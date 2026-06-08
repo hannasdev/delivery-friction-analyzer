@@ -16,7 +16,8 @@ The first implementation should be able to run as a local analyzer or service-ba
 
 - GitHub adapter: fetches raw GitHub data.
 - Normalizer: converts provider-specific payloads into stable internal entities.
-- Classifier: labels file categories, comment categories, severity source, and workflow signals.
+- Repository profile: maps paths and languages to file roles and functional surfaces for the analyzed repository.
+- Classifier: labels file categories, file roles, comment sources, comment categories, severity source, and workflow signals.
 - Metrics engine: computes raw and derived friction metrics.
 - Recommendation engine: maps recurring patterns to suggested interventions.
 - Reporter: produces human-readable and machine-readable reports.
@@ -31,6 +32,7 @@ The first implementation should be able to run as a local analyzer or service-ba
 | Treat token/model analytics as an optional phase. | Attribution may be noisy and privacy-sensitive. | Require model logs for MVP, but that would slow adoption and narrow the first use case. |
 | Use representative PR examples in recommendations. | Suggestions are more convincing when backed by concrete evidence. | Provide generic best practices, but those are less actionable. |
 | Use GraphQL for review-thread analytics. | Live validation against `hannasdev/mcp-writing` showed GraphQL exposes review-thread count, resolution state, outdated state, paths, lines, and grouped comments. | REST-only review comments are simpler but lose thread state. |
+| Use repository profiles instead of hardcoded source-repo assumptions. | Language and file extension do not determine product role. HTML may be a marketing surface in one repo and core UI in another. | Bake assumptions from fixture repositories into metrics, but that would make the product misleading outside the source data. |
 | Model Copilot review effort separately from comment severity. | Public docs describe Low/Medium as review effort levels. GitHub's changelog and live UI validation show a separate per-comment severity label, but checked public REST and GraphQL comment/thread payloads did not expose it. | Collapse effort and severity into one field, but that would mix review configuration with finding impact. |
 | Treat GitHub UI partial severity as experimental. | Live validation found `automatedComment.severity` in an undocumented deferred `automated-review-comment` React partial, not in a stable public API field. | Ignore severity entirely for MVP, or classify severity locally from comment text. |
 
@@ -48,6 +50,7 @@ The first implementation should be able to run as a local analyzer or service-ba
 - Metrics should be deterministic for a given normalized dataset and classifier version.
 - Recommendations should reference the metric evidence and example PRs that triggered them.
 - Reports should default to repository-level aggregation and avoid individual rankings.
+- Repository profiles should be explicit inputs with conservative defaults; validation fixtures may suggest defaults but must not become hardcoded product assumptions.
 - PR-open diff measurements must record whether they came from an observed snapshot, reconstruction, or are unavailable.
 
 ## Data Model Sketch
@@ -55,6 +58,9 @@ The first implementation should be able to run as a local analyzer or service-ba
 Core entities:
 
 - Repository
+- RepositoryLanguageDistribution
+- RepositoryProfile
+- FileRoleRule
 - PullRequest
 - PullRequestSnapshot
 - ChangedFile
@@ -71,9 +77,11 @@ Core entities:
 Important fields:
 
 - stable source IDs and URLs;
+- repository language byte counts and percentages;
+- repository profile version and rule source;
 - timestamps for lifecycle and waiting-time calculations;
-- file path, extension, additions, deletions, and category;
-- comment author type, severity, body category, file target, and resolution status when available;
+- file path, extension, language when available, additions, deletions, category, role, functional surface, generated/vendored flag, and profile confidence;
+- comment source, author type, severity, confidence or visibility state when available, body category, file target, and resolution status when available;
 - review effort source such as `observed_public_api`, `rule`, `manual`, or `unavailable`;
 - comment impact or severity source such as `observed_public_api`, `internal_ui_partial`, `rule`, `model`, `manual`, `unavailable`, or `excluded`;
 - check name, conclusion, duration, rerun relationship, and failure category when available;
@@ -86,6 +94,7 @@ There is no existing product data to migrate. The first implementation should st
 ## Failure Modes
 
 - GitHub API data is incomplete or rate-limited: report partial coverage and show missing data categories.
+- Repository profile is missing or too generic: compute conservative metrics and mark role-based recommendations as low-confidence.
 - Copilot severity is unavailable through public APIs: preserve comments and use an explicit `severity_source` value of `internal_ui_partial`, `unavailable`, or `inferred`.
 - Generated files dominate a PR: mark the report as low-confidence unless generated files are excluded or down-weighted.
 - A PR has limited metadata or no description: compute available metrics while marking planning-related classifications as low-confidence.

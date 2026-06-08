@@ -15,6 +15,8 @@ The core GitHub data source is viable, but several MVP risks are real.
 
 GitHub exposes enough data to measure review-loop friction, review-thread state, CI reruns, changed files, lifecycle timing, and post-review commits. GitHub's public changelog confirms that Copilot code review comments can display `High`, `Medium`, and `Low` severity labels, but the checked public REST and GraphQL review-comment fields do not expose that value. The GitHub web UI does expose it in an undocumented deferred HTML/React partial. PR-open diff snapshots are also not directly available from simple PR metadata.
 
+This note records fixture-source evidence from `hannasdev/mcp-writing`. Source-specific observations here should calibrate tests and examples, not become hardcoded product assumptions.
+
 ## Findings
 
 | Assumption / Risk | Validation Result | Evidence | Product Impact |
@@ -27,6 +29,7 @@ GitHub exposes enough data to measure review-loop friction, review-thread state,
 | Diff size at merge is easy to collect. | Confirmed. | `gh pr list` / `gh pr view` exposed final additions, deletions, changed files, and per-file changes. | Final diff metrics are straightforward. |
 | Diff size at PR open is directly available. | Not confirmed; real reconstruction risk. | Simple PR metadata returned final/current additions and deletions. It did not expose a first-open diff snapshot. | Open-vs-merge diff growth likely requires reconstructing the PR state at open from commits, timeline events, branch refs, and/or stored snapshots collected at PR creation time. |
 | File category matters for interpreting metrics. | Confirmed by sample. | PR 239 mixed source, tests, README, generated docs, release-log, and initiative bookkeeping. PR 221 mixed core source, tests, generated docs, guides, release-log, and completed initiative docs. | File categorization is required before line-count or comment-density metrics are meaningful. |
+| Repository language distribution is available. | Confirmed through REST. | `GET /repos/hannasdev/mcp-writing/languages` returned byte counts for JavaScript, HTML, Shell, and Dockerfile. | Store language distribution as repository context, but do not use language alone as a risk or product-role signal. |
 | Comment categorization will affect recommendation quality. | Confirmed. | PR 239 comments included runtime bug, performance regression, duplication/refactor, docs accuracy, generated docs, release-log hygiene, and minor code clarity. PR 221 comments included SQL identifier safety, restore checksum safety, cross-scope safety, release-log hygiene, and dead code. | Recommendation mappings should start transparent and rule-based, then improve with examples. |
 | Copilot review can fail and should be represented. | Confirmed. | PR 221 included a Copilot review body: "Copilot encountered an error and was unable to review this pull request." | The data model should include review attempts, failures, and no-new-comment rounds, not only comments. |
 
@@ -77,6 +80,7 @@ GitHub exposes enough data to measure review-loop friction, review-thread state,
 
 - `gh pr list --json`: good for recent PR inventory, final additions/deletions, changed files, commits, timestamps, and URLs.
 - `gh pr view --json reviews,files,statusCheckRollup`: useful for review summaries, final file changes, and final head status.
+- `repos/{owner}/{repo}/languages`: useful for repository language distribution as byte counts.
 - `repos/{owner}/{repo}/pulls/{number}/comments`: useful for individual review comments, paths, lines, timestamps, and commit IDs.
 - GraphQL `pullRequest.reviewThreads`: required for thread counts, resolved state, outdated state, and per-thread grouping.
 - `repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request`: useful for workflow-run churn across PR commits while the branch/run history remains available.
@@ -107,6 +111,7 @@ This appears to be the source of the visible `Medium` badge for the sample comme
 
 - No structured Copilot severity field was visible in the checked REST or GraphQL comment/thread payloads.
 - Public GraphQL schema introspection for `PullRequestReviewComment` did not list any severity-like or effort-like field, despite the web UI partial exposing `automatedComment.severity`.
+- Language distribution does not explain file role. The same language can represent a core product surface, marketing/support content, generated docs, fixtures, or something else depending on repository conventions.
 - Simple PR metadata does not expose the changed-line count at PR open.
 - Final status rollups do not show the full CI churn history.
 - Some timeline events hide commit details unless additional fields or endpoints are queried.
