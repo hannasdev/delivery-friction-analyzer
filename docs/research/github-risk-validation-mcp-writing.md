@@ -15,7 +15,7 @@ The core GitHub data source is viable, but several MVP risks are real.
 
 GitHub exposes enough data to measure review-loop friction, review-thread state, CI reruns, changed files, lifecycle timing, and post-review commits. GitHub's public changelog confirms that Copilot code review comments can display `High`, `Medium`, and `Low` severity labels, but the checked public REST and GraphQL review-comment fields do not expose that value. The GitHub web UI does expose it in an undocumented deferred HTML/React partial. PR-open diff snapshots are also not directly available from simple PR metadata.
 
-This note records fixture-source evidence from `hannasdev/mcp-writing`. Source-specific observations here should calibrate tests and examples, not become hardcoded product assumptions.
+This note records validation-target evidence from `hannasdev/mcp-writing`. Target-specific observations here should calibrate tests and examples, not become hardcoded product assumptions.
 
 ## Findings
 

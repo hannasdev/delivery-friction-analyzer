@@ -4,11 +4,12 @@
 
 ### Outcome
 
-Establish the GitHub data that is available, reliable, and useful enough to support the first friction report, using `hannasdev/mcp-writing` only as source fixture data.
+Establish the GitHub data that is available, reliable, and useful enough to support the first friction report for a configured target repository, using `hannasdev/mcp-writing` only as target fixture data.
 
 ### Scope
 
 - Inspect GitHub APIs for pull requests, reviews, review comments, commits, check runs, changed files, and timeline events.
+- Define the target repository input contract, including owner/name, analysis window, default branch handling, repository visibility, and how the analyzer distinguishes the product repository from the analyzed repository.
 - Fetch and preserve repository language distribution from `GET /repos/{owner}/{repo}/languages`.
 - Define a configurable repository profile format, including path rules for core product code, product UI, tests, generated docs, release notes, planning docs, marketing site, config, infrastructure, fixtures, generated/vendored artifacts, and unknown files.
 - Determine how to classify review comment source: Copilot, human reviewer, GitHub Actions bot, dependency bot, code scanning, unknown bot.
@@ -18,7 +19,7 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 - Validate which review-thread fields require GraphQL rather than REST.
 - Validate whether PR-open diff size can be reconstructed from historical GitHub data or must be marked unavailable/low-confidence until a post-MVP GitHub App snapshot feature exists.
 - Define the initial normalized data model for PR lifecycle, diff shape, review feedback, CI checks, and iteration churn.
-- Create fixture payloads covering exactly four target scenarios when available: low-friction PR, high-review-churn PR, high-CI-churn PR, and broad file-spread PR. One real PR may satisfy multiple scenarios. If the validation source cannot supply a scenario, document the gap and add a minimal synthetic fixture only for schema/metric coverage.
+- Create fixture payloads from the validation target covering exactly four target scenarios when available: low-friction PR, high-review-churn PR, high-CI-churn PR, and broad file-spread PR. One real PR may satisfy multiple scenarios. If the validation target cannot supply a scenario, document the gap and add a minimal synthetic fixture only for schema/metric coverage.
 
 ### Non-Goals
 
@@ -32,11 +33,12 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 
 - [ ] The repo contains documented GitHub fields used by the analyzer and their API source.
 - [ ] The repo contains typed or schema-defined normalized entities for PRs, comments, check runs, commits, and changed files.
+- [ ] The target repository input contract is documented and tested separately from the product repository.
 - [ ] Repository language distribution is captured and documented as context.
-- [ ] The repository profile format can classify file roles without hardcoding assumptions from the validation source repository.
+- [ ] The repository profile format can classify file roles without hardcoding assumptions from the validation target repository.
 - [ ] The GitHub access and coverage matrix documents auth mode, required scopes, API families, rate-limit behavior, missing data behavior, and degraded report output.
 - [ ] Review comments can be grouped by source.
-- [ ] The repo contains fixture data for the four target scenarios, or a documented fixture gap plus a minimal synthetic fixture where real source data is unavailable.
+- [ ] The repo contains target-repository fixture data for the four target scenarios, or a documented fixture gap plus a minimal synthetic fixture where real target data is unavailable.
 - [ ] Copilot review effort support is documented as available, unavailable, or requiring fallback classification.
 - [ ] Comment-level severity and confidence/visibility state are documented as public API, internal UI partial, inferred, unavailable, or excluded from MVP scoring.
 - [ ] Review-thread resolution/outdated support is documented with the GraphQL fields required.
@@ -141,7 +143,7 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 
 ### Scope
 
-- Generate a readable report for a selected repository and time window.
+- Generate a readable report for a configured target repository and time window.
 - Include ranked bottlenecks, metric evidence, representative PR examples, comment-source breakdowns, and recommended interventions.
 - Produce Markdown and JSON report artifacts.
 - Include report coverage metadata for available API families, missing scopes, partial data, rate limits, deleted branches, and PR-open diff reconstruction confidence.
@@ -166,7 +168,7 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 - [ ] The report includes a coverage section that labels unavailable or partial GitHub data.
 - [ ] The report has both Markdown and JSON outputs.
 - [ ] Reports avoid individual developer ranking by default.
-- [ ] Reports can be generated locally without external services beyond GitHub data ingestion.
+- [ ] Reports can be generated locally for a configured target repository without external services beyond GitHub API access.
 
 ### Required Validation
 

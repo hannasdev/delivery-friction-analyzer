@@ -6,13 +6,13 @@ The product depends on turning GitHub workflow events into trustworthy delivery-
 
 ## Current State
 
-This is a new repository with no implementation yet. The initial source of truth is GitHub data from pull requests, reviews, review comments, commits, check runs, changed files, and timeline events.
+This is a new product repository with no implementation yet and little/no PR history. It is not expected to be a useful analysis target during MVP validation. The initial source of truth is GitHub data from configured target repositories: pull requests, reviews, review comments, commits, check runs, changed files, and timeline events.
 
 Token and model usage data is not part of the MVP. It is an extension that requires explicit attribution keys and privacy decisions.
 
 ## Target Shape
 
-The MVP is a local-first GitHub report generator. It should run against a selected repository using local credentials, produce local report artifacts, and avoid hosted-service, webhook, or GitHub App assumptions.
+The MVP is a local GitHub-connected report generator. It should run from the product repository, fetch live GitHub data for a configured target repository using local credentials, produce local report artifacts, and avoid hosted-service, webhook, or GitHub App assumptions.
 
 The core design should remain modular so a future service-backed GitHub App can reuse the same normalizer, metrics, and reporter:
 
@@ -29,7 +29,7 @@ The core design should remain modular so a future service-backed GitHub App can 
 | Decision | Rationale | Alternatives Considered |
 | --- | --- | --- |
 | Start with GitHub-only analytics. | GitHub has enough signal to validate the product without waiting for model usage attribution. | Start with token analytics first, but that risks solving a harder attribution problem before proving workflow value. |
-| Build the MVP as a local-first report generator. | Local execution minimizes permissions, avoids hosted storage decisions, and keeps the first product wedge focused on analysis quality. | Start as a service-backed GitHub App, but that would pull webhook delivery, installation permissions, tenant storage, and PR-open snapshot capture into the MVP. |
+| Build the MVP as a local GitHub-connected report generator. | Local execution minimizes permissions, avoids hosted storage decisions, and keeps the first product wedge focused on analysis quality while still using live GitHub API data. | Start as a service-backed GitHub App, but that would pull webhook delivery, installation permissions, tenant storage, and PR-open snapshot capture into the MVP. |
 | Produce Markdown and JSON reports first. | Markdown is readable and easy to review; JSON gives tests and future UI work a stable machine-readable contract. | Build a web UI first, but that adds presentation scope before the metrics and recommendations are proven. |
 | Keep observed data separate from inferred classifications. | Users need to trust the diagnosis and understand uncertainty. | Collapse everything into a single score, but that would be opaque. |
 | Default reports to repository and team-level patterns. | The product should improve workflows without becoming developer surveillance. | Rank individuals, but that undermines trust and misuses noisy metrics. |
@@ -68,6 +68,7 @@ The core design should remain modular so a future service-backed GitHub App can 
 Core entities:
 
 - Repository
+- TargetRepository
 - RepositoryLanguageDistribution
 - RepositoryProfile
 - FileRoleRule
@@ -87,6 +88,7 @@ Core entities:
 Important fields:
 
 - stable source IDs and URLs;
+- target repository owner, name, default branch, visibility, and analysis window;
 - repository language byte counts and percentages;
 - repository profile version and rule source;
 - timestamps for lifecycle and waiting-time calculations;

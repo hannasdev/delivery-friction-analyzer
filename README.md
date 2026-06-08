@@ -6,7 +6,11 @@ The core idea is to use GitHub data as the first durable signal. Pull request di
 
 ## Product Direction
 
-The MVP should be repo-source-agnostic, using `hannasdev/mcp-writing` as validation data rather than as product-specific scope. The first version should produce a repository-level friction report that answers:
+The MVP should be repo-source-agnostic and GitHub-connected. This repository is the builder repo for the analyzer; it is not expected to provide useful product analytics until it has meaningful PR history.
+
+The first version should run locally from this project, fetch live GitHub data for a configured target repository, and produce a repository-level friction report. `hannasdev/mcp-writing` is the first validation target and fixture source, not product-specific scope.
+
+The report should answer:
 
 - Where do PRs require the most corrective loops?
 - Which feedback patterns repeat across PRs?

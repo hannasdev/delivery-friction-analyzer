@@ -18,6 +18,16 @@ Developers can now move from idea to draft feature quickly, but the expensive pa
 
 The product should help teams answer: "Where are AI-assisted delivery cycles leaking time, and what intervention would reduce the next loop?"
 
+## Repository Roles
+
+The product repository and the analyzed repository are separate concepts:
+
+- Product repository: this repository, `hannasdev/delivery-friction-analyzer`, where the analyzer is built.
+- Target repository: a GitHub repository selected by the user for analysis.
+- Validation target / fixture source: a real target repository used to collect example payloads and verify report usefulness.
+
+The product repository currently has little or no PR history, so it is not a meaningful analysis target yet. The MVP should run locally from this product repository while fetching live GitHub data for a configured target repository such as `hannasdev/mcp-writing`.
+
 ## Goals
 
 - Identify measurable GitHub signals that indicate review churn, validation waste, scope drift, and late corrective work in a repository.
@@ -49,15 +59,15 @@ The reporting experience should prioritize:
 
 ## Proposed Solution
 
-Build a GitHub-connected analyzer that ingests pull request data and produces friction metrics across the PR lifecycle.
+Build a GitHub-connected analyzer that runs locally, ingests pull request data for a configured target repository, and produces friction metrics across that target repository's PR lifecycle.
 
-The first useful output is a local repository friction report that ranks the highest-waste patterns, explains the evidence, and recommends interventions. The report should combine raw observations with transparent component metrics such as comment-source density, iteration drag, validation gap indicators, planning gap indicators, diff growth, and changed-file spread.
+The first useful output is a local GitHub-connected repository friction report that ranks the highest-waste patterns in the target repository, explains the evidence, and recommends interventions. The report should combine raw observations with transparent component metrics such as comment-source density, iteration drag, validation gap indicators, planning gap indicators, diff growth, and changed-file spread.
 
 The MVP should emit both Markdown and JSON report artifacts. Markdown makes the diagnosis readable; JSON provides a deterministic contract for tests and future UI work.
 
 ### Repo-Source-Agnostic MVP
 
-The MVP should be repo-source-agnostic. `hannasdev/mcp-writing` can be used as a validation and fixture source, but no `mcp-writing`-specific product assumptions should be required for another repository to use the analyzer.
+The MVP should be repo-source-agnostic. `hannasdev/mcp-writing` can be used as a validation target and fixture source, but no `mcp-writing`-specific product assumptions should be required for another repository to use the analyzer.
 
 The product should support a repository profile that maps paths and languages to product roles before computing risk or friction. Examples of roles include:
 
@@ -149,14 +159,14 @@ Composite scores are not required for the MVP. If a score-like value is included
 
 ## User / Maintainer Workflows
 
-- A maintainer connects a repository and receives a friction report for the last 30, 60, or 90 days of merged PRs.
+- A maintainer runs the analyzer locally against a configured GitHub target repository and receives a friction report for the last 30, 60, or 90 days of merged PRs.
 - A team lead inspects the highest-friction PR examples and sees whether waste came from review churn, validation failures, scope growth, or planning gaps.
 - A team compares before-and-after friction after adding a hook, skill, validation script, or planning gate.
 - A product owner reviews whether AI-assisted delivery is becoming faster in mergeable output, not just faster in draft generation.
 
 ## Acceptance Criteria
 
-- [ ] The product can ingest GitHub PRs, reviews, review comments, commits, check runs, and changed-file metadata for a selected repository.
+- [ ] The product can ingest GitHub PRs, reviews, review comments, commits, check runs, and changed-file metadata for a configured target repository.
 - [ ] The product can ingest GitHub repository language distribution and preserve it as context, not as a direct risk score.
 - [ ] The product can distinguish at least these file categories: code, tests, docs, config, generated, infrastructure, unknown.
 - [ ] The product can apply a repository profile that distinguishes core product files from tests, generated docs, release notes, planning docs, marketing site files, config, infrastructure, fixtures, generated/vendored artifacts, and unknown files.
@@ -202,7 +212,7 @@ Testing should focus on correctness of data extraction, metric calculation, clas
 
 - [ ] What should the product be called publicly?
 - [x] Should the MVP be a GitHub App, CLI, hosted dashboard, or local report generator? Start as a local GitHub report generator; GitHub App/webhook snapshot capture is post-MVP.
-- [x] Which repositories should be used as the first validation dataset? Use `hannasdev/mcp-writing` as source fixture data only, not as product-specific scope.
+- [x] Which repositories should be used as the first validation dataset? Use `hannasdev/mcp-writing` as target repository fixture data only, not as product-specific scope.
 - [ ] Can Copilot review effort be fetched reliably through GitHub APIs, or does it require a different integration path?
 - [ ] Should the MVP include an experimental GitHub UI-partial extractor for Copilot comment severity, or avoid severity weighting until a stable public API source exists?
 - [x] Can GitHub expose repository language distribution? Yes, through `GET /repos/{owner}/{repo}/languages`.
