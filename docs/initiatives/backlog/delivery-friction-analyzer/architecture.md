@@ -12,7 +12,9 @@ Token and model usage data is not part of the MVP. It is an extension that requi
 
 ## Target Shape
 
-The first implementation should be able to run as a local analyzer or service-backed GitHub App, but the core design should remain modular:
+The MVP is a local-first GitHub report generator. It should run against a selected repository using local credentials, produce local report artifacts, and avoid hosted-service, webhook, or GitHub App assumptions.
+
+The core design should remain modular so a future service-backed GitHub App can reuse the same normalizer, metrics, and reporter:
 
 - GitHub adapter: fetches raw GitHub data.
 - Normalizer: converts provider-specific payloads into stable internal entities.
@@ -27,6 +29,8 @@ The first implementation should be able to run as a local analyzer or service-ba
 | Decision | Rationale | Alternatives Considered |
 | --- | --- | --- |
 | Start with GitHub-only analytics. | GitHub has enough signal to validate the product without waiting for model usage attribution. | Start with token analytics first, but that risks solving a harder attribution problem before proving workflow value. |
+| Build the MVP as a local-first report generator. | Local execution minimizes permissions, avoids hosted storage decisions, and keeps the first product wedge focused on analysis quality. | Start as a service-backed GitHub App, but that would pull webhook delivery, installation permissions, tenant storage, and PR-open snapshot capture into the MVP. |
+| Produce Markdown and JSON reports first. | Markdown is readable and easy to review; JSON gives tests and future UI work a stable machine-readable contract. | Build a web UI first, but that adds presentation scope before the metrics and recommendations are proven. |
 | Keep observed data separate from inferred classifications. | Users need to trust the diagnosis and understand uncertainty. | Collapse everything into a single score, but that would be opaque. |
 | Default reports to repository and team-level patterns. | The product should improve workflows without becoming developer surveillance. | Rank individuals, but that undermines trust and misuses noisy metrics. |
 | Treat token/model analytics as an optional phase. | Attribution may be noisy and privacy-sensitive. | Require model logs for MVP, but that would slow adoption and narrow the first use case. |
@@ -39,6 +43,10 @@ The first implementation should be able to run as a local analyzer or service-ba
 ## Contracts And Boundaries
 
 - Raw GitHub payloads should be stored or cached separately from normalized entities.
+- MVP fixture raw payloads should be versioned with tests after secrets and tokens are redacted.
+- Runtime raw payload caches should live in a user-selected local cache directory and should not be committed by default.
+- Normalized output and report artifacts should be deterministic for the same input payloads, repository profile, and metric version.
+- Markdown reports may include short comment excerpts and source URLs for evidence; private-repository usage must support redaction or excerpt suppression.
 - Normalized PR entities should retain source IDs and URLs for traceability.
 - Review attempts should be represented separately from individual review comments so failed Copilot reviews and no-new-comment rounds remain visible.
 - Classifications must record their source:
@@ -52,6 +60,8 @@ The first implementation should be able to run as a local analyzer or service-ba
 - Reports should default to repository-level aggregation and avoid individual rankings.
 - Repository profiles should be explicit inputs with conservative defaults; validation fixtures may suggest defaults but must not become hardcoded product assumptions.
 - PR-open diff measurements must record whether they came from an observed snapshot, reconstruction, or are unavailable.
+- Access coverage must be explicit: reports should state which API sources were available, which scopes were missing, which data was partial, and how that affected each metric.
+- The MVP should prefer transparent component metrics over opaque composite scores. Any score-like value must expose its component inputs and version.
 
 ## Data Model Sketch
 
@@ -85,6 +95,7 @@ Important fields:
 - review effort source such as `observed_public_api`, `rule`, `manual`, or `unavailable`;
 - comment impact or severity source such as `observed_public_api`, `internal_ui_partial`, `rule`, `model`, `manual`, `unavailable`, or `excluded`;
 - check name, conclusion, duration, rerun relationship, and failure category when available;
+- access source and coverage status for each API family used by a report;
 - metric version and classifier version.
 
 ## Migration / Compatibility
@@ -94,6 +105,7 @@ There is no existing product data to migrate. The first implementation should st
 ## Failure Modes
 
 - GitHub API data is incomplete or rate-limited: report partial coverage and show missing data categories.
+- GitHub token lacks scopes or private-repository access: continue with available public data when possible and mark affected metrics partial or unavailable.
 - Repository profile is missing or too generic: compute conservative metrics and mark role-based recommendations as low-confidence.
 - Copilot severity is unavailable through public APIs: preserve comments and use an explicit `severity_source` value of `internal_ui_partial`, `unavailable`, or `inferred`.
 - Generated files dominate a PR: mark the report as low-confidence unless generated files are excluded or down-weighted.
@@ -118,8 +130,8 @@ There is no existing product data to migrate. The first implementation should st
 
 ## Open Questions
 
-- [ ] Should the MVP persist raw GitHub payloads, or only normalized data and report artifacts?
+- [x] Should the MVP persist raw GitHub payloads, or only normalized data and report artifacts? Persist redacted fixture payloads for tests; keep runtime raw payload caches local and user-controlled; emit normalized JSON and Markdown reports.
 - [ ] What is the minimum viable GitHub permission set for a public and private repository?
-- [ ] Which report format should come first: Markdown, JSON, web UI, or all three?
-- [ ] Should file categorization be globally defined or repo-configurable from the start?
+- [x] Which report format should come first: Markdown, JSON, web UI, or all three? Markdown plus JSON first; web UI is deferred.
+- [x] Should file categorization be globally defined or repo-configurable from the start? Use global base categories with repository-configurable file-role and functional-surface rules.
 - [ ] What confidence threshold is required before token/model usage can be attributed to a PR?

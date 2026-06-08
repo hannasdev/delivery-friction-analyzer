@@ -51,7 +51,9 @@ The reporting experience should prioritize:
 
 Build a GitHub-connected analyzer that ingests pull request data and produces friction metrics across the PR lifecycle.
 
-The first useful output is a local repository friction report that ranks the highest-waste patterns, explains the evidence, and recommends interventions. The report should combine raw observations with derived metrics such as comment-source density, iteration drag, validation gap score, planning gap score, diff growth, and changed-file spread.
+The first useful output is a local repository friction report that ranks the highest-waste patterns, explains the evidence, and recommends interventions. The report should combine raw observations with transparent component metrics such as comment-source density, iteration drag, validation gap indicators, planning gap indicators, diff growth, and changed-file spread.
+
+The MVP should emit both Markdown and JSON report artifacts. Markdown makes the diagnosis readable; JSON provides a deterministic contract for tests and future UI work.
 
 ### Repo-Source-Agnostic MVP
 
@@ -132,6 +134,8 @@ The MVP should not infer that `HTML` is always a product UI surface, that docs a
 - Review surprise score: comments and changed files that fall outside the PR title, description, linked issue, or initial scope.
 - Fix amplification: additional changes required after PR open or after first review relative to the initial diff.
 
+Composite scores are not required for the MVP. If a score-like value is included, the report must show its component inputs and formula version so users can understand why it changed.
+
 ### Recommendation Categories
 
 - Add or improve pre-commit hooks for repeated formatting, lint, typecheck, or snapshot churn.
@@ -147,7 +151,6 @@ The MVP should not infer that `HTML` is always a product UI surface, that docs a
 
 - A maintainer connects a repository and receives a friction report for the last 30, 60, or 90 days of merged PRs.
 - A team lead inspects the highest-friction PR examples and sees whether waste came from review churn, validation failures, scope growth, or planning gaps.
-- A developer opens a PR and gets a lightweight readiness diagnosis before asking for review.
 - A team compares before-and-after friction after adding a hook, skill, validation script, or planning gate.
 - A product owner reviews whether AI-assisted delivery is becoming faster in mergeable output, not just faster in draft generation.
 
@@ -161,7 +164,8 @@ The MVP should not infer that `HTML` is always a product UI surface, that docs a
 - [ ] The product can compute raw counts and normalized metrics for review feedback, CI failures, lifecycle time, iteration churn, and diff growth.
 - [ ] The product can compute changed-file spread and flag small diffs that touch many non-generated core files.
 - [ ] The product can preserve Copilot review comment severity and confidence/visibility data when GitHub exposes it, but does not use unstable vendor labels as primary trend metrics.
-- [ ] The product can generate a repository friction report with ranked bottlenecks, evidence, representative PR examples, and suggested interventions.
+- [ ] The product can generate Markdown and JSON repository friction reports with ranked bottlenecks, evidence, representative PR examples, and suggested interventions.
+- [ ] The product can include coverage metadata that labels unavailable or partial GitHub data, missing scopes, rate limits, deleted branches, and PR-open diff reconstruction confidence.
 - [ ] The product clearly labels inferred classifications separately from directly observed GitHub data.
 - [ ] The product avoids individual developer ranking in the default reporting experience.
 - [ ] Token and model usage integration is documented as a later extension, not a blocker for the MVP.
@@ -177,7 +181,9 @@ The MVP should not infer that `HTML` is always a product UI surface, that docs a
 | Diff line counts can be noisy for generated files, dependency updates, or fixture changes. | False positives in churn metrics. | Validation fixtures show that PRs often mix product code, tests, docs, generated artifacts, release notes, and planning files. Detect generated and low-signal file categories and exclude or down-weight them by default. |
 | Repository language distribution can mislead role classification. | HTML, docs, or generated files may be core product surfaces in one repo and unrelated support surfaces in another. | Store GitHub language distribution as context, then use repository profile rules to classify file role and functional surface. Fixture-specific examples can calibrate defaults but must not become hardcoded product assumptions. |
 | A small diff across many code files can hide cross-cutting risk. | Line-count-only metrics may understate changes that touch many modules or call sites. | Add changed-file spread, directory spread, functional-surface spread, and small-diff wide-spread flags after excluding generated and low-signal paths. |
-| PR-open diff size is not directly available from simple PR metadata. | Open-vs-merge diff growth may be expensive or low-confidence to reconstruct after the fact. | Treat this as a confirmed reconstruction risk. Prefer GitHub App snapshots at PR-open time, or reconstruct from commits/timeline with an explicit confidence label. |
+| Missing permissions or rate limits can make reports look more complete than they are. | Users may trust metrics that are based on partial data. | Require an access and coverage matrix plus report-level coverage metadata for unavailable, degraded, rate-limited, or reconstructed data. |
+| Opaque aggregate scores can create unproductive debates. | The MVP may spend effort defending formulas instead of surfacing bottlenecks. | Prefer component metrics and representative examples. Any score-like value must expose component inputs and formula version. |
+| PR-open diff size is not directly available from simple PR metadata. | Open-vs-merge diff growth may be expensive or low-confidence to reconstruct after the fact. | Treat this as a confirmed reconstruction risk. In the MVP, reconstruct from commits/timeline with an explicit confidence label or mark unavailable. Post-MVP, consider GitHub App snapshots at PR-open time. |
 | Recommendation quality may be weak if comments are not categorized well. | Reports may feel generic. | Confirmed by sampled comments spanning correctness, performance, safety, docs accuracy, generated docs, release-log hygiene, duplication, and clarity. Start with transparent rule-based categories, representative examples, and user-editable recommendation mappings. |
 | Copilot review attempts can produce no comments or fail. | Counting only comments misses review-loop events and tool reliability friction. | Store review attempts, no-new-comment reviews, and failed review bodies as first-class review events. |
 | Joining token/model usage with GitHub work may be hard. | Phase 2 attribution may be unreliable. | Treat model analytics as optional and require explicit join keys such as branch, PR number, commit SHA, or session metadata. |
@@ -195,7 +201,7 @@ Testing should focus on correctness of data extraction, metric calculation, clas
 ## Open Questions
 
 - [ ] What should the product be called publicly?
-- [x] Should the MVP be a GitHub App, CLI, hosted dashboard, or local report generator? Start as a local GitHub report generator.
+- [x] Should the MVP be a GitHub App, CLI, hosted dashboard, or local report generator? Start as a local GitHub report generator; GitHub App/webhook snapshot capture is post-MVP.
 - [x] Which repositories should be used as the first validation dataset? Use `hannasdev/mcp-writing` as source fixture data only, not as product-specific scope.
 - [ ] Can Copilot review effort be fetched reliably through GitHub APIs, or does it require a different integration path?
 - [ ] Should the MVP include an experimental GitHub UI-partial extractor for Copilot comment severity, or avoid severity weighting until a stable public API source exists?
@@ -206,6 +212,7 @@ Testing should focus on correctness of data extraction, metric calculation, clas
 - [x] Is full CI churn available beyond the final status rollup? Yes, workflow runs can be queried by PR branch/event, but branch deletion or rename may reduce reliability.
 - [ ] Should recommendation mappings be manually configured per repo before the product attempts automated suggestions?
 - [ ] What join keys are realistic for future token and model usage integration?
+- [x] Which report format should come first? Markdown plus JSON; web UI is post-MVP.
 
 ## Shaped Backlog Features
 
@@ -222,6 +229,10 @@ Track Copilot severity, confidence, hidden-comment thresholds, review effort, an
 ### PR-Open Snapshot Capture
 
 Add a GitHub App or webhook mode that stores PR-open diff snapshots so diff growth does not depend on historical reconstruction.
+
+### PR Readiness Diagnosis
+
+Generate a lightweight diagnosis for an open PR before the author requests review. This is a later workflow because the MVP focuses on repository-level historical friction reports, not live PR intervention.
 
 ### Token And Model Usage Attribution
 

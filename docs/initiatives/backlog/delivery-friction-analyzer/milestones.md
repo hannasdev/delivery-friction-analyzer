@@ -12,12 +12,13 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 - Fetch and preserve repository language distribution from `GET /repos/{owner}/{repo}/languages`.
 - Define a configurable repository profile format, including path rules for core product code, product UI, tests, generated docs, release notes, planning docs, marketing site, config, infrastructure, fixtures, generated/vendored artifacts, and unknown files.
 - Determine how to classify review comment source: Copilot, human reviewer, GitHub Actions bot, dependency bot, code scanning, unknown bot.
+- Define a GitHub access and coverage matrix for local execution, including authentication mode, minimum public-repo and private-repo permissions, REST coverage, GraphQL coverage, Actions coverage, rate-limit behavior, missing-scope handling, and degraded report output.
 - Determine whether Copilot review effort is available as structured metadata.
 - Determine whether comment-level severity and confidence/visibility state are available through public APIs, undocumented UI partials, local inference, or should be excluded from MVP scoring.
 - Validate which review-thread fields require GraphQL rather than REST.
-- Validate whether PR-open diff size can be reconstructed from historical GitHub data or requires a GitHub App snapshot.
+- Validate whether PR-open diff size can be reconstructed from historical GitHub data or must be marked unavailable/low-confidence until a post-MVP GitHub App snapshot feature exists.
 - Define the initial normalized data model for PR lifecycle, diff shape, review feedback, CI checks, and iteration churn.
-- Create fixture payloads for at least three representative PRs from the validation source repository.
+- Create fixture payloads covering exactly four target scenarios when available: low-friction PR, high-review-churn PR, high-CI-churn PR, and broad file-spread PR. One real PR may satisfy multiple scenarios. If the validation source cannot supply a scenario, document the gap and add a minimal synthetic fixture only for schema/metric coverage.
 
 ### Non-Goals
 
@@ -25,6 +26,7 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 - Do not integrate token or model usage data.
 - Do not build advanced profile inference for every product shape; the MVP can rely on explicit profile rules and conservative defaults.
 - Do not use unstable vendor severity/confidence labels as primary trend metrics.
+- Do not implement GitHub App/webhook snapshot capture for PR-open diffs.
 
 ### Acceptance Criteria
 
@@ -32,8 +34,9 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 - [ ] The repo contains typed or schema-defined normalized entities for PRs, comments, check runs, commits, and changed files.
 - [ ] Repository language distribution is captured and documented as context.
 - [ ] The repository profile format can classify file roles without hardcoding assumptions from the validation source repository.
+- [ ] The GitHub access and coverage matrix documents auth mode, required scopes, API families, rate-limit behavior, missing data behavior, and degraded report output.
 - [ ] Review comments can be grouped by source.
-- [ ] The repo contains fixture data covering at least one low-friction PR, one high-review-churn PR, one high-CI-churn PR, and one broad file-spread PR when available.
+- [ ] The repo contains fixture data for the four target scenarios, or a documented fixture gap plus a minimal synthetic fixture where real source data is unavailable.
 - [ ] Copilot review effort support is documented as available, unavailable, or requiring fallback classification.
 - [ ] Comment-level severity and confidence/visibility state are documented as public API, internal UI partial, inferred, unavailable, or excluded from MVP scoring.
 - [ ] Review-thread resolution/outdated support is documented with the GraphQL fields required.
@@ -53,6 +56,7 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 - Repository language distribution may be confused with file role unless profile rules are applied before risk weighting.
 - Timeline and review-thread APIs may require GraphQL rather than REST-only access.
 - Branch-based CI churn queries may lose fidelity after PR head branches are deleted.
+- Missing scopes, deleted branches, or rate limits may make reports partial; this must be visible in the report coverage metadata.
 
 ### Status
 
@@ -87,12 +91,14 @@ Compute the core raw and derived friction metrics from normalized GitHub data us
   - review surprise score;
   - fix amplification.
 - Produce a machine-readable metrics summary per PR and per repository.
+- Emit transparent component metrics first; any composite score must include its component inputs and formula version.
 
 ### Non-Goals
 
 - Do not build advanced natural language classification beyond simple rule-based categories.
 - Do not implement a general multi-product repository classifier.
 - Do not make severity-weighted scoring a primary output while severity comes from unstable vendor UI payloads.
+- Do not hide important component metrics behind opaque aggregate scores.
 - Do not render a polished dashboard.
 
 ### Acceptance Criteria
@@ -103,6 +109,7 @@ Compute the core raw and derived friction metrics from normalized GitHub data us
 - [ ] Comment-source metrics distinguish Copilot, human, bot, scanner, and unknown sources.
 - [ ] Small diffs across many core files can be flagged after excluding generated and non-core files.
 - [ ] Metrics distinguish observed GitHub data from inferred classifications.
+- [ ] Any score-like metric exposes its component inputs and formula version.
 - [ ] Repository-level summaries can rank PRs by the highest friction categories.
 
 ### Required Validation
@@ -136,6 +143,8 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 
 - Generate a readable report for a selected repository and time window.
 - Include ranked bottlenecks, metric evidence, representative PR examples, comment-source breakdowns, and recommended interventions.
+- Produce Markdown and JSON report artifacts.
+- Include report coverage metadata for available API families, missing scopes, partial data, rate limits, deleted branches, and PR-open diff reconstruction confidence.
 - Support recommendation categories for hooks, preflight scripts, repo-specific AI skills, PR readiness gates, smaller milestones, planning artifacts, and test infrastructure.
 - Recommend smaller milestones when a small diff touches many core files, directories, or functional surfaces.
 - Explain which findings were excluded or down-weighted because they target generated docs, marketing files, release notes, or other non-core surfaces according to the repository profile.
@@ -154,6 +163,8 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 - [ ] Each recommendation includes evidence and representative PR examples.
 - [ ] The report separates Copilot, human, bot, scanner, and unknown comment sources.
 - [ ] The report shows which files/surfaces were counted as core product surfaces versus down-weighted support surfaces.
+- [ ] The report includes a coverage section that labels unavailable or partial GitHub data.
+- [ ] The report has both Markdown and JSON outputs.
 - [ ] Reports avoid individual developer ranking by default.
 - [ ] Reports can be generated locally without external services beyond GitHub data ingestion.
 
@@ -167,56 +178,7 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 - Generic recommendations could reduce trust.
 - The report must show enough evidence to make suggested interventions feel earned.
 - Overemphasizing non-core surfaces such as marketing or generated files could distort the diagnosis.
-
-### Status
-
-- [x] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
-
-## Milestone 4: Backlog Feature Shaping
-
-### Outcome
-
-Shape the features that are intentionally excluded from the first local GitHub report MVP so they can be revisited without ambiguity.
-
-### Scope
-
-- Shape multi-product repository profiles for client-side apps, libraries, CLIs, infrastructure repos, documentation sites, and monorepos.
-- Shape stable vendor signal integration for Copilot severity, confidence, hidden comments, and review effort when GitHub exposes stable sources or experimental extractors are enabled.
-- Shape PR-open snapshot capture through a GitHub App or webhook mode.
-- Shape token and model usage attribution, including possible join keys: branch, PR number, commit SHA, local session ID, timestamp window, or explicit metadata.
-- Shape hosted dashboard and cross-repository benchmarking requirements.
-
-### Non-Goals
-
-- Do not require model usage data for the core report.
-- Do not ingest private logs without explicit user consent and clear data boundaries.
-- Do not implement these features before the local GitHub report proves useful.
-- Do not make cross-repository comparisons until repository profiles, source breakdowns, and review-culture differences are represented.
-
-### Acceptance Criteria
-
-- [ ] The PRD contains shaped backlog features with a clear reason each is excluded from the first local report MVP.
-- [ ] Multi-product repository profiles describe how language and file role differ by product shape.
-- [ ] Vendor severity/confidence integration is documented as unstable unless sourced from public API or explicitly experimental UI partials.
-- [ ] Token/model usage attribution documents feasible and infeasible join strategies, privacy risks, and metrics that could complement GitHub friction.
-- [ ] Hosted dashboard and cross-repo benchmarking are documented as post-MVP features.
-- [ ] The MVP remains valid without these backlog features.
-
-### Required Validation
-
-- Manual: review shaped backlog features against the MVP and confirm each excluded feature has a clear later entry point.
-
-### Risks / Watchpoints
-
-- Backlog shaping can become hidden MVP scope creep if acceptance criteria are not explicit.
-- Attribution may be too noisy if work spans multiple sessions, models, or branches.
-- Token cost can become a distracting metric unless tied to corrective loops or mergeable outcomes.
-- Cross-repo benchmarking can mislead unless repository profiles and review-source differences are modeled.
+- Reports can overstate confidence when data is missing; coverage metadata must make partial analysis visible.
 
 ### Status
 
