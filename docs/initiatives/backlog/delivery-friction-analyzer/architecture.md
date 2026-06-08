@@ -30,11 +30,14 @@ The first implementation should be able to run as a local analyzer or service-ba
 | Default reports to repository and team-level patterns. | The product should improve workflows without becoming developer surveillance. | Rank individuals, but that undermines trust and misuses noisy metrics. |
 | Treat token/model analytics as an optional phase. | Attribution may be noisy and privacy-sensitive. | Require model logs for MVP, but that would slow adoption and narrow the first use case. |
 | Use representative PR examples in recommendations. | Suggestions are more convincing when backed by concrete evidence. | Provide generic best practices, but those are less actionable. |
+| Use GraphQL for review-thread analytics. | Live validation against `hannasdev/mcp-writing` showed GraphQL exposes review-thread count, resolution state, outdated state, paths, lines, and grouped comments. | REST-only review comments are simpler but lose thread state. |
+| Model Copilot severity as optional. | Live validation did not find structured severity in checked REST or GraphQL comment/thread payloads. | Make severity required, but that would block useful MVP metrics. |
 
 ## Contracts And Boundaries
 
 - Raw GitHub payloads should be stored or cached separately from normalized entities.
 - Normalized PR entities should retain source IDs and URLs for traceability.
+- Review attempts should be represented separately from individual review comments so failed Copilot reviews and no-new-comment rounds remain visible.
 - Classifications must record their source:
   - `observed` for direct GitHub metadata;
   - `rule` for deterministic local categorization;
@@ -43,6 +46,7 @@ The first implementation should be able to run as a local analyzer or service-ba
 - Metrics should be deterministic for a given normalized dataset and classifier version.
 - Recommendations should reference the metric evidence and example PRs that triggered them.
 - Reports should default to repository-level aggregation and avoid individual rankings.
+- PR-open diff measurements must record whether they came from an observed snapshot, reconstruction, or are unavailable.
 
 ## Data Model Sketch
 
@@ -55,6 +59,7 @@ Core entities:
 - Review
 - ReviewThread
 - ReviewComment
+- ReviewAttempt
 - Commit
 - CheckRun
 - WorkflowRun
@@ -67,6 +72,7 @@ Important fields:
 - timestamps for lifecycle and waiting-time calculations;
 - file path, extension, additions, deletions, and category;
 - comment author type, severity, body category, file target, and resolution status when available;
+- severity source such as `observed`, `inferred`, or `unavailable`;
 - check name, conclusion, duration, rerun relationship, and failure category when available;
 - metric version and classifier version.
 
@@ -105,4 +111,3 @@ There is no existing product data to migrate. The first implementation should st
 - [ ] Which report format should come first: Markdown, JSON, web UI, or all three?
 - [ ] Should file categorization be globally defined or repo-configurable from the start?
 - [ ] What confidence threshold is required before token/model usage can be attributed to a PR?
-

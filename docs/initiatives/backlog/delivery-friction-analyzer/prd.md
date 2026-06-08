@@ -8,6 +8,7 @@
 - Related docs:
   - [Milestones](milestones.md)
   - [Architecture Notes](architecture.md)
+  - [GitHub Risk Validation: `hannasdev/mcp-writing`](../../../research/github-risk-validation-mcp-writing.md)
 
 ## Problem
 
@@ -68,7 +69,7 @@ The first useful output is a repository friction report that ranks the highest-w
   - review comment count;
   - review thread count;
   - unresolved or reopened thread count when available;
-  - Copilot comment severity: high, medium, low;
+  - Copilot comment severity: high, medium, low when directly available, otherwise `unavailable` or inferred with an explicit source label;
   - comment target category: code, tests, docs, config, generated, infrastructure, unknown.
 - Iteration churn:
   - commits after PR open;
@@ -79,6 +80,8 @@ The first useful output is a repository friction report that ranks the highest-w
 - CI and validation:
   - failed check runs;
   - repeated failures of the same check;
+  - cancelled or superseded workflow runs;
+  - review-service check runs such as Copilot review attempts;
   - time spent waiting on failed and rerun checks;
   - commits that appear to address formatting, lint, typecheck, tests, snapshots, or CI config.
 - PR metadata quality:
@@ -130,11 +133,13 @@ The first useful output is a repository friction report that ranks the highest-w
 
 | Risk | Impact | Mitigation / Decision Path |
 | --- | --- | --- |
-| GitHub may not expose Copilot severity in a stable, structured way through every API path. | Severity metrics may be incomplete. | Preserve raw comment metadata, support fallback text classification, and label severity source. |
+| GitHub may not expose Copilot severity in a stable, structured way through every API path. | Severity metrics may be incomplete. | Confirmed as a real MVP risk against `hannasdev/mcp-writing`: REST review comments and checked GraphQL review-thread fields did not expose severity. Preserve raw comment metadata, support fallback text classification, and label severity source. |
 | Raw comment counts can reward shallow reviews or penalize thoughtful review. | Metrics may mislead teams. | Normalize by file category, changed lines, lifecycle phase, and severity; emphasize patterns and examples. |
 | The product could feel like developer surveillance. | Low trust and poor adoption. | Default to team and repository-level reporting, avoid individual ranking, and focus recommendations on workflow improvements. |
-| Diff line counts can be noisy for generated files, dependency updates, or fixture changes. | False positives in churn metrics. | Detect generated and low-signal file categories and exclude or down-weight them by default. |
-| Recommendation quality may be weak if comments are not categorized well. | Reports may feel generic. | Start with transparent rule-based categories, representative examples, and user-editable recommendation mappings. |
+| Diff line counts can be noisy for generated files, dependency updates, or fixture changes. | False positives in churn metrics. | Confirmed in `hannasdev/mcp-writing`: sampled PRs mixed source, tests, README, generated docs, release logs, and initiative bookkeeping. Detect generated and low-signal file categories and exclude or down-weight them by default. |
+| PR-open diff size is not directly available from simple PR metadata. | Open-vs-merge diff growth may be expensive or low-confidence to reconstruct after the fact. | Treat this as a confirmed reconstruction risk. Prefer GitHub App snapshots at PR-open time, or reconstruct from commits/timeline with an explicit confidence label. |
+| Recommendation quality may be weak if comments are not categorized well. | Reports may feel generic. | Confirmed by sampled comments spanning correctness, performance, safety, docs accuracy, generated docs, release-log hygiene, duplication, and clarity. Start with transparent rule-based categories, representative examples, and user-editable recommendation mappings. |
+| Copilot review attempts can produce no comments or fail. | Counting only comments misses review-loop events and tool reliability friction. | Store review attempts, no-new-comment reviews, and failed review bodies as first-class review events. |
 | Joining token/model usage with GitHub work may be hard. | Phase 2 attribution may be unreliable. | Treat model analytics as optional and require explicit join keys such as branch, PR number, commit SHA, or session metadata. |
 
 ## Testing Strategy
@@ -153,6 +158,8 @@ Testing should focus on correctness of data extraction, metric calculation, clas
 - [ ] Should the MVP be a GitHub App, CLI, hosted dashboard, or local report generator?
 - [ ] Which repositories should be used as the first validation dataset?
 - [ ] Can Copilot severity be fetched reliably through GitHub APIs, or does it require a different integration path?
+- [x] Can GitHub expose review-thread resolution/outdated state? Yes, through GraphQL `reviewThreads`.
+- [x] Is Copilot severity exposed in the checked review-comment/thread payloads? Not in the REST and GraphQL fields checked against `hannasdev/mcp-writing`; model as unavailable/inferred unless another API source is found.
+- [x] Is full CI churn available beyond the final status rollup? Yes, workflow runs can be queried by PR branch/event, but branch deletion or rename may reduce reliability.
 - [ ] Should recommendation mappings be manually configured per repo before the product attempts automated suggestions?
 - [ ] What join keys are realistic for future token and model usage integration?
-

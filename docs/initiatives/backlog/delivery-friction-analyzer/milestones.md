@@ -10,6 +10,8 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 
 - Inspect GitHub APIs for pull requests, reviews, review comments, commits, check runs, changed files, and timeline events.
 - Determine whether Copilot review severity is available as structured metadata.
+- Validate which review-thread fields require GraphQL rather than REST.
+- Validate whether PR-open diff size can be reconstructed from historical GitHub data or requires a GitHub App snapshot.
 - Define the initial normalized data model for PR lifecycle, diff shape, review feedback, CI checks, and iteration churn.
 - Create fixture payloads for at least three representative PRs.
 
@@ -24,6 +26,8 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 - [ ] The repo contains typed or schema-defined normalized entities for PRs, comments, check runs, commits, and changed files.
 - [ ] The repo contains fixture data covering at least one low-friction PR, one high-review-churn PR, and one high-CI-churn PR.
 - [ ] Copilot severity support is documented as available, unavailable, or requiring fallback classification.
+- [ ] Review-thread resolution/outdated support is documented with the GraphQL fields required.
+- [ ] PR-open diff support is documented as direct, reconstructed, or snapshot-only.
 
 ### Required Validation
 
@@ -34,6 +38,7 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 
 - Copilot metadata may not be available in the expected API shape.
 - Timeline and review-thread APIs may require GraphQL rather than REST-only access.
+- Branch-based CI churn queries may lose fidelity after PR head branches are deleted.
 
 ### Status
 
@@ -182,4 +187,3 @@ Define whether and how model usage data can be joined to GitHub delivery frictio
 - [ ] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
-
