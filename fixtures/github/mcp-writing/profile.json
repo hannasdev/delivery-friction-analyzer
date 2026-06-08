@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "repository-profile.v1",
+  "repository": {
+    "owner": "hannasdev",
+    "name": "mcp-writing"
+  },
+  "rules": [
+    {
+      "id": "generated-tool-docs",
+      "match": { "prefix": "docs/agents/" },
+      "category": "generated",
+      "role": "generated_docs",
+      "functionalSurface": "agent_tool_reference",
+      "generated": true
+    },
+    {
+      "id": "tests",
+      "match": { "prefix": "src/test/" },
+      "category": "tests",
+      "role": "tests",
+      "functionalSurface": "test_suite"
+    },
+    {
+      "id": "core-src",
+      "match": { "prefix": "src/" },
+      "category": "code",
+      "role": "core_product_code",
+      "functionalSurface": "runtime"
+    },
+    {
+      "id": "release-log",
+      "match": { "exact": "release-log.md" },
+      "category": "docs",
+      "role": "release_notes",
+      "functionalSurface": "release_notes"
+    },
+    {
+      "id": "planning-docs",
+      "match": { "prefix": "docs/initiatives/" },
+      "category": "docs",
+      "role": "planning_docs",
+      "functionalSurface": "planning"
+    },
+    {
+      "id": "guides",
+      "match": { "prefix": "docs/guides/" },
+      "category": "docs",
+      "role": "unknown",
+      "functionalSurface": "user_docs"
+    },
+    {
+      "id": "top-level-docs",
+      "match": { "regex": "^(README|PRODUCT|FEATURES)\\.md$" },
+      "category": "docs",
+      "role": "unknown",
+      "functionalSurface": "product_docs"
+    },
+    {
+      "id": "docker",
+      "match": { "suffix": "Dockerfile" },
+      "category": "infrastructure",
+      "role": "infrastructure",
+      "functionalSurface": "runtime_infra"
+    }
+  ]
+}

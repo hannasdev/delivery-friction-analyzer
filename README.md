@@ -22,6 +22,6 @@ The product should eventually combine GitHub delivery friction with token and mo
 
 ## Planning Docs
 
-- [PRD](docs/initiatives/backlog/delivery-friction-analyzer/prd.md)
-- [Milestones](docs/initiatives/backlog/delivery-friction-analyzer/milestones.md)
-- [Architecture Notes](docs/initiatives/backlog/delivery-friction-analyzer/architecture.md)
+- [PRD](docs/initiatives/active/delivery-friction-analyzer/prd.md)
+- [Milestones](docs/initiatives/active/delivery-friction-analyzer/milestones.md)
+- [Architecture Notes](docs/initiatives/active/delivery-friction-analyzer/architecture.md)

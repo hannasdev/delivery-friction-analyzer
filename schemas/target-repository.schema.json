@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://delivery-friction-analyzer.local/schemas/target-repository.schema.json",
+  "title": "TargetRepositoryInput",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "owner",
+    "name",
+    "defaultBranch",
+    "visibility",
+    "analysisWindowDays"
+  ],
+  "properties": {
+    "owner": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "defaultBranch": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._/-]+$"
+    },
+    "visibility": {
+      "enum": ["public", "private", "unknown"]
+    },
+    "analysisWindowDays": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 365
+    },
+    "isValidationTarget": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

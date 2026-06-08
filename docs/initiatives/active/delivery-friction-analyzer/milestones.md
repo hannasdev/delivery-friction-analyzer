@@ -1,6 +1,6 @@
 # Delivery Friction Analyzer Milestones
 
-## Milestone 1: GitHub Data Inventory And Repo Profile
+## M1: GitHub Data Inventory And Repo Profile
 
 ### Outcome
 
@@ -62,14 +62,14 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 
 ### Status
 
-- [x] Not started
-- [ ] Implemented
+- [ ] Not started
+- [x] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
 
-## Milestone 2: Friction Metrics Engine
+## M2: Friction Metrics Engine
 
 ### Outcome
 
@@ -135,7 +135,7 @@ Compute the core raw and derived friction metrics from normalized GitHub data us
 - [ ] PR opened
 - [ ] Merged
 
-## Milestone 3: Recommendation Report
+## M3: Recommendation Report
 
 ### Outcome
 

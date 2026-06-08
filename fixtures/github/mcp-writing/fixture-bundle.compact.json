@@ -1,0 +1,237 @@
+{
+  "schemaVersion": "github-fixture-bundle.v1",
+  "collectedAt": "2026-06-08T00:00:00Z",
+  "targetRepository": {
+    "owner": "hannasdev",
+    "name": "mcp-writing",
+    "defaultBranch": "main",
+    "visibility": "public",
+    "analysisWindowDays": 30,
+    "isValidationTarget": true
+  },
+  "languageDistribution": {
+    "source": "rest:/repos/{owner}/{repo}/languages",
+    "bytesByLanguage": {
+      "JavaScript": 2059415,
+      "HTML": 671230,
+      "Shell": 2174,
+      "Dockerfile": 1172
+    }
+  },
+  "scenarios": [
+    {
+      "id": "low-friction-pr",
+      "pullRequestNumber": 223,
+      "evidence": "1 changed file, 2 changed lines, one Copilot review summary, all final checks successful."
+    },
+    {
+      "id": "high-review-churn-pr",
+      "pullRequestNumber": 239,
+      "evidence": "15 GraphQL review threads and multiple Copilot review rounds before the final no-new-comment review."
+    },
+    {
+      "id": "high-ci-churn-pr",
+      "pullRequestNumber": 239,
+      "evidence": "9 pull_request workflow runs for the branch, including one cancelled CI run."
+    },
+    {
+      "id": "broad-file-spread-pr",
+      "pullRequestNumber": 221,
+      "evidence": "15 changed files spanning core source, tests, generated docs, guides, release notes, and planning docs."
+    }
+  ],
+  "pullRequests": [
+    {
+      "number": 223,
+      "title": "docs: accept architecture snapshot milestone",
+      "author": { "login": "hannasdev" },
+      "url": "https://github.com/hannasdev/mcp-writing/pull/223",
+      "state": "MERGED",
+      "createdAt": "2026-05-28T14:38:07Z",
+      "mergedAt": "2026-05-28T14:39:28Z",
+      "updatedAt": "2026-05-28T14:39:31Z",
+      "additions": 1,
+      "deletions": 1,
+      "changedFiles": 1,
+      "headRefName": "docs/complete-architecture-alignment-bookkeeping",
+      "headRefOid": "a4de2d9f2c61fce9564b8a0fe01422ecbb8ef15a",
+      "commits": [
+        {
+          "oid": "a4de2d9f2c61fce9564b8a0fe01422ecbb8ef15a",
+          "authoredDate": "2026-05-28T14:37:28Z",
+          "messageHeadline": "docs: accept architecture snapshot milestone"
+        }
+      ],
+      "files": [
+        {
+          "path": "docs/initiatives/backlog/architecture-alignment-follow-up/milestones.md",
+          "additions": 1,
+          "deletions": 1,
+          "changeType": "MODIFIED"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOSAlxCc8AAAABBS8f7w",
+          "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" },
+          "submittedAt": "2026-05-28T14:39:02Z",
+          "state": "COMMENTED",
+          "commitOid": "a4de2d9f2c61fce9564b8a0fe01422ecbb8ef15a",
+          "generatedCommentCount": 0
+        }
+      ],
+      "reviewThreads": {
+        "source": "not_sampled_low_friction",
+        "totalCount": 0,
+        "nodes": []
+      },
+      "statusCheckRollup": [
+        { "__typename": "CheckRun", "name": "Test (Node 22.x)", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Validate PR description sections", "workflowName": "PR Template Check", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Test (Node 24.x)", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Static Checks", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Docker", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" }
+      ]
+    },
+    {
+      "number": 239,
+      "title": "feat: resolve scene vocabulary variants",
+      "author": { "login": "hannasdev" },
+      "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+      "state": "MERGED",
+      "createdAt": "2026-06-07T13:54:12Z",
+      "mergedAt": "2026-06-07T16:32:59Z",
+      "updatedAt": "2026-06-07T16:33:01Z",
+      "additions": 1168,
+      "deletions": 77,
+      "changedFiles": 13,
+      "headRefName": "feat/extended-vocabulary-resolution",
+      "headRefOid": "cc6de6e8b806815a0fd50b15d2c439cbec3807e5",
+      "commits": [
+        { "oid": "e47e9fb828cf3de3093383bb8adbe15ade75c34a", "authoredDate": "2026-06-07T13:31:13Z", "messageHeadline": "feat(search): resolve scene vocabulary variants" },
+        { "oid": "60bc02d70925171ea6ba9646be15817bcd7574cb", "authoredDate": "2026-06-07T13:54:44Z", "messageHeadline": "docs(release): link vocabulary resolution PR" },
+        { "oid": "adaf1635592e1c4afcb5c8300edf31971dc10776", "authoredDate": "2026-06-07T14:01:26Z", "messageHeadline": "fix(search): preserve indexed vocabulary predicates" },
+        { "oid": "1659d944af081a2ea0dea5de89420a08dba79dd8", "authoredDate": "2026-06-07T14:12:54Z", "messageHeadline": "fix(search): handle indexed vocabulary variants" },
+        { "oid": "f54ce414776c332d568c57b673be680a8bf302ec", "authoredDate": "2026-06-07T14:24:24Z", "messageHeadline": "fix(search): reject ambiguous chapter id casing" },
+        { "oid": "fb67931ce1dfbbf6d2eaeefe6ab724f2c6f17add", "authoredDate": "2026-06-07T15:40:37Z", "messageHeadline": "fix(metadata): skip empty vocabulary suggestions" },
+        { "oid": "cc6de6e8b806815a0fd50b15d2c439cbec3807e5", "authoredDate": "2026-06-07T16:06:32Z", "messageHeadline": "docs(search): clarify chapter id matching" }
+      ],
+      "files": [
+        { "path": "PRODUCT.md", "additions": 1, "deletions": 1, "changeType": "MODIFIED" },
+        { "path": "README.md", "additions": 2, "deletions": 2, "changeType": "MODIFIED" },
+        { "path": "docs/agents/tools.md", "additions": 7, "deletions": 7, "changeType": "MODIFIED" },
+        { "path": "docs/initiatives/active/human-input-forgiveness/milestones.md", "additions": 1, "deletions": 1, "changeType": "MODIFIED" },
+        { "path": "release-log.md", "additions": 8, "deletions": 0, "changeType": "MODIFIED" },
+        { "path": "src/core/canonical-target-resolution.js", "additions": 6, "deletions": 46, "changeType": "MODIFIED" },
+        { "path": "src/core/match-utils.js", "additions": 41, "deletions": 0, "changeType": "ADDED" },
+        { "path": "src/core/vocabulary-resolution.js", "additions": 269, "deletions": 0, "changeType": "ADDED" },
+        { "path": "src/test/integration/metadata.test.mjs", "additions": 67, "deletions": 0, "changeType": "MODIFIED" },
+        { "path": "src/test/integration/search.test.mjs", "additions": 302, "deletions": 0, "changeType": "MODIFIED" },
+        { "path": "src/test/unit/vocabulary-resolution.test.mjs", "additions": 103, "deletions": 0, "changeType": "ADDED" },
+        { "path": "src/tools/metadata.js", "additions": 22, "deletions": 3, "changeType": "MODIFIED" },
+        { "path": "src/tools/search.js", "additions": 339, "deletions": 17, "changeType": "MODIFIED" }
+      ],
+      "reviews": [
+        { "id": "copilot-239-1", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-06-07T13:58:22Z", "state": "COMMENTED", "commitOid": "e47e9fb828cf3de3093383bb8adbe15ade75c34a", "generatedCommentCount": 3 },
+        { "id": "copilot-239-2", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-06-07T14:05:30Z", "state": "COMMENTED", "commitOid": "adaf1635592e1c4afcb5c8300edf31971dc10776", "generatedCommentCount": 4 },
+        { "id": "copilot-239-3", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-06-07T14:18:27Z", "state": "COMMENTED", "commitOid": "1659d944af081a2ea0dea5de89420a08dba79dd8", "generatedCommentCount": 3 },
+        { "id": "copilot-239-4", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-06-07T14:29:21Z", "state": "COMMENTED", "commitOid": "f54ce414776c332d568c57b673be680a8bf302ec", "generatedCommentCount": 1 },
+        { "id": "copilot-239-5", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-06-07T16:03:45Z", "state": "COMMENTED", "commitOid": "fb67931ce1dfbbf6d2eaeefe6ab724f2c6f17add", "generatedCommentCount": 4 },
+        { "id": "copilot-239-6", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-06-07T16:11:19Z", "state": "COMMENTED", "commitOid": "cc6de6e8b806815a0fd50b15d2c439cbec3807e5", "generatedCommentCount": 0 }
+      ],
+      "reviewThreads": {
+        "source": "graphql:repository.pullRequest.reviewThreads",
+        "totalCount": 15,
+        "nodes": [
+          { "id": "PRRT_kwDOSAlxCc6HqPzM", "isResolved": true, "isOutdated": false, "path": "src/core/vocabulary-resolution.js", "line": 61, "comments": [{ "databaseId": 3369463173, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/core/vocabulary-resolution.js" }, { "databaseId": 3369469200, "author": { "login": "hannasdev", "type": "User" }, "path": "src/core/vocabulary-resolution.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqPzb", "isResolved": true, "isOutdated": true, "path": "src/tools/search.js", "line": null, "comments": [{ "databaseId": 3369463188, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/search.js" }, { "databaseId": 3369469316, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/search.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqPzi", "isResolved": true, "isOutdated": true, "path": "release-log.md", "line": null, "comments": [{ "databaseId": 3369463197, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "release-log.md" }, { "databaseId": 3369469380, "author": { "login": "hannasdev", "type": "User" }, "path": "release-log.md" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqSjp", "isResolved": true, "isOutdated": false, "path": "src/tools/search.js", "line": 139, "comments": [{ "databaseId": 3369478381, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/search.js" }, { "databaseId": 3369497146, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/search.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqSjt", "isResolved": true, "isOutdated": false, "path": "src/tools/search.js", "line": 329, "comments": [{ "databaseId": 3369478387, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/search.js" }, { "databaseId": 3369497200, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/search.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqSj6", "isResolved": true, "isOutdated": true, "path": "src/tools/metadata.js", "line": null, "comments": [{ "databaseId": 3369478399, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/metadata.js" }, { "databaseId": 3369497240, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/metadata.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqSkC", "isResolved": true, "isOutdated": true, "path": "src/core/vocabulary-resolution.js", "line": null, "comments": [{ "databaseId": 3369478412, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/core/vocabulary-resolution.js" }, { "databaseId": 3369497298, "author": { "login": "hannasdev", "type": "User" }, "path": "src/core/vocabulary-resolution.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqXNU", "isResolved": true, "isOutdated": true, "path": "src/tools/metadata.js", "line": null, "comments": [{ "databaseId": 3369503847, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/metadata.js" }, { "databaseId": 3369512745, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/metadata.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqXNY", "isResolved": true, "isOutdated": false, "path": "src/tools/search.js", "line": 121, "comments": [{ "databaseId": 3369503852, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/search.js" }, { "databaseId": 3369512786, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/search.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqXNc", "isResolved": true, "isOutdated": false, "path": "src/tools/search.js", "line": 384, "comments": [{ "databaseId": 3369503858, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/search.js" }, { "databaseId": 3369512839, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/search.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqZ74", "isResolved": true, "isOutdated": true, "path": "src/tools/metadata.js", "line": null, "comments": [{ "databaseId": 3369518412, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/metadata.js" }, { "databaseId": 3369623631, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/metadata.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqzS-", "isResolved": true, "isOutdated": true, "path": "src/tools/search.js", "line": null, "comments": [{ "databaseId": 3369655730, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/search.js" }, { "databaseId": 3369665705, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/search.js" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqzTP", "isResolved": true, "isOutdated": true, "path": "README.md", "line": null, "comments": [{ "databaseId": 3369655754, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "README.md" }, { "databaseId": 3369665808, "author": { "login": "hannasdev", "type": "User" }, "path": "README.md" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqzTY", "isResolved": true, "isOutdated": true, "path": "docs/agents/tools.md", "line": null, "comments": [{ "databaseId": 3369655767, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "docs/agents/tools.md" }, { "databaseId": 3369665902, "author": { "login": "hannasdev", "type": "User" }, "path": "docs/agents/tools.md" }] },
+          { "id": "PRRT_kwDOSAlxCc6HqzTh", "isResolved": true, "isOutdated": true, "path": "src/tools/metadata.js", "line": null, "comments": [{ "databaseId": 3369655780, "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "path": "src/tools/metadata.js" }, { "databaseId": 3369665970, "author": { "login": "hannasdev", "type": "User" }, "path": "src/tools/metadata.js" }] }
+        ]
+      },
+      "statusCheckRollup": [
+        { "__typename": "CheckRun", "name": "Test (Node 22.x)", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Test (Node 24.x)", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Static Checks", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Docker", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "StatusContext", "context": "security/snyk", "state": "SUCCESS" }
+      ],
+      "workflowRuns": {
+        "source": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+        "totalCount": 9,
+        "conclusions": {
+          "success": 8,
+          "cancelled": 1
+        }
+      }
+    },
+    {
+      "number": 221,
+      "title": "feat(backup): apply project restores transactionally",
+      "author": { "login": "hannasdev" },
+      "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+      "state": "MERGED",
+      "createdAt": "2026-05-25T14:50:29Z",
+      "mergedAt": "2026-05-26T14:46:59Z",
+      "updatedAt": "2026-05-26T14:47:03Z",
+      "additions": 1149,
+      "deletions": 58,
+      "changedFiles": 15,
+      "headRefName": "feat/transactional-restore-rebuild",
+      "headRefOid": "93c62ea2feb48d0da2df44afdf58c3dbfc49a5e1",
+      "commits": [
+        { "oid": "73adc7948d4c6c8c74b12645c3986b2421fe7076", "authoredDate": "2026-05-25T11:53:40Z", "messageHeadline": "docs(backup): advance recovery initiative to M7" },
+        { "oid": "8a776f4d0062f6805c5349f4affc1d171b4369b7", "authoredDate": "2026-05-25T11:59:57Z", "messageHeadline": "feat(backup): apply project restores transactionally" },
+        { "oid": "93c62ea2feb48d0da2df44afdf58c3dbfc49a5e1", "authoredDate": "2026-05-26T11:30:00Z", "messageHeadline": "docs(backup): clarify restore checksum guidance" }
+      ],
+      "files": [
+        { "path": "FEATURES.md", "additions": 12, "deletions": 0, "changeType": "MODIFIED" },
+        { "path": "PRODUCT.md", "additions": 5, "deletions": 4, "changeType": "MODIFIED" },
+        { "path": "README.md", "additions": 4, "deletions": 3, "changeType": "MODIFIED" },
+        { "path": "docs/agents/tools.md", "additions": 5, "deletions": 2, "changeType": "MODIFIED" },
+        { "path": "docs/guides/backup-recovery.md", "additions": 119, "deletions": 0, "changeType": "ADDED" },
+        { "path": "docs/guides/docker.md", "additions": 4, "deletions": 0, "changeType": "MODIFIED" },
+        { "path": "docs/initiatives/done/database-backup-recovery/milestones.md", "additions": 32, "deletions": 6, "changeType": "RENAMED" },
+        { "path": "docs/initiatives/done/database-backup-recovery/prd.md", "additions": 4, "deletions": 4, "changeType": "RENAMED" },
+        { "path": "release-log.md", "additions": 8, "deletions": 0, "changeType": "MODIFIED" },
+        { "path": "src/structure/project-backup-restore.js", "additions": 467, "deletions": 22, "changeType": "MODIFIED" },
+        { "path": "src/test/integration/runtime.test.mjs", "additions": 14, "deletions": 0, "changeType": "MODIFIED" },
+        { "path": "src/test/integration/sync.test.mjs", "additions": 59, "deletions": 0, "changeType": "MODIFIED" },
+        { "path": "src/test/unit/project-backup-restore.test.mjs", "additions": 394, "deletions": 14, "changeType": "MODIFIED" },
+        { "path": "src/tools/sync.js", "additions": 9, "deletions": 3, "changeType": "MODIFIED" },
+        { "path": "src/workflows/workflow-catalogue.js", "additions": 13, "deletions": 0, "changeType": "MODIFIED" }
+      ],
+      "reviews": [
+        { "id": "copilot-221-1", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-05-25T14:54:25Z", "state": "COMMENTED", "commitOid": "f7e9f1be0ff4693a1aef8f86b6f5b29338063d6d", "generatedCommentCount": 2 },
+        { "id": "copilot-221-2", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-05-25T15:09:59Z", "state": "COMMENTED", "commitOid": "0892ddaceee6a1af2c28ed34cfe61e4e560e9e90", "generatedCommentCount": 1 },
+        { "id": "copilot-221-3", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-05-25T19:37:52Z", "state": "COMMENTED", "commitOid": "e822ffb37828dd001d4881ec02b0e394dd5d9ad2", "generatedCommentCount": 1 },
+        { "id": "copilot-221-4", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-05-25T20:12:07Z", "state": "COMMENTED", "commitOid": "7f74fc0ba6a6c1d630f9493a66acc4c293ca9b2a", "generatedCommentCount": 4 },
+        { "id": "copilot-221-5", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-05-25T20:28:25Z", "state": "COMMENTED", "commitOid": "f939a3277456c15e0789bd0b4193527f54755894", "generatedCommentCount": 2 },
+        { "id": "copilot-221-error", "author": { "login": "copilot-pull-request-reviewer", "type": "Bot" }, "submittedAt": "2026-05-26T12:12:29Z", "state": "COMMENTED", "commitOid": "93c62ea2feb48d0da2df44afdf58c3dbfc49a5e1", "generatedCommentCount": 0, "failedAttempt": true }
+      ],
+      "reviewThreads": {
+        "source": "not_sampled_for_broad_file_spread",
+        "totalCount": 10,
+        "nodes": []
+      },
+      "statusCheckRollup": [
+        { "__typename": "CheckRun", "name": "Test (Node 22.x)", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Validate PR description sections", "workflowName": "PR Template Check", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Test (Node 24.x)", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Static Checks", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" },
+        { "__typename": "CheckRun", "name": "Docker", "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS" }
+      ]
+    }
+  ]
+}
