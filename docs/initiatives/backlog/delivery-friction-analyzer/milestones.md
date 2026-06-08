@@ -9,7 +9,8 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 ### Scope
 
 - Inspect GitHub APIs for pull requests, reviews, review comments, commits, check runs, changed files, and timeline events.
-- Determine whether Copilot review severity is available as structured metadata.
+- Determine whether Copilot review effort is available as structured metadata.
+- Determine whether comment-level severity is available through public APIs, undocumented UI partials, local inference, or should be excluded from the MVP.
 - Validate which review-thread fields require GraphQL rather than REST.
 - Validate whether PR-open diff size can be reconstructed from historical GitHub data or requires a GitHub App snapshot.
 - Define the initial normalized data model for PR lifecycle, diff shape, review feedback, CI checks, and iteration churn.
@@ -25,7 +26,8 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 - [ ] The repo contains documented GitHub fields used by the analyzer and their API source.
 - [ ] The repo contains typed or schema-defined normalized entities for PRs, comments, check runs, commits, and changed files.
 - [ ] The repo contains fixture data covering at least one low-friction PR, one high-review-churn PR, and one high-CI-churn PR.
-- [ ] Copilot severity support is documented as available, unavailable, or requiring fallback classification.
+- [ ] Copilot review effort support is documented as available, unavailable, or requiring fallback classification.
+- [ ] Comment-level severity is documented as public API, internal UI partial, inferred, unavailable, or excluded from the MVP.
 - [ ] Review-thread resolution/outdated support is documented with the GraphQL fields required.
 - [ ] PR-open diff support is documented as direct, reconstructed, or snapshot-only.
 
@@ -36,7 +38,9 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 
 ### Risks / Watchpoints
 
-- Copilot metadata may not be available in the expected API shape.
+- Copilot review effort metadata may not be available in the expected API shape.
+- Copilot severity labels may only be available in undocumented GitHub UI partials unless a stable public API source is found.
+- Copilot UI effort labels may be confused with comment severity unless the product separates review-level effort from finding-level impact.
 - Timeline and review-thread APIs may require GraphQL rather than REST-only access.
 - Branch-based CI churn queries may lose fidelity after PR head branches are deleted.
 

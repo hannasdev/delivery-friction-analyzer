@@ -31,7 +31,8 @@ The first implementation should be able to run as a local analyzer or service-ba
 | Treat token/model analytics as an optional phase. | Attribution may be noisy and privacy-sensitive. | Require model logs for MVP, but that would slow adoption and narrow the first use case. |
 | Use representative PR examples in recommendations. | Suggestions are more convincing when backed by concrete evidence. | Provide generic best practices, but those are less actionable. |
 | Use GraphQL for review-thread analytics. | Live validation against `hannasdev/mcp-writing` showed GraphQL exposes review-thread count, resolution state, outdated state, paths, lines, and grouped comments. | REST-only review comments are simpler but lose thread state. |
-| Model Copilot severity as optional. | Live validation did not find structured severity in checked REST or GraphQL comment/thread payloads. | Make severity required, but that would block useful MVP metrics. |
+| Model Copilot review effort separately from comment severity. | Public docs describe Low/Medium as review effort levels. GitHub's changelog and live UI validation show a separate per-comment severity label, but checked public REST and GraphQL comment/thread payloads did not expose it. | Collapse effort and severity into one field, but that would mix review configuration with finding impact. |
+| Treat GitHub UI partial severity as experimental. | Live validation found `automatedComment.severity` in an undocumented deferred `automated-review-comment` React partial, not in a stable public API field. | Ignore severity entirely for MVP, or classify severity locally from comment text. |
 
 ## Contracts And Boundaries
 
@@ -39,7 +40,8 @@ The first implementation should be able to run as a local analyzer or service-ba
 - Normalized PR entities should retain source IDs and URLs for traceability.
 - Review attempts should be represented separately from individual review comments so failed Copilot reviews and no-new-comment rounds remain visible.
 - Classifications must record their source:
-  - `observed` for direct GitHub metadata;
+  - `observed_public_api` for direct documented GitHub API metadata;
+  - `internal_ui_partial` for data extracted from undocumented GitHub UI HTML/React partials;
   - `rule` for deterministic local categorization;
   - `model` for any future model-assisted classification;
   - `manual` for user-edited labels.
@@ -72,7 +74,8 @@ Important fields:
 - timestamps for lifecycle and waiting-time calculations;
 - file path, extension, additions, deletions, and category;
 - comment author type, severity, body category, file target, and resolution status when available;
-- severity source such as `observed`, `inferred`, or `unavailable`;
+- review effort source such as `observed_public_api`, `rule`, `manual`, or `unavailable`;
+- comment impact or severity source such as `observed_public_api`, `internal_ui_partial`, `rule`, `model`, `manual`, `unavailable`, or `excluded`;
 - check name, conclusion, duration, rerun relationship, and failure category when available;
 - metric version and classifier version.
 
@@ -83,7 +86,7 @@ There is no existing product data to migrate. The first implementation should st
 ## Failure Modes
 
 - GitHub API data is incomplete or rate-limited: report partial coverage and show missing data categories.
-- Copilot severity is unavailable: preserve comments and use an explicit `severity_source` value of `unavailable` or `inferred`.
+- Copilot severity is unavailable through public APIs: preserve comments and use an explicit `severity_source` value of `internal_ui_partial`, `unavailable`, or `inferred`.
 - Generated files dominate a PR: mark the report as low-confidence unless generated files are excluded or down-weighted.
 - A PR has limited metadata or no description: compute available metrics while marking planning-related classifications as low-confidence.
 - Token/model attribution is ambiguous: do not attach usage to a PR unless the join key meets a documented confidence threshold.

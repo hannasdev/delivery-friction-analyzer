@@ -69,7 +69,8 @@ The first useful output is a repository friction report that ranks the highest-w
   - review comment count;
   - review thread count;
   - unresolved or reopened thread count when available;
-  - Copilot comment severity: high, medium, low when directly available, otherwise `unavailable` or inferred with an explicit source label;
+  - Copilot review effort level when directly available, currently documented by GitHub as Low or Medium review effort;
+  - Copilot comment severity when available, with an explicit source label such as public API, internal UI partial, inferred, or unavailable;
   - comment target category: code, tests, docs, config, generated, infrastructure, unknown.
 - Iteration churn:
   - commits after PR open;
@@ -133,7 +134,7 @@ The first useful output is a repository friction report that ranks the highest-w
 
 | Risk | Impact | Mitigation / Decision Path |
 | --- | --- | --- |
-| GitHub may not expose Copilot severity in a stable, structured way through every API path. | Severity metrics may be incomplete. | Confirmed as a real MVP risk against `hannasdev/mcp-writing`: REST review comments and checked GraphQL review-thread fields did not expose severity. Preserve raw comment metadata, support fallback text classification, and label severity source. |
+| GitHub may not expose Copilot severity in a stable, structured way through every API path. | Severity metrics may be incomplete or depend on undocumented UI payloads. | Public changelog checked on 2026-06-08 confirms Copilot comment severity labels, and the GitHub web UI partial exposed `automatedComment.severity: "medium"` for the sample comment. REST review comments and checked GraphQL review-thread fields did not expose severity. Preserve raw comment metadata, model review effort separately from comment severity, support fallback text classification, and label severity source. |
 | Raw comment counts can reward shallow reviews or penalize thoughtful review. | Metrics may mislead teams. | Normalize by file category, changed lines, lifecycle phase, and severity; emphasize patterns and examples. |
 | The product could feel like developer surveillance. | Low trust and poor adoption. | Default to team and repository-level reporting, avoid individual ranking, and focus recommendations on workflow improvements. |
 | Diff line counts can be noisy for generated files, dependency updates, or fixture changes. | False positives in churn metrics. | Confirmed in `hannasdev/mcp-writing`: sampled PRs mixed source, tests, README, generated docs, release logs, and initiative bookkeeping. Detect generated and low-signal file categories and exclude or down-weight them by default. |
@@ -157,9 +158,10 @@ Testing should focus on correctness of data extraction, metric calculation, clas
 - [ ] What should the product be called publicly?
 - [ ] Should the MVP be a GitHub App, CLI, hosted dashboard, or local report generator?
 - [ ] Which repositories should be used as the first validation dataset?
-- [ ] Can Copilot severity be fetched reliably through GitHub APIs, or does it require a different integration path?
+- [ ] Can Copilot review effort be fetched reliably through GitHub APIs, or does it require a different integration path?
+- [ ] Should the MVP include an experimental GitHub UI-partial extractor for Copilot comment severity, or avoid severity weighting until a stable public API source exists?
 - [x] Can GitHub expose review-thread resolution/outdated state? Yes, through GraphQL `reviewThreads`.
-- [x] Is Copilot severity exposed in the checked review-comment/thread payloads? Not in the REST and GraphQL fields checked against `hannasdev/mcp-writing`; model as unavailable/inferred unless another API source is found.
+- [x] Is Copilot severity exposed in the checked review-comment/thread payloads? Not in checked public REST or GraphQL payloads. It is exposed in the GitHub web UI's deferred `automated-review-comment` React partial as `automatedComment.severity`.
 - [x] Is full CI churn available beyond the final status rollup? Yes, workflow runs can be queried by PR branch/event, but branch deletion or rename may reduce reliability.
 - [ ] Should recommendation mappings be manually configured per repo before the product attempts automated suggestions?
 - [ ] What join keys are realistic for future token and model usage integration?

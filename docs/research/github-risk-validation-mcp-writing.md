@@ -13,7 +13,7 @@
 
 The core GitHub data source is viable, but several MVP risks are real.
 
-GitHub exposes enough data to measure review-loop friction, review-thread state, CI reruns, changed files, lifecycle timing, and post-review commits. However, Copilot severity is not exposed in the REST or GraphQL review-comment fields checked here, even for a comment where the GitHub web UI displays a `Medium` badge. PR-open diff snapshots are also not directly available from simple PR metadata.
+GitHub exposes enough data to measure review-loop friction, review-thread state, CI reruns, changed files, lifecycle timing, and post-review commits. GitHub's public changelog confirms that Copilot code review comments can display `High`, `Medium`, and `Low` severity labels, but the checked public REST and GraphQL review-comment fields do not expose that value. The GitHub web UI does expose it in an undocumented deferred HTML/React partial. PR-open diff snapshots are also not directly available from simple PR metadata.
 
 ## Findings
 
@@ -21,7 +21,7 @@ GitHub exposes enough data to measure review-loop friction, review-thread state,
 | --- | --- | --- | --- |
 | Review churn can be measured from GitHub. | Confirmed. | PR 239 exposed 15 GraphQL review threads and five Copilot comment-producing review rounds before the final no-new-comments review. PR 221 exposed 10 Copilot comments, five comment-producing review rounds, and one Copilot review error. | Review-loop metrics are viable for MVP. |
 | Review thread resolution and outdated state are available. | Confirmed through GraphQL. | `reviewThreads` returned `totalCount`, `isResolved`, `isOutdated`, `path`, line fields, and per-thread comments. | Use GraphQL for thread-aware review analytics instead of relying only on REST comments. |
-| Copilot high/medium/low severity is directly available in review-comment payloads. | Not confirmed; likely real public API gap. | The GitHub web UI shows `Medium` on comment `3369463173`, but the exact REST payload exposed author, path, line, timestamps, commit IDs, body, and reactions with no severity field. GraphQL introspection for `PullRequestReviewComment` did not expose a `severity`, `priority`, `risk`, or similar field, and queried GraphQL comment/thread nodes did not return severity metadata. | Severity-weighted metrics need either a different API source, fallback text classification, or an `unavailable` severity source. |
+| Copilot high/medium/low severity is directly available in review-comment payloads. | Partially confirmed, but not through checked public APIs. | GitHub's 2026-05-12 changelog says Copilot code review comments are categorized as `High`, `Medium`, and `Low`. The GitHub web UI shows `Medium` on comment `3369463173`, and the deferred HTML partial for thread `2275998924` embeds `automatedComment.severity: "medium"`. However, the exact REST payload exposed author, path, line, timestamps, commit IDs, body, and reactions with no severity field. GraphQL introspection for `PullRequestReviewComment` did not expose a `severity`, `priority`, `risk`, `effort`, or similar field, and queried GraphQL comment/thread nodes did not return this metadata. | Comment severity exists in GitHub's UI model, but relying on it for MVP requires an undocumented HTML-partial extractor. Keep severity source explicit: `internal_ui_partial`, `inferred`, or `unavailable`. |
 | Copilot review summary text is available. | Confirmed. | `gh pr view` review bodies contained Copilot summaries such as reviewed file counts and generated comment counts. | The analyzer can derive review-round counts and comment counts from structured comments plus summary bodies. |
 | CI churn can be reconstructed beyond final status. | Confirmed, with caveats. | PR 239 branch workflow runs returned nine pull-request runs, including repeated CI runs and one cancelled run. Final head check-runs exposed individual jobs and Copilot review as a check-run. | Use workflow-runs-by-branch or check-suites per commit for churn; `statusCheckRollup` alone only reflects the current/final head. |
 | Diff size at merge is easy to collect. | Confirmed. | `gh pr list` / `gh pr view` exposed final additions, deletions, changed files, and per-file changes. | Final diff metrics are straightforward. |
@@ -82,19 +82,56 @@ GitHub exposes enough data to measure review-loop friction, review-thread state,
 - `repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request`: useful for workflow-run churn across PR commits while the branch/run history remains available.
 - `repos/{owner}/{repo}/commits/{sha}/check-runs`: useful for check-run detail on a specific commit.
 
+### Observed UI Partial
+
+The GitHub PR page lazily expands resolved review threads through deferred HTML endpoints. For the sample comment, the collapsed thread advertised:
+
+- `data-deferred-content-url="/hannasdev/mcp-writing/pull/239/threads/2275998924?rendering_on_files_tab=false"`
+- `data-hidden-comment-ids="3369463173,3369469200"`
+
+Fetching that endpoint returned HTML with a React partial:
+
+- `react-partial partial-name="automated-review-comment"`
+- embedded JSON at `script[type="application/json"][data-target="react-partial.embeddedData"]`
+- `props.comment.id: "PRRC_kwDOSAlxCc7I1e2F"`
+- `props.comment.databaseId: 3369463173`
+- `props.comment.automatedComment.id: "62120207"`
+- `props.comment.automatedComment.source: "copilot"`
+- `props.comment.automatedComment.severity: "medium"`
+- `props.comment.automatedComment.securitySeverity: "none"`
+- `props.comment.automatedComment.hideSeverityLabel: false`
+
+This appears to be the source of the visible `Medium` badge for the sample comment. It is not an observed public GraphQL field; it is an undocumented GitHub UI partial and should be treated as unstable.
+
 ### Observed Gaps
 
 - No structured Copilot severity field was visible in the checked REST or GraphQL comment/thread payloads.
-- Public GraphQL schema introspection for `PullRequestReviewComment` did not list any severity-like field, despite the web UI showing a severity badge for at least one Copilot comment.
+- Public GraphQL schema introspection for `PullRequestReviewComment` did not list any severity-like or effort-like field, despite the web UI partial exposing `automatedComment.severity`.
 - Simple PR metadata does not expose the changed-line count at PR open.
 - Final status rollups do not show the full CI churn history.
 - Some timeline events hide commit details unless additional fields or endpoints are queried.
 - Branch-based workflow-run lookup may be weaker after head branches are deleted or renamed.
 
+## Public Documentation Check
+
+Public GitHub documentation and changelog sources distinguish two related concepts:
+
+What they document:
+
+- Copilot code review supports review effort levels. Public docs describe `Low` as the default standard review and `Medium` as a higher-reasoning, longer analysis mode for complex, security-sensitive, or cross-service changes.
+- Medium review effort is documented as public preview and can consume more AI credits and GitHub Actions minutes than Low.
+- GitHub's public changelog announced Copilot code review comment severity labels on 2026-05-12 and says comments are categorized as `High`, `Medium`, or `Low`.
+- Copilot review comments are documented as ordinary pull request review comments: users can react, reply, resolve, or hide them.
+- REST pull request review comment examples list ordinary review-comment fields such as `id`, `node_id`, `diff_hunk`, `path`, `commit_id`, `body`, `created_at`, `updated_at`, `html_url`, line fields, and author metadata. They do not document severity or review effort fields.
+- GitHub Code Quality, a separate product area, does document severity levels for Code Quality findings: `Error`, `Warning`, and `Note`. Those are not the same as Copilot code review comment severities and use a different bot/product surface.
+
+Implication: the `Medium` badge in the GitHub UI is a real Copilot comment severity label, but the stable public API path for retrieving it is still unconfirmed. If the product uses the UI partial, store it as `severity_source: internal_ui_partial`, not `observed_public_api`. If the product classifies severity locally, store it as `severity_source: inferred`.
+
 ## Product Implications
 
 - MVP should prioritize review loop count, thread count, resolved/outdated state, comment density, CI run churn, and post-review commits before severity-weighted scoring.
-- Severity should be modeled as optional with explicit `severity_source` values such as `unavailable`, `inferred`, or `observed`.
+- Copilot review effort and comment severity should be modeled separately. Review effort is a review-level setting documented as Low/Medium. Comment severity is a per-comment UI label documented in the GitHub changelog and available in an undocumented UI partial, but not in checked public REST/GraphQL payloads.
 - The analyzer should ingest GraphQL review threads, not only REST comments.
+- If severity is important for MVP, add an experimental extractor for GitHub deferred thread partials and label its output as `internal_ui_partial`.
 - Open-vs-merge diff growth should either require stored snapshots collected by a GitHub App at PR-open time or be clearly marked as reconstructed with confidence.
 - Recommendation quality should start with transparent categories: correctness, performance, security/safety, docs accuracy, generated docs, release-log hygiene, test coverage, refactor/duplication, CI/validation, and scope/planning.
