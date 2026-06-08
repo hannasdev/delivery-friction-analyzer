@@ -6,13 +6,14 @@
 - Checked: 2026-06-08
 - Sample focus:
   - <https://github.com/hannasdev/mcp-writing/pull/239>
+  - <https://github.com/hannasdev/mcp-writing/pull/239#discussion_r3369463173>
   - <https://github.com/hannasdev/mcp-writing/pull/221>
 
 ## Summary
 
 The core GitHub data source is viable, but several MVP risks are real.
 
-GitHub exposes enough data to measure review-loop friction, review-thread state, CI reruns, changed files, lifecycle timing, and post-review commits. However, Copilot severity is not exposed in the REST or GraphQL review-comment fields checked here, and PR-open diff snapshots are not directly available from simple PR metadata.
+GitHub exposes enough data to measure review-loop friction, review-thread state, CI reruns, changed files, lifecycle timing, and post-review commits. However, Copilot severity is not exposed in the REST or GraphQL review-comment fields checked here, even for a comment where the GitHub web UI displays a `Medium` badge. PR-open diff snapshots are also not directly available from simple PR metadata.
 
 ## Findings
 
@@ -20,7 +21,7 @@ GitHub exposes enough data to measure review-loop friction, review-thread state,
 | --- | --- | --- | --- |
 | Review churn can be measured from GitHub. | Confirmed. | PR 239 exposed 15 GraphQL review threads and five Copilot comment-producing review rounds before the final no-new-comments review. PR 221 exposed 10 Copilot comments, five comment-producing review rounds, and one Copilot review error. | Review-loop metrics are viable for MVP. |
 | Review thread resolution and outdated state are available. | Confirmed through GraphQL. | `reviewThreads` returned `totalCount`, `isResolved`, `isOutdated`, `path`, line fields, and per-thread comments. | Use GraphQL for thread-aware review analytics instead of relying only on REST comments. |
-| Copilot high/medium/low severity is directly available in review-comment payloads. | Not confirmed; likely real risk. | REST review comments exposed author, path, line, timestamps, commit IDs, and body, but no severity field. GraphQL review threads exposed resolution/outdated state and comment bodies, but no severity field in the queried fields. | Severity-weighted metrics need either a different API source, fallback text classification, or an `unavailable` severity source. |
+| Copilot high/medium/low severity is directly available in review-comment payloads. | Not confirmed; likely real public API gap. | The GitHub web UI shows `Medium` on comment `3369463173`, but the exact REST payload exposed author, path, line, timestamps, commit IDs, body, and reactions with no severity field. GraphQL introspection for `PullRequestReviewComment` did not expose a `severity`, `priority`, `risk`, or similar field, and queried GraphQL comment/thread nodes did not return severity metadata. | Severity-weighted metrics need either a different API source, fallback text classification, or an `unavailable` severity source. |
 | Copilot review summary text is available. | Confirmed. | `gh pr view` review bodies contained Copilot summaries such as reviewed file counts and generated comment counts. | The analyzer can derive review-round counts and comment counts from structured comments plus summary bodies. |
 | CI churn can be reconstructed beyond final status. | Confirmed, with caveats. | PR 239 branch workflow runs returned nine pull-request runs, including repeated CI runs and one cancelled run. Final head check-runs exposed individual jobs and Copilot review as a check-run. | Use workflow-runs-by-branch or check-suites per commit for churn; `statusCheckRollup` alone only reflects the current/final head. |
 | Diff size at merge is easy to collect. | Confirmed. | `gh pr list` / `gh pr view` exposed final additions, deletions, changed files, and per-file changes. | Final diff metrics are straightforward. |
@@ -35,6 +36,7 @@ GitHub exposes enough data to measure review-loop friction, review-thread state,
 - Final diff: 1,168 additions, 77 deletions, 13 changed files.
 - Commits: 7 total, with multiple post-review fix commits.
 - Copilot comments: 15 individual Copilot review comments.
+- Example severity gap: comment `3369463173` displays `Medium` in GitHub's web UI, but the checked REST and GraphQL public API payloads do not expose that value.
 - Review threads: 15 total through GraphQL.
 - Review loop shape:
   - initial Copilot review generated 3 comments;
@@ -83,6 +85,7 @@ GitHub exposes enough data to measure review-loop friction, review-thread state,
 ### Observed Gaps
 
 - No structured Copilot severity field was visible in the checked REST or GraphQL comment/thread payloads.
+- Public GraphQL schema introspection for `PullRequestReviewComment` did not list any severity-like field, despite the web UI showing a severity badge for at least one Copilot comment.
 - Simple PR metadata does not expose the changed-line count at PR open.
 - Final status rollups do not show the full CI churn history.
 - Some timeline events hide commit details unless additional fields or endpoints are queried.
@@ -95,4 +98,3 @@ GitHub exposes enough data to measure review-loop friction, review-thread state,
 - The analyzer should ingest GraphQL review threads, not only REST comments.
 - Open-vs-merge diff growth should either require stored snapshots collected by a GitHub App at PR-open time or be clearly marked as reconstructed with confidence.
 - Recommendation quality should start with transparent categories: correctness, performance, security/safety, docs accuracy, generated docs, release-log hygiene, test coverage, refactor/duplication, CI/validation, and scope/planning.
-
