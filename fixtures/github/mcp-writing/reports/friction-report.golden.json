@@ -19,8 +19,8 @@
     "cancelledWorkflowRuns": 1,
     "topBottleneckIds": [
       "review-churn",
-      "changed-file-spread",
-      "validation-gap"
+      "repo-guidance-gap",
+      "changed-file-spread"
     ]
   },
   "coverage": {
@@ -184,6 +184,40 @@
       }
     },
     {
+      "id": "repo-guidance-gap",
+      "title": "Repo guidance gap",
+      "metricLabel": "iteration drag",
+      "observedData": [
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 20,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        },
+        {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+          "value": 12,
+          "changedLines": 1207,
+          "reviewThreads": 10,
+          "functionalSurfaces": 6,
+          "coreChangedLines": 514,
+          "lowSignalFiles": 4
+        }
+      ],
+      "inferredDiagnosis": "Repeated review loops suggest some repository expectations are not yet available at implementation time.",
+      "suggestedAction": {
+        "category": "repo_specific_ai_skills",
+        "action": "Add repo-specific AI skills or instructions for repeated review themes before opening the next PR."
+      }
+    },
+    {
       "id": "changed-file-spread",
       "title": "Changed-file spread",
       "metricLabel": "spread score",
@@ -229,6 +263,74 @@
       }
     },
     {
+      "id": "review-surprise",
+      "title": "Review surprise",
+      "metricLabel": "surface surprise score",
+      "observedData": [
+        {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+          "value": 5,
+          "changedLines": 1207,
+          "reviewThreads": 10,
+          "functionalSurfaces": 6,
+          "coreChangedLines": 514,
+          "lowSignalFiles": 4
+        },
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 4,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        }
+      ],
+      "inferredDiagnosis": "Changes spanning several functional surfaces are more likely to surprise reviewers.",
+      "suggestedAction": {
+        "category": "pr_readiness_gate",
+        "action": "Call out multi-surface scope in the PR description or split cross-surface work."
+      }
+    },
+    {
+      "id": "fix-amplification",
+      "title": "Fix amplification",
+      "metricLabel": "post-review commits",
+      "observedData": [
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 5,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        },
+        {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+          "value": 1,
+          "changedLines": 1207,
+          "reviewThreads": 10,
+          "functionalSurfaces": 6,
+          "coreChangedLines": 514,
+          "lowSignalFiles": 4
+        }
+      ],
+      "inferredDiagnosis": "Post-review commits show where initial PR shape did not stay stable.",
+      "suggestedAction": {
+        "category": "smaller_milestones",
+        "action": "Use smaller delivery slices when review feedback causes meaningful post-review change."
+      }
+    },
+    {
       "id": "validation-gap",
       "title": "Validation gap",
       "metricLabel": "validation gap score",
@@ -249,40 +351,6 @@
       "suggestedAction": {
         "category": "preflight_scripts",
         "action": "Add local preflight scripts for recurring CI or workflow interruptions."
-      }
-    },
-    {
-      "id": "repo-guidance-gap",
-      "title": "Repo guidance gap",
-      "metricLabel": "iteration drag",
-      "observedData": [
-        {
-          "number": 239,
-          "title": "feat: resolve scene vocabulary variants",
-          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
-          "value": 20,
-          "changedLines": 1245,
-          "reviewThreads": 15,
-          "functionalSurfaces": 5,
-          "coreChangedLines": 743,
-          "lowSignalFiles": 3
-        },
-        {
-          "number": 221,
-          "title": "feat(backup): apply project restores transactionally",
-          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
-          "value": 12,
-          "changedLines": 1207,
-          "reviewThreads": 10,
-          "functionalSurfaces": 6,
-          "coreChangedLines": 514,
-          "lowSignalFiles": 4
-        }
-      ],
-      "inferredDiagnosis": "Repeated review loops suggest some repository expectations are not yet available at implementation time.",
-      "suggestedAction": {
-        "category": "repo_specific_ai_skills",
-        "action": "Add repo-specific AI skills or instructions for repeated review themes before opening the next PR."
       }
     },
     {
@@ -374,74 +442,6 @@
       "suggestedAction": {
         "category": "planning_artifacts",
         "action": "Improve planning artifacts when planning or scope files are part of high-friction changes."
-      }
-    },
-    {
-      "id": "review-surprise",
-      "title": "Review surprise",
-      "metricLabel": "surface surprise score",
-      "observedData": [
-        {
-          "number": 221,
-          "title": "feat(backup): apply project restores transactionally",
-          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
-          "value": 5,
-          "changedLines": 1207,
-          "reviewThreads": 10,
-          "functionalSurfaces": 6,
-          "coreChangedLines": 514,
-          "lowSignalFiles": 4
-        },
-        {
-          "number": 239,
-          "title": "feat: resolve scene vocabulary variants",
-          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
-          "value": 4,
-          "changedLines": 1245,
-          "reviewThreads": 15,
-          "functionalSurfaces": 5,
-          "coreChangedLines": 743,
-          "lowSignalFiles": 3
-        }
-      ],
-      "inferredDiagnosis": "Changes spanning several functional surfaces are more likely to surprise reviewers.",
-      "suggestedAction": {
-        "category": "pr_readiness_gate",
-        "action": "Call out multi-surface scope in the PR description or split cross-surface work."
-      }
-    },
-    {
-      "id": "fix-amplification",
-      "title": "Fix amplification",
-      "metricLabel": "post-review commits",
-      "observedData": [
-        {
-          "number": 239,
-          "title": "feat: resolve scene vocabulary variants",
-          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
-          "value": 5,
-          "changedLines": 1245,
-          "reviewThreads": 15,
-          "functionalSurfaces": 5,
-          "coreChangedLines": 743,
-          "lowSignalFiles": 3
-        },
-        {
-          "number": 221,
-          "title": "feat(backup): apply project restores transactionally",
-          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
-          "value": 1,
-          "changedLines": 1207,
-          "reviewThreads": 10,
-          "functionalSurfaces": 6,
-          "coreChangedLines": 514,
-          "lowSignalFiles": 4
-        }
-      ],
-      "inferredDiagnosis": "Post-review commits show where initial PR shape did not stay stable.",
-      "suggestedAction": {
-        "category": "smaller_milestones",
-        "action": "Use smaller delivery slices when review feedback causes meaningful post-review change."
       }
     }
   ],

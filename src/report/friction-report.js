@@ -264,9 +264,11 @@ function summarizeCoverage(metricsSummary) {
 
 function summarizeBottlenecks(metricsSummary) {
   return BOTTLENECK_DEFINITIONS
-    .map(definition => {
+    .map((definition, definitionIndex) => {
       const evidence = topEvidence(metricsSummary, definition.rankingKey);
       return {
+        definitionIndex,
+        rankValue: evidence[0]?.value ?? 0,
         id: definition.id,
         title: definition.title,
         metricLabel: definition.metricLabel,
@@ -278,7 +280,12 @@ function summarizeBottlenecks(metricsSummary) {
         },
       };
     })
-    .filter(bottleneck => bottleneck.observedData.length > 0);
+    .filter(bottleneck => bottleneck.observedData.length > 0)
+    .sort((left, right) => {
+      const delta = right.rankValue - left.rankValue;
+      return delta || left.definitionIndex - right.definitionIndex;
+    })
+    .map(({ definitionIndex, rankValue, ...bottleneck }) => bottleneck);
 }
 
 function summarizeRecommendationCategories(bottlenecks) {

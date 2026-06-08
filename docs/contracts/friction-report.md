@@ -29,6 +29,8 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `guardrails`: machine-readable checks that the report avoids individual ranking, separates evidence from inference, and does not use an opaque composite score.
 - `followUp`: non-automated future work suggested by the report.
 
+Bottlenecks are ordered by their strongest observed representative metric value, with stable category order used only to break ties.
+
 ## Markdown Output
 
 The Markdown renderer presents the same report data for human review:

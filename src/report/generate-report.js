@@ -3,6 +3,8 @@ import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
 import { generateRepositoryFrictionReport, renderRepositoryFrictionMarkdown } from "./friction-report.js";
 
+const ALLOWED_OPTIONS = new Set(["metrics-summary", "json-out", "markdown-out"]);
+
 const USAGE = `Usage:
   node src/report/generate-report.js --metrics-summary <path> --json-out <path> --markdown-out <path>
 `;
@@ -18,6 +20,9 @@ function parseArgs(argv) {
       throw new Error(`Unexpected argument: ${arg}`);
     }
     const key = arg.slice(2);
+    if (!ALLOWED_OPTIONS.has(key)) {
+      throw new Error(`Unknown option: ${arg}`);
+    }
     const value = argv[index + 1];
     if (!value || value.startsWith("--")) {
       throw new Error(`Missing value for ${arg}`);

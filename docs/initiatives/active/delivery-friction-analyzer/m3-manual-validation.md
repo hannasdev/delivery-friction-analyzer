@@ -29,4 +29,4 @@ npm run report:fixture
 
 M3 is the final initiative milestone, but this implementation branch must not mark the milestone accepted/completed or move the initiative to a done/completed location before review and merge. Final lifecycle completion is explicitly deferred until conformance review, adversarial review, PR approval, merge, and the post-merge `initiative-completion` check. This branch only marks M3 as implemented.
 
-The strict lifecycle checker is expected to keep blocking before merge because the initiative remains under `docs/initiatives/active/` and the final milestone is not accepted/completed yet.
+The strict lifecycle checker passes before merge because the PRD and milestone docs now expose machine-readable implementation-complete status while explicitly deferring final lifecycle movement until PR merge and post-merge cleanup.

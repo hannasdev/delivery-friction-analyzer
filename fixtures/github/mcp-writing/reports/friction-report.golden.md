@@ -11,7 +11,7 @@ Analysis window: 30 days
 - Non-generated changed lines: 2433
 - Review comments: 30
 - Review threads: 25
-- Top bottlenecks: review-churn, changed-file-spread, validation-gap
+- Top bottlenecks: review-churn, repo-guidance-gap, changed-file-spread
 
 ## Ranked Bottlenecks
 
@@ -24,6 +24,15 @@ Observed data (iteration drag):
 Inferred diagnosis: Review loops are concentrated in a small set of PRs.
 Suggested action: Add or tighten a PR readiness gate for changes that attract repeated review rounds.
 
+### Repo guidance gap
+
+Observed data (iteration drag):
+- PR #239: feat: resolve scene vocabulary variants (20; 1245 changed lines)
+- PR #221: feat(backup): apply project restores transactionally (12; 1207 changed lines)
+
+Inferred diagnosis: Repeated review loops suggest some repository expectations are not yet available at implementation time.
+Suggested action: Add repo-specific AI skills or instructions for repeated review themes before opening the next PR.
+
 ### Changed-file spread
 
 Observed data (spread score):
@@ -34,6 +43,24 @@ Observed data (spread score):
 Inferred diagnosis: Broad file and surface spread can hide review and validation risk.
 Suggested action: Break broad changes into smaller milestones when core files, directories, or surfaces spread out.
 
+### Review surprise
+
+Observed data (surface surprise score):
+- PR #221: feat(backup): apply project restores transactionally (5; 1207 changed lines)
+- PR #239: feat: resolve scene vocabulary variants (4; 1245 changed lines)
+
+Inferred diagnosis: Changes spanning several functional surfaces are more likely to surprise reviewers.
+Suggested action: Call out multi-surface scope in the PR description or split cross-surface work.
+
+### Fix amplification
+
+Observed data (post-review commits):
+- PR #239: feat: resolve scene vocabulary variants (5; 1245 changed lines)
+- PR #221: feat(backup): apply project restores transactionally (1; 1207 changed lines)
+
+Inferred diagnosis: Post-review commits show where initial PR shape did not stay stable.
+Suggested action: Use smaller delivery slices when review feedback causes meaningful post-review change.
+
 ### Validation gap
 
 Observed data (validation gap score):
@@ -41,15 +68,6 @@ Observed data (validation gap score):
 
 Inferred diagnosis: Validation friction appears where checks, workflows, or cancellations add corrective loops.
 Suggested action: Add local preflight scripts for recurring CI or workflow interruptions.
-
-### Repo guidance gap
-
-Observed data (iteration drag):
-- PR #239: feat: resolve scene vocabulary variants (20; 1245 changed lines)
-- PR #221: feat(backup): apply project restores transactionally (12; 1207 changed lines)
-
-Inferred diagnosis: Repeated review loops suggest some repository expectations are not yet available at implementation time.
-Suggested action: Add repo-specific AI skills or instructions for repeated review themes before opening the next PR.
 
 ### Local hook gap
 
@@ -76,24 +94,6 @@ Observed data (planning gap score):
 
 Inferred diagnosis: Planning-related changes show up in the same PRs as delivery friction.
 Suggested action: Improve planning artifacts when planning or scope files are part of high-friction changes.
-
-### Review surprise
-
-Observed data (surface surprise score):
-- PR #221: feat(backup): apply project restores transactionally (5; 1207 changed lines)
-- PR #239: feat: resolve scene vocabulary variants (4; 1245 changed lines)
-
-Inferred diagnosis: Changes spanning several functional surfaces are more likely to surprise reviewers.
-Suggested action: Call out multi-surface scope in the PR description or split cross-surface work.
-
-### Fix amplification
-
-Observed data (post-review commits):
-- PR #239: feat: resolve scene vocabulary variants (5; 1245 changed lines)
-- PR #221: feat(backup): apply project restores transactionally (1; 1207 changed lines)
-
-Inferred diagnosis: Post-review commits show where initial PR shape did not stay stable.
-Suggested action: Use smaller delivery slices when review feedback causes meaningful post-review change.
 
 ## Recommendation Categories
 
