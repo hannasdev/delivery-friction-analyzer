@@ -62,8 +62,8 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 
 ### Status
 
-- [x] Not started
-- [ ] Implemented
+- [ ] Not started
+- [x] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened

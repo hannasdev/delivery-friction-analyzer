@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://delivery-friction-analyzer.local/schemas/normalized-entities.schema.json",
+  "title": "NormalizedFixtureBundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "targetRepository", "languageDistribution", "pullRequests"],
+  "properties": {
+    "schemaVersion": { "const": "normalized-fixture.v1" },
+    "targetRepository": { "$ref": "target-repository.schema.json" },
+    "languageDistribution": {
+      "type": "object",
+      "required": ["source", "bytesByLanguage"],
+      "properties": {
+        "source": { "const": "rest:/repos/{owner}/{repo}/languages" },
+        "bytesByLanguage": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "pullRequests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "number",
+          "title",
+          "url",
+          "state",
+          "lifecycle",
+          "commits",
+          "diffAtMerge",
+          "files",
+          "reviews",
+          "reviewThreads",
+          "reviewComments",
+          "checkRuns"
+        ],
+        "properties": {
+          "number": { "type": "integer" },
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "state": { "enum": ["OPEN", "CLOSED", "MERGED"] },
+          "lifecycle": { "type": "object" },
+          "commits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["oid", "authoredDate", "committedDate", "messageHeadline"],
+              "properties": {
+                "oid": { "type": "string" },
+                "authoredDate": { "type": ["string", "null"] },
+                "committedDate": { "type": ["string", "null"] },
+                "messageHeadline": { "type": ["string", "null"] }
+              }
+            }
+          },
+          "diffAtMerge": { "type": "object" },
+          "prOpenDiff": { "type": "object" },
+          "files": { "type": "array" },
+          "reviews": { "type": "array" },
+          "reviewThreads": { "type": "object" },
+          "reviewComments": { "type": "object" },
+          "checkRuns": { "type": "array" },
+          "workflowRuns": { "type": "object" }
+        }
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 ## Status
 
-- State: Backlog
+- State: Active
 - Owner: Hanna
 - Created: 2026-06-08
 - Related docs:
