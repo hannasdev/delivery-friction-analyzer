@@ -31,7 +31,19 @@ export function validateTargetRepository(input, { productRepository } = {}) {
     errors.push("visibility must be public, private, or unknown.");
   }
 
-  if (productRepository && input.owner === productRepository.owner && input.name === productRepository.name) {
+  const normalizedInputOwner = typeof input.owner === "string" ? input.owner.toLowerCase() : null;
+  const normalizedInputName = typeof input.name === "string" ? input.name.toLowerCase() : null;
+  const normalizedProductOwner = typeof productRepository?.owner === "string" ? productRepository.owner.toLowerCase() : null;
+  const normalizedProductName = typeof productRepository?.name === "string" ? productRepository.name.toLowerCase() : null;
+
+  if (
+    normalizedInputOwner
+    && normalizedInputName
+    && normalizedProductOwner
+    && normalizedProductName
+    && normalizedInputOwner === normalizedProductOwner
+    && normalizedInputName === normalizedProductName
+  ) {
     errors.push("target repository must be distinct from the product repository.");
   }
 

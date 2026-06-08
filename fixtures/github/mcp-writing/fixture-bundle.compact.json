@@ -44,6 +44,7 @@
     {
       "number": 223,
       "title": "docs: accept architecture snapshot milestone",
+      "author": { "login": "hannasdev" },
       "url": "https://github.com/hannasdev/mcp-writing/pull/223",
       "state": "MERGED",
       "createdAt": "2026-05-28T14:38:07Z",
@@ -95,6 +96,7 @@
     {
       "number": 239,
       "title": "feat: resolve scene vocabulary variants",
+      "author": { "login": "hannasdev" },
       "url": "https://github.com/hannasdev/mcp-writing/pull/239",
       "state": "MERGED",
       "createdAt": "2026-06-07T13:54:12Z",
@@ -177,6 +179,7 @@
     {
       "number": 221,
       "title": "feat(backup): apply project restores transactionally",
+      "author": { "login": "hannasdev" },
       "url": "https://github.com/hannasdev/mcp-writing/pull/221",
       "state": "MERGED",
       "createdAt": "2026-05-25T14:50:29Z",

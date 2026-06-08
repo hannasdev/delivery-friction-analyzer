@@ -46,6 +46,50 @@ describe("target repository contract", () => {
     assert(errors.some(error => error.includes("distinct from the product repository")));
   });
 
+  it("rejects product repository matches case-insensitively", () => {
+    const errors = validateTargetRepository(
+      {
+        owner: "HannasDev",
+        name: "Delivery-Friction-Analyzer",
+        defaultBranch: "main",
+        visibility: "public",
+        analysisWindowDays: 30,
+      },
+      {
+        productRepository: {
+          owner: "hannasdev",
+          name: "delivery-friction-analyzer",
+        },
+      },
+    );
+
+    assert(errors.some(error => error.includes("distinct from the product repository")));
+  });
+
+  it("reports malformed owner and name without throwing during product repository comparison", () => {
+    let errors;
+    assert.doesNotThrow(() => {
+      errors = validateTargetRepository(
+        {
+          owner: null,
+          name: 42,
+          defaultBranch: "main",
+          visibility: "public",
+          analysisWindowDays: 30,
+        },
+        {
+          productRepository: {
+            owner: "hannasdev",
+            name: "delivery-friction-analyzer",
+          },
+        },
+      );
+    });
+
+    assert(errors.some(error => error.includes("owner must be a GitHub owner/name segment")));
+    assert(errors.some(error => error.includes("name must be a GitHub owner/name segment")));
+  });
+
   it("rejects malformed analysis windows and branch names", () => {
     const errors = validateTargetRepository({
       owner: "hannasdev",

@@ -48,7 +48,11 @@ describe("comment source classification", () => {
     assert.equal(classifyCommentSource({ login: "github-actions[bot]", type: "Bot" }), "github_actions_bot");
     assert.equal(classifyCommentSource({ login: "dependabot[bot]", type: "Bot" }), "dependency_bot");
     assert.equal(classifyCommentSource({ login: "github-code-scanning", type: "Bot" }), "code_scanning");
-    assert.equal(classifyCommentSource({ login: "hannasdev", type: "User" }), "human_reviewer");
+    assert.equal(classifyCommentSource({ login: "reviewer", type: "User" }), "human_reviewer");
+    assert.equal(
+      classifyCommentSource({ login: "hannasdev", type: "User" }, { pullRequestAuthorLogin: "hannasdev" }),
+      "author_reply",
+    );
     assert.equal(classifyCommentSource({ login: "some-review-bot", type: "Bot" }), "unknown_bot");
   });
 });

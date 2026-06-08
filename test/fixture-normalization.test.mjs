@@ -36,6 +36,7 @@ describe("mcp-writing compact fixture normalization", () => {
     const pr221 = normalized.pullRequests.find(pr => pr.number === 221);
 
     assert.equal(normalized.targetRepository.owner, "hannasdev");
+    assert.equal(pr239.authorLogin, "hannasdev");
     assert.equal(pr239.lifecycle.firstCommitAt, "2026-06-07T13:31:13Z");
     assert.equal(pr239.commits.length, 7);
     assert.deepEqual(pr239.commits[0], {
@@ -47,7 +48,8 @@ describe("mcp-writing compact fixture normalization", () => {
     assert.equal(pr239.reviewThreads.totalCount, 15);
     assert.equal(pr239.reviewThreads.resolvedCount, 15);
     assert.equal(pr239.reviewComments.bySource.copilot, 15);
-    assert.equal(pr239.reviewComments.bySource.human_reviewer, 15);
+    assert.equal(pr239.reviewComments.bySource.author_reply, 15);
+    assert.equal(pr239.reviewComments.bySource.human_reviewer, 0);
     assert.equal(pr239.workflowRuns.totalCount, 9);
     assert.equal(pr239.workflowRuns.conclusions.cancelled, 1);
     assert.equal(pr239.prOpenDiff.source, "unavailable");

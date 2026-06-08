@@ -10,6 +10,7 @@
     "targetRepository": { "$ref": "target-repository.schema.json" },
     "languageDistribution": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["source", "bytesByLanguage"],
       "properties": {
         "source": { "const": "rest:/repos/{owner}/{repo}/languages" },
@@ -23,26 +24,42 @@
       "type": "array",
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "number",
           "title",
+          "authorLogin",
           "url",
           "state",
           "lifecycle",
           "commits",
           "diffAtMerge",
+          "prOpenDiff",
           "files",
           "reviews",
           "reviewThreads",
           "reviewComments",
-          "checkRuns"
+          "checkRuns",
+          "workflowRuns"
         ],
         "properties": {
           "number": { "type": "integer" },
           "title": { "type": "string" },
+          "authorLogin": { "type": ["string", "null"] },
           "url": { "type": "string" },
           "state": { "enum": ["OPEN", "CLOSED", "MERGED"] },
-          "lifecycle": { "type": "object" },
+          "lifecycle": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["createdAt", "mergedAt", "firstCommitAt", "firstReviewAt", "lastReviewAt"],
+            "properties": {
+              "createdAt": { "type": ["string", "null"] },
+              "mergedAt": { "type": ["string", "null"] },
+              "firstCommitAt": { "type": ["string", "null"] },
+              "firstReviewAt": { "type": ["string", "null"] },
+              "lastReviewAt": { "type": ["string", "null"] }
+            }
+          },
           "commits": {
             "type": "array",
             "items": {
@@ -57,14 +74,180 @@
               }
             }
           },
-          "diffAtMerge": { "type": "object" },
-          "prOpenDiff": { "type": "object" },
-          "files": { "type": "array" },
-          "reviews": { "type": "array" },
-          "reviewThreads": { "type": "object" },
-          "reviewComments": { "type": "object" },
-          "checkRuns": { "type": "array" },
-          "workflowRuns": { "type": "object" }
+          "diffAtMerge": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["additions", "deletions", "changedFiles"],
+            "properties": {
+              "additions": { "type": "integer", "minimum": 0 },
+              "deletions": { "type": "integer", "minimum": 0 },
+              "changedFiles": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "prOpenDiff": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source", "confidence"],
+            "properties": {
+              "source": { "enum": ["direct", "reconstructed", "snapshot_only", "unavailable"] },
+              "confidence": { "type": "string" }
+            }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "category",
+                "role",
+                "functionalSurface",
+                "generated",
+                "classificationSource",
+                "ruleId",
+                "additions",
+                "deletions",
+                "changeType"
+              ],
+              "properties": {
+                "path": { "type": "string" },
+                "category": { "enum": ["code", "tests", "docs", "config", "generated", "infrastructure", "unknown"] },
+                "role": {
+                  "enum": [
+                    "core_product_code",
+                    "product_ui",
+                    "tests",
+                    "generated_docs",
+                    "release_notes",
+                    "planning_docs",
+                    "marketing_site",
+                    "config",
+                    "infrastructure",
+                    "fixtures",
+                    "generated_or_vendored",
+                    "unknown"
+                  ]
+                },
+                "functionalSurface": { "type": "string" },
+                "generated": { "type": "boolean" },
+                "classificationSource": { "enum": ["repository_profile", "fallback_rule"] },
+                "ruleId": { "type": ["string", "null"] },
+                "additions": { "type": "integer", "minimum": 0 },
+                "deletions": { "type": "integer", "minimum": 0 },
+                "changeType": { "type": "string" }
+              }
+            }
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "submittedAt",
+                "state",
+                "commitOid",
+                "source",
+                "generatedCommentCount",
+                "failedAttempt"
+              ],
+              "properties": {
+                "id": { "type": "string" },
+                "submittedAt": { "type": ["string", "null"] },
+                "state": { "type": ["string", "null"] },
+                "commitOid": { "type": ["string", "null"] },
+                "source": {
+                  "enum": [
+                    "copilot",
+                    "human_reviewer",
+                    "author_reply",
+                    "github_actions_bot",
+                    "dependency_bot",
+                    "code_scanning",
+                    "unknown_bot",
+                    "unknown"
+                  ]
+                },
+                "generatedCommentCount": { "type": ["integer", "null"], "minimum": 0 },
+                "failedAttempt": { "type": "boolean" }
+              }
+            }
+          },
+          "reviewThreads": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source", "totalCount", "resolvedCount", "outdatedCount"],
+            "properties": {
+              "source": { "type": "string" },
+              "totalCount": { "type": "integer", "minimum": 0 },
+              "resolvedCount": { "type": "integer", "minimum": 0 },
+              "outdatedCount": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "reviewComments": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["totalCount", "bySource"],
+            "properties": {
+              "totalCount": { "type": "integer", "minimum": 0 },
+              "bySource": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "copilot",
+                  "human_reviewer",
+                  "author_reply",
+                  "github_actions_bot",
+                  "dependency_bot",
+                  "code_scanning",
+                  "unknown_bot",
+                  "unknown"
+                ],
+                "properties": {
+                  "copilot": { "type": "integer", "minimum": 0 },
+                  "human_reviewer": { "type": "integer", "minimum": 0 },
+                  "author_reply": { "type": "integer", "minimum": 0 },
+                  "github_actions_bot": { "type": "integer", "minimum": 0 },
+                  "dependency_bot": { "type": "integer", "minimum": 0 },
+                  "code_scanning": { "type": "integer", "minimum": 0 },
+                  "unknown_bot": { "type": "integer", "minimum": 0 },
+                  "unknown": { "type": "integer", "minimum": 0 }
+                }
+              }
+            }
+          },
+          "checkRuns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "name", "workflowName", "status", "conclusion", "startedAt", "completedAt"],
+              "properties": {
+                "source": { "enum": ["check_run", "status_context"] },
+                "name": { "type": ["string", "null"] },
+                "workflowName": { "type": ["string", "null"] },
+                "status": { "type": ["string", "null"] },
+                "conclusion": { "type": ["string", "null"] },
+                "startedAt": { "type": ["string", "null"] },
+                "completedAt": { "type": ["string", "null"] }
+              }
+            }
+          },
+          "workflowRuns": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source", "totalCount", "conclusions"],
+            "properties": {
+              "source": { "type": "string" },
+              "totalCount": { "type": ["integer", "null"], "minimum": 0 },
+              "conclusions": {
+                "type": "object",
+                "additionalProperties": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
         }
       }
     }

@@ -52,6 +52,7 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
       title: pr.title,
       url: pr.url,
       state: pr.state,
+      authorLogin: pr.author?.login ?? null,
       lifecycle: {
         createdAt: pr.createdAt,
         mergedAt: pr.mergedAt ?? null,
@@ -81,7 +82,7 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
       },
       reviewComments: {
         totalCount: threadComments.length,
-        bySource: groupByCommentSource(threadComments),
+        bySource: groupByCommentSource(threadComments, { pullRequestAuthorLogin: pr.author?.login }),
       },
       checkRuns: (pr.statusCheckRollup ?? []).map(check => ({
         source: check.__typename === "StatusContext" ? "status_context" : "check_run",
