@@ -248,7 +248,7 @@ function componentMetric(value, inputs) {
 
 function summarizeComponents({ pr, comments, files, checks, iteration, diffGrowth, changedLines, reviewThreads }) {
   const validationFailures = checks.checkRuns.failedCount + checks.workflowRuns.failedCount + checks.workflowRuns.cancelledCount;
-  const postReviewCommits = iteration.commitsAfterFirstReview ?? 0;
+  const postReviewCommits = iteration.commitsAfterFirstReview;
   const planningLines = (pr.files ?? []).filter(file => file.role === "planning_docs").reduce((sum, file) => sum + linesOf(file), 0);
   const nonCoreSurfaces = Math.max(files.functionalSurfaces - 1, 0);
   const reviewThreadCount = reviewThreads.totalCount ?? 0;
@@ -264,7 +264,7 @@ function summarizeComponents({ pr, comments, files, checks, iteration, diffGrowt
       nonGeneratedChangedLines: files.nonGeneratedChangedLines,
       linesBySurface: files.byFunctionalSurface,
     }),
-    iterationDrag: componentMetric(postReviewCommits + reviewThreadCount + iteration.failedReviewAttempts, {
+    iterationDrag: componentMetric(postReviewCommits === null ? null : postReviewCommits + reviewThreadCount + iteration.failedReviewAttempts, {
       commitsAfterFirstReview: iteration.commitsAfterFirstReview,
       reviewThreads: reviewThreadCount,
       failedReviewAttempts: iteration.failedReviewAttempts,

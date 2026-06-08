@@ -248,9 +248,13 @@ describe("friction metric formulas", () => {
     }));
 
     assert.equal(noReviewMetrics.iteration.commitsAfterFirstReview, 0);
+    assert.equal(noReviewMetrics.components.iterationDrag.value, 0);
     assert.equal(noReviewMetrics.components.iterationDrag.inputs.commitsAfterFirstReview, 0);
+    assert.equal(noReviewMetrics.components.fixAmplification.value, 0);
     assert.equal(missingTimestampMetrics.iteration.commitsAfterFirstReview, null);
+    assert.equal(missingTimestampMetrics.components.iterationDrag.value, null);
     assert.equal(missingTimestampMetrics.components.iterationDrag.inputs.commitsAfterFirstReview, null);
+    assert.equal(missingTimestampMetrics.components.fixAmplification.value, null);
   });
 });
 

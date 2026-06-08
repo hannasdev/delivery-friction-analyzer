@@ -88,6 +88,26 @@
             "type": "object",
             "additionalProperties": false,
             "required": ["source", "confidence"],
+            "allOf": [
+              {
+                "if": {
+                  "type": "object",
+                  "required": ["source"],
+                  "properties": {
+                    "source": { "enum": ["snapshot_only", "unavailable"] }
+                  }
+                },
+                "then": {
+                  "not": {
+                    "anyOf": [
+                      { "required": ["additions"] },
+                      { "required": ["deletions"] },
+                      { "required": ["changedFiles"] }
+                    ]
+                  }
+                }
+              }
+            ],
             "properties": {
               "source": { "enum": ["direct", "reconstructed", "snapshot_only", "unavailable"] },
               "confidence": { "type": "string" },

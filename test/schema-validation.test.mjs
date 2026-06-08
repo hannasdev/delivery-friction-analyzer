@@ -32,6 +32,29 @@ function validateSchema(value, schema, schemas, path = "$") {
   }
 
   const errors = [];
+  if (schema.allOf) {
+    for (const childSchema of schema.allOf) {
+      errors.push(...validateSchema(value, childSchema, schemas, path));
+    }
+  }
+  if (schema.anyOf) {
+    const childErrors = schema.anyOf.map(childSchema => validateSchema(value, childSchema, schemas, path));
+    if (childErrors.every(result => result.length > 0)) {
+      errors.push(`${path} must match at least one allowed schema`);
+    }
+  }
+  if (schema.not && validateSchema(value, schema.not, schemas, path).length === 0) {
+    errors.push(`${path} must not match disallowed schema`);
+  }
+  if (schema.if) {
+    const conditionMatches = validateSchema(value, schema.if, schemas, path).length === 0;
+    if (conditionMatches && schema.then) {
+      errors.push(...validateSchema(value, schema.then, schemas, path));
+    }
+    if (!conditionMatches && schema.else) {
+      errors.push(...validateSchema(value, schema.else, schemas, path));
+    }
+  }
   if (schema.const !== undefined && value !== schema.const) {
     errors.push(`${path} must equal ${JSON.stringify(schema.const)}`);
   }
@@ -56,7 +79,11 @@ function validateSchema(value, schema, schemas, path = "$") {
       errors.push(`${path} must match ${schema.pattern}`);
     }
   }
-  if (schema.type === "object" && value && typeof value === "object" && !Array.isArray(value)) {
+  const shouldValidateObjectShape = (schema.type === "object" || schema.required || schema.properties || schema.additionalProperties)
+    && value
+    && typeof value === "object"
+    && !Array.isArray(value);
+  if (shouldValidateObjectShape) {
     for (const key of schema.required ?? []) {
       if (!(key in value)) errors.push(`${path}.${key} is required`);
     }
@@ -156,6 +183,29 @@ describe("normalized entity schema", () => {
     assert.equal(metrics.coverage.prOpenDiff.status, "computed");
     assert.equal(metrics.components.diffGrowthRatio.value, 2);
     assert.equal(metrics.components.diffGrowthRatio.inputs.changedFileGrowthRatio, 1);
+  });
+
+  it("rejects unavailable PR-open diff counts", async () => {
+    const [bundle, profile, normalizedSchema, targetSchema] = await Promise.all([
+      readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),
+      readJson("../fixtures/github/mcp-writing/profile.json"),
+      readJson("../schemas/normalized-entities.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const normalized = normalizeFixtureBundle(bundle, { repositoryProfile: profile });
+    normalized.pullRequests[0].prOpenDiff = {
+      source: "unavailable",
+      confidence: "unavailable",
+      additions: 1,
+      deletions: 0,
+      changedFiles: 1,
+    };
+
+    const errors = validateSchema(normalized, normalizedSchema, {
+      "target-repository.schema.json": targetSchema,
+    });
+
+    assert(errors.some(error => error.includes("$.pullRequests[0].prOpenDiff must not match disallowed schema")));
   });
 
   it("reports unresolved schema references without throwing", async () => {
