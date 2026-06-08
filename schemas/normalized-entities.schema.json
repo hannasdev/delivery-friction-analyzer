@@ -92,6 +92,19 @@
               {
                 "if": {
                   "type": "object",
+                  "anyOf": [
+                    { "required": ["additions"] },
+                    { "required": ["deletions"] },
+                    { "required": ["changedFiles"] }
+                  ]
+                },
+                "then": {
+                  "required": ["additions", "deletions", "changedFiles"]
+                }
+              },
+              {
+                "if": {
+                  "type": "object",
                   "required": ["source"],
                   "properties": {
                     "source": { "enum": ["snapshot_only", "unavailable"] }

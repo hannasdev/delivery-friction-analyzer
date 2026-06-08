@@ -208,6 +208,28 @@ describe("normalized entity schema", () => {
     assert(errors.some(error => error.includes("$.pullRequests[0].prOpenDiff must not match disallowed schema")));
   });
 
+  it("rejects partial PR-open diff counts", async () => {
+    const [bundle, profile, normalizedSchema, targetSchema] = await Promise.all([
+      readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),
+      readJson("../fixtures/github/mcp-writing/profile.json"),
+      readJson("../schemas/normalized-entities.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const normalized = normalizeFixtureBundle(bundle, { repositoryProfile: profile });
+    normalized.pullRequests[0].prOpenDiff = {
+      source: "direct",
+      confidence: "high",
+      additions: 1,
+    };
+
+    const errors = validateSchema(normalized, normalizedSchema, {
+      "target-repository.schema.json": targetSchema,
+    });
+
+    assert(errors.some(error => error.includes("$.pullRequests[0].prOpenDiff.deletions is required")));
+    assert(errors.some(error => error.includes("$.pullRequests[0].prOpenDiff.changedFiles is required")));
+  });
+
   it("reports unresolved schema references without throwing", async () => {
     assert.deepEqual(
       validateSchema({}, { $ref: "missing.schema.json" }, {}),
