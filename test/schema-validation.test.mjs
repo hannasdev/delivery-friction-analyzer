@@ -37,6 +37,15 @@ function validateSchema(value, schema, schemas, path = "$") {
     if (schema.minimum !== undefined && value < schema.minimum) {
       errors.push(`${path} must be >= ${schema.minimum}`);
     }
+    if (schema.maximum !== undefined && value > schema.maximum) {
+      errors.push(`${path} must be <= ${schema.maximum}`);
+    }
+  }
+  if (typeof value === "string" && schema.pattern) {
+    const pattern = new RegExp(schema.pattern);
+    if (!pattern.test(value)) {
+      errors.push(`${path} must match ${schema.pattern}`);
+    }
   }
   if (schema.type === "object" && value && typeof value === "object" && !Array.isArray(value)) {
     for (const key of schema.required ?? []) {
@@ -92,5 +101,24 @@ describe("normalized entity schema", () => {
     });
 
     assert(errors.some(error => error.includes("$.pullRequests[0].commits is required")));
+  });
+
+  it("enforces referenced schema maximum and pattern constraints", async () => {
+    const [bundle, profile, normalizedSchema, targetSchema] = await Promise.all([
+      readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),
+      readJson("../fixtures/github/mcp-writing/profile.json"),
+      readJson("../schemas/normalized-entities.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const normalized = normalizeFixtureBundle(bundle, { repositoryProfile: profile });
+    normalized.targetRepository.owner = "bad owner";
+    normalized.targetRepository.analysisWindowDays = 366;
+
+    const errors = validateSchema(normalized, normalizedSchema, {
+      "target-repository.schema.json": targetSchema,
+    });
+
+    assert(errors.some(error => error.includes("$.targetRepository.owner must match")));
+    assert(errors.some(error => error.includes("$.targetRepository.analysisWindowDays must be <= 365")));
   });
 });

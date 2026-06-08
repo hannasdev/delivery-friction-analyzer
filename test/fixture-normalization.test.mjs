@@ -77,4 +77,17 @@ describe("mcp-writing compact fixture normalization", () => {
     assert.equal(pr221.reviews.filter(review => review.failedAttempt).length, 1);
     assert.equal(pr221.reviews.reduce((sum, review) => sum + review.generatedCommentCount, 0), 10);
   });
+
+  it("normalizes missing check-run names to null", async () => {
+    const [bundle, profile] = await Promise.all([
+      readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),
+      readJson("../fixtures/github/mcp-writing/profile.json"),
+    ]);
+    const bundleWithUnnamedCheck = structuredClone(bundle);
+    bundleWithUnnamedCheck.pullRequests[0].statusCheckRollup = [{ __typename: "CheckRun", status: "COMPLETED" }];
+
+    const normalized = normalizeFixtureBundle(bundleWithUnnamedCheck, { repositoryProfile: profile });
+
+    assert.equal(normalized.pullRequests[0].checkRuns[0].name, null);
+  });
 });

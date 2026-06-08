@@ -86,7 +86,7 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
       },
       checkRuns: (pr.statusCheckRollup ?? []).map(check => ({
         source: check.__typename === "StatusContext" ? "status_context" : "check_run",
-        name: check.name ?? check.context,
+        name: check.name ?? check.context ?? null,
         workflowName: check.workflowName ?? null,
         status: check.status ?? check.state ?? null,
         conclusion: check.conclusion ?? check.state ?? null,

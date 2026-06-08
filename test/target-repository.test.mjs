@@ -102,4 +102,18 @@ describe("target repository contract", () => {
     assert(errors.some(error => error.includes("defaultBranch")));
     assert(errors.some(error => error.includes("analysisWindowDays")));
   });
+
+  it("rejects non-boolean validation target flags", () => {
+    const result = normalizeTargetRepository({
+      owner: "hannasdev",
+      name: "mcp-writing",
+      defaultBranch: "main",
+      visibility: "public",
+      analysisWindowDays: 30,
+      isValidationTarget: "false",
+    });
+
+    assert.equal(result.ok, false);
+    assert(result.errors.some(error => error.includes("isValidationTarget must be a boolean")));
+  });
 });

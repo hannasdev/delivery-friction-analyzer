@@ -31,6 +31,10 @@ export function validateTargetRepository(input, { productRepository } = {}) {
     errors.push("visibility must be public, private, or unknown.");
   }
 
+  if (input.isValidationTarget !== undefined && typeof input.isValidationTarget !== "boolean") {
+    errors.push("isValidationTarget must be a boolean when provided.");
+  }
+
   const normalizedInputOwner = typeof input.owner === "string" ? input.owner.toLowerCase() : null;
   const normalizedInputName = typeof input.name === "string" ? input.name.toLowerCase() : null;
   const normalizedProductOwner = typeof productRepository?.owner === "string" ? productRepository.owner.toLowerCase() : null;
@@ -65,7 +69,7 @@ export function normalizeTargetRepository(input, options = {}) {
       defaultBranch: input.defaultBranch,
       visibility: input.visibility,
       analysisWindowDays: input.analysisWindowDays,
-      isValidationTarget: Boolean(input.isValidationTarget),
+      isValidationTarget: input.isValidationTarget ?? false,
     },
   };
 }
