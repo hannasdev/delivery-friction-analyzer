@@ -1,0 +1,878 @@
+{
+  "metricVersion": "friction-metrics.v1",
+  "targetRepository": {
+    "owner": "hannasdev",
+    "name": "mcp-writing",
+    "defaultBranch": "main",
+    "visibility": "public",
+    "analysisWindowDays": 30,
+    "isValidationTarget": true
+  },
+  "totals": {
+    "pullRequests": 3,
+    "changedLines": 2454,
+    "nonGeneratedChangedLines": 2433,
+    "reviewComments": 30,
+    "reviewThreads": 25,
+    "failedChecks": 0,
+    "cancelledWorkflowRuns": 1
+  },
+  "rankings": {
+    "reviewChurn": [
+      {
+        "number": 239,
+        "title": "feat: resolve scene vocabulary variants",
+        "value": 20
+      },
+      {
+        "number": 221,
+        "title": "feat(backup): apply project restores transactionally",
+        "value": 12
+      },
+      {
+        "number": 223,
+        "title": "docs: accept architecture snapshot milestone",
+        "value": 0
+      }
+    ],
+    "changedFileSpread": [
+      {
+        "number": 221,
+        "title": "feat(backup): apply project restores transactionally",
+        "value": 17
+      },
+      {
+        "number": 239,
+        "title": "feat: resolve scene vocabulary variants",
+        "value": 16
+      },
+      {
+        "number": 223,
+        "title": "docs: accept architecture snapshot milestone",
+        "value": 2
+      }
+    ],
+    "validationGap": [
+      {
+        "number": 239,
+        "title": "feat: resolve scene vocabulary variants",
+        "value": 1
+      },
+      {
+        "number": 221,
+        "title": "feat(backup): apply project restores transactionally",
+        "value": 0
+      },
+      {
+        "number": 223,
+        "title": "docs: accept architecture snapshot milestone",
+        "value": 0
+      }
+    ],
+    "planningGap": [
+      {
+        "number": 221,
+        "title": "feat(backup): apply project restores transactionally",
+        "value": 1
+      },
+      {
+        "number": 223,
+        "title": "docs: accept architecture snapshot milestone",
+        "value": 1
+      },
+      {
+        "number": 239,
+        "title": "feat: resolve scene vocabulary variants",
+        "value": 1
+      }
+    ],
+    "reviewSurprise": [
+      {
+        "number": 221,
+        "title": "feat(backup): apply project restores transactionally",
+        "value": 5
+      },
+      {
+        "number": 239,
+        "title": "feat: resolve scene vocabulary variants",
+        "value": 4
+      },
+      {
+        "number": 223,
+        "title": "docs: accept architecture snapshot milestone",
+        "value": 0
+      }
+    ],
+    "fixAmplification": [
+      {
+        "number": 239,
+        "title": "feat: resolve scene vocabulary variants",
+        "value": 5
+      },
+      {
+        "number": 221,
+        "title": "feat(backup): apply project restores transactionally",
+        "value": 1
+      },
+      {
+        "number": 223,
+        "title": "docs: accept architecture snapshot milestone",
+        "value": 0
+      }
+    ]
+  },
+  "pullRequests": [
+    {
+      "metricVersion": "friction-metrics.v1",
+      "number": 223,
+      "title": "docs: accept architecture snapshot milestone",
+      "url": "https://github.com/hannasdev/mcp-writing/pull/223",
+      "state": "MERGED",
+      "coverage": {
+        "prOpenDiff": {
+          "source": "unavailable",
+          "confidence": "unavailable",
+          "status": "unavailable"
+        },
+        "reviewThreads": {
+          "source": "not_sampled_low_friction"
+        },
+        "workflowRuns": {
+          "source": "unavailable",
+          "status": "unavailable"
+        }
+      },
+      "diffAtMerge": {
+        "additions": 1,
+        "deletions": 1,
+        "changedFiles": 1,
+        "changedLines": 2
+      },
+      "files": {
+        "allFiles": 1,
+        "nonGeneratedFiles": 1,
+        "coreFiles": 0,
+        "lowSignalFiles": 1,
+        "directories": 1,
+        "functionalSurfaces": 1,
+        "changedLines": 2,
+        "nonGeneratedChangedLines": 2,
+        "coreChangedLines": 0,
+        "weightedChangedLines": 0.5,
+        "linesPerNonGeneratedFile": 2,
+        "smallDiffWideSpread": false,
+        "byCategory": {
+          "docs": 2
+        },
+        "byRole": {
+          "planning_docs": 2
+        },
+        "byFunctionalSurface": {
+          "planning": 2
+        },
+        "classificationSources": {
+          "repository_profile": 1
+        },
+        "formulaInputs": {
+          "lowSignalRoleWeight": 0.25,
+          "lowSignalRoles": [
+            "fixtures",
+            "generated_docs",
+            "generated_or_vendored",
+            "marketing_site",
+            "planning_docs",
+            "release_notes"
+          ],
+          "coreRoles": [
+            "core_product_code",
+            "product_ui"
+          ],
+          "smallDiffWideSpread": {
+            "maxCoreChangedLines": 600,
+            "minCoreFiles": 3
+          }
+        }
+      },
+      "review": {
+        "comments": {
+          "totalCount": 0,
+          "bySource": {
+            "copilot": 0,
+            "human_reviewer": 0,
+            "author_reply": 0,
+            "github_actions_bot": 0,
+            "dependency_bot": 0,
+            "code_scanning": 0,
+            "unknown_bot": 0,
+            "unknown": 0
+          },
+          "densityPer100ChangedLines": {
+            "copilot": 0,
+            "human_reviewer": 0,
+            "author_reply": 0,
+            "github_actions_bot": 0,
+            "dependency_bot": 0,
+            "code_scanning": 0,
+            "unknown_bot": 0,
+            "unknown": 0
+          },
+          "densityPerChangedFile": {
+            "copilot": 0,
+            "human_reviewer": 0,
+            "author_reply": 0,
+            "github_actions_bot": 0,
+            "dependency_bot": 0,
+            "code_scanning": 0,
+            "unknown_bot": 0,
+            "unknown": 0
+          }
+        },
+        "threads": {
+          "source": "not_sampled_low_friction",
+          "totalCount": 0,
+          "resolvedCount": 0,
+          "outdatedCount": 0
+        }
+      },
+      "ci": {
+        "checkRuns": {
+          "totalCount": 5,
+          "successfulCount": 5,
+          "failedCount": 0,
+          "byConclusion": {
+            "success": 5
+          }
+        },
+        "workflowRuns": {
+          "source": "unavailable",
+          "totalCount": null,
+          "conclusions": {},
+          "failedCount": 0,
+          "cancelledCount": 0,
+          "coverage": "unavailable"
+        }
+      },
+      "lifecycle": {
+        "timeToFirstReviewHours": 0.02,
+        "timeToMergeHours": 0.02,
+        "reviewWindowHours": 0
+      },
+      "iteration": {
+        "commitCount": 1,
+        "commitsAfterFirstReview": 0,
+        "reviewAttempts": 1,
+        "failedReviewAttempts": 0
+      },
+      "components": {
+        "commentSourceDensity": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 0,
+          "inputs": {
+            "totalComments": 0,
+            "changedLines": 2,
+            "bySourcePer100ChangedLines": {
+              "copilot": 0,
+              "human_reviewer": 0,
+              "author_reply": 0,
+              "github_actions_bot": 0,
+              "dependency_bot": 0,
+              "code_scanning": 0,
+              "unknown_bot": 0,
+              "unknown": 0
+            }
+          }
+        },
+        "functionalSurfaceDensity": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 1,
+          "inputs": {
+            "functionalSurfaces": 1,
+            "nonGeneratedChangedLines": 2,
+            "linesBySurface": {
+              "planning": 2
+            }
+          }
+        },
+        "iterationDrag": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 0,
+          "inputs": {
+            "commitsAfterFirstReview": 0,
+            "reviewThreads": 0,
+            "failedReviewAttempts": 0
+          }
+        },
+        "diffGrowthRatio": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": null,
+          "inputs": {
+            "status": "unavailable",
+            "source": "unavailable",
+            "confidence": "unavailable",
+            "changedLineGrowthRatio": null,
+            "changedFileGrowthRatio": null
+          }
+        },
+        "changedFileSpread": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 2,
+          "inputs": {
+            "coreFiles": 0,
+            "directories": 1,
+            "functionalSurfaces": 1
+          }
+        },
+        "validationGapScore": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 0,
+          "inputs": {
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0,
+            "workflowCoverage": "unavailable"
+          }
+        },
+        "planningGapScore": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 1,
+          "inputs": {
+            "planningChangedLines": 2,
+            "source": "repository_profile"
+          }
+        },
+        "reviewSurpriseScore": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 0,
+          "inputs": {
+            "functionalSurfaces": 1,
+            "method": "deterministic_surface_spread_without_title_nlp"
+          }
+        },
+        "fixAmplification": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 0,
+          "inputs": {
+            "commitsAfterFirstReview": 0,
+            "diffGrowthStatus": "unavailable",
+            "changedLineGrowthRatio": null
+          }
+        }
+      }
+    },
+    {
+      "metricVersion": "friction-metrics.v1",
+      "number": 239,
+      "title": "feat: resolve scene vocabulary variants",
+      "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+      "state": "MERGED",
+      "coverage": {
+        "prOpenDiff": {
+          "source": "unavailable",
+          "confidence": "unavailable",
+          "status": "unavailable"
+        },
+        "reviewThreads": {
+          "source": "graphql:repository.pullRequest.reviewThreads"
+        },
+        "workflowRuns": {
+          "source": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+          "status": "observed"
+        }
+      },
+      "diffAtMerge": {
+        "additions": 1168,
+        "deletions": 77,
+        "changedFiles": 13,
+        "changedLines": 1245
+      },
+      "files": {
+        "allFiles": 13,
+        "nonGeneratedFiles": 12,
+        "coreFiles": 5,
+        "lowSignalFiles": 3,
+        "directories": 6,
+        "functionalSurfaces": 5,
+        "changedLines": 1245,
+        "nonGeneratedChangedLines": 1231,
+        "coreChangedLines": 743,
+        "weightedChangedLines": 1223.5,
+        "linesPerNonGeneratedFile": 102.58,
+        "smallDiffWideSpread": false,
+        "byCategory": {
+          "code": 743,
+          "docs": 16,
+          "generated": 14,
+          "tests": 472
+        },
+        "byRole": {
+          "core_product_code": 743,
+          "generated_docs": 14,
+          "planning_docs": 2,
+          "release_notes": 8,
+          "tests": 472,
+          "unknown": 6
+        },
+        "byFunctionalSurface": {
+          "agent_tool_reference": 14,
+          "planning": 2,
+          "product_docs": 6,
+          "release_notes": 8,
+          "runtime": 743,
+          "test_suite": 472
+        },
+        "classificationSources": {
+          "repository_profile": 13
+        },
+        "formulaInputs": {
+          "lowSignalRoleWeight": 0.25,
+          "lowSignalRoles": [
+            "fixtures",
+            "generated_docs",
+            "generated_or_vendored",
+            "marketing_site",
+            "planning_docs",
+            "release_notes"
+          ],
+          "coreRoles": [
+            "core_product_code",
+            "product_ui"
+          ],
+          "smallDiffWideSpread": {
+            "maxCoreChangedLines": 600,
+            "minCoreFiles": 3
+          }
+        }
+      },
+      "review": {
+        "comments": {
+          "totalCount": 30,
+          "bySource": {
+            "copilot": 15,
+            "human_reviewer": 0,
+            "author_reply": 15,
+            "github_actions_bot": 0,
+            "dependency_bot": 0,
+            "code_scanning": 0,
+            "unknown_bot": 0,
+            "unknown": 0
+          },
+          "densityPer100ChangedLines": {
+            "copilot": 1.2048,
+            "human_reviewer": 0,
+            "author_reply": 1.2048,
+            "github_actions_bot": 0,
+            "dependency_bot": 0,
+            "code_scanning": 0,
+            "unknown_bot": 0,
+            "unknown": 0
+          },
+          "densityPerChangedFile": {
+            "copilot": 1.1538,
+            "human_reviewer": 0,
+            "author_reply": 1.1538,
+            "github_actions_bot": 0,
+            "dependency_bot": 0,
+            "code_scanning": 0,
+            "unknown_bot": 0,
+            "unknown": 0
+          }
+        },
+        "threads": {
+          "source": "graphql:repository.pullRequest.reviewThreads",
+          "totalCount": 15,
+          "resolvedCount": 15,
+          "outdatedCount": 10
+        }
+      },
+      "ci": {
+        "checkRuns": {
+          "totalCount": 5,
+          "successfulCount": 5,
+          "failedCount": 0,
+          "byConclusion": {
+            "success": 5
+          }
+        },
+        "workflowRuns": {
+          "source": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+          "totalCount": 9,
+          "conclusions": {
+            "success": 8,
+            "cancelled": 1
+          },
+          "failedCount": 0,
+          "cancelledCount": 1,
+          "coverage": "observed"
+        }
+      },
+      "lifecycle": {
+        "timeToFirstReviewHours": 0.07,
+        "timeToMergeHours": 2.65,
+        "reviewWindowHours": 2.22
+      },
+      "iteration": {
+        "commitCount": 7,
+        "commitsAfterFirstReview": 5,
+        "reviewAttempts": 6,
+        "failedReviewAttempts": 0
+      },
+      "components": {
+        "commentSourceDensity": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 30,
+          "inputs": {
+            "totalComments": 30,
+            "changedLines": 1245,
+            "bySourcePer100ChangedLines": {
+              "copilot": 1.2048,
+              "human_reviewer": 0,
+              "author_reply": 1.2048,
+              "github_actions_bot": 0,
+              "dependency_bot": 0,
+              "code_scanning": 0,
+              "unknown_bot": 0,
+              "unknown": 0
+            }
+          }
+        },
+        "functionalSurfaceDensity": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 5,
+          "inputs": {
+            "functionalSurfaces": 5,
+            "nonGeneratedChangedLines": 1231,
+            "linesBySurface": {
+              "agent_tool_reference": 14,
+              "planning": 2,
+              "product_docs": 6,
+              "release_notes": 8,
+              "runtime": 743,
+              "test_suite": 472
+            }
+          }
+        },
+        "iterationDrag": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 20,
+          "inputs": {
+            "commitsAfterFirstReview": 5,
+            "reviewThreads": 15,
+            "failedReviewAttempts": 0
+          }
+        },
+        "diffGrowthRatio": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": null,
+          "inputs": {
+            "status": "unavailable",
+            "source": "unavailable",
+            "confidence": "unavailable",
+            "changedLineGrowthRatio": null,
+            "changedFileGrowthRatio": null
+          }
+        },
+        "changedFileSpread": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 16,
+          "inputs": {
+            "coreFiles": 5,
+            "directories": 6,
+            "functionalSurfaces": 5
+          }
+        },
+        "validationGapScore": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 1,
+          "inputs": {
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1,
+            "workflowCoverage": "observed"
+          }
+        },
+        "planningGapScore": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 1,
+          "inputs": {
+            "planningChangedLines": 2,
+            "source": "repository_profile"
+          }
+        },
+        "reviewSurpriseScore": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 4,
+          "inputs": {
+            "functionalSurfaces": 5,
+            "method": "deterministic_surface_spread_without_title_nlp"
+          }
+        },
+        "fixAmplification": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 5,
+          "inputs": {
+            "commitsAfterFirstReview": 5,
+            "diffGrowthStatus": "unavailable",
+            "changedLineGrowthRatio": null
+          }
+        }
+      }
+    },
+    {
+      "metricVersion": "friction-metrics.v1",
+      "number": 221,
+      "title": "feat(backup): apply project restores transactionally",
+      "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+      "state": "MERGED",
+      "coverage": {
+        "prOpenDiff": {
+          "source": "unavailable",
+          "confidence": "unavailable",
+          "status": "unavailable"
+        },
+        "reviewThreads": {
+          "source": "not_sampled_for_broad_file_spread"
+        },
+        "workflowRuns": {
+          "source": "unavailable",
+          "status": "unavailable"
+        }
+      },
+      "diffAtMerge": {
+        "additions": 1149,
+        "deletions": 58,
+        "changedFiles": 15,
+        "changedLines": 1207
+      },
+      "files": {
+        "allFiles": 15,
+        "nonGeneratedFiles": 14,
+        "coreFiles": 3,
+        "lowSignalFiles": 4,
+        "directories": 8,
+        "functionalSurfaces": 6,
+        "changedLines": 1207,
+        "nonGeneratedChangedLines": 1200,
+        "coreChangedLines": 514,
+        "weightedChangedLines": 1159.5,
+        "linesPerNonGeneratedFile": 85.71,
+        "smallDiffWideSpread": true,
+        "byCategory": {
+          "code": 514,
+          "docs": 205,
+          "generated": 7,
+          "tests": 481
+        },
+        "byRole": {
+          "core_product_code": 514,
+          "generated_docs": 7,
+          "planning_docs": 46,
+          "release_notes": 8,
+          "tests": 481,
+          "unknown": 151
+        },
+        "byFunctionalSurface": {
+          "agent_tool_reference": 7,
+          "planning": 46,
+          "product_docs": 28,
+          "release_notes": 8,
+          "runtime": 514,
+          "test_suite": 481,
+          "user_docs": 123
+        },
+        "classificationSources": {
+          "repository_profile": 15
+        },
+        "formulaInputs": {
+          "lowSignalRoleWeight": 0.25,
+          "lowSignalRoles": [
+            "fixtures",
+            "generated_docs",
+            "generated_or_vendored",
+            "marketing_site",
+            "planning_docs",
+            "release_notes"
+          ],
+          "coreRoles": [
+            "core_product_code",
+            "product_ui"
+          ],
+          "smallDiffWideSpread": {
+            "maxCoreChangedLines": 600,
+            "minCoreFiles": 3
+          }
+        }
+      },
+      "review": {
+        "comments": {
+          "totalCount": 0,
+          "bySource": {
+            "copilot": 0,
+            "human_reviewer": 0,
+            "author_reply": 0,
+            "github_actions_bot": 0,
+            "dependency_bot": 0,
+            "code_scanning": 0,
+            "unknown_bot": 0,
+            "unknown": 0
+          },
+          "densityPer100ChangedLines": {
+            "copilot": 0,
+            "human_reviewer": 0,
+            "author_reply": 0,
+            "github_actions_bot": 0,
+            "dependency_bot": 0,
+            "code_scanning": 0,
+            "unknown_bot": 0,
+            "unknown": 0
+          },
+          "densityPerChangedFile": {
+            "copilot": 0,
+            "human_reviewer": 0,
+            "author_reply": 0,
+            "github_actions_bot": 0,
+            "dependency_bot": 0,
+            "code_scanning": 0,
+            "unknown_bot": 0,
+            "unknown": 0
+          }
+        },
+        "threads": {
+          "source": "not_sampled_for_broad_file_spread",
+          "totalCount": 10,
+          "resolvedCount": 0,
+          "outdatedCount": 0
+        }
+      },
+      "ci": {
+        "checkRuns": {
+          "totalCount": 5,
+          "successfulCount": 5,
+          "failedCount": 0,
+          "byConclusion": {
+            "success": 5
+          }
+        },
+        "workflowRuns": {
+          "source": "unavailable",
+          "totalCount": null,
+          "conclusions": {},
+          "failedCount": 0,
+          "cancelledCount": 0,
+          "coverage": "unavailable"
+        }
+      },
+      "lifecycle": {
+        "timeToFirstReviewHours": 0.07,
+        "timeToMergeHours": 23.94,
+        "reviewWindowHours": 21.3
+      },
+      "iteration": {
+        "commitCount": 3,
+        "commitsAfterFirstReview": 1,
+        "reviewAttempts": 6,
+        "failedReviewAttempts": 1
+      },
+      "components": {
+        "commentSourceDensity": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 0,
+          "inputs": {
+            "totalComments": 0,
+            "changedLines": 1207,
+            "bySourcePer100ChangedLines": {
+              "copilot": 0,
+              "human_reviewer": 0,
+              "author_reply": 0,
+              "github_actions_bot": 0,
+              "dependency_bot": 0,
+              "code_scanning": 0,
+              "unknown_bot": 0,
+              "unknown": 0
+            }
+          }
+        },
+        "functionalSurfaceDensity": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 6,
+          "inputs": {
+            "functionalSurfaces": 6,
+            "nonGeneratedChangedLines": 1200,
+            "linesBySurface": {
+              "agent_tool_reference": 7,
+              "planning": 46,
+              "product_docs": 28,
+              "release_notes": 8,
+              "runtime": 514,
+              "test_suite": 481,
+              "user_docs": 123
+            }
+          }
+        },
+        "iterationDrag": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 12,
+          "inputs": {
+            "commitsAfterFirstReview": 1,
+            "reviewThreads": 10,
+            "failedReviewAttempts": 1
+          }
+        },
+        "diffGrowthRatio": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": null,
+          "inputs": {
+            "status": "unavailable",
+            "source": "unavailable",
+            "confidence": "unavailable",
+            "changedLineGrowthRatio": null,
+            "changedFileGrowthRatio": null
+          }
+        },
+        "changedFileSpread": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 17,
+          "inputs": {
+            "coreFiles": 3,
+            "directories": 8,
+            "functionalSurfaces": 6
+          }
+        },
+        "validationGapScore": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 0,
+          "inputs": {
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0,
+            "workflowCoverage": "unavailable"
+          }
+        },
+        "planningGapScore": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 1,
+          "inputs": {
+            "planningChangedLines": 46,
+            "source": "repository_profile"
+          }
+        },
+        "reviewSurpriseScore": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 5,
+          "inputs": {
+            "functionalSurfaces": 6,
+            "method": "deterministic_surface_spread_without_title_nlp"
+          }
+        },
+        "fixAmplification": {
+          "formulaVersion": "friction-metrics.v1",
+          "value": 1,
+          "inputs": {
+            "commitsAfterFirstReview": 1,
+            "diffGrowthStatus": "unavailable",
+            "changedLineGrowthRatio": null
+          }
+        }
+      }
+    }
+  ]
+}

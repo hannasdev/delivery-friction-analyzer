@@ -64,10 +64,10 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 
 - [ ] Not started
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged
 
 ## M2: Friction Metrics Engine
 
@@ -128,11 +128,11 @@ Compute the core raw and derived friction metrics from normalized GitHub data us
 
 ### Status
 
-- [x] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [ ] Not started
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
 
 ## M3: Recommendation Report
