@@ -40,6 +40,19 @@ describe("repository profile classification", () => {
     assert.equal(classifyFilePath("public/index.html", marketingProfile).role, "marketing_site");
     assert.equal(classifyFilePath("public/index.html", productProfile).role, "product_ui");
   });
+
+  it("ignores invalid profile regex rules instead of throwing", () => {
+    const profile = {
+      rules: [
+        { id: "broken-regex", match: { regex: "[" }, category: "code", role: "core_product_code" },
+        { id: "docs", match: { prefix: "docs/" }, category: "docs", role: "planning_docs" },
+      ],
+    };
+
+    assert.doesNotThrow(() => classifyFilePath("src/app.js", profile));
+    assert.equal(classifyFilePath("src/app.js", profile).classificationSource, "fallback_rule");
+    assert.equal(classifyFilePath("docs/readme.md", profile).role, "planning_docs");
+  });
 });
 
 describe("comment source classification", () => {
@@ -51,6 +64,10 @@ describe("comment source classification", () => {
     assert.equal(classifyCommentSource({ login: "reviewer", type: "User" }), "human_reviewer");
     assert.equal(
       classifyCommentSource({ login: "hannasdev", type: "User" }, { pullRequestAuthorLogin: "hannasdev" }),
+      "author_reply",
+    );
+    assert.equal(
+      classifyCommentSource({ login: "dependabot[bot]", type: "Bot" }, { pullRequestAuthorLogin: "dependabot[bot]" }),
       "author_reply",
     );
     assert.equal(classifyCommentSource({ login: "some-review-bot", type: "Bot" }), "unknown_bot");

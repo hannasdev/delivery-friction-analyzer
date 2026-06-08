@@ -21,6 +21,10 @@ export function classifyCommentSource(author = {}, { pullRequestAuthorLogin } = 
     return SOURCE.copilot;
   }
 
+  if (prAuthorLogin && login === prAuthorLogin) {
+    return SOURCE.authorReply;
+  }
+
   if (login === "github-actions[bot]" || login === "github-actions" || login.includes("github-actions")) {
     return SOURCE.githubActions;
   }
@@ -35,10 +39,6 @@ export function classifyCommentSource(author = {}, { pullRequestAuthorLogin } = 
 
   if (type === "bot" || login.endsWith("[bot]")) {
     return SOURCE.unknownBot;
-  }
-
-  if (prAuthorLogin && login === prAuthorLogin) {
-    return SOURCE.authorReply;
   }
 
   if (type === "user" || author.authorAssociation) {

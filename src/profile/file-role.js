@@ -28,7 +28,13 @@ function ruleMatches(path, match = {}) {
   if (match.prefix && !path.startsWith(match.prefix)) return false;
   if (match.suffix && !path.endsWith(match.suffix)) return false;
   if (match.includes && !path.includes(match.includes)) return false;
-  if (match.regex && !new RegExp(match.regex).test(path)) return false;
+  if (match.regex) {
+    try {
+      if (!new RegExp(match.regex).test(path)) return false;
+    } catch {
+      return false;
+    }
+  }
   return Boolean(match.exact || match.prefix || match.suffix || match.includes || match.regex);
 }
 
