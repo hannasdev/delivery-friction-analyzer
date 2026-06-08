@@ -18,8 +18,16 @@ function matchesType(value, expected) {
 }
 
 function validateSchema(value, schema, schemas, path = "$") {
+  if (!schema) {
+    return [`${path} has no schema`];
+  }
+
   if (schema.$ref) {
-    return validateSchema(value, schemas[schema.$ref], schemas, path);
+    const referencedSchema = schemas[schema.$ref];
+    if (!referencedSchema) {
+      return [`${path} references unknown schema ${schema.$ref}`];
+    }
+    return validateSchema(value, referencedSchema, schemas, path);
   }
 
   const errors = [];
@@ -120,5 +128,14 @@ describe("normalized entity schema", () => {
 
     assert(errors.some(error => error.includes("$.targetRepository.owner must match")));
     assert(errors.some(error => error.includes("$.targetRepository.analysisWindowDays must be <= 365")));
+  });
+
+  it("reports unresolved schema references without throwing", async () => {
+    assert.deepEqual(
+      validateSchema({}, { $ref: "missing.schema.json" }, {}),
+      ["$ references unknown schema missing.schema.json"],
+    );
+
+    assert.deepEqual(validateSchema({}, undefined, {}), ["$ has no schema"]);
   });
 });
