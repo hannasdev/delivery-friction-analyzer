@@ -208,7 +208,7 @@ function summarizeIteration(pr) {
   };
 }
 
-function summarizeDiffGrowth(pr) {
+function summarizeDiffGrowth(pr, diffAtMerge = pr.diffAtMerge ?? {}) {
   const openDiff = pr.prOpenDiff ?? {};
   const canCompare = ["direct", "reconstructed"].includes(openDiff.source)
     && Number.isInteger(openDiff.additions)
@@ -226,14 +226,14 @@ function summarizeDiffGrowth(pr) {
   }
 
   const openLines = openDiff.additions + openDiff.deletions;
-  const mergeLines = pr.diffAtMerge.additions + pr.diffAtMerge.deletions;
+  const mergeLines = Number(diffAtMerge.additions ?? 0) + Number(diffAtMerge.deletions ?? 0);
 
   return {
     status: "computed",
     source: openDiff.source,
     confidence: openDiff.confidence,
     changedLineGrowthRatio: openLines > 0 ? round(mergeLines / openLines) : null,
-    changedFileGrowthRatio: openDiff.changedFiles > 0 ? round(pr.diffAtMerge.changedFiles / openDiff.changedFiles) : null,
+    changedFileGrowthRatio: openDiff.changedFiles > 0 ? round((diffAtMerge.changedFiles ?? 0) / openDiff.changedFiles) : null,
   };
 }
 
@@ -245,16 +245,17 @@ function componentMetric(value, inputs) {
   };
 }
 
-function summarizeComponents({ pr, comments, files, checks, iteration, diffGrowth }) {
+function summarizeComponents({ pr, comments, files, checks, iteration, diffGrowth, changedLines, reviewThreads }) {
   const validationFailures = checks.checkRuns.failedCount + checks.workflowRuns.failedCount + checks.workflowRuns.cancelledCount;
   const postReviewCommits = iteration.commitsAfterFirstReview ?? 0;
-  const planningLines = pr.files.filter(file => file.role === "planning_docs").reduce((sum, file) => sum + linesOf(file), 0);
+  const planningLines = (pr.files ?? []).filter(file => file.role === "planning_docs").reduce((sum, file) => sum + linesOf(file), 0);
   const nonCoreSurfaces = Math.max(files.functionalSurfaces - 1, 0);
+  const reviewThreadCount = reviewThreads.totalCount ?? 0;
 
   return {
     commentSourceDensity: componentMetric(comments.totalCount, {
       totalComments: comments.totalCount,
-      changedLines: files.changedLines,
+      changedLines,
       bySourcePer100ChangedLines: comments.densityPer100ChangedLines,
     }),
     functionalSurfaceDensity: componentMetric(files.functionalSurfaces, {
@@ -262,9 +263,9 @@ function summarizeComponents({ pr, comments, files, checks, iteration, diffGrowt
       nonGeneratedChangedLines: files.nonGeneratedChangedLines,
       linesBySurface: files.byFunctionalSurface,
     }),
-    iterationDrag: componentMetric(postReviewCommits + pr.reviewThreads.totalCount + iteration.failedReviewAttempts, {
+    iterationDrag: componentMetric(postReviewCommits + reviewThreadCount + iteration.failedReviewAttempts, {
       commitsAfterFirstReview: iteration.commitsAfterFirstReview,
-      reviewThreads: pr.reviewThreads.totalCount,
+      reviewThreads: reviewThreadCount,
       failedReviewAttempts: iteration.failedReviewAttempts,
     }),
     diffGrowthRatio: componentMetric(diffGrowth.changedLineGrowthRatio, diffGrowth),
@@ -296,14 +297,21 @@ function summarizeComponents({ pr, comments, files, checks, iteration, diffGrowt
 }
 
 export function computePullRequestMetrics(pr) {
+  const diffAtMerge = pr.diffAtMerge ?? { additions: 0, deletions: 0, changedFiles: 0 };
+  const reviewThreads = pr.reviewThreads ?? {
+    source: "unavailable",
+    totalCount: 0,
+    resolvedCount: 0,
+    outdatedCount: 0,
+  };
   const files = summarizeFiles(pr.files ?? []);
-  const changedLines = pr.diffAtMerge.additions + pr.diffAtMerge.deletions;
-  const comments = summarizeComments(pr, changedLines, pr.diffAtMerge.changedFiles);
+  const changedLines = Number(diffAtMerge.additions ?? 0) + Number(diffAtMerge.deletions ?? 0);
+  const comments = summarizeComments(pr, changedLines, diffAtMerge.changedFiles ?? 0);
   const checks = summarizeChecks(pr);
   const lifecycle = summarizeLifecycle(pr);
   const iteration = summarizeIteration(pr);
-  const diffGrowth = summarizeDiffGrowth(pr);
-  const components = summarizeComponents({ pr, comments, files, checks, iteration, diffGrowth });
+  const diffGrowth = summarizeDiffGrowth(pr, diffAtMerge);
+  const components = summarizeComponents({ pr, comments, files, checks, iteration, diffGrowth, changedLines, reviewThreads });
 
   return {
     metricVersion: FRICTION_METRICS_VERSION,
@@ -317,20 +325,20 @@ export function computePullRequestMetrics(pr) {
         confidence: pr.prOpenDiff?.confidence ?? "unavailable",
         status: diffGrowth.status,
       },
-      reviewThreads: { source: pr.reviewThreads?.source ?? "unavailable" },
+      reviewThreads: { source: reviewThreads.source ?? "unavailable" },
       workflowRuns: {
         source: pr.workflowRuns?.source ?? "unavailable",
         status: checks.workflowRuns.coverage,
       },
     },
     diffAtMerge: {
-      ...pr.diffAtMerge,
+      ...diffAtMerge,
       changedLines,
     },
     files,
     review: {
       comments,
-      threads: pr.reviewThreads,
+      threads: reviewThreads,
     },
     ci: checks,
     lifecycle,

@@ -211,6 +211,22 @@ describe("friction metric formulas", () => {
     assert.equal(metrics.ci.workflowRuns.totalCount, null);
     assert.equal(metrics.ci.workflowRuns.coverage, "unavailable");
   });
+
+  it("keeps partial PR file and review thread inputs safe and transparent", () => {
+    const pr = buildSyntheticPr();
+    delete pr.files;
+    delete pr.reviewThreads;
+
+    const metrics = computePullRequestMetrics(pr);
+
+    assert.equal(metrics.files.changedLines, 0);
+    assert.equal(metrics.review.threads.source, "unavailable");
+    assert.equal(metrics.review.threads.totalCount, 0);
+    assert.equal(metrics.components.iterationDrag.inputs.reviewThreads, 0);
+    assert.equal(metrics.components.commentSourceDensity.inputs.changedLines, 200);
+    assert.equal(metrics.review.comments.densityPer100ChangedLines.copilot, 1);
+    assert.equal(metrics.components.planningGapScore.inputs.planningChangedLines, 0);
+  });
 });
 
 describe("fixture repository metrics", () => {
