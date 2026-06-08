@@ -100,7 +100,7 @@ Suggested action: Use smaller delivery slices when review feedback causes meanin
 - Hooks: 1 triggered bottleneck(s)
 - Preflight scripts: 1 triggered bottleneck(s)
 - Repo-specific AI skills: 1 triggered bottleneck(s)
-- PR readiness gates: 1 triggered bottleneck(s)
+- PR readiness gates: 2 triggered bottleneck(s)
 - Smaller milestones: 2 triggered bottleneck(s)
 - Planning artifacts: 1 triggered bottleneck(s)
 - Test infrastructure: 1 triggered bottleneck(s)

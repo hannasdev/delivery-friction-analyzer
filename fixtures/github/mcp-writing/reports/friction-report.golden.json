@@ -406,7 +406,7 @@
       ],
       "inferredDiagnosis": "Changes spanning several functional surfaces are more likely to surprise reviewers.",
       "suggestedAction": {
-        "category": "scope_control",
+        "category": "pr_readiness_gate",
         "action": "Call out multi-surface scope in the PR description or split cross-surface work."
       }
     },
@@ -468,7 +468,7 @@
       "id": "pr_readiness_gate",
       "label": "PR readiness gates",
       "description": "Review-before-review checks for scope, tests, descriptions, and evidence.",
-      "triggeredBottlenecks": 1
+      "triggeredBottlenecks": 2
     },
     {
       "id": "smaller_milestones",

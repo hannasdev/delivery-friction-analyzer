@@ -117,7 +117,7 @@ const BOTTLENECK_DEFINITIONS = [
     rankingKey: "reviewSurprise",
     title: "Review surprise",
     metricLabel: "surface surprise score",
-    recommendationCategory: "scope_control",
+    recommendationCategory: "pr_readiness_gate",
     action: "Call out multi-surface scope in the PR description or split cross-surface work.",
     diagnosis: "Changes spanning several functional surfaces are more likely to surprise reviewers.",
   },
