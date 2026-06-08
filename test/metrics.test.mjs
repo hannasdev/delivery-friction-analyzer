@@ -256,6 +256,38 @@ describe("friction metric formulas", () => {
     assert.equal(missingTimestampMetrics.components.iterationDrag.inputs.commitsAfterFirstReview, null);
     assert.equal(missingTimestampMetrics.components.fixAmplification.value, null);
   });
+
+  it("keeps unknown component values visible in rankings", () => {
+    const repositoryMetrics = computeRepositoryMetrics({
+      targetRepository: { owner: "example", name: "repo" },
+      pullRequests: [
+        buildSyntheticPr({
+          number: 1,
+          title: "feat: no review",
+          lifecycle: {
+            ...buildSyntheticPr().lifecycle,
+            firstReviewAt: null,
+            lastReviewAt: null,
+          },
+          reviews: [],
+          reviewThreads: { source: "graphql", totalCount: 0, resolvedCount: 0, outdatedCount: 0 },
+        }),
+        buildSyntheticPr({
+          number: 2,
+          title: "feat: missing review timestamp",
+          lifecycle: {
+            ...buildSyntheticPr().lifecycle,
+            firstReviewAt: null,
+            lastReviewAt: null,
+          },
+          reviews: [{ id: "r1", submittedAt: null, state: "COMMENTED", commitOid: "a", source: "copilot", generatedCommentCount: 0, failedAttempt: false }],
+        }),
+      ],
+    });
+
+    assert.deepEqual(repositoryMetrics.rankings.fixAmplification.map(entry => entry.value), [0, null]);
+    assert.deepEqual(repositoryMetrics.rankings.fixAmplification.map(entry => entry.number), [1, 2]);
+  });
 });
 
 describe("fixture repository metrics", () => {

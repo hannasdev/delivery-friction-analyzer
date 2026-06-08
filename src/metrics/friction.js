@@ -351,13 +351,17 @@ export function computePullRequestMetrics(pr) {
 function rankBy(pullRequests, metricName) {
   return [...pullRequests]
     .sort((left, right) => {
-      const delta = (right.components[metricName]?.value ?? 0) - (left.components[metricName]?.value ?? 0);
+      const leftValue = left.components[metricName]?.value;
+      const rightValue = right.components[metricName]?.value;
+      if (leftValue === null && rightValue !== null) return 1;
+      if (rightValue === null && leftValue !== null) return -1;
+      const delta = (rightValue ?? 0) - (leftValue ?? 0);
       return delta || left.number - right.number;
     })
     .map(pr => ({
       number: pr.number,
       title: pr.title,
-      value: pr.components[metricName]?.value ?? 0,
+      value: pr.components[metricName]?.value === undefined ? 0 : pr.components[metricName].value,
     }));
 }
 
