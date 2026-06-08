@@ -18,7 +18,8 @@ npm run report:fixture
 ## Fixture Scenario Inspection
 
 - Review churn is the top reported bottleneck. PR #239 and PR #221 carry the highest iteration-drag evidence, matching the high-review-churn fixture scenario.
-- Changed-file spread is the second reported bottleneck. PR #221 and PR #239 show broad file and surface spread, while PR #223 remains visible as a low-line-count planning-doc example.
+- Repo guidance gap is the second reported bottleneck, using the same iteration-drag evidence as the top review-churn pattern to recommend repo-specific AI skills or instructions.
+- Changed-file spread is the third reported bottleneck. PR #221 and PR #239 show broad file and surface spread, while PR #223 remains visible as a low-line-count planning-doc example.
 - Validation gap is reported with PR #239 as the representative example, matching the fixture workflow interruption signal.
 - Comment-source coverage separates Copilot comments from author replies and shows zero human, scanner, dependency-bot, GitHub Actions bot, unknown-bot, and unknown comments for this fixture.
 - Surface coverage separates core runtime/test surfaces from low-signal planning, generated docs, and release notes.
