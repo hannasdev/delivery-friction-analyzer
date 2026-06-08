@@ -193,18 +193,19 @@ function summarizeLifecycle(pr) {
 
 function summarizeIteration(pr) {
   const firstReviewAt = pr.lifecycle?.firstReviewAt ? Date.parse(pr.lifecycle.firstReviewAt) : null;
-  const commitsAfterFirstReview = firstReviewAt
+  const reviews = pr.reviews ?? [];
+  const commitsAfterFirstReview = Number.isFinite(firstReviewAt)
     ? (pr.commits ?? []).filter(commit => {
       const authoredAt = Date.parse(commit.authoredDate);
       return Number.isFinite(authoredAt) && authoredAt > firstReviewAt;
     }).length
-    : null;
+    : reviews.length === 0 ? 0 : null;
 
   return {
     commitCount: (pr.commits ?? []).length,
     commitsAfterFirstReview,
-    reviewAttempts: (pr.reviews ?? []).length,
-    failedReviewAttempts: (pr.reviews ?? []).filter(review => review.failedAttempt).length,
+    reviewAttempts: reviews.length,
+    failedReviewAttempts: reviews.filter(review => review.failedAttempt).length,
   };
 }
 

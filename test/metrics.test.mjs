@@ -227,6 +227,31 @@ describe("friction metric formulas", () => {
     assert.equal(metrics.review.comments.densityPer100ChangedLines.copilot, 1);
     assert.equal(metrics.components.planningGapScore.inputs.planningChangedLines, 0);
   });
+
+  it("distinguishes no-review iteration from missing review timestamps", () => {
+    const noReviewMetrics = computePullRequestMetrics(buildSyntheticPr({
+      lifecycle: {
+        ...buildSyntheticPr().lifecycle,
+        firstReviewAt: null,
+        lastReviewAt: null,
+      },
+      reviews: [],
+      reviewThreads: { source: "graphql", totalCount: 0, resolvedCount: 0, outdatedCount: 0 },
+    }));
+    const missingTimestampMetrics = computePullRequestMetrics(buildSyntheticPr({
+      lifecycle: {
+        ...buildSyntheticPr().lifecycle,
+        firstReviewAt: null,
+        lastReviewAt: null,
+      },
+      reviews: [{ id: "r1", submittedAt: null, state: "COMMENTED", commitOid: "a", source: "copilot", generatedCommentCount: 0, failedAttempt: false }],
+    }));
+
+    assert.equal(noReviewMetrics.iteration.commitsAfterFirstReview, 0);
+    assert.equal(noReviewMetrics.components.iterationDrag.inputs.commitsAfterFirstReview, 0);
+    assert.equal(missingTimestampMetrics.iteration.commitsAfterFirstReview, null);
+    assert.equal(missingTimestampMetrics.components.iterationDrag.inputs.commitsAfterFirstReview, null);
+  });
 });
 
 describe("fixture repository metrics", () => {
