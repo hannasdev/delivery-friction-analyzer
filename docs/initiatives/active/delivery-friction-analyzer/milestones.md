@@ -130,8 +130,8 @@ Compute the core raw and derived friction metrics from normalized GitHub data us
 
 - [ ] Not started
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
 

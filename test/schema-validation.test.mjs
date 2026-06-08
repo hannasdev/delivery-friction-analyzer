@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
+import { computePullRequestMetrics } from "../src/metrics/friction.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
 
 async function readJson(path) {
@@ -128,6 +129,33 @@ describe("normalized entity schema", () => {
 
     assert(errors.some(error => error.includes("$.targetRepository.owner must match")));
     assert(errors.some(error => error.includes("$.targetRepository.analysisWindowDays must be <= 365")));
+  });
+
+  it("accepts schema-valid PR-open diff counts used for diff growth", async () => {
+    const [bundle, profile, normalizedSchema, targetSchema] = await Promise.all([
+      readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),
+      readJson("../fixtures/github/mcp-writing/profile.json"),
+      readJson("../schemas/normalized-entities.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const normalized = normalizeFixtureBundle(bundle, { repositoryProfile: profile });
+    normalized.pullRequests[0].prOpenDiff = {
+      source: "direct",
+      confidence: "high",
+      additions: 1,
+      deletions: 0,
+      changedFiles: 1,
+    };
+
+    const errors = validateSchema(normalized, normalizedSchema, {
+      "target-repository.schema.json": targetSchema,
+    });
+    const metrics = computePullRequestMetrics(normalized.pullRequests[0]);
+
+    assert.deepEqual(errors, []);
+    assert.equal(metrics.coverage.prOpenDiff.status, "computed");
+    assert.equal(metrics.components.diffGrowthRatio.value, 2);
+    assert.equal(metrics.components.diffGrowthRatio.inputs.changedFileGrowthRatio, 1);
   });
 
   it("reports unresolved schema references without throwing", async () => {

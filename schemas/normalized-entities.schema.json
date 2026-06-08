@@ -90,7 +90,10 @@
             "required": ["source", "confidence"],
             "properties": {
               "source": { "enum": ["direct", "reconstructed", "snapshot_only", "unavailable"] },
-              "confidence": { "type": "string" }
+              "confidence": { "type": "string" },
+              "additions": { "type": "integer", "minimum": 0 },
+              "deletions": { "type": "integer", "minimum": 0 },
+              "changedFiles": { "type": "integer", "minimum": 0 }
             }
           },
           "files": {
