@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 import { writeRepositoryFrictionReport } from "../src/report/generate-report.js";
 import {
@@ -139,18 +140,18 @@ describe("friction report generation", () => {
 
       await assert.rejects(
         execFileAsync("node", [
-          new URL("../src/report/generate-report.js", import.meta.url).pathname,
+          fileURLToPath(new URL("../src/report/generate-report.js", import.meta.url)),
           "--unknown",
           "value",
           "--metrics-summary",
-          new URL("../fixtures/github/mcp-writing/metrics-summary.golden.json", import.meta.url).pathname,
+          fileURLToPath(new URL("../fixtures/github/mcp-writing/metrics-summary.golden.json", import.meta.url)),
           "--json-out",
           jsonOutPath,
           "--markdown-out",
           markdownOutPath,
         ]),
         error => {
-          assert.match(error.stderr, /Unknown option: --unknown/);
+          assert.match(String(error.stderr), /Unknown option: --unknown/);
           return true;
         },
       );

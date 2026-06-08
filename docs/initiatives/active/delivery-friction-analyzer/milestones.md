@@ -188,7 +188,7 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 
 - [ ] Not started
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
