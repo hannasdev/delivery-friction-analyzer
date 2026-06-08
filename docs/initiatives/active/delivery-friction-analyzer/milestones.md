@@ -133,7 +133,7 @@ Compute the core raw and derived friction metrics from normalized GitHub data us
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged
 
 ## M3: Recommendation Report
 
@@ -184,8 +184,8 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 
 ### Status
 
-- [x] Not started
-- [ ] Implemented
+- [ ] Not started
+- [x] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
