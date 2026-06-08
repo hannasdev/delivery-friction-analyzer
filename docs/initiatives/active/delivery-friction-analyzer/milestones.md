@@ -137,6 +137,8 @@ Compute the core raw and derived friction metrics from normalized GitHub data us
 
 ## M3: Recommendation Report
 
+Status: Implemented; final lifecycle deferred until PR merge and post-merge initiative-completion.
+
 ### Outcome
 
 Generate a useful repository friction report that ranks bottlenecks and maps them to concrete interventions.
