@@ -161,11 +161,11 @@ Use larger live samples from `hannasdev/mcp-writing` to calibrate coverage, diag
 
 ### Status
 
-Status: Implemented; final initiative completion is deferred until this milestone PR merges.
+Status: Merged in PR #7 on 2026-06-09.
 
 - [ ] Not started
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged

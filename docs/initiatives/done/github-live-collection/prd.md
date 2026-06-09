@@ -2,15 +2,15 @@
 
 ## Status
 
-Status: Implemented; final initiative completion is deferred until the M3 PR merges.
+Status: Completed in PR #7 on 2026-06-09.
 
-- State: Active
+- State: Done
 - Owner: Hanna
 - Created: 2026-06-09
 - Related docs:
   - [Milestones](milestones.md)
   - [Architecture Notes](architecture.md)
-  - [Delivery Friction Analyzer PRD](../../done/delivery-friction-analyzer/prd.md)
+  - [Delivery Friction Analyzer PRD](../delivery-friction-analyzer/prd.md)
   - [Friction Metrics Contract](../../../contracts/friction-metrics.md)
   - [Friction Report Contract](../../../contracts/friction-report.md)
   - [GitHub Access And Coverage Matrix](../../../reference/github-access-coverage.md)
