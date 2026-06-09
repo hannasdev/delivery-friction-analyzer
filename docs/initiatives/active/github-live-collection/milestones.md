@@ -50,7 +50,7 @@ Add a reusable GitHub collection layer that can fetch live repository and pull r
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M2: End-To-End Local Analyze Command
