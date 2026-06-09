@@ -26,8 +26,6 @@ npm run report:fixture
 - Coverage notes label PR-open diff growth as unavailable and workflow-run data as partially unavailable instead of inferring missing values from merge-time data.
 - Recommendations are repository-level workflow suggestions and do not rank contributors or reviewers.
 
-## Lifecycle Note
+## Completion Note
 
-M3 is the final initiative milestone, but this implementation branch must not mark the milestone accepted/completed or move the initiative to a done/completed location before review and merge. Final lifecycle completion is explicitly deferred until conformance review, adversarial review, PR approval, merge, and the post-merge `initiative-completion` check. This branch only marks M3 as implemented.
-
-The strict lifecycle checker passes before merge because the PRD and milestone docs now expose machine-readable implementation-complete status while explicitly deferring final lifecycle movement until PR merge and post-merge cleanup.
+M3 was the final initiative milestone. It merged in PR #3 on 2026-06-09, and post-merge `initiative-completion` moved the initiative to `docs/initiatives/done/delivery-friction-analyzer/`.
