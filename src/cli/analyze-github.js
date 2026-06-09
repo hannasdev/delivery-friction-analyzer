@@ -133,8 +133,13 @@ async function validateOutputDirectory(outDir) {
   }
 
   const probePath = join(resolvedOutDir, `.analyze-github-write-test-${process.pid}-${Date.now()}`);
-  await writeFile(probePath, "ok\n", "utf8");
-  await rm(probePath, { force: true });
+  try {
+    await writeFile(probePath, "ok\n", "utf8");
+  } catch (error) {
+    throw new Error(`out must be a writable directory path: ${resolvedOutDir}`);
+  } finally {
+    await rm(probePath, { force: true });
+  }
   return resolvedOutDir;
 }
 
@@ -190,13 +195,17 @@ async function writeAnalysisArtifacts(outDir, paths, artifacts) {
   await mkdir(stagingDir, { recursive: false });
 
   try {
-    await Promise.all([
+    const stagingResults = await Promise.allSettled([
       writeJson(stagingPaths.sourceBundle, artifacts.sourceBundle),
       writeJson(stagingPaths.normalized, artifacts.normalized),
       writeJson(stagingPaths.metricsSummary, artifacts.metricsSummary),
       writeJson(stagingPaths.reportJson, artifacts.reportJson),
       writeText(stagingPaths.reportMarkdown, artifacts.reportMarkdown),
     ]);
+    const rejectedStagingWrite = stagingResults.find(result => result.status === "rejected");
+    if (rejectedStagingWrite) {
+      throw rejectedStagingWrite.reason;
+    }
 
     await assertWritableArtifactTargets(paths);
     await mkdir(backupDir, { recursive: false });

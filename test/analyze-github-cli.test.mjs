@@ -356,6 +356,32 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("reports a clear error when the output directory is not writable", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "readonly-out");
+      await mkdir(outDir, { recursive: true });
+      await chmod(outDir, 0o555);
+      const provider = createProvider();
+
+      try {
+        await assert.rejects(
+          runAnalyzeGithub({
+            repository: "example/example-repo",
+            limit: 1,
+            profilePath,
+            outDir,
+          }, { provider }),
+          /out must be a writable directory path/,
+        );
+      } finally {
+        await chmod(outDir, 0o755);
+      }
+
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
   it("does not leave partial report artifacts when a final artifact path is blocked", async () => {
     await withTempDirectory(async directory => {
       const profilePath = await writeProfile(directory);
@@ -410,6 +436,32 @@ describe("GitHub live analyze CLI", () => {
 
       assert.deepEqual(provider.calls, []);
       assert.equal(await readFile(artifactPath, "utf8"), "existing artifact\n");
+    });
+  });
+
+  it("waits for staging writes to settle before cleaning up failed staging output", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "staging-failure-out");
+      const provider = createProvider();
+      provider.kind = { name: "mock-gh" };
+      provider.kind.self = provider.kind;
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir,
+        }, {
+          provider,
+          now: () => "2026-06-09T00:00:00Z",
+        }),
+        /circular/i,
+      );
+
+      const entries = await readdir(outDir);
+      assert.deepEqual(entries.filter(entry => entry.startsWith(".analyze-github-")), []);
     });
   });
 });
