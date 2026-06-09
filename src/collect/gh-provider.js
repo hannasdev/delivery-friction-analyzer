@@ -194,18 +194,41 @@ export function createGhCliProvider({ ghPath = "gh", runCommand } = {}) {
     },
 
     async getWorkflowRuns({ owner, name, branch }) {
-      return runGhJson([
-        "api",
-        `repos/${owner}/${name}/actions/runs`,
-        "--method",
-        "GET",
-        "-f",
-        `branch=${branch}`,
-        "-f",
-        "event=pull_request",
-        "-f",
-        "per_page=100",
-      ]);
+      const workflowRuns = [];
+      let totalCount = 0;
+      let page = 1;
+      let lastData = {};
+
+      do {
+        const data = await runGhJson([
+          "api",
+          `repos/${owner}/${name}/actions/runs`,
+          "--method",
+          "GET",
+          "-f",
+          `branch=${branch}`,
+          "-f",
+          "event=pull_request",
+          "-f",
+          "per_page=100",
+          "-f",
+          `page=${page}`,
+        ]);
+        const pageRuns = data.workflow_runs ?? data.workflowRuns ?? [];
+        lastData = data;
+        workflowRuns.push(...pageRuns);
+        totalCount = data.total_count ?? data.totalCount ?? workflowRuns.length;
+        page += 1;
+        if (pageRuns.length === 0) {
+          break;
+        }
+      } while (workflowRuns.length < totalCount);
+
+      return {
+        ...lastData,
+        total_count: totalCount,
+        workflow_runs: workflowRuns,
+      };
     },
   };
 }

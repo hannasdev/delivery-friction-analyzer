@@ -363,6 +363,17 @@ export async function collectGitHubSourceBundle({
       });
       if (workflowRunsAttempt.value) {
         pr.workflowRuns = mapWorkflowRuns(workflowRunsAttempt.value);
+        if (pr.workflowRuns.totalCount > pr.workflowRuns.runs.length) {
+          workflowRunsAttempt.coverage = coverageEntry({
+            family: "workflow_runs",
+            source: "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            status: COVERAGE_STATUS.partial,
+            diagnostics: [
+              `PR #${pr.number} collected ${pr.workflowRuns.runs.length} of ${pr.workflowRuns.totalCount} workflow run(s).`,
+            ],
+            downstreamImpact: "Workflow churn history may be incomplete for affected PRs; final status check rollup remains available.",
+          });
+        }
       }
       pr.coverage.workflowRuns = workflowRunsAttempt.coverage;
       workflowRunCoverages.push(workflowRunsAttempt.coverage);

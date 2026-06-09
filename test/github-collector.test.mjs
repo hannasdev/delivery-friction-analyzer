@@ -306,6 +306,46 @@ describe("GitHub source collector", () => {
     assert(coverageFor(bundle, "workflow_runs").diagnostics.some(diagnostic => diagnostic.includes("403")));
   });
 
+  it("marks workflow-run coverage partial when a provider returns fewer runs than total_count", async () => {
+    const provider = createProvider({
+      async getWorkflowRuns(input) {
+        this.calls.push(["getWorkflowRuns", input]);
+        return {
+          total_count: 101,
+          workflow_runs: [
+            {
+              id: 501,
+              name: "CI",
+              workflow_name: "CI",
+              head_sha: "abc123",
+              head_branch: "feat/live-source",
+              event: "pull_request",
+              status: "completed",
+              conclusion: "success",
+            },
+          ],
+        };
+      },
+    });
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      provider,
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+
+    assert.equal(bundle.pullRequests[0].workflowRuns.totalCount, 101);
+    assert.equal(bundle.pullRequests[0].workflowRuns.runs.length, 1);
+    assert.equal(bundle.pullRequests[0].coverage.workflowRuns.status, "partial");
+    assert.equal(coverageFor(bundle, "workflow_runs").status, "partial");
+    assert(
+      bundle.pullRequests[0].coverage.workflowRuns.diagnostics.some(diagnostic => (
+        diagnostic.includes("collected 1 of 101 workflow run")
+      )),
+    );
+  });
+
   it("degrades workflow branch history without calling Actions when headRefName is missing", async () => {
     const provider = createProvider({
       async getPullRequest(input) {
@@ -490,6 +530,43 @@ describe("gh CLI provider", () => {
     assert.equal(threads.totalCount, 1);
     assert.equal(threads.nodes.length, 1);
     assert.equal(threads.nodes[0].comments.nodes[0].databaseId, 1001);
+  });
+
+  it("paginates workflow runs until GitHub total_count is collected", async () => {
+    const requestedPages = [];
+    const provider = createGhCliProvider({
+      async runCommand(args) {
+        assert.equal(args[0], "api");
+        assert.equal(args[1], "repos/example/example-repo/actions/runs");
+        const pageArg = args.find(arg => arg.startsWith("page="));
+        const page = Number(pageArg?.split("=")[1] ?? 1);
+        requestedPages.push(page);
+        return JSON.stringify({
+          total_count: 101,
+          workflow_runs: Array.from({ length: page === 1 ? 100 : 1 }, (_, index) => ({
+            id: page === 1 ? index + 1 : 101,
+            name: "CI",
+            workflow_name: "CI",
+            head_sha: "abc123",
+            head_branch: "feat/live-source",
+            event: "pull_request",
+            status: "completed",
+            conclusion: "success",
+          })),
+        });
+      },
+    });
+
+    const runs = await provider.getWorkflowRuns({
+      owner: "example",
+      name: "example-repo",
+      branch: "feat/live-source",
+    });
+
+    assert.deepEqual(requestedPages, [1, 2]);
+    assert.equal(runs.total_count, 101);
+    assert.equal(runs.workflow_runs.length, 101);
+    assert.equal(runs.workflow_runs[100].id, 101);
   });
 
   it("fails review-thread collection when GraphQL returns errors", async () => {
