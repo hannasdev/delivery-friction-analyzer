@@ -25,6 +25,9 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `commentSources`: total and source-grouped review comments for Copilot, human, bot, scanner, author replies, and unknown sources.
 - `surfaces`: core, low-signal, generated, support-surface, role, and functional-surface breakdowns.
 - `bottlenecks`: ranked friction patterns with observed data, inferred diagnosis, and suggested action kept as separate fields.
+- `bottlenecks[].observedData[].validationEvidence`: workflow-run source label, workflow-run coverage, workflow-run conclusions, failed check-run count, failed workflow-run count, and cancelled workflow-run count for representative PR examples.
+- `bottlenecks[].observedData[].reviewEvidence`: review-thread source label, thread counts, resolution/outdated counts, comment-source breakdown, bot comment count, human reviewer comment count, and author reply count for representative PR examples.
+- `bottlenecks[].dominance`: whether the displayed examples are dominated by a single PR, including the top PR number, share of displayed signal, and a human-readable interpretation note.
 - `recommendationCategories`: supported recommendation categories and how many bottlenecks triggered each one.
 - `guardrails`: machine-readable checks that the report avoids individual ranking, separates evidence from inference, and does not use an opaque composite score.
 - `followUp`: non-automated future work suggested by the report.
@@ -37,6 +40,8 @@ The Markdown renderer presents the same report data for human review:
 
 - summary totals;
 - ranked bottlenecks with representative PR examples;
+- validation and review source evidence for each representative PR example;
+- dominance notes when a single PR carries most of the displayed signal;
 - comment-source breakdown;
 - core and support-surface breakdown;
 - coverage notes for unavailable or partial data;
@@ -61,6 +66,8 @@ The M3 report contract supports these recommendation categories:
 ## Coverage And Confidence
 
 Reports must label unavailable or partial GitHub data instead of inferring unavailable values from merge-time data. PR-open diff growth remains unavailable unless direct or reconstructed counts exist. Workflow coverage and review-thread sources are summarized separately.
+
+Representative examples should carry enough source evidence to trace a report claim back to generated artifacts. Validation examples should name the workflow-run source and conclusions. Review churn examples should name the review-thread source and comment sources. When displayed examples are dominated by one PR, the report should say so instead of implying a repository-wide pattern from an outlier.
 
 ## Guardrails
 

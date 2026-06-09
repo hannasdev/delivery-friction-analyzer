@@ -58,6 +58,7 @@ The live collector should be callable from a local CLI and should also be testab
 | Treat branch-based workflow lookup as a sourced approximation. | Actions runs by branch/event are useful but can be noisy for deleted, reused, or bot branches. | Ignore workflow runs entirely, but the 30-PR smoke test showed workflow churn can dominate useful findings. |
 | Prefer explicit degraded coverage over hard failure when enough core PR data is available. | Partial reports can still be useful if the missing data is visible. | Fail any time one API family is unavailable, but that makes private repos and limited tokens frustrating. |
 | Limit MVP selection to latest-N merged PRs. | It is enough to make the MVP useful and keeps pagination, date filtering, and report calibration focused. | Add `--since` immediately, but date-window semantics can be layered on after latest-N collection is reliable. |
+| Show source evidence and outlier dominance in representative report examples. | A 30-PR live sample can be dominated by one broad feature PR or one validation-heavy automation PR, and maintainers need to trace the finding back to source artifacts before acting. | Only show ranked PR numbers and aggregate coverage, but that makes reports harder to audit. |
 
 ## Contracts And Boundaries
 
@@ -106,6 +107,14 @@ The output directory should contain:
 
 The JSON and Markdown report artifacts include collection coverage caveats from the source bundle. Source bundles, normalized data, metrics summaries, and reports may contain sensitive repository metadata and should be treated as local/private unless intentionally shared.
 
+Representative bottleneck examples should include:
+
+- workflow-run source, coverage, conclusions, failed workflow runs, cancelled workflow runs, and failed check runs;
+- review-thread source, thread counts, resolved/outdated counts, and comment-source counts;
+- a dominance note when one displayed PR contributes most of the visible signal.
+
+When a report recommendation looks surprising, inspect `friction-report.json` for the normalized evidence fields and `source-bundle.json` for the raw collection payload behind the PR number. This is the MVP traceability path until a UI can deep-link from report examples to artifact snippets.
+
 ## Migration / Compatibility
 
 The existing metrics-summary report command should remain supported. Fixture-based tests and golden files should continue to use deterministic local inputs.
@@ -123,6 +132,7 @@ Live collection should add a new path into the existing contracts rather than re
 - Output directory cannot be written: fail before GitHub collection when possible.
 - A branch has many workflow runs: preserve source data and head SHAs so the report can be interpreted or filtered later.
 - PR-open diff data is unavailable: mark diff growth unavailable and do not infer from merge-time diff.
+- One PR dominates a bottleneck: keep the real signal, but add a dominance note so maintainers inspect the raw evidence before treating it as a broad repository pattern.
 
 ## Security / Safety Considerations
 

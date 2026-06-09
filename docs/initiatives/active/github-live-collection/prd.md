@@ -2,6 +2,8 @@
 
 ## Status
 
+Status: Implemented; final initiative completion is deferred until the M3 PR merges.
+
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-09

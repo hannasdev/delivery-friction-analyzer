@@ -19,7 +19,12 @@ Analysis window: 30 days
 
 Observed data (iteration drag):
 - PR #239: feat: resolve scene vocabulary variants (20; 1245 changed lines)
+  - Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1
+  - Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15
 - PR #221: feat(backup): apply project restores transactionally (12; 1207 changed lines)
+  - Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0
+  - Review: thread source not_sampled_for_broad_file_spread; threads 10; resolved 0; outdated 0; comments none
+Dominance note: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing.
 
 Inferred diagnosis: Review loops are concentrated in a small set of PRs.
 Suggested action: Add or tighten a PR readiness gate for changes that attract repeated review rounds.
@@ -28,7 +33,12 @@ Suggested action: Add or tighten a PR readiness gate for changes that attract re
 
 Observed data (iteration drag):
 - PR #239: feat: resolve scene vocabulary variants (20; 1245 changed lines)
+  - Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1
+  - Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15
 - PR #221: feat(backup): apply project restores transactionally (12; 1207 changed lines)
+  - Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0
+  - Review: thread source not_sampled_for_broad_file_spread; threads 10; resolved 0; outdated 0; comments none
+Dominance note: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing.
 
 Inferred diagnosis: Repeated review loops suggest some repository expectations are not yet available at implementation time.
 Suggested action: Add repo-specific AI skills or instructions for repeated review themes before opening the next PR.
@@ -37,8 +47,15 @@ Suggested action: Add repo-specific AI skills or instructions for repeated revie
 
 Observed data (spread score):
 - PR #221: feat(backup): apply project restores transactionally (17; 1207 changed lines)
+  - Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0
+  - Review: thread source not_sampled_for_broad_file_spread; threads 10; resolved 0; outdated 0; comments none
 - PR #239: feat: resolve scene vocabulary variants (16; 1245 changed lines)
+  - Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1
+  - Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15
 - PR #223: docs: accept architecture snapshot milestone (2; 2 changed lines)
+  - Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0
+  - Review: thread source not_sampled_low_friction; threads 0; resolved 0; outdated 0; comments none
+Dominance note: Displayed examples are not dominated by one PR.
 
 Inferred diagnosis: Broad file and surface spread can hide review and validation risk.
 Suggested action: Break broad changes into smaller milestones when core files, directories, or surfaces spread out.
@@ -47,7 +64,12 @@ Suggested action: Break broad changes into smaller milestones when core files, d
 
 Observed data (surface surprise score):
 - PR #221: feat(backup): apply project restores transactionally (5; 1207 changed lines)
+  - Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0
+  - Review: thread source not_sampled_for_broad_file_spread; threads 10; resolved 0; outdated 0; comments none
 - PR #239: feat: resolve scene vocabulary variants (4; 1245 changed lines)
+  - Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1
+  - Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15
+Dominance note: PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing.
 
 Inferred diagnosis: Changes spanning several functional surfaces are more likely to surprise reviewers.
 Suggested action: Call out multi-surface scope in the PR description or split cross-surface work.
@@ -56,7 +78,12 @@ Suggested action: Call out multi-surface scope in the PR description or split cr
 
 Observed data (post-review commits):
 - PR #239: feat: resolve scene vocabulary variants (5; 1245 changed lines)
+  - Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1
+  - Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15
 - PR #221: feat(backup): apply project restores transactionally (1; 1207 changed lines)
+  - Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0
+  - Review: thread source not_sampled_for_broad_file_spread; threads 10; resolved 0; outdated 0; comments none
+Dominance note: PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
 
 Inferred diagnosis: Post-review commits show where initial PR shape did not stay stable.
 Suggested action: Use smaller delivery slices when review feedback causes meaningful post-review change.
@@ -65,6 +92,9 @@ Suggested action: Use smaller delivery slices when review feedback causes meanin
 
 Observed data (validation gap score):
 - PR #239: feat: resolve scene vocabulary variants (1; 1245 changed lines)
+  - Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1
+  - Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15
+Dominance note: Not enough positive examples to evaluate outlier dominance.
 
 Inferred diagnosis: Validation friction appears where checks, workflows, or cancellations add corrective loops.
 Suggested action: Add local preflight scripts for recurring CI or workflow interruptions.
@@ -73,6 +103,9 @@ Suggested action: Add local preflight scripts for recurring CI or workflow inter
 
 Observed data (validation gap score):
 - PR #239: feat: resolve scene vocabulary variants (1; 1245 changed lines)
+  - Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1
+  - Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15
+Dominance note: Not enough positive examples to evaluate outlier dominance.
 
 Inferred diagnosis: Validation signals point to checks that may be cheaper to catch before a branch reaches CI.
 Suggested action: Add or improve local hooks for recurring formatting, lint, typecheck, snapshot, or generated-output churn.
@@ -81,6 +114,9 @@ Suggested action: Add or improve local hooks for recurring formatting, lint, typ
 
 Observed data (validation gap score):
 - PR #239: feat: resolve scene vocabulary variants (1; 1245 changed lines)
+  - Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1
+  - Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15
+Dominance note: Not enough positive examples to evaluate outlier dominance.
 
 Inferred diagnosis: Validation friction may indicate a missing or inconvenient local safety net.
 Suggested action: Invest in test infrastructure when recurring CI or workflow signals are a primary delivery loop.
@@ -89,8 +125,15 @@ Suggested action: Invest in test infrastructure when recurring CI or workflow si
 
 Observed data (planning gap score):
 - PR #221: feat(backup): apply project restores transactionally (1; 1207 changed lines)
+  - Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0
+  - Review: thread source not_sampled_for_broad_file_spread; threads 10; resolved 0; outdated 0; comments none
 - PR #223: docs: accept architecture snapshot milestone (1; 2 changed lines)
+  - Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0
+  - Review: thread source not_sampled_low_friction; threads 0; resolved 0; outdated 0; comments none
 - PR #239: feat: resolve scene vocabulary variants (1; 1245 changed lines)
+  - Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1
+  - Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15
+Dominance note: Displayed examples are not dominated by one PR.
 
 Inferred diagnosis: Planning-related changes show up in the same PRs as delivery friction.
 Suggested action: Improve planning artifacts when planning or scope files are part of high-friction changes.

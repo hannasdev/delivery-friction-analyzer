@@ -49,6 +49,146 @@ describe("friction report generation", () => {
     assert.equal(reviewChurn.suggestedAction.category, "pr_readiness_gate");
   });
 
+  it("surfaces source evidence and outlier dominance for bottleneck examples", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+    const topExample = reviewChurn.observedData[0];
+
+    assert.equal(reviewChurn.dominance.status, "single_pr_dominates");
+    assert.equal(reviewChurn.dominance.topPrNumber, 239);
+    assert.equal(reviewChurn.dominance.topShare, 0.625);
+    assert.equal(
+      topExample.validationEvidence.workflowRunSource,
+      "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+    );
+    assert.deepEqual(topExample.validationEvidence.workflowRunConclusions, [
+      { name: "success", value: 8 },
+      { name: "cancelled", value: 1 },
+    ]);
+    assert.equal(topExample.validationEvidence.cancelledWorkflowRuns, 1);
+    assert.equal(topExample.reviewEvidence.reviewThreadSource, "graphql:repository.pullRequest.reviewThreads");
+    assert.deepEqual(topExample.reviewEvidence.commentSources, [
+      { name: "author_reply", value: 15 },
+      { name: "copilot", value: 15 },
+    ]);
+  });
+
+  it("counts bot comments even when a bot source is outside displayed source samples", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {},
+      pullRequests: [
+        {
+          number: 8,
+          title: "many comment sources",
+          url: "https://example.test/pull/8",
+          diffAtMerge: { changedLines: 1 },
+          review: {
+            comments: {
+              bySource: {
+                author_reply: 10,
+                human_reviewer: 9,
+                unknown: 8,
+                custom_source: 7,
+                other_source: 6,
+                github_actions_bot: 5,
+              },
+            },
+          },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          {
+            number: 8,
+            title: "many comment sources",
+            value: 2,
+          },
+        ],
+      },
+    });
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+    const topExample = reviewChurn.observedData[0];
+
+    assert.deepEqual(topExample.reviewEvidence.commentSources, [
+      { name: "author_reply", value: 10 },
+      { name: "human_reviewer", value: 9 },
+      { name: "unknown", value: 8 },
+      { name: "custom_source", value: 7 },
+      { name: "other_source", value: 6 },
+    ]);
+    assert.equal(topExample.reviewEvidence.botComments, 5);
+  });
+
+  it("renders coverage notes, source labels, and dominance notes in Markdown", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assert(markdown.includes("Dominance note: PR #239 contributes 63% of the displayed signal"));
+    assert(
+      markdown.includes(
+        "Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1",
+      ),
+    );
+    assert(
+      markdown.includes(
+        "Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15",
+      ),
+    );
+    assert(
+      markdown.includes(
+        "- PR-open diff growth is unavailable for some PRs and is not inferred from merge-time data.",
+      ),
+    );
+    assert(markdown.includes("- Workflow-run coverage is unavailable for some PRs"));
+  });
+
+  it("pins the redacted live-30 calibration sample for source-label regressions", async () => {
+    const calibration = await readJson("../fixtures/github/mcp-writing/reports/live-30-calibration.golden.json");
+    const coverageByFamily = new Map(calibration.collectionCoverage.apiFamilies.map(entry => [entry.family, entry]));
+    const validationGap = calibration.topBottlenecks.find(bottleneck => bottleneck.id === "validation-gap");
+    const reviewChurn = calibration.topBottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+    const validationExample = validationGap.observedData[0];
+    const reviewExample = reviewChurn.observedData[0];
+
+    assert.equal(calibration.schemaVersion, "github-live-report-calibration.v1");
+    assert.equal(calibration.derivedFrom.pullRequests, 30);
+    assert.equal(calibration.collectionCoverage.status, "partial");
+    assert.equal(coverageByFamily.get("pr_open_diff").status, "unavailable");
+    assert.equal(coverageByFamily.get("workflow_runs").attempts, 30);
+    assert.equal(
+      coverageByFamily.get("workflow_runs").source,
+      "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+    );
+    assert.equal(coverageByFamily.get("review_threads").source, "graphql:repository.pullRequest.reviewThreads");
+    assert.deepEqual(calibration.summary.topBottleneckIds, [
+      "validation-gap",
+      "local-hook-gap",
+      "test-infrastructure-gap",
+    ]);
+    assert.equal(validationGap.dominance.status, "single_pr_dominates");
+    assert.equal(validationGap.dominance.topPrNumber, 214);
+    assert.equal(validationGap.dominance.topShare, 0.848);
+    assert.deepEqual(validationExample.validationEvidence.workflowRunConclusions, [
+      { name: "failure", value: 39 },
+      { name: "success", value: 16 },
+    ]);
+    assert.equal(validationExample.validationEvidence.failedWorkflowRuns, 39);
+    assert.equal(reviewExample.reviewEvidence.reviewThreadSource, "graphql:repository.pullRequest.reviewThreads");
+    assert.equal(reviewExample.reviewEvidence.reviewThreads, 17);
+    assert.deepEqual(reviewExample.reviewEvidence.commentSources, [
+      { name: "author_reply", value: 17 },
+      { name: "copilot", value: 17 },
+    ]);
+  });
+
   it("covers the milestone recommendation categories", async () => {
     const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
     const report = generateRepositoryFrictionReport(metricsSummary);
@@ -104,6 +244,156 @@ describe("friction report generation", () => {
       "local-hook-gap",
       "test-infrastructure-gap",
     ]);
+  });
+
+  it("does not flag exact evidence ties as single-PR dominance", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {},
+      pullRequests: [
+        {
+          number: 1,
+          title: "first equal review",
+          url: "https://example.test/pull/1",
+          diffAtMerge: { changedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "second equal review",
+          url: "https://example.test/pull/2",
+          diffAtMerge: { changedLines: 20 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "first equal review", value: 10 },
+          { number: 2, title: "second equal review", value: 10 },
+        ],
+      },
+    });
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.dominance.status, "distributed");
+    assert.equal(reviewChurn.dominance.topShare, 0.5);
+    assert.equal(reviewChurn.dominance.note, "Displayed examples are not dominated by one PR.");
+  });
+
+  it("classifies dominance using the raw share before rounding the display value", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {},
+      pullRequests: [
+        {
+          number: 1,
+          title: "bare majority review",
+          url: "https://example.test/pull/1",
+          diffAtMerge: { changedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "near equal review",
+          url: "https://example.test/pull/2",
+          diffAtMerge: { changedLines: 20 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "bare majority review", value: 1251 },
+          { number: 2, title: "near equal review", value: 1249 },
+        ],
+      },
+    });
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.dominance.status, "single_pr_dominates");
+    assert.equal(reviewChurn.dominance.topShare, 0.5);
+  });
+
+  it("renders legacy observed examples without nested evidence fields", () => {
+    const markdown = renderRepositoryFrictionMarkdown({
+      reportVersion: "friction-report.v1",
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      summary: {
+        pullRequests: 1,
+        changedLines: 1,
+        nonGeneratedChangedLines: 1,
+        reviewComments: 0,
+        reviewThreads: 0,
+        topBottleneckIds: ["review-churn"],
+      },
+      bottlenecks: [
+        {
+          id: "review-churn",
+          title: "Review churn",
+          metricLabel: "iteration drag",
+          observedData: [
+            {
+              number: 7,
+              title: "legacy evidence shape",
+              value: 2,
+              changedLines: 1,
+            },
+          ],
+          inferredDiagnosis: "Review loops are concentrated in a small set of PRs.",
+          suggestedAction: {
+            action: "Add or tighten a PR readiness gate.",
+          },
+        },
+      ],
+      recommendationCategories: [],
+      commentSources: {
+        totalComments: 0,
+        botComments: 0,
+        humanComments: 0,
+        authorReplies: 0,
+        bySource: [],
+      },
+      surfaces: {
+        coreChangedLines: 1,
+        lowSignalChangedLines: 0,
+        lowSignalFiles: 0,
+        weightedChangedLines: 1,
+        smallDiffWideSpreadCount: 0,
+        byFunctionalSurface: [],
+        byRole: [],
+      },
+      coverage: {
+        prOpenDiff: { unavailable: 1 },
+        workflowRuns: { unavailable: 1 },
+        reviewThreads: { unavailable: 1 },
+        notes: [],
+      },
+      guardrails: {
+        avoidsIndividualRanking: true,
+        separatesObservedInferredAndSuggested: true,
+        usesCompositeScore: false,
+      },
+      followUp: [],
+    });
+
+    assert(markdown.includes("- PR #7: legacy evidence shape (2; 1 changed lines)"));
+    assert(
+      markdown.includes(
+        "Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0",
+      ),
+    );
+    assert(markdown.includes("Review: thread source unavailable; threads 0; resolved 0; outdated 0; comments none"));
+    assert(markdown.includes("Dominance note: Not enough positive examples to evaluate outlier dominance."));
   });
 
   it("escapes Markdown metacharacters in representative PR titles", () => {
