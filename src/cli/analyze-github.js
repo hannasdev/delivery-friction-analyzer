@@ -286,6 +286,9 @@ export async function runAnalyzeGithub(options, {
     validateOutputDirectory(options.outDir),
   ]);
   const paths = artifactPaths(outDir);
+  if (!options.dryRun) {
+    await assertWritableArtifactTargets(paths);
+  }
 
   const collectionLimit = options.dryRun ? Math.min(options.limit, 1) : options.limit;
   onProgress?.(options.dryRun

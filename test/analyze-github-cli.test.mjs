@@ -361,6 +361,7 @@ describe("GitHub live analyze CLI", () => {
       const profilePath = await writeProfile(directory);
       const outDir = join(directory, "blocked-artifact-out");
       await mkdir(join(outDir, ANALYZE_GITHUB_ARTIFACTS.sourceBundle), { recursive: true });
+      const provider = createProvider();
 
       await assert.rejects(
         runAnalyzeGithub({
@@ -369,12 +370,13 @@ describe("GitHub live analyze CLI", () => {
           profilePath,
           outDir,
         }, {
-          provider: createProvider(),
+          provider,
           now: () => "2026-06-09T00:00:00Z",
         }),
         /artifact path must be a writable file path/,
       );
 
+      assert.deepEqual(provider.calls, []);
       assert.deepEqual(await readdir(outDir), [ANALYZE_GITHUB_ARTIFACTS.sourceBundle]);
     });
   });
