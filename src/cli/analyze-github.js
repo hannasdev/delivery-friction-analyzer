@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { collectGitHubSourceBundle } from "../collect/github-source-bundle.js";
@@ -143,6 +143,25 @@ function artifactPaths(outDir) {
   );
 }
 
+function artifactTransactionDirectory(outDir, label) {
+  return join(outDir, `.analyze-github-${label}-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+}
+
+async function assertWritableArtifactTargets(paths) {
+  for (const path of Object.values(paths)) {
+    try {
+      const pathStat = await stat(path);
+      if (!pathStat.isFile()) {
+        throw new Error(`artifact path must be a writable file path, not a directory or special file: ${path}`);
+      }
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+}
+
 async function writeJson(path, value) {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
@@ -151,6 +170,57 @@ async function writeJson(path, value) {
 async function writeText(path, value) {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, value, "utf8");
+}
+
+async function writeAnalysisArtifacts(outDir, paths, artifacts) {
+  await assertWritableArtifactTargets(paths);
+
+  const stagingDir = artifactTransactionDirectory(outDir, "staging");
+  const backupDir = artifactTransactionDirectory(outDir, "backup");
+  const stagingPaths = artifactPaths(stagingDir);
+  const backupPaths = artifactPaths(backupDir);
+  const backedUp = [];
+  const promoted = [];
+
+  await mkdir(stagingDir, { recursive: false });
+
+  try {
+    await Promise.all([
+      writeJson(stagingPaths.sourceBundle, artifacts.sourceBundle),
+      writeJson(stagingPaths.normalized, artifacts.normalized),
+      writeJson(stagingPaths.metricsSummary, artifacts.metricsSummary),
+      writeJson(stagingPaths.reportJson, artifacts.reportJson),
+      writeText(stagingPaths.reportMarkdown, artifacts.reportMarkdown),
+    ]);
+
+    await assertWritableArtifactTargets(paths);
+    await mkdir(backupDir, { recursive: false });
+
+    for (const [key, finalPath] of Object.entries(paths)) {
+      try {
+        await rename(finalPath, backupPaths[key]);
+        backedUp.push(key);
+      } catch (error) {
+        if (error.code !== "ENOENT") {
+          throw error;
+        }
+      }
+    }
+
+    for (const [key, stagingPath] of Object.entries(stagingPaths)) {
+      await rename(stagingPath, paths[key]);
+      promoted.push(key);
+    }
+  } catch (error) {
+    await Promise.allSettled(promoted.map(key => rm(paths[key], { force: true })));
+    await Promise.allSettled(backedUp.map(key => rename(backupPaths[key], paths[key])));
+    throw error;
+  } finally {
+    await Promise.allSettled([
+      rm(stagingDir, { recursive: true, force: true }),
+      rm(backupDir, { recursive: true, force: true }),
+    ]);
+  }
 }
 
 function collectionCoverageMarkdown(sourceBundle) {
@@ -247,13 +317,13 @@ export async function runAnalyzeGithub(options, {
   const markdown = `${renderRepositoryFrictionMarkdown(report)}${collectionCoverageMarkdown(sourceBundle)}`;
 
   onProgress?.("Writing local artifacts.");
-  await Promise.all([
-    writeJson(paths.sourceBundle, sourceBundle),
-    writeJson(paths.normalized, normalized),
-    writeJson(paths.metricsSummary, metrics),
-    writeJson(paths.reportJson, report),
-    writeText(paths.reportMarkdown, markdown),
-  ]);
+  await writeAnalysisArtifacts(outDir, paths, {
+    sourceBundle,
+    normalized,
+    metricsSummary: metrics,
+    reportJson: report,
+    reportMarkdown: markdown,
+  });
 
   return summarizeResult({
     dryRun: false,

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
@@ -353,6 +353,29 @@ describe("GitHub live analyze CLI", () => {
         /out must be a directory path/,
       );
       assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("does not leave partial report artifacts when a final artifact path is blocked", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "blocked-artifact-out");
+      await mkdir(join(outDir, ANALYZE_GITHUB_ARTIFACTS.sourceBundle), { recursive: true });
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir,
+        }, {
+          provider: createProvider(),
+          now: () => "2026-06-09T00:00:00Z",
+        }),
+        /artifact path must be a writable file path/,
+      );
+
+      assert.deepEqual(await readdir(outDir), [ANALYZE_GITHUB_ARTIFACTS.sourceBundle]);
     });
   });
 });
