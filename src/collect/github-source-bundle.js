@@ -79,8 +79,9 @@ function mapCommit(commit) {
 }
 
 function mapReview(review) {
+  const id = review.id ?? review.databaseId;
   return {
-    id: String(review.id ?? review.databaseId ?? ""),
+    id: id == null ? null : String(id),
     author: review.author ?? null,
     submittedAt: review.submittedAt ?? review.submitted_at ?? null,
     state: review.state ?? null,

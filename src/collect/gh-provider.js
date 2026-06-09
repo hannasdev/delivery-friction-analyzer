@@ -68,8 +68,11 @@ query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
 `;
 
 function parseJson(stdout, args) {
+  if (String(stdout ?? "").trim() === "") {
+    throw new Error(`gh returned empty JSON output for ${args.slice(0, 3).join(" ")}.`);
+  }
   try {
-    return JSON.parse(stdout || "{}");
+    return JSON.parse(stdout);
   } catch (error) {
     throw new Error(`gh returned invalid JSON for ${args.slice(0, 3).join(" ")}: ${error.message}`);
   }

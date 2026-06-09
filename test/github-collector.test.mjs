@@ -284,6 +284,32 @@ describe("GitHub source collector", () => {
     assert(serialized.includes("[local credential path]"));
   });
 
+  it("preserves a missing review id as null", async () => {
+    const provider = createProvider({
+      async getPullRequest(input) {
+        this.calls.push(["getPullRequest", input]);
+        return pullRequestDetails({
+          reviews: [
+            {
+              author: { login: "reviewer", type: "User" },
+              submittedAt: "2026-06-01T10:30:00Z",
+              state: "COMMENTED",
+            },
+          ],
+        });
+      },
+    });
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      provider,
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+
+    assert.equal(bundle.pullRequests[0].reviews[0].id, null);
+  });
+
   it("degrades workflow-run coverage when Actions access is unavailable", async () => {
     const provider = createProvider({
       async getWorkflowRuns(input) {
@@ -470,6 +496,24 @@ describe("gh CLI provider", () => {
     });
 
     assert.deepEqual(prs.map(pr => pr.number), [3, 2]);
+  });
+
+  it("fails JSON commands when gh returns empty stdout", async () => {
+    const provider = createGhCliProvider({
+      async runCommand(args) {
+        assert.equal(args[0], "api");
+        assert.equal(args[1], "repos/example/example-repo");
+        return "";
+      },
+    });
+
+    await assert.rejects(
+      provider.getRepository({
+        owner: "example",
+        name: "example-repo",
+      }),
+      /gh returned empty JSON output for api repos\/example\/example-repo/,
+    );
   });
 
   it("unwraps GraphQL response data when collecting review threads", async () => {
