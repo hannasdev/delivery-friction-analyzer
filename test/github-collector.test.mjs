@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { createGhCliProvider } from "../src/collect/gh-provider.js";
-import { collectGitHubSourceBundle } from "../src/collect/github-source-bundle.js";
+import { buildCoverageSummary, collectGitHubSourceBundle } from "../src/collect/github-source-bundle.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
 
 function repositoryMetadata() {
@@ -169,6 +169,29 @@ function coverageFor(bundle, family) {
 }
 
 describe("GitHub source collector", () => {
+  it("summarizes coverage statuses without losing all-unavailable state", () => {
+    assert.equal(buildCoverageSummary([
+      { status: "available" },
+      { status: "available" },
+    ]), "available");
+    assert.equal(buildCoverageSummary([
+      { status: "unavailable" },
+      { status: "unavailable" },
+    ]), "unavailable");
+    assert.equal(buildCoverageSummary([
+      { status: "available" },
+      { status: "unavailable" },
+    ]), "partial");
+    assert.equal(buildCoverageSummary([
+      { status: "partial" },
+      { status: "available" },
+    ]), "partial");
+    assert.equal(buildCoverageSummary([
+      { status: "rate_limited" },
+      { status: "unavailable" },
+    ]), "rate_limited");
+  });
+
   it("maps gh-backed provider responses into a versioned source bundle", async () => {
     const provider = createProvider();
 

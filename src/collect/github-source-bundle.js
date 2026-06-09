@@ -259,9 +259,10 @@ async function attempt({ family, source, downstreamImpact, run }) {
   }
 }
 
-function buildCoverageSummary(entries) {
+export function buildCoverageSummary(entries) {
   const statuses = new Set(entries.map(entry => entry.status));
   if (statuses.has(COVERAGE_STATUS.rateLimited)) return COVERAGE_STATUS.rateLimited;
+  if (statuses.size === 1 && statuses.has(COVERAGE_STATUS.unavailable)) return COVERAGE_STATUS.unavailable;
   if (statuses.has(COVERAGE_STATUS.unavailable) || statuses.has(COVERAGE_STATUS.partial)) return COVERAGE_STATUS.partial;
   return COVERAGE_STATUS.available;
 }
