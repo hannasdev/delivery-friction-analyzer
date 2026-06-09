@@ -2,9 +2,9 @@
 
 ## Status
 
-Status: M3 implementation complete; final lifecycle deferred until PR merge and post-merge initiative-completion.
+Status: Complete; final milestone merged in PR #3 on 2026-06-09.
 
-- State: Active
+- State: Done
 - Owner: Hanna
 - Created: 2026-06-08
 - Related docs:
