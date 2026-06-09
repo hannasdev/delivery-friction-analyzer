@@ -312,7 +312,7 @@ export async function collectGitHubSourceBundle({
     run: () => provider.getLanguages(targetInput),
   });
 
-  const inventory = await provider.listMergedPullRequests({ ...targetInput, limit });
+  const inventory = (await provider.listMergedPullRequests({ ...targetInput, limit })).slice(0, limit);
   const inventoryCoverage = coverageEntry({
     family: "pull_request_inventory",
     source: "gh pr list --state merged --search \"is:merged sort:merged-desc\"",
