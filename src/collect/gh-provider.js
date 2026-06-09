@@ -96,6 +96,13 @@ function graphqlErrorMessage(errors) {
   return `GitHub GraphQL returned errors: ${messages.join("; ")}`;
 }
 
+function requireGraphqlPage(page, label) {
+  if (!page || !Array.isArray(page.nodes)) {
+    throw new Error(`GitHub GraphQL response did not include ${label}.`);
+  }
+  return page;
+}
+
 export function createGhCliProvider({ ghPath = "gh", runCommand } = {}) {
   async function runGh(args) {
     if (runCommand) {
@@ -187,7 +194,10 @@ export function createGhCliProvider({ ghPath = "gh", runCommand } = {}) {
           throw new Error(graphqlErrorMessage(data.errors));
         }
         const root = data.data ?? data;
-        const page = root.repository?.pullRequest?.reviewThreads;
+        const page = requireGraphqlPage(
+          root.repository?.pullRequest?.reviewThreads,
+          "repository.pullRequest.reviewThreads",
+        );
         totalCount = page?.totalCount ?? nodes.length;
         nodes.push(...(page?.nodes ?? []));
         cursor = page?.pageInfo?.hasNextPage ? page.pageInfo.endCursor : null;

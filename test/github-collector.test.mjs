@@ -253,13 +253,14 @@ describe("GitHub source collector", () => {
     const fakeClassicToken = ["ghp", "abcdef1234567890"].join("_");
     const fakeEnvToken = ["super", "secret"].join("");
     const fakeAuthorizationToken = ["very", "secret", "value"].join("");
+    const fakeWindowsCredentialPath = String.raw`C:\Users\Hanna\AppData\Roaming\GitHub CLI\hosts.yml`;
     const envTokenLabel = ["GITHUB", "TOKEN"].join("_");
     const authorizationLabel = ["Author", "ization"].join("");
     const provider = createProvider({
       async getReviewThreads(input) {
         this.calls.push(["getReviewThreads", input]);
         throw new Error(
-          `GraphQL: Resource not accessible by integration ${envTokenLabel}=${fakeEnvToken} ${fakeClassicToken} /Users/hanna/.config/gh/hosts.yml ${authorizationLabel}: token ${fakeAuthorizationToken}`,
+          `GraphQL: Resource not accessible by integration ${envTokenLabel}=${fakeEnvToken} ${fakeClassicToken} /Users/hanna/.config/gh/hosts.yml ${fakeWindowsCredentialPath} ${authorizationLabel}: token ${fakeAuthorizationToken}`,
         );
       },
     });
@@ -280,6 +281,7 @@ describe("GitHub source collector", () => {
     assert(!serialized.includes(fakeClassicToken));
     assert(!serialized.includes(fakeAuthorizationToken));
     assert(!serialized.includes("/Users/hanna/.config/gh/hosts.yml"));
+    assert(!serialized.includes(fakeWindowsCredentialPath));
     assert(serialized.includes("[REDACTED]"));
     assert(serialized.includes("[local credential path]"));
   });
@@ -636,6 +638,31 @@ describe("gh CLI provider", () => {
         number: 7,
       }),
       /GitHub GraphQL returned errors: Resource not accessible by integration/,
+    );
+  });
+
+  it("fails review-thread collection when GraphQL omits the expected payload", async () => {
+    const provider = createGhCliProvider({
+      async runCommand(args) {
+        assert.equal(args[0], "api");
+        assert.equal(args[1], "graphql");
+        return JSON.stringify({
+          data: {
+            repository: {
+              pullRequest: null,
+            },
+          },
+        });
+      },
+    });
+
+    await assert.rejects(
+      provider.getReviewThreads({
+        owner: "example",
+        name: "example-repo",
+        number: 7,
+      }),
+      /GitHub GraphQL response did not include repository\.pullRequest\.reviewThreads/,
     );
   });
 });

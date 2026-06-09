@@ -22,6 +22,8 @@ const LOCAL_CREDENTIAL_PATH_PATTERNS = [
   /\/Users\/[^/\s]+\/\.git-credentials/g,
   /\/home\/[^/\s]+\/\.config\/gh\/hosts\.yml/g,
   /\/home\/[^/\s]+\/\.git-credentials/g,
+  /[A-Z]:\\Users\\[^\\\r\n]+\\AppData\\Roaming\\GitHub CLI\\hosts\.yml/gi,
+  /[A-Z]:\\Users\\[^\\\r\n]+\\\.git-credentials/gi,
 ];
 
 export function redactDiagnostic(value) {
