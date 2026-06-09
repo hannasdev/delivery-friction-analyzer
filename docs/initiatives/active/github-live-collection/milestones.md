@@ -103,8 +103,8 @@ Expose a maintainer-facing local command that runs live collection, normalizatio
 ### Status
 
 - [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
+- [x] Implemented
+- [x] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged

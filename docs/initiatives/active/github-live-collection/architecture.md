@@ -14,7 +14,13 @@ The repository currently exposes a report command that reads an existing `fricti
 node src/report/generate-report.js --metrics-summary <path> --json-out <path> --markdown-out <path>
 ```
 
-Fixture data for `hannasdev/mcp-writing` exercises normalization, metrics, and reports. A temporary live collector run from `/tmp` proved the same internal modules can process a larger live PR sample, but that collector is not versioned product code, has no tests, and does not provide stable CLI behavior.
+The repository also exposes a live analysis command that runs collection, normalization, metrics, and reporting in one local workflow:
+
+```sh
+node src/cli/analyze-github.js --repo <owner/name> --limit <count> --profile <path> --out <directory>
+```
+
+Fixture data for `hannasdev/mcp-writing` exercises normalization, metrics, and reports. The live command uses the versioned collector and existing downstream modules so the temporary `/tmp` smoke-test scripts are no longer the product interface.
 
 The completed Delivery Friction Analyzer architecture already names the intended module boundary:
 
@@ -72,7 +78,7 @@ The live collector should be callable from a local CLI and should also be testab
 
 ## Data And CLI Contracts
 
-The live CLI should accept at least:
+The live CLI accepts:
 
 - `--repo <owner/name>`;
 - `--limit <number>` for latest merged PRs;
@@ -97,6 +103,8 @@ The output directory should contain:
 - `metrics-summary.json`;
 - `friction-report.json`;
 - `friction-report.md`.
+
+The JSON and Markdown report artifacts include collection coverage caveats from the source bundle. Source bundles, normalized data, metrics summaries, and reports may contain sensitive repository metadata and should be treated as local/private unless intentionally shared.
 
 ## Migration / Compatibility
 
@@ -140,5 +148,6 @@ Live collection should add a new path into the existing contracts rather than re
 - [x] Should the adapter call `gh` or use direct REST/GraphQL HTTP requests first? Use a `gh`-backed adapter first behind a provider boundary.
 - [ ] How much retry/backoff is needed for the local MVP?
 - [x] Should live collection support date windows in the first milestone or defer them until after latest-N works? Defer date windows until latest-N works.
+- [x] Should the primary command live beside `src/report/generate-report.js` or under a dedicated `src/cli/` entry point? Use `src/cli/analyze-github.js`.
 - [ ] Should workflow-run filtering use PR head SHAs immediately, or should branch/event lookup ship first with explicit source caveats?
 - [ ] Should source bundles be redacted by default for private repositories?

@@ -30,3 +30,33 @@ The product should eventually combine GitHub delivery friction with token and mo
   - [PRD](docs/initiatives/active/github-live-collection/prd.md)
   - [Milestones](docs/initiatives/active/github-live-collection/milestones.md)
   - [Architecture Notes](docs/initiatives/active/github-live-collection/architecture.md)
+
+## Local GitHub Analysis
+
+Run the live analyzer with local `gh` credentials:
+
+```sh
+npm run analyze:github -- \
+  --repo hannasdev/mcp-writing \
+  --limit 30 \
+  --profile fixtures/github/mcp-writing/profile.json \
+  --out reports/mcp-writing
+```
+
+The command writes:
+
+- `source-bundle.json`
+- `normalized.json`
+- `metrics-summary.json`
+- `friction-report.json`
+- `friction-report.md`
+
+Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts.
+
+Generated artifacts may contain repository names, PR URLs, PR titles, file paths, and comment metadata. Treat source bundles, normalized data, metrics summaries, and reports as local/private unless you intentionally review and share them.
+
+The existing metrics-summary-only report command remains available for fixture and advanced workflows:
+
+```sh
+npm run report:fixture
+```

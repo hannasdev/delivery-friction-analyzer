@@ -138,7 +138,7 @@ Coverage should be explicit for every API family. For example, review-thread Gra
 
 ## Open Questions
 
-- [ ] Should the primary command live beside `src/report/generate-report.js` or under a dedicated `src/cli/` entry point?
+- [x] Should the primary command live beside `src/report/generate-report.js` or under a dedicated `src/cli/` entry point? Use `src/cli/analyze-github.js`.
 - [x] Should live collection use `gh` as the first implementation dependency, direct HTTP calls with the GitHub token, or a provider interface that can support both? Use a `gh`-backed adapter first, behind a provider boundary so direct HTTP calls can be added later.
 - [ ] Should output artifacts default inside the product repo, the target repo, or a user-selected external directory?
 - [x] What is the minimum date-window behavior for MVP: latest N merged PRs only, `--since`, or both? Latest N merged PRs only for the live-collection MVP; date windows are follow-up once latest-N collection is reliable.
