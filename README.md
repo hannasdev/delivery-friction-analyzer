@@ -26,7 +26,7 @@ The product should eventually combine GitHub delivery friction with token and mo
   - [PRD](docs/initiatives/done/delivery-friction-analyzer/prd.md)
   - [Milestones](docs/initiatives/done/delivery-friction-analyzer/milestones.md)
   - [Architecture Notes](docs/initiatives/done/delivery-friction-analyzer/architecture.md)
-- Backlog: GitHub live collection:
-  - [PRD](docs/initiatives/backlog/github-live-collection/prd.md)
-  - [Milestones](docs/initiatives/backlog/github-live-collection/milestones.md)
-  - [Architecture Notes](docs/initiatives/backlog/github-live-collection/architecture.md)
+- Active: GitHub live collection:
+  - [PRD](docs/initiatives/active/github-live-collection/prd.md)
+  - [Milestones](docs/initiatives/active/github-live-collection/milestones.md)
+  - [Architecture Notes](docs/initiatives/active/github-live-collection/architecture.md)

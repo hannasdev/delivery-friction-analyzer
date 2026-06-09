@@ -47,10 +47,10 @@ Add a reusable GitHub collection layer that can fetch live repository and pull r
 ### Status
 
 - [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
 
 ## M2: End-To-End Local Analyze Command
