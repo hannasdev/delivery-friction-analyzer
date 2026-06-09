@@ -194,6 +194,122 @@ describe("friction report generation", () => {
     ]);
   });
 
+  it("does not flag exact evidence ties as single-PR dominance", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {},
+      pullRequests: [
+        {
+          number: 1,
+          title: "first equal review",
+          url: "https://example.test/pull/1",
+          diffAtMerge: { changedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "second equal review",
+          url: "https://example.test/pull/2",
+          diffAtMerge: { changedLines: 20 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "first equal review", value: 10 },
+          { number: 2, title: "second equal review", value: 10 },
+        ],
+      },
+    });
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.dominance.status, "distributed");
+    assert.equal(reviewChurn.dominance.topShare, 0.5);
+    assert.equal(reviewChurn.dominance.note, "Displayed examples are not dominated by one PR.");
+  });
+
+  it("renders legacy observed examples without nested evidence fields", () => {
+    const markdown = renderRepositoryFrictionMarkdown({
+      reportVersion: "friction-report.v1",
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      summary: {
+        pullRequests: 1,
+        changedLines: 1,
+        nonGeneratedChangedLines: 1,
+        reviewComments: 0,
+        reviewThreads: 0,
+        topBottleneckIds: ["review-churn"],
+      },
+      bottlenecks: [
+        {
+          id: "review-churn",
+          title: "Review churn",
+          metricLabel: "iteration drag",
+          observedData: [
+            {
+              number: 7,
+              title: "legacy evidence shape",
+              value: 2,
+              changedLines: 1,
+            },
+          ],
+          dominance: {
+            note: "Not enough positive examples to evaluate outlier dominance.",
+          },
+          inferredDiagnosis: "Review loops are concentrated in a small set of PRs.",
+          suggestedAction: {
+            action: "Add or tighten a PR readiness gate.",
+          },
+        },
+      ],
+      recommendationCategories: [],
+      commentSources: {
+        totalComments: 0,
+        botComments: 0,
+        humanComments: 0,
+        authorReplies: 0,
+        bySource: [],
+      },
+      surfaces: {
+        coreChangedLines: 1,
+        lowSignalChangedLines: 0,
+        lowSignalFiles: 0,
+        weightedChangedLines: 1,
+        smallDiffWideSpreadCount: 0,
+        byFunctionalSurface: [],
+        byRole: [],
+      },
+      coverage: {
+        prOpenDiff: { unavailable: 1 },
+        workflowRuns: { unavailable: 1 },
+        reviewThreads: { unavailable: 1 },
+        notes: [],
+      },
+      guardrails: {
+        avoidsIndividualRanking: true,
+        separatesObservedInferredAndSuggested: true,
+        usesCompositeScore: false,
+      },
+      followUp: [],
+    });
+
+    assert(markdown.includes("- PR #7: legacy evidence shape (2; 1 changed lines)"));
+    assert(
+      markdown.includes(
+        "Validation: workflow source unavailable; coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0",
+      ),
+    );
+    assert(markdown.includes("Review: thread source unavailable; threads 0; resolved 0; outdated 0; comments none"));
+  });
+
   it("escapes Markdown metacharacters in representative PR titles", () => {
     const report = generateRepositoryFrictionReport({
       metricVersion: "friction-metrics.v1",

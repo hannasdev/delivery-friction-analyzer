@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-09 — Live Report Calibration
+
+- What changed: Report bottleneck examples now show validation sources, workflow conclusions, review-thread sources, comment-source evidence, and outlier dominance notes, with a redacted 30-PR calibration sample protecting the output shape.
+- Why it matters: Maintainers can trust and inspect live report recommendations more easily before turning them into process changes.
+- Who is affected: Maintainers and contributors reviewing delivery-friction reports from live GitHub analysis.
+- Action needed: None.
+- PR: TBD
+
 ### 2026-06-09 - Local GitHub Analysis Command
 
 - What changed: Added a documented local command that runs live GitHub collection, normalization, metrics, and Markdown/JSON report generation in one workflow.

@@ -335,7 +335,7 @@ function summarizeEvidenceDominance(evidence) {
 
   const topValue = values[0];
   const topShare = Math.round((topValue / total) * 1000) / 1000;
-  const status = topShare >= 0.5 ? "single_pr_dominates" : "distributed";
+  const status = topShare > 0.5 ? "single_pr_dominates" : "distributed";
   return {
     status,
     topPrNumber: evidence[0]?.number ?? null,
@@ -402,17 +402,21 @@ function escapeMarkdownText(value) {
 
 function lineForEvidence(evidence) {
   const changedLines = evidence.changedLines === null ? "unknown changed lines" : `${evidence.changedLines} changed lines`;
-  const validationConclusions = evidence.validationEvidence.workflowRunConclusions.length
-    ? evidence.validationEvidence.workflowRunConclusions.map(entry => `${entry.name}=${entry.value}`).join(", ")
+  const validationEvidence = evidence.validationEvidence ?? {};
+  const reviewEvidence = evidence.reviewEvidence ?? {};
+  const workflowRunConclusions = validationEvidence.workflowRunConclusions ?? [];
+  const reviewCommentSources = reviewEvidence.commentSources ?? [];
+  const validationConclusions = workflowRunConclusions.length
+    ? workflowRunConclusions.map(entry => `${entry.name}=${entry.value}`).join(", ")
     : "none";
-  const commentSources = evidence.reviewEvidence.commentSources.length
-    ? evidence.reviewEvidence.commentSources.map(entry => `${entry.name}=${entry.value}`).join(", ")
+  const commentSources = reviewCommentSources.length
+    ? reviewCommentSources.map(entry => `${entry.name}=${entry.value}`).join(", ")
     : "none";
 
   return [
     `- PR #${evidence.number}: ${escapeMarkdownText(evidence.title)} (${evidence.value}; ${changedLines})`,
-    `  - Validation: workflow source ${evidence.validationEvidence.workflowRunSource}; coverage ${evidence.validationEvidence.workflowRunCoverage}; conclusions ${validationConclusions}; failed checks ${evidence.validationEvidence.failedCheckRuns}; failed workflows ${evidence.validationEvidence.failedWorkflowRuns}; cancelled workflows ${evidence.validationEvidence.cancelledWorkflowRuns}`,
-    `  - Review: thread source ${evidence.reviewEvidence.reviewThreadSource}; threads ${evidence.reviewEvidence.reviewThreads}; resolved ${evidence.reviewEvidence.resolvedThreads}; outdated ${evidence.reviewEvidence.outdatedThreads}; comments ${commentSources}`,
+    `  - Validation: workflow source ${validationEvidence.workflowRunSource ?? "unavailable"}; coverage ${validationEvidence.workflowRunCoverage ?? "unavailable"}; conclusions ${validationConclusions}; failed checks ${validationEvidence.failedCheckRuns ?? 0}; failed workflows ${validationEvidence.failedWorkflowRuns ?? 0}; cancelled workflows ${validationEvidence.cancelledWorkflowRuns ?? 0}`,
+    `  - Review: thread source ${reviewEvidence.reviewThreadSource ?? "unavailable"}; threads ${reviewEvidence.reviewThreads ?? 0}; resolved ${reviewEvidence.resolvedThreads ?? 0}; outdated ${reviewEvidence.outdatedThreads ?? 0}; comments ${commentSources}`,
   ].join("\n");
 }
 
