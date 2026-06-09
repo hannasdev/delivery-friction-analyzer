@@ -273,7 +273,7 @@ function summarizeBottlenecks(metricsSummary) {
         title: definition.title,
         metricLabel: definition.metricLabel,
         observedData: evidence,
-        inferredDiagnosis: evidence.length ? definition.diagnosis : "No material signal in the fixture data.",
+        inferredDiagnosis: definition.diagnosis,
         suggestedAction: {
           category: definition.recommendationCategory,
           action: definition.action,
@@ -334,9 +334,17 @@ export function generateRepositoryFrictionReport(metricsSummary) {
   };
 }
 
+function escapeMarkdownText(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/[\\`*_\[\]]/g, "\\$&");
+}
+
 function lineForEvidence(evidence) {
   const changedLines = evidence.changedLines === null ? "unknown changed lines" : `${evidence.changedLines} changed lines`;
-  return `- PR #${evidence.number}: ${evidence.title} (${evidence.value}; ${changedLines})`;
+  return `- PR #${evidence.number}: ${escapeMarkdownText(evidence.title)} (${evidence.value}; ${changedLines})`;
 }
 
 function renderList(items) {

@@ -106,6 +106,40 @@ describe("friction report generation", () => {
     ]);
   });
 
+  it("escapes Markdown metacharacters in representative PR titles", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {},
+      pullRequests: [
+        {
+          number: 7,
+          title: "fix *markdown* [link](https://example.test) `code`",
+          url: "https://example.test/pull/7",
+          diffAtMerge: { changedLines: 1 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          {
+            number: 7,
+            title: "fix *markdown* [link](https://example.test) `code`",
+            value: 2,
+          },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assert(
+      markdown.includes("- PR #7: fix \\*markdown\\* \\[link\\](https://example.test) \\`code\\` (2; 1 changed lines)"),
+    );
+  });
+
   it("writes local JSON and Markdown report artifacts from a metrics summary", async () => {
     const tempDirectory = await mkdtemp(join(tmpdir(), "friction-report-"));
     try {
