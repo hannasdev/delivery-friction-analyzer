@@ -74,6 +74,58 @@ describe("friction report generation", () => {
     ]);
   });
 
+  it("counts bot comments even when a bot source is outside displayed source samples", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {},
+      pullRequests: [
+        {
+          number: 8,
+          title: "many comment sources",
+          url: "https://example.test/pull/8",
+          diffAtMerge: { changedLines: 1 },
+          review: {
+            comments: {
+              bySource: {
+                author_reply: 10,
+                human_reviewer: 9,
+                unknown: 8,
+                custom_source: 7,
+                other_source: 6,
+                github_actions_bot: 5,
+              },
+            },
+          },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          {
+            number: 8,
+            title: "many comment sources",
+            value: 2,
+          },
+        ],
+      },
+    });
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+    const topExample = reviewChurn.observedData[0];
+
+    assert.deepEqual(topExample.reviewEvidence.commentSources, [
+      { name: "author_reply", value: 10 },
+      { name: "human_reviewer", value: 9 },
+      { name: "unknown", value: 8 },
+      { name: "custom_source", value: 7 },
+      { name: "other_source", value: 6 },
+    ]);
+    assert.equal(topExample.reviewEvidence.botComments, 5);
+  });
+
   it("renders coverage notes, source labels, and dominance notes in Markdown", async () => {
     const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
     const report = generateRepositoryFrictionReport(metricsSummary);
@@ -231,6 +283,42 @@ describe("friction report generation", () => {
     assert.equal(reviewChurn.dominance.note, "Displayed examples are not dominated by one PR.");
   });
 
+  it("classifies dominance using the raw share before rounding the display value", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {},
+      pullRequests: [
+        {
+          number: 1,
+          title: "bare majority review",
+          url: "https://example.test/pull/1",
+          diffAtMerge: { changedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "near equal review",
+          url: "https://example.test/pull/2",
+          diffAtMerge: { changedLines: 20 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "bare majority review", value: 1251 },
+          { number: 2, title: "near equal review", value: 1249 },
+        ],
+      },
+    });
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.dominance.status, "single_pr_dominates");
+    assert.equal(reviewChurn.dominance.topShare, 0.5);
+  });
+
   it("renders legacy observed examples without nested evidence fields", () => {
     const markdown = renderRepositoryFrictionMarkdown({
       reportVersion: "friction-report.v1",
@@ -261,9 +349,6 @@ describe("friction report generation", () => {
               changedLines: 1,
             },
           ],
-          dominance: {
-            note: "Not enough positive examples to evaluate outlier dominance.",
-          },
           inferredDiagnosis: "Review loops are concentrated in a small set of PRs.",
           suggestedAction: {
             action: "Add or tighten a PR readiness gate.",
@@ -308,6 +393,7 @@ describe("friction report generation", () => {
       ),
     );
     assert(markdown.includes("Review: thread source unavailable; threads 0; resolved 0; outdated 0; comments none"));
+    assert(markdown.includes("Dominance note: Not enough positive examples to evaluate outlier dominance."));
   });
 
   it("escapes Markdown metacharacters in representative PR titles", () => {

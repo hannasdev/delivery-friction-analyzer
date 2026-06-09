@@ -161,9 +161,10 @@ function findPullRequest(metricsSummary, number) {
 }
 
 function formatPr(pr, rankingEntry) {
-  const commentSources = nonZeroEntries(pr?.review?.comments?.bySource).slice(0, 5);
+  const allCommentSources = nonZeroEntries(pr?.review?.comments?.bySource);
+  const commentSources = allCommentSources.slice(0, 5);
   const workflowRunConclusions = nonZeroEntries(pr?.ci?.workflowRuns?.conclusions);
-  const botComments = commentSources
+  const botComments = allCommentSources
     .filter(entry => BOT_SOURCES.has(entry.name))
     .reduce((sum, entry) => sum + entry.value, 0);
 
@@ -334,8 +335,9 @@ function summarizeEvidenceDominance(evidence) {
   }
 
   const topValue = values[0];
-  const topShare = Math.round((topValue / total) * 1000) / 1000;
-  const status = topShare > 0.5 ? "single_pr_dominates" : "distributed";
+  const rawTopShare = topValue / total;
+  const topShare = Math.round(rawTopShare * 1000) / 1000;
+  const status = rawTopShare > 0.5 ? "single_pr_dominates" : "distributed";
   return {
     status,
     topPrNumber: evidence[0]?.number ?? null,
@@ -466,7 +468,7 @@ export function renderRepositoryFrictionMarkdown(report) {
       "",
       `Observed data (${bottleneck.metricLabel}):`,
       ...bottleneck.observedData.map(lineForEvidence),
-      `Dominance note: ${bottleneck.dominance.note}`,
+      `Dominance note: ${bottleneck.dominance?.note ?? "Not enough positive examples to evaluate outlier dominance."}`,
       "",
       `Inferred diagnosis: ${bottleneck.inferredDiagnosis}`,
       `Suggested action: ${bottleneck.suggestedAction.action}`,
