@@ -1,0 +1,501 @@
+{
+  "reportVersion": "friction-report.v1",
+  "metricVersion": "friction-metrics.v1",
+  "targetRepository": {
+    "owner": "hannasdev",
+    "name": "mcp-writing",
+    "defaultBranch": "main",
+    "visibility": "public",
+    "analysisWindowDays": 30,
+    "isValidationTarget": true
+  },
+  "summary": {
+    "pullRequests": 3,
+    "changedLines": 2454,
+    "nonGeneratedChangedLines": 2433,
+    "reviewComments": 30,
+    "reviewThreads": 25,
+    "failedChecks": 0,
+    "cancelledWorkflowRuns": 1,
+    "topBottleneckIds": [
+      "review-churn",
+      "repo-guidance-gap",
+      "changed-file-spread"
+    ]
+  },
+  "coverage": {
+    "prOpenDiff": {
+      "unavailable": 3
+    },
+    "workflowRuns": {
+      "unavailable": 2,
+      "observed": 1
+    },
+    "reviewThreads": {
+      "not_sampled_low_friction": 1,
+      "graphql:repository.pullRequest.reviewThreads": 1,
+      "not_sampled_for_broad_file_spread": 1
+    },
+    "notes": [
+      "PR-open diff growth is unavailable for some PRs and is not inferred from merge-time data.",
+      "Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing."
+    ]
+  },
+  "commentSources": {
+    "totalComments": 30,
+    "bySource": [
+      {
+        "name": "author_reply",
+        "value": 15
+      },
+      {
+        "name": "copilot",
+        "value": 15
+      },
+      {
+        "name": "code_scanning",
+        "value": 0
+      },
+      {
+        "name": "dependency_bot",
+        "value": 0
+      },
+      {
+        "name": "github_actions_bot",
+        "value": 0
+      },
+      {
+        "name": "human_reviewer",
+        "value": 0
+      },
+      {
+        "name": "unknown",
+        "value": 0
+      },
+      {
+        "name": "unknown_bot",
+        "value": 0
+      }
+    ],
+    "botComments": 15,
+    "humanComments": 0,
+    "authorReplies": 15,
+    "dominantSource": {
+      "name": "author_reply",
+      "value": 15
+    }
+  },
+  "surfaces": {
+    "coreChangedLines": 1257,
+    "lowSignalChangedLines": 87,
+    "lowSignalFiles": 8,
+    "weightedChangedLines": 2383.5,
+    "smallDiffWideSpreadCount": 1,
+    "byFunctionalSurface": [
+      {
+        "name": "runtime",
+        "value": 1257
+      },
+      {
+        "name": "test_suite",
+        "value": 953
+      },
+      {
+        "name": "user_docs",
+        "value": 123
+      },
+      {
+        "name": "planning",
+        "value": 50
+      },
+      {
+        "name": "product_docs",
+        "value": 34
+      },
+      {
+        "name": "agent_tool_reference",
+        "value": 21
+      },
+      {
+        "name": "release_notes",
+        "value": 16
+      }
+    ],
+    "byRole": [
+      {
+        "name": "core_product_code",
+        "value": 1257
+      },
+      {
+        "name": "tests",
+        "value": 953
+      },
+      {
+        "name": "unknown",
+        "value": 157
+      },
+      {
+        "name": "planning_docs",
+        "value": 50
+      },
+      {
+        "name": "generated_docs",
+        "value": 21
+      },
+      {
+        "name": "release_notes",
+        "value": 16
+      }
+    ]
+  },
+  "bottlenecks": [
+    {
+      "id": "review-churn",
+      "title": "Review churn",
+      "metricLabel": "iteration drag",
+      "observedData": [
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 20,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        },
+        {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+          "value": 12,
+          "changedLines": 1207,
+          "reviewThreads": 10,
+          "functionalSurfaces": 6,
+          "coreChangedLines": 514,
+          "lowSignalFiles": 4
+        }
+      ],
+      "inferredDiagnosis": "Review loops are concentrated in a small set of PRs.",
+      "suggestedAction": {
+        "category": "pr_readiness_gate",
+        "action": "Add or tighten a PR readiness gate for changes that attract repeated review rounds."
+      }
+    },
+    {
+      "id": "repo-guidance-gap",
+      "title": "Repo guidance gap",
+      "metricLabel": "iteration drag",
+      "observedData": [
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 20,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        },
+        {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+          "value": 12,
+          "changedLines": 1207,
+          "reviewThreads": 10,
+          "functionalSurfaces": 6,
+          "coreChangedLines": 514,
+          "lowSignalFiles": 4
+        }
+      ],
+      "inferredDiagnosis": "Repeated review loops suggest some repository expectations are not yet available at implementation time.",
+      "suggestedAction": {
+        "category": "repo_specific_ai_skills",
+        "action": "Add repo-specific AI skills or instructions for repeated review themes before opening the next PR."
+      }
+    },
+    {
+      "id": "changed-file-spread",
+      "title": "Changed-file spread",
+      "metricLabel": "spread score",
+      "observedData": [
+        {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+          "value": 17,
+          "changedLines": 1207,
+          "reviewThreads": 10,
+          "functionalSurfaces": 6,
+          "coreChangedLines": 514,
+          "lowSignalFiles": 4
+        },
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 16,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        },
+        {
+          "number": 223,
+          "title": "docs: accept architecture snapshot milestone",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/223",
+          "value": 2,
+          "changedLines": 2,
+          "reviewThreads": 0,
+          "functionalSurfaces": 1,
+          "coreChangedLines": 0,
+          "lowSignalFiles": 1
+        }
+      ],
+      "inferredDiagnosis": "Broad file and surface spread can hide review and validation risk.",
+      "suggestedAction": {
+        "category": "smaller_milestones",
+        "action": "Break broad changes into smaller milestones when core files, directories, or surfaces spread out."
+      }
+    },
+    {
+      "id": "review-surprise",
+      "title": "Review surprise",
+      "metricLabel": "surface surprise score",
+      "observedData": [
+        {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+          "value": 5,
+          "changedLines": 1207,
+          "reviewThreads": 10,
+          "functionalSurfaces": 6,
+          "coreChangedLines": 514,
+          "lowSignalFiles": 4
+        },
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 4,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        }
+      ],
+      "inferredDiagnosis": "Changes spanning several functional surfaces are more likely to surprise reviewers.",
+      "suggestedAction": {
+        "category": "pr_readiness_gate",
+        "action": "Call out multi-surface scope in the PR description or split cross-surface work."
+      }
+    },
+    {
+      "id": "fix-amplification",
+      "title": "Fix amplification",
+      "metricLabel": "post-review commits",
+      "observedData": [
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 5,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        },
+        {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+          "value": 1,
+          "changedLines": 1207,
+          "reviewThreads": 10,
+          "functionalSurfaces": 6,
+          "coreChangedLines": 514,
+          "lowSignalFiles": 4
+        }
+      ],
+      "inferredDiagnosis": "Post-review commits show where initial PR shape did not stay stable.",
+      "suggestedAction": {
+        "category": "smaller_milestones",
+        "action": "Use smaller delivery slices when review feedback causes meaningful post-review change."
+      }
+    },
+    {
+      "id": "validation-gap",
+      "title": "Validation gap",
+      "metricLabel": "validation gap score",
+      "observedData": [
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 1,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        }
+      ],
+      "inferredDiagnosis": "Validation friction appears where checks, workflows, or cancellations add corrective loops.",
+      "suggestedAction": {
+        "category": "preflight_scripts",
+        "action": "Add local preflight scripts for recurring CI or workflow interruptions."
+      }
+    },
+    {
+      "id": "local-hook-gap",
+      "title": "Local hook gap",
+      "metricLabel": "validation gap score",
+      "observedData": [
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 1,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        }
+      ],
+      "inferredDiagnosis": "Validation signals point to checks that may be cheaper to catch before a branch reaches CI.",
+      "suggestedAction": {
+        "category": "hooks",
+        "action": "Add or improve local hooks for recurring formatting, lint, typecheck, snapshot, or generated-output churn."
+      }
+    },
+    {
+      "id": "test-infrastructure-gap",
+      "title": "Test infrastructure gap",
+      "metricLabel": "validation gap score",
+      "observedData": [
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 1,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        }
+      ],
+      "inferredDiagnosis": "Validation friction may indicate a missing or inconvenient local safety net.",
+      "suggestedAction": {
+        "category": "test_infrastructure",
+        "action": "Invest in test infrastructure when recurring CI or workflow signals are a primary delivery loop."
+      }
+    },
+    {
+      "id": "planning-gap",
+      "title": "Planning gap",
+      "metricLabel": "planning gap score",
+      "observedData": [
+        {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221",
+          "value": 1,
+          "changedLines": 1207,
+          "reviewThreads": 10,
+          "functionalSurfaces": 6,
+          "coreChangedLines": 514,
+          "lowSignalFiles": 4
+        },
+        {
+          "number": 223,
+          "title": "docs: accept architecture snapshot milestone",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/223",
+          "value": 1,
+          "changedLines": 2,
+          "reviewThreads": 0,
+          "functionalSurfaces": 1,
+          "coreChangedLines": 0,
+          "lowSignalFiles": 1
+        },
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239",
+          "value": 1,
+          "changedLines": 1245,
+          "reviewThreads": 15,
+          "functionalSurfaces": 5,
+          "coreChangedLines": 743,
+          "lowSignalFiles": 3
+        }
+      ],
+      "inferredDiagnosis": "Planning-related changes show up in the same PRs as delivery friction.",
+      "suggestedAction": {
+        "category": "planning_artifacts",
+        "action": "Improve planning artifacts when planning or scope files are part of high-friction changes."
+      }
+    }
+  ],
+  "recommendationCategories": [
+    {
+      "id": "hooks",
+      "label": "Hooks",
+      "description": "Local hooks for repeated formatting, lint, typecheck, snapshot, or generated-output churn.",
+      "triggeredBottlenecks": 1
+    },
+    {
+      "id": "preflight_scripts",
+      "label": "Preflight scripts",
+      "description": "Local commands that catch CI or workflow failures before pushing.",
+      "triggeredBottlenecks": 1
+    },
+    {
+      "id": "repo_specific_ai_skills",
+      "label": "Repo-specific AI skills",
+      "description": "Repository guidance for repeated review themes around architecture, tests, docs, or unsafe APIs.",
+      "triggeredBottlenecks": 1
+    },
+    {
+      "id": "pr_readiness_gate",
+      "label": "PR readiness gates",
+      "description": "Review-before-review checks for scope, tests, descriptions, and evidence.",
+      "triggeredBottlenecks": 2
+    },
+    {
+      "id": "smaller_milestones",
+      "label": "Smaller milestones",
+      "description": "Smaller delivery slices for broad, unstable, or cross-surface changes.",
+      "triggeredBottlenecks": 2
+    },
+    {
+      "id": "planning_artifacts",
+      "label": "Planning artifacts",
+      "description": "Durable product or architecture notes when requirement or scope signals dominate.",
+      "triggeredBottlenecks": 1
+    },
+    {
+      "id": "test_infrastructure",
+      "label": "Test infrastructure",
+      "description": "Validation infrastructure when recurring failures or missing coverage create delivery loops.",
+      "triggeredBottlenecks": 1
+    }
+  ],
+  "guardrails": {
+    "avoidsIndividualRanking": true,
+    "separatesObservedInferredAndSuggested": true,
+    "usesCompositeScore": false
+  },
+  "followUp": [
+    "Inspect recommendations against real PR history before turning them into automated repository changes.",
+    "Collect PR-open snapshots in a future GitHub App flow when diff-growth coverage matters."
+  ]
+}
