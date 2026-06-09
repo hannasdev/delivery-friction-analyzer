@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
@@ -378,6 +378,38 @@ describe("GitHub live analyze CLI", () => {
 
       assert.deepEqual(provider.calls, []);
       assert.deepEqual(await readdir(outDir), [ANALYZE_GITHUB_ARTIFACTS.sourceBundle]);
+    });
+  });
+
+  it("fails before provider calls when an existing artifact file is not writable", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "readonly-artifact-out");
+      await mkdir(outDir, { recursive: true });
+      const artifactPath = join(outDir, ANALYZE_GITHUB_ARTIFACTS.sourceBundle);
+      await writeFile(artifactPath, "existing artifact\n", "utf8");
+      await chmod(artifactPath, 0o444);
+      const provider = createProvider();
+
+      try {
+        await assert.rejects(
+          runAnalyzeGithub({
+            repository: "example/example-repo",
+            limit: 1,
+            profilePath,
+            outDir,
+          }, {
+            provider,
+            now: () => "2026-06-09T00:00:00Z",
+          }),
+          /artifact path must be writable/,
+        );
+      } finally {
+        await chmod(artifactPath, 0o644);
+      }
+
+      assert.deepEqual(provider.calls, []);
+      assert.equal(await readFile(artifactPath, "utf8"), "existing artifact\n");
     });
   });
 });

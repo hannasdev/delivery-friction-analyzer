@@ -1,4 +1,5 @@
-import { mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import { access, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { collectGitHubSourceBundle } from "../collect/github-source-bundle.js";
@@ -154,8 +155,12 @@ async function assertWritableArtifactTargets(paths) {
       if (!pathStat.isFile()) {
         throw new Error(`artifact path must be a writable file path, not a directory or special file: ${path}`);
       }
+      await access(path, constants.W_OK);
     } catch (error) {
       if (error.code !== "ENOENT") {
+        if (error.code === "EACCES") {
+          throw new Error(`artifact path must be writable: ${path}`);
+        }
         throw error;
       }
     }
