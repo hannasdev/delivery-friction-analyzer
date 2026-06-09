@@ -41,6 +41,11 @@ query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
           path
           line
           comments(first: 100) {
+            totalCount
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
             nodes {
               databaseId
               author {
@@ -118,6 +123,8 @@ export function createGhCliProvider({ ghPath = "gh", runCommand } = {}) {
         `${owner}/${name}`,
         "--state",
         "merged",
+        "--search",
+        "is:merged sort:merged-desc",
         "--limit",
         String(limit),
         "--json",

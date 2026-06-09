@@ -309,9 +309,91 @@ describe("GitHub source collector", () => {
     assert.equal(bundle.pullRequests[0].prOpenDiff.source, "unavailable");
     assert.equal(bundle.pullRequests[0].prOpenDiff.additions, undefined);
   });
+
+  it("marks review-thread coverage partial when nested comments are truncated", async () => {
+    const provider = createProvider({
+      async getReviewThreads(input) {
+        this.calls.push(["getReviewThreads", input]);
+        return {
+          totalCount: 1,
+          nodes: [
+            {
+              id: "thread-with-many-comments",
+              isResolved: false,
+              isOutdated: false,
+              path: "src/collect/github-source-bundle.js",
+              line: 42,
+              comments: {
+                totalCount: 101,
+                pageInfo: {
+                  hasNextPage: true,
+                  endCursor: "comment-cursor",
+                },
+                nodes: [
+                  {
+                    databaseId: 1001,
+                    author: { login: "reviewer", type: "User" },
+                    path: "src/collect/github-source-bundle.js",
+                    line: 42,
+                  },
+                ],
+              },
+            },
+          ],
+        };
+      },
+    });
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      provider,
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+
+    assert.equal(bundle.pullRequests[0].reviewThreads.totalCount, 1);
+    assert.equal(bundle.pullRequests[0].reviewThreads.nodes[0].comments.length, 1);
+    assert.equal(bundle.pullRequests[0].coverage.reviewThreads.status, "partial");
+    assert.equal(coverageFor(bundle, "review_threads").status, "partial");
+    assert(
+      bundle.pullRequests[0].coverage.reviewThreads.diagnostics.some(diagnostic => (
+        diagnostic.includes("more than 100 comments")
+      )),
+    );
+  });
 });
 
 describe("gh CLI provider", () => {
+  it("requests merged PRs with an explicit merged-date search and sorts returned data defensively", async () => {
+    const provider = createGhCliProvider({
+      async runCommand(args) {
+        assert.deepEqual(args.slice(0, 8), [
+          "pr",
+          "list",
+          "--repo",
+          "example/example-repo",
+          "--state",
+          "merged",
+          "--search",
+          "is:merged sort:merged-desc",
+        ]);
+        return JSON.stringify([
+          { number: 1, mergedAt: "2026-06-01T10:00:00Z" },
+          { number: 3, mergedAt: "2026-06-03T10:00:00Z" },
+          { number: 2, mergedAt: "2026-06-02T10:00:00Z" },
+        ]);
+      },
+    });
+
+    const prs = await provider.listMergedPullRequests({
+      owner: "example",
+      name: "example-repo",
+      limit: 2,
+    });
+
+    assert.deepEqual(prs.map(pr => pr.number), [3, 2]);
+  });
+
   it("unwraps GraphQL response data when collecting review threads", async () => {
     const provider = createGhCliProvider({
       async runCommand(args) {

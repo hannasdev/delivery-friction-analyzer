@@ -49,7 +49,7 @@ Add a reusable GitHub collection layer that can fetch live repository and pull r
 - [ ] Not started
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
 

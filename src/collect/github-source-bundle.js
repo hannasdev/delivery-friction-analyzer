@@ -91,6 +91,7 @@ function mapReview(review) {
 }
 
 function mapReviewThreads(threads) {
+  let truncatedCommentThreads = 0;
   const nodes = (threads.nodes ?? []).map(thread => ({
     id: thread.id,
     isResolved: Boolean(thread.isResolved),
@@ -109,10 +110,19 @@ function mapReviewThreads(threads) {
     })),
   }));
 
+  for (const thread of threads.nodes ?? []) {
+    if (thread.comments?.pageInfo?.hasNextPage) {
+      truncatedCommentThreads += 1;
+    }
+  }
+
   return {
-    source: "graphql:repository.pullRequest.reviewThreads",
-    totalCount: threads.totalCount ?? nodes.length,
-    nodes,
+    reviewThreads: {
+      source: "graphql:repository.pullRequest.reviewThreads",
+      totalCount: threads.totalCount ?? nodes.length,
+      nodes,
+    },
+    truncatedCommentThreads,
   };
 }
 
@@ -305,7 +315,7 @@ export async function collectGitHubSourceBundle({
   const inventory = await provider.listMergedPullRequests({ ...targetInput, limit });
   const inventoryCoverage = coverageEntry({
     family: "pull_request_inventory",
-    source: "gh pr list --state merged",
+    source: "gh pr list --state merged --search \"is:merged sort:merged-desc\"",
     status: COVERAGE_STATUS.available,
     downstreamImpact: "Required to select latest merged pull requests.",
   });
@@ -325,7 +335,19 @@ export async function collectGitHubSourceBundle({
       run: () => provider.getReviewThreads({ ...targetInput, number: pr.number }),
     });
     if (reviewThreadsAttempt.value) {
-      pr.reviewThreads = mapReviewThreads(reviewThreadsAttempt.value);
+      const mappedReviewThreads = mapReviewThreads(reviewThreadsAttempt.value);
+      pr.reviewThreads = mappedReviewThreads.reviewThreads;
+      if (mappedReviewThreads.truncatedCommentThreads > 0) {
+        reviewThreadsAttempt.coverage = coverageEntry({
+          family: "review_threads",
+          source: "graphql:repository.pullRequest.reviewThreads",
+          status: COVERAGE_STATUS.partial,
+          diagnostics: [
+            `PR #${pr.number} has ${mappedReviewThreads.truncatedCommentThreads} review thread(s) with more than 100 comments; nested comment pagination is deferred from M1.`,
+          ],
+          downstreamImpact: "Thread counts are available, but review-comment totals may be incomplete for affected PRs.",
+        });
+      }
     }
     pr.coverage.reviewThreads = reviewThreadsAttempt.coverage;
     reviewThreadCoverages.push(reviewThreadsAttempt.coverage);
@@ -403,7 +425,7 @@ export async function collectGitHubSourceBundle({
       strategy: "latest_merged_pull_requests",
       requestedLimit: limit,
       collectedCount: pullRequests.length,
-      source: "gh pr list --state merged",
+      source: "gh pr list --state merged --search \"is:merged sort:merged-desc\"",
     },
     coverage: {
       status: buildCoverageSummary(apiFamilies),
