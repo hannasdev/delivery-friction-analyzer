@@ -163,7 +163,43 @@
           "reviewThreads": 15,
           "functionalSurfaces": 5,
           "coreChangedLines": 743,
-          "lowSignalFiles": 3
+          "lowSignalFiles": 3,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ],
+            "botComments": 15,
+            "humanReviewerComments": 0,
+            "authorReplies": 15
+          }
         },
         {
           "number": 221,
@@ -174,9 +210,33 @@
           "reviewThreads": 10,
           "functionalSurfaces": 6,
           "coreChangedLines": 514,
-          "lowSignalFiles": 4
+          "lowSignalFiles": 4,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "not_sampled_for_broad_file_spread",
+            "reviewThreads": 10,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
         }
       ],
+      "dominance": {
+        "status": "single_pr_dominates",
+        "topPrNumber": 239,
+        "topShare": 0.625,
+        "note": "PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing."
+      },
       "inferredDiagnosis": "Review loops are concentrated in a small set of PRs.",
       "suggestedAction": {
         "category": "pr_readiness_gate",
@@ -197,7 +257,43 @@
           "reviewThreads": 15,
           "functionalSurfaces": 5,
           "coreChangedLines": 743,
-          "lowSignalFiles": 3
+          "lowSignalFiles": 3,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ],
+            "botComments": 15,
+            "humanReviewerComments": 0,
+            "authorReplies": 15
+          }
         },
         {
           "number": 221,
@@ -208,9 +304,33 @@
           "reviewThreads": 10,
           "functionalSurfaces": 6,
           "coreChangedLines": 514,
-          "lowSignalFiles": 4
+          "lowSignalFiles": 4,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "not_sampled_for_broad_file_spread",
+            "reviewThreads": 10,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
         }
       ],
+      "dominance": {
+        "status": "single_pr_dominates",
+        "topPrNumber": 239,
+        "topShare": 0.625,
+        "note": "PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing."
+      },
       "inferredDiagnosis": "Repeated review loops suggest some repository expectations are not yet available at implementation time.",
       "suggestedAction": {
         "category": "repo_specific_ai_skills",
@@ -231,7 +351,25 @@
           "reviewThreads": 10,
           "functionalSurfaces": 6,
           "coreChangedLines": 514,
-          "lowSignalFiles": 4
+          "lowSignalFiles": 4,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "not_sampled_for_broad_file_spread",
+            "reviewThreads": 10,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
         },
         {
           "number": 239,
@@ -242,7 +380,43 @@
           "reviewThreads": 15,
           "functionalSurfaces": 5,
           "coreChangedLines": 743,
-          "lowSignalFiles": 3
+          "lowSignalFiles": 3,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ],
+            "botComments": 15,
+            "humanReviewerComments": 0,
+            "authorReplies": 15
+          }
         },
         {
           "number": 223,
@@ -253,9 +427,33 @@
           "reviewThreads": 0,
           "functionalSurfaces": 1,
           "coreChangedLines": 0,
-          "lowSignalFiles": 1
+          "lowSignalFiles": 1,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "not_sampled_low_friction",
+            "reviewThreads": 0,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
         }
       ],
+      "dominance": {
+        "status": "distributed",
+        "topPrNumber": 221,
+        "topShare": 0.486,
+        "note": "Displayed examples are not dominated by one PR."
+      },
       "inferredDiagnosis": "Broad file and surface spread can hide review and validation risk.",
       "suggestedAction": {
         "category": "smaller_milestones",
@@ -276,7 +474,25 @@
           "reviewThreads": 10,
           "functionalSurfaces": 6,
           "coreChangedLines": 514,
-          "lowSignalFiles": 4
+          "lowSignalFiles": 4,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "not_sampled_for_broad_file_spread",
+            "reviewThreads": 10,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
         },
         {
           "number": 239,
@@ -287,9 +503,51 @@
           "reviewThreads": 15,
           "functionalSurfaces": 5,
           "coreChangedLines": 743,
-          "lowSignalFiles": 3
+          "lowSignalFiles": 3,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ],
+            "botComments": 15,
+            "humanReviewerComments": 0,
+            "authorReplies": 15
+          }
         }
       ],
+      "dominance": {
+        "status": "single_pr_dominates",
+        "topPrNumber": 221,
+        "topShare": 0.556,
+        "note": "PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing."
+      },
       "inferredDiagnosis": "Changes spanning several functional surfaces are more likely to surprise reviewers.",
       "suggestedAction": {
         "category": "pr_readiness_gate",
@@ -310,7 +568,43 @@
           "reviewThreads": 15,
           "functionalSurfaces": 5,
           "coreChangedLines": 743,
-          "lowSignalFiles": 3
+          "lowSignalFiles": 3,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ],
+            "botComments": 15,
+            "humanReviewerComments": 0,
+            "authorReplies": 15
+          }
         },
         {
           "number": 221,
@@ -321,9 +615,33 @@
           "reviewThreads": 10,
           "functionalSurfaces": 6,
           "coreChangedLines": 514,
-          "lowSignalFiles": 4
+          "lowSignalFiles": 4,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "not_sampled_for_broad_file_spread",
+            "reviewThreads": 10,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
         }
       ],
+      "dominance": {
+        "status": "single_pr_dominates",
+        "topPrNumber": 239,
+        "topShare": 0.833,
+        "note": "PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing."
+      },
       "inferredDiagnosis": "Post-review commits show where initial PR shape did not stay stable.",
       "suggestedAction": {
         "category": "smaller_milestones",
@@ -344,9 +662,51 @@
           "reviewThreads": 15,
           "functionalSurfaces": 5,
           "coreChangedLines": 743,
-          "lowSignalFiles": 3
+          "lowSignalFiles": 3,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ],
+            "botComments": 15,
+            "humanReviewerComments": 0,
+            "authorReplies": 15
+          }
         }
       ],
+      "dominance": {
+        "status": "not_applicable",
+        "topPrNumber": 239,
+        "topShare": null,
+        "note": "Not enough positive examples to evaluate outlier dominance."
+      },
       "inferredDiagnosis": "Validation friction appears where checks, workflows, or cancellations add corrective loops.",
       "suggestedAction": {
         "category": "preflight_scripts",
@@ -367,9 +727,51 @@
           "reviewThreads": 15,
           "functionalSurfaces": 5,
           "coreChangedLines": 743,
-          "lowSignalFiles": 3
+          "lowSignalFiles": 3,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ],
+            "botComments": 15,
+            "humanReviewerComments": 0,
+            "authorReplies": 15
+          }
         }
       ],
+      "dominance": {
+        "status": "not_applicable",
+        "topPrNumber": 239,
+        "topShare": null,
+        "note": "Not enough positive examples to evaluate outlier dominance."
+      },
       "inferredDiagnosis": "Validation signals point to checks that may be cheaper to catch before a branch reaches CI.",
       "suggestedAction": {
         "category": "hooks",
@@ -390,9 +792,51 @@
           "reviewThreads": 15,
           "functionalSurfaces": 5,
           "coreChangedLines": 743,
-          "lowSignalFiles": 3
+          "lowSignalFiles": 3,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ],
+            "botComments": 15,
+            "humanReviewerComments": 0,
+            "authorReplies": 15
+          }
         }
       ],
+      "dominance": {
+        "status": "not_applicable",
+        "topPrNumber": 239,
+        "topShare": null,
+        "note": "Not enough positive examples to evaluate outlier dominance."
+      },
       "inferredDiagnosis": "Validation friction may indicate a missing or inconvenient local safety net.",
       "suggestedAction": {
         "category": "test_infrastructure",
@@ -413,7 +857,25 @@
           "reviewThreads": 10,
           "functionalSurfaces": 6,
           "coreChangedLines": 514,
-          "lowSignalFiles": 4
+          "lowSignalFiles": 4,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "not_sampled_for_broad_file_spread",
+            "reviewThreads": 10,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
         },
         {
           "number": 223,
@@ -424,7 +886,25 @@
           "reviewThreads": 0,
           "functionalSurfaces": 1,
           "coreChangedLines": 0,
-          "lowSignalFiles": 1
+          "lowSignalFiles": 1,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "not_sampled_low_friction",
+            "reviewThreads": 0,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
         },
         {
           "number": 239,
@@ -435,9 +915,51 @@
           "reviewThreads": 15,
           "functionalSurfaces": 5,
           "coreChangedLines": 743,
-          "lowSignalFiles": 3
+          "lowSignalFiles": 3,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ],
+            "botComments": 15,
+            "humanReviewerComments": 0,
+            "authorReplies": 15
+          }
         }
       ],
+      "dominance": {
+        "status": "distributed",
+        "topPrNumber": 221,
+        "topShare": 0.333,
+        "note": "Displayed examples are not dominated by one PR."
+      },
       "inferredDiagnosis": "Planning-related changes show up in the same PRs as delivery friction.",
       "suggestedAction": {
         "category": "planning_artifacts",

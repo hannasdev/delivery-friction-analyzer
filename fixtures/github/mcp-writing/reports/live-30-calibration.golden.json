@@ -1,0 +1,344 @@
+{
+  "schemaVersion": "github-live-report-calibration.v1",
+  "derivedFrom": {
+    "repository": "hannasdev/mcp-writing",
+    "pullRequests": 30,
+    "sourceArtifact": "friction-report.v1",
+    "redaction": "Keeps report-level counts, source labels, conclusions, and representative PR titles; omits raw comments, file paths, URLs, authors, SHAs, and workflow run lists."
+  },
+  "summary": {
+    "pullRequests": 30,
+    "changedLines": 25315,
+    "nonGeneratedChangedLines": 25071,
+    "reviewComments": 206,
+    "reviewThreads": 104,
+    "failedChecks": 3,
+    "cancelledWorkflowRuns": 12,
+    "topBottleneckIds": [
+      "validation-gap",
+      "local-hook-gap",
+      "test-infrastructure-gap"
+    ]
+  },
+  "collectionCoverage": {
+    "status": "partial",
+    "apiFamilies": [
+      {
+        "family": "pull_request_details",
+        "source": "gh pr view --json",
+        "status": "available",
+        "attempts": 30
+      },
+      {
+        "family": "review_threads",
+        "source": "graphql:repository.pullRequest.reviewThreads",
+        "status": "available",
+        "attempts": 30
+      },
+      {
+        "family": "workflow_runs",
+        "source": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+        "status": "available",
+        "attempts": 30
+      },
+      {
+        "family": "pr_open_diff",
+        "source": "historical_snapshot",
+        "status": "unavailable",
+        "attempts": 30,
+        "downstreamImpact": "Diff growth metrics must remain unavailable."
+      }
+    ]
+  },
+  "topBottlenecks": [
+    {
+      "id": "validation-gap",
+      "title": "Validation gap",
+      "dominance": {
+        "status": "single_pr_dominates",
+        "topPrNumber": 214,
+        "topShare": 0.848
+      },
+      "observedData": [
+        {
+          "number": 214,
+          "title": "chore(deps): Bump qs from 6.15.1 to 6.15.2 in the npm_and_yarn group across 1 directory",
+          "value": 39,
+          "changedLines": 6,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "failure",
+                "value": 39
+              },
+              {
+                "name": "success",
+                "value": 16
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 39,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 0,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "commentSources": []
+          }
+        },
+        {
+          "number": 213,
+          "title": "feat: support runnable Docker workflow",
+          "value": 4,
+          "changedLines": 440,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 5
+              },
+              {
+                "name": "failure",
+                "value": 2
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 1,
+            "failedWorkflowRuns": 2,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 4,
+            "resolvedThreads": 4,
+            "outdatedThreads": 4,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 4
+              },
+              {
+                "name": "copilot",
+                "value": 4
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "changed-file-spread",
+      "title": "Changed-file spread",
+      "dominance": {
+        "status": "distributed",
+        "topPrNumber": 212,
+        "topShare": 0.458
+      },
+      "observedData": [
+        {
+          "number": 212,
+          "title": "feat: harden filesystem boundary mutations",
+          "value": 38,
+          "changedLines": 4385,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 12
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 17,
+            "resolvedThreads": 17,
+            "outdatedThreads": 9,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 17
+              },
+              {
+                "name": "copilot",
+                "value": 17
+              }
+            ]
+          }
+        },
+        {
+          "number": 219,
+          "title": "feat: add project database backup foundation",
+          "value": 25,
+          "changedLines": 3285,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 7,
+            "resolvedThreads": 7,
+            "outdatedThreads": 3,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 7
+              },
+              {
+                "name": "copilot",
+                "value": 7
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "review-churn",
+      "title": "Review churn",
+      "dominance": {
+        "status": "distributed",
+        "topPrNumber": 212,
+        "topShare": 0.385
+      },
+      "observedData": [
+        {
+          "number": 212,
+          "title": "feat: harden filesystem boundary mutations",
+          "value": 25,
+          "changedLines": 4385,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 12
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 17,
+            "resolvedThreads": 17,
+            "outdatedThreads": 9,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 17
+              },
+              {
+                "name": "copilot",
+                "value": 17
+              }
+            ]
+          }
+        },
+        {
+          "number": 220,
+          "title": "feat(backup): add project restore dry-run planning",
+          "value": 20,
+          "changedLines": 1766,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 10
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 13,
+            "resolvedThreads": 13,
+            "outdatedThreads": 7,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 13
+              },
+              {
+                "name": "copilot",
+                "value": 13
+              }
+            ]
+          }
+        },
+        {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "value": 20,
+          "changedLines": 1245,
+          "validationEvidence": {
+            "workflowRunSource": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+            "workflowRunCoverage": "observed",
+            "workflowRunConclusions": [
+              {
+                "name": "success",
+                "value": 8
+              },
+              {
+                "name": "cancelled",
+                "value": 1
+              }
+            ],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 1
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "graphql:repository.pullRequest.reviewThreads",
+            "reviewThreads": 15,
+            "resolvedThreads": 15,
+            "outdatedThreads": 10,
+            "commentSources": [
+              {
+                "name": "author_reply",
+                "value": 15
+              },
+              {
+                "name": "copilot",
+                "value": 15
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

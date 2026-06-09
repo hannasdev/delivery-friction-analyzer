@@ -152,11 +152,21 @@ function sortedEntries(object = {}) {
     .map(([name, value]) => ({ name, value }));
 }
 
+function nonZeroEntries(object = {}) {
+  return sortedEntries(object).filter(entry => entry.value > 0);
+}
+
 function findPullRequest(metricsSummary, number) {
   return (metricsSummary.pullRequests ?? []).find(pr => pr.number === number);
 }
 
 function formatPr(pr, rankingEntry) {
+  const commentSources = nonZeroEntries(pr?.review?.comments?.bySource).slice(0, 5);
+  const workflowRunConclusions = nonZeroEntries(pr?.ci?.workflowRuns?.conclusions);
+  const botComments = commentSources
+    .filter(entry => BOT_SOURCES.has(entry.name))
+    .reduce((sum, entry) => sum + entry.value, 0);
+
   return {
     number: rankingEntry.number,
     title: rankingEntry.title,
@@ -167,6 +177,24 @@ function formatPr(pr, rankingEntry) {
     functionalSurfaces: pr?.files?.functionalSurfaces ?? null,
     coreChangedLines: pr?.files?.coreChangedLines ?? null,
     lowSignalFiles: pr?.files?.lowSignalFiles ?? null,
+    validationEvidence: {
+      workflowRunSource: pr?.ci?.workflowRuns?.source ?? "unavailable",
+      workflowRunCoverage: pr?.ci?.workflowRuns?.coverage ?? "unavailable",
+      workflowRunConclusions,
+      failedCheckRuns: pr?.ci?.checkRuns?.failedCount ?? 0,
+      failedWorkflowRuns: pr?.ci?.workflowRuns?.failedCount ?? 0,
+      cancelledWorkflowRuns: pr?.ci?.workflowRuns?.cancelledCount ?? 0,
+    },
+    reviewEvidence: {
+      reviewThreadSource: pr?.review?.threads?.source ?? "unavailable",
+      reviewThreads: pr?.review?.threads?.totalCount ?? 0,
+      resolvedThreads: pr?.review?.threads?.resolvedCount ?? 0,
+      outdatedThreads: pr?.review?.threads?.outdatedCount ?? 0,
+      commentSources,
+      botComments,
+      humanReviewerComments: pr?.review?.comments?.bySource?.human_reviewer ?? 0,
+      authorReplies: pr?.review?.comments?.bySource?.author_reply ?? 0,
+    },
   };
 }
 
@@ -266,6 +294,7 @@ function summarizeBottlenecks(metricsSummary) {
   return BOTTLENECK_DEFINITIONS
     .map((definition, definitionIndex) => {
       const evidence = topEvidence(metricsSummary, definition.rankingKey);
+      const dominance = summarizeEvidenceDominance(evidence);
       return {
         definitionIndex,
         rankValue: evidence[0]?.value ?? 0,
@@ -273,6 +302,7 @@ function summarizeBottlenecks(metricsSummary) {
         title: definition.title,
         metricLabel: definition.metricLabel,
         observedData: evidence,
+        dominance,
         inferredDiagnosis: definition.diagnosis,
         suggestedAction: {
           category: definition.recommendationCategory,
@@ -286,6 +316,34 @@ function summarizeBottlenecks(metricsSummary) {
       return delta || left.definitionIndex - right.definitionIndex;
     })
     .map(({ definitionIndex, rankValue, ...bottleneck }) => bottleneck);
+}
+
+function summarizeEvidenceDominance(evidence) {
+  const values = evidence
+    .map(entry => Number(entry.value ?? 0))
+    .filter(value => value > 0);
+  const total = values.reduce((sum, value) => sum + value, 0);
+
+  if (values.length < 2 || total === 0) {
+    return {
+      status: "not_applicable",
+      topPrNumber: evidence[0]?.number ?? null,
+      topShare: null,
+      note: "Not enough positive examples to evaluate outlier dominance.",
+    };
+  }
+
+  const topValue = values[0];
+  const topShare = Math.round((topValue / total) * 1000) / 1000;
+  const status = topShare >= 0.5 ? "single_pr_dominates" : "distributed";
+  return {
+    status,
+    topPrNumber: evidence[0]?.number ?? null,
+    topShare,
+    note: status === "single_pr_dominates"
+      ? `PR #${evidence[0].number} contributes ${Math.round(topShare * 100)}% of the displayed signal; inspect raw evidence before generalizing.`
+      : "Displayed examples are not dominated by one PR.",
+  };
 }
 
 function summarizeRecommendationCategories(bottlenecks) {
@@ -344,7 +402,18 @@ function escapeMarkdownText(value) {
 
 function lineForEvidence(evidence) {
   const changedLines = evidence.changedLines === null ? "unknown changed lines" : `${evidence.changedLines} changed lines`;
-  return `- PR #${evidence.number}: ${escapeMarkdownText(evidence.title)} (${evidence.value}; ${changedLines})`;
+  const validationConclusions = evidence.validationEvidence.workflowRunConclusions.length
+    ? evidence.validationEvidence.workflowRunConclusions.map(entry => `${entry.name}=${entry.value}`).join(", ")
+    : "none";
+  const commentSources = evidence.reviewEvidence.commentSources.length
+    ? evidence.reviewEvidence.commentSources.map(entry => `${entry.name}=${entry.value}`).join(", ")
+    : "none";
+
+  return [
+    `- PR #${evidence.number}: ${escapeMarkdownText(evidence.title)} (${evidence.value}; ${changedLines})`,
+    `  - Validation: workflow source ${evidence.validationEvidence.workflowRunSource}; coverage ${evidence.validationEvidence.workflowRunCoverage}; conclusions ${validationConclusions}; failed checks ${evidence.validationEvidence.failedCheckRuns}; failed workflows ${evidence.validationEvidence.failedWorkflowRuns}; cancelled workflows ${evidence.validationEvidence.cancelledWorkflowRuns}`,
+    `  - Review: thread source ${evidence.reviewEvidence.reviewThreadSource}; threads ${evidence.reviewEvidence.reviewThreads}; resolved ${evidence.reviewEvidence.resolvedThreads}; outdated ${evidence.reviewEvidence.outdatedThreads}; comments ${commentSources}`,
+  ].join("\n");
 }
 
 function renderList(items) {
@@ -393,6 +462,7 @@ export function renderRepositoryFrictionMarkdown(report) {
       "",
       `Observed data (${bottleneck.metricLabel}):`,
       ...bottleneck.observedData.map(lineForEvidence),
+      `Dominance note: ${bottleneck.dominance.note}`,
       "",
       `Inferred diagnosis: ${bottleneck.inferredDiagnosis}`,
       `Suggested action: ${bottleneck.suggestedAction.action}`,

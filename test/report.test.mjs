@@ -49,6 +49,94 @@ describe("friction report generation", () => {
     assert.equal(reviewChurn.suggestedAction.category, "pr_readiness_gate");
   });
 
+  it("surfaces source evidence and outlier dominance for bottleneck examples", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+    const topExample = reviewChurn.observedData[0];
+
+    assert.equal(reviewChurn.dominance.status, "single_pr_dominates");
+    assert.equal(reviewChurn.dominance.topPrNumber, 239);
+    assert.equal(reviewChurn.dominance.topShare, 0.625);
+    assert.equal(
+      topExample.validationEvidence.workflowRunSource,
+      "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+    );
+    assert.deepEqual(topExample.validationEvidence.workflowRunConclusions, [
+      { name: "success", value: 8 },
+      { name: "cancelled", value: 1 },
+    ]);
+    assert.equal(topExample.validationEvidence.cancelledWorkflowRuns, 1);
+    assert.equal(topExample.reviewEvidence.reviewThreadSource, "graphql:repository.pullRequest.reviewThreads");
+    assert.deepEqual(topExample.reviewEvidence.commentSources, [
+      { name: "author_reply", value: 15 },
+      { name: "copilot", value: 15 },
+    ]);
+  });
+
+  it("renders coverage notes, source labels, and dominance notes in Markdown", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assert(markdown.includes("Dominance note: PR #239 contributes 63% of the displayed signal"));
+    assert(
+      markdown.includes(
+        "Validation: workflow source rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request; coverage observed; conclusions success=8, cancelled=1",
+      ),
+    );
+    assert(
+      markdown.includes(
+        "Review: thread source graphql:repository.pullRequest.reviewThreads; threads 15; resolved 15; outdated 10; comments author_reply=15, copilot=15",
+      ),
+    );
+    assert(
+      markdown.includes(
+        "- PR-open diff growth is unavailable for some PRs and is not inferred from merge-time data.",
+      ),
+    );
+    assert(markdown.includes("- Workflow-run coverage is unavailable for some PRs"));
+  });
+
+  it("pins the redacted live-30 calibration sample for source-label regressions", async () => {
+    const calibration = await readJson("../fixtures/github/mcp-writing/reports/live-30-calibration.golden.json");
+    const coverageByFamily = new Map(calibration.collectionCoverage.apiFamilies.map(entry => [entry.family, entry]));
+    const validationGap = calibration.topBottlenecks.find(bottleneck => bottleneck.id === "validation-gap");
+    const reviewChurn = calibration.topBottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+    const validationExample = validationGap.observedData[0];
+    const reviewExample = reviewChurn.observedData[0];
+
+    assert.equal(calibration.schemaVersion, "github-live-report-calibration.v1");
+    assert.equal(calibration.derivedFrom.pullRequests, 30);
+    assert.equal(calibration.collectionCoverage.status, "partial");
+    assert.equal(coverageByFamily.get("pr_open_diff").status, "unavailable");
+    assert.equal(coverageByFamily.get("workflow_runs").attempts, 30);
+    assert.equal(
+      coverageByFamily.get("workflow_runs").source,
+      "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+    );
+    assert.equal(coverageByFamily.get("review_threads").source, "graphql:repository.pullRequest.reviewThreads");
+    assert.deepEqual(calibration.summary.topBottleneckIds, [
+      "validation-gap",
+      "local-hook-gap",
+      "test-infrastructure-gap",
+    ]);
+    assert.equal(validationGap.dominance.status, "single_pr_dominates");
+    assert.equal(validationGap.dominance.topPrNumber, 214);
+    assert.equal(validationGap.dominance.topShare, 0.848);
+    assert.deepEqual(validationExample.validationEvidence.workflowRunConclusions, [
+      { name: "failure", value: 39 },
+      { name: "success", value: 16 },
+    ]);
+    assert.equal(validationExample.validationEvidence.failedWorkflowRuns, 39);
+    assert.equal(reviewExample.reviewEvidence.reviewThreadSource, "graphql:repository.pullRequest.reviewThreads");
+    assert.equal(reviewExample.reviewEvidence.reviewThreads, 17);
+    assert.deepEqual(reviewExample.reviewEvidence.commentSources, [
+      { name: "author_reply", value: 17 },
+      { name: "copilot", value: 17 },
+    ]);
+  });
+
   it("covers the milestone recommendation categories", async () => {
     const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
     const report = generateRepositoryFrictionReport(metricsSummary);

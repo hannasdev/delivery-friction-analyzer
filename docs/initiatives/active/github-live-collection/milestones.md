@@ -46,12 +46,14 @@ Add a reusable GitHub collection layer that can fetch live repository and pull r
 
 ### Status
 
+Status: Merged.
+
 - [ ] Not started
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged
 
 ## M2: End-To-End Local Analyze Command
 
@@ -105,9 +107,9 @@ Expose a maintainer-facing local command that runs live collection, normalizatio
 - [ ] Not started
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged
 
 ## M3: Live Report Calibration And Coverage Hardening
 
@@ -159,8 +161,10 @@ Use larger live samples from `hannasdev/mcp-writing` to calibrate coverage, diag
 
 ### Status
 
+Status: Implemented; final initiative completion is deferred until this milestone PR merges.
+
 - [ ] Not started
-- [ ] Implemented
+- [x] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
