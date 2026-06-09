@@ -47,8 +47,8 @@ Add a reusable GitHub collection layer that can fetch live repository and pull r
 ### Status
 
 - [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
+- [x] Implemented
+- [x] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
