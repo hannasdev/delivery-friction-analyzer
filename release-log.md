@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can trust and inspect live report recommendations more easily before turning them into process changes.
 - Who is affected: Maintainers and contributors reviewing delivery-friction reports from live GitHub analysis.
 - Action needed: None.
-- PR: TBD
+- PR: #7
 
 ### 2026-06-09 - Local GitHub Analysis Command
 
