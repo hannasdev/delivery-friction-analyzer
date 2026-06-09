@@ -211,14 +211,14 @@ describe("GitHub source collector", () => {
     assert.equal(normalized.pullRequests[0].reviewThreads.resolvedCount, 1);
   });
 
-  it("enforces the requested limit even when a provider returns extra inventory", async () => {
+  it("enforces latest-merged ordering and limit when a provider returns extra inventory", async () => {
     const provider = createProvider({
       async listMergedPullRequests(input) {
         this.calls.push(["listMergedPullRequests", input]);
         return [
+          { number: 9, mergedAt: "2026-06-01T12:00:00Z" },
           { number: 11, mergedAt: "2026-06-03T12:00:00Z" },
           { number: 10, mergedAt: "2026-06-02T12:00:00Z" },
-          { number: 9, mergedAt: "2026-06-01T12:00:00Z" },
         ];
       },
       async getPullRequest(input) {
@@ -490,5 +490,31 @@ describe("gh CLI provider", () => {
     assert.equal(threads.totalCount, 1);
     assert.equal(threads.nodes.length, 1);
     assert.equal(threads.nodes[0].comments.nodes[0].databaseId, 1001);
+  });
+
+  it("fails review-thread collection when GraphQL returns errors", async () => {
+    const provider = createGhCliProvider({
+      async runCommand(args) {
+        assert.equal(args[0], "api");
+        assert.equal(args[1], "graphql");
+        return JSON.stringify({
+          data: {
+            repository: null,
+          },
+          errors: [
+            { message: "Resource not accessible by integration" },
+          ],
+        });
+      },
+    });
+
+    await assert.rejects(
+      provider.getReviewThreads({
+        owner: "example",
+        name: "example-repo",
+        number: 7,
+      }),
+      /GitHub GraphQL returned errors: Resource not accessible by integration/,
+    );
   });
 });

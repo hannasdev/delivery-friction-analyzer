@@ -83,6 +83,16 @@ function normalizeGhError(error) {
   throw normalized;
 }
 
+function graphqlErrorMessage(errors) {
+  const messages = errors
+    .map(error => error?.message)
+    .filter(Boolean);
+  if (messages.length === 0) {
+    return "GitHub GraphQL returned errors.";
+  }
+  return `GitHub GraphQL returned errors: ${messages.join("; ")}`;
+}
+
 export function createGhCliProvider({ ghPath = "gh", runCommand } = {}) {
   async function runGh(args) {
     if (runCommand) {
@@ -170,6 +180,9 @@ export function createGhCliProvider({ ghPath = "gh", runCommand } = {}) {
           args.push("-f", `cursor=${cursor}`);
         }
         const data = await runGhJson(args);
+        if (Array.isArray(data.errors) && data.errors.length > 0) {
+          throw new Error(graphqlErrorMessage(data.errors));
+        }
         const root = data.data ?? data;
         const page = root.repository?.pullRequest?.reviewThreads;
         totalCount = page?.totalCount ?? nodes.length;
