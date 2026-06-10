@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-10 — Report Evidence Readability
+
+- What changed: Markdown friction reports now show final/current PR additions, deletions, changed files, and changed lines in representative evidence tables, with validation and review details rendered as plain Markdown lists.
+- Why it matters: Maintainers can compare PR size against review, validation, and planning friction without reading dense semicolon-packed table cells.
+- Who is affected: Maintainers and contributors reviewing delivery-friction reports.
+- Action needed: None.
+- PR: Pending.
+
 ### 2026-06-10 — CLI Report Delivery Experience
 
 - What changed: Successful GitHub analysis runs now print a concise human-readable completion message by default, with the Markdown report path first; pass `--json` to print the full machine-readable completion receipt on stdout. Live collection also retries transient `gh pr view` GraphQL authentication failures.

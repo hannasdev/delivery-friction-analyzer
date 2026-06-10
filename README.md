@@ -51,9 +51,11 @@ Successful runs print a concise completion message with `friction-report.md` fir
 
 Read `friction-report.md` first, then inspect `methodology.md`, the CSV exports, `friction-report.json`, and `source-bundle.json` when a bottleneck looks surprising. Each ranked bottleneck example includes the workflow-run source, workflow-run conclusions, review-thread source, comment-source breakdown, and a dominance note when one PR contributes most of the displayed signal.
 
+Ranked bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score. PR size columns show final/current additions, deletions, changed files, and changed lines so maintainers can compare size against review, validation, and planning signals.
+
 Known MVP interpretation limits:
 
-- PR-open diff growth is unavailable for historical live runs and is not inferred from merge-time diff data.
+- PR-open diff growth is unavailable unless an open-time snapshot or reconstruction exists; the local historical collector does not infer it from merge-time diff data.
 - Workflow runs are collected from branch-based pull-request Actions history, which can be unavailable or partial for deleted, renamed, reused, or inaccessible branches.
 - Review-thread counts depend on GraphQL review-thread coverage; unavailable thread access is reported instead of silently treated as zero review churn.
 - A single dependency, bot, or unusually broad feature PR can dominate validation or review findings. Treat dominance notes as a prompt to inspect the raw PR evidence before generalizing.

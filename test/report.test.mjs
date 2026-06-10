@@ -160,23 +160,36 @@ describe("friction report generation", () => {
 
     assert(markdown.includes("## Evidence Quality And Coverage"));
     assert(markdown.includes("| PR-open diff | unavailable: 3 |"));
-    assert(markdown.includes("#### Observed Evidence (iteration drag)"));
-    assert(markdown.includes("| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |"));
+    assert(markdown.includes("#### Review churn Observed Evidence (iteration drag)"));
+    assert(markdown.includes("## How Bottlenecks Are Prioritized"));
+    assert(markdown.includes("- Bottlenecks are ordered by their strongest displayed representative score"));
+    assert(markdown.includes("| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |"));
     assert(
       markdown.includes(
-        "| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1",
+        "| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | 1168 | 77 | 13 | 1245 |",
       ),
     );
+    assert(markdown.includes("Evidence details for PR #239:"));
+    assert(markdown.includes("- Workflow coverage: observed"));
+    assert(markdown.includes("- Workflow conclusions: success=8, cancelled=1"));
     assert(
       markdown.includes(
-        "comments author\\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\\_request; review graphql:repository.pullRequest.reviewThreads",
+        "- Review thread source: graphql:repository.pullRequest.reviewThreads\n- Threads: 15\n- Resolved threads: 15\n- Outdated threads: 10\n- Comment sources: author\\_reply=15, copilot=15",
       ),
     );
-    assert(markdown.includes("#### Confidence And Caveats"));
+    assert(markdown.includes("- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\\_request"));
+    assert(markdown.includes("#### Review churn Interpretation And Recommendation"));
+    assert(markdown.includes("| Inferred diagnosis | Review loops are concentrated in a small set of PRs. |"));
+    assert(
+      markdown.includes(
+        "| Suggested action | Add or tighten a PR readiness gate for changes that attract repeated review rounds. |",
+      ),
+    );
+    assert(markdown.includes("#### Review churn Confidence And Caveats"));
     assert(markdown.includes("- PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing."));
     assert(
       markdown.includes(
-        "- PR-open diff growth is unavailable for some PRs and is not inferred from merge-time data.",
+        "- PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.",
       ),
     );
     assert(markdown.includes("- Workflow-run coverage is unavailable for some PRs"));
@@ -501,15 +514,20 @@ describe("friction report generation", () => {
       followUp: [],
     });
 
-    assert(markdown.includes("| #7 | legacy evidence shape | 2 | 1 |"));
+    assert(markdown.includes("| #7 | legacy evidence shape | 2 | unknown | unknown | unknown | 1 |"));
     assert(markdown.includes("Recommendation category: unspecified"));
     assert(!markdown.includes("Recommendation category: undefined"));
-    assert(
-      markdown.includes(
-        "coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0",
-      ),
-    );
-    assert(markdown.includes("threads 0; resolved 0; outdated 0; comments none | workflow unavailable; review unavailable"));
+    assert(markdown.includes("- Workflow coverage: unavailable"));
+    assert(markdown.includes("- Workflow conclusions: none"));
+    assert(markdown.includes("- Failed checks: 0"));
+    assert(markdown.includes("- Failed workflows: 0"));
+    assert(markdown.includes("- Cancelled workflows: 0"));
+    assert(markdown.includes("- Threads: 0"));
+    assert(markdown.includes("- Resolved threads: 0"));
+    assert(markdown.includes("- Outdated threads: 0"));
+    assert(markdown.includes("- Comment sources: none"));
+    assert(markdown.includes("- Workflow source: unavailable"));
+    assert(markdown.includes("- Review source: unavailable"));
     assert(markdown.includes("- Not enough positive examples to evaluate outlier dominance."));
   });
 
@@ -544,7 +562,7 @@ describe("friction report generation", () => {
 
     assert(
       markdown.includes(
-        "| [#7](https://example.test/pull/7) | fix \\*markdown\\* \\[link\\](https://example.test) \\`code\\` | 2 | 1 |",
+        "| [#7](https://example.test/pull/7) | fix \\*markdown\\* \\[link\\](https://example.test) \\`code\\` | 2 | unknown | unknown | unknown | 1 |",
       ),
     );
   });
