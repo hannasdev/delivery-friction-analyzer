@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can understand the report methodology, inspect spreadsheet-friendly evidence, and see outlier sensitivity without reading nested JSON first.
 - Who is affected: Maintainers and contributors running local GitHub analysis.
 - Action needed: Use `--no-csv` for runs where spreadsheet-friendly artifacts should not be produced.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/10
 
 ### 2026-06-10 — Report Readability And Evidence Transparency
 
