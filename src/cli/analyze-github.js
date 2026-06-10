@@ -253,11 +253,7 @@ function collectionCoverageMarkdown(sourceBundle) {
     lines.push(`- ${family.family}: ${family.status} (${family.attempts ?? 1} attempt(s))${diagnostics}${impact}`);
   }
 
-  lines.push(
-    "",
-    "Artifact sensitivity: source bundles, normalized data, metrics summaries, and reports may include repository names, PR URLs, titles, file paths, and comment metadata. Treat them as local/private unless intentionally shared.",
-    "",
-  );
+  lines.push("");
   return lines.join("\n");
 }
 
@@ -265,7 +261,7 @@ function attachCollectionCoverage(report, sourceBundle) {
   return {
     ...report,
     collectionCoverage: sourceBundle.coverage,
-    artifactSensitivity: "Generated artifacts may include repository names, PR URLs, titles, file paths, and comment metadata.",
+    artifactSensitivity: "Generated artifacts may include repository names, PR URLs, titles, file paths, and comment metadata. Treat them as local/private unless intentionally shared.",
   };
 }
 

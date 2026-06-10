@@ -38,14 +38,17 @@ Bottlenecks are ordered by their strongest observed representative metric value,
 
 The Markdown renderer presents the same report data for human review:
 
-- summary totals;
-- ranked bottlenecks with representative PR examples;
-- validation and review source evidence for each representative PR example;
-- dominance notes when a single PR carries most of the displayed signal;
-- comment-source breakdown;
-- core and support-surface breakdown;
-- coverage notes for unavailable or partial data;
-- guardrails and follow-up.
+- executive summary totals in a table;
+- a short "How To Read This Report" guide that distinguishes observed evidence, interpretation, recommendations, and caveats;
+- evidence-quality and coverage tables before detailed recommendations;
+- key findings that highlight top bottlenecks, strongest displayed signal, outlier caveats, and coverage caveats;
+- ranked bottlenecks with representative PR examples rendered as tables;
+- validation, review, changed-line, score, and source-label evidence for each representative PR example;
+- separately labeled interpretation, recommendation, and confidence/caveat blocks for each bottleneck;
+- shared-evidence notes when multiple recommendation categories use the same representative PR set;
+- recommendation-category, comment-source, and core/support-surface tables;
+- a concise methodology summary;
+- guardrails, follow-up, and artifact-sensitivity guidance.
 
 Markdown output should not include individual contributor or reviewer rankings.
 

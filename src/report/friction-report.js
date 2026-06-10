@@ -402,46 +402,250 @@ function escapeMarkdownText(value) {
     .replace(/[\\`*_\[\]]/g, "\\$&");
 }
 
-function lineForEvidence(evidence) {
-  const changedLines = evidence.changedLines === null ? "unknown changed lines" : `${evidence.changedLines} changed lines`;
-  const validationEvidence = evidence.validationEvidence ?? {};
-  const reviewEvidence = evidence.reviewEvidence ?? {};
-  const workflowRunConclusions = validationEvidence.workflowRunConclusions ?? [];
-  const reviewCommentSources = reviewEvidence.commentSources ?? [];
-  const validationConclusions = workflowRunConclusions.length
-    ? workflowRunConclusions.map(entry => `${entry.name}=${entry.value}`).join(", ")
-    : "none";
-  const commentSources = reviewCommentSources.length
-    ? reviewCommentSources.map(entry => `${entry.name}=${entry.value}`).join(", ")
-    : "none";
+function escapeMarkdownTableCell(value) {
+  return escapeMarkdownText(value ?? "")
+    .replace(/\|/g, "\\|")
+    .replace(/\n/g, " ");
+}
 
+function rawMarkdownCell(markdown) {
+  return { markdown };
+}
+
+function formatMarkdownTableCell(value) {
+  if (value && typeof value === "object" && "markdown" in value) {
+    return String(value.markdown).replace(/\n/g, " ");
+  }
+  return escapeMarkdownTableCell(value);
+}
+
+function formatNamedValues(entries) {
+  return entries.length
+    ? entries.map(entry => `${entry.name}=${entry.value}`).join(", ")
+    : "none";
+}
+
+function formatCoverageEntries(entries) {
+  return entries.length
+    ? entries.map(entry => `${entry.name}: ${entry.value}`).join(", ")
+    : "none";
+}
+
+function renderMarkdownTable(headers, rows) {
+  if (!rows.length) return "None";
   return [
-    `- PR #${evidence.number}: ${escapeMarkdownText(evidence.title)} (${evidence.value}; ${changedLines})`,
-    `  - Validation: workflow source ${validationEvidence.workflowRunSource ?? "unavailable"}; coverage ${validationEvidence.workflowRunCoverage ?? "unavailable"}; conclusions ${validationConclusions}; failed checks ${validationEvidence.failedCheckRuns ?? 0}; failed workflows ${validationEvidence.failedWorkflowRuns ?? 0}; cancelled workflows ${validationEvidence.cancelledWorkflowRuns ?? 0}`,
-    `  - Review: thread source ${reviewEvidence.reviewThreadSource ?? "unavailable"}; threads ${reviewEvidence.reviewThreads ?? 0}; resolved ${reviewEvidence.resolvedThreads ?? 0}; outdated ${reviewEvidence.outdatedThreads ?? 0}; comments ${commentSources}`,
+    `| ${headers.map(formatMarkdownTableCell).join(" | ")} |`,
+    `| ${headers.map(() => "---").join(" | ")} |`,
+    ...rows.map(row => `| ${row.map(formatMarkdownTableCell).join(" | ")} |`),
   ].join("\n");
+}
+
+function evidenceSignature(bottleneck) {
+  return (bottleneck.observedData ?? [])
+    .map(evidence => evidence.number)
+    .sort((left, right) => Number(left) - Number(right))
+    .join(",");
+}
+
+function sharedEvidenceNotes(bottlenecks) {
+  const bySignature = new Map();
+  for (const bottleneck of bottlenecks ?? []) {
+    const signature = evidenceSignature(bottleneck);
+    if (!signature) continue;
+    bySignature.set(signature, [...(bySignature.get(signature) ?? []), bottleneck.title]);
+  }
+
+  const notes = new Map();
+  for (const bottleneck of bottlenecks ?? []) {
+    const titles = bySignature.get(evidenceSignature(bottleneck)) ?? [];
+    const relatedTitles = titles.filter(title => title !== bottleneck.title);
+    if (relatedTitles.length > 0) {
+      notes.set(bottleneck.id, `Shares the same representative PR evidence as ${relatedTitles.join(", ")}.`);
+    }
+  }
+  return notes;
+}
+
+function prReference(evidence) {
+  const label = `#${evidence.number}`;
+  return evidence.url ? rawMarkdownCell(`[${label}](${evidence.url})`) : label;
+}
+
+function changedLinesLabel(value) {
+  return value === null || value === undefined ? "unknown" : String(value);
+}
+
+function evidenceRows(observedData) {
+  return (observedData ?? []).map(evidence => {
+    const validationEvidence = evidence.validationEvidence ?? {};
+    const reviewEvidence = evidence.reviewEvidence ?? {};
+    const workflowRunConclusions = validationEvidence.workflowRunConclusions ?? [];
+    const reviewCommentSources = reviewEvidence.commentSources ?? [];
+
+    return [
+      prReference(evidence),
+      evidence.title,
+      evidence.value,
+      changedLinesLabel(evidence.changedLines),
+      [
+        `coverage ${validationEvidence.workflowRunCoverage ?? "unavailable"}`,
+        `conclusions ${formatNamedValues(workflowRunConclusions)}`,
+        `failed checks ${validationEvidence.failedCheckRuns ?? 0}`,
+        `failed workflows ${validationEvidence.failedWorkflowRuns ?? 0}`,
+        `cancelled workflows ${validationEvidence.cancelledWorkflowRuns ?? 0}`,
+      ].join("; "),
+      [
+        `threads ${reviewEvidence.reviewThreads ?? 0}`,
+        `resolved ${reviewEvidence.resolvedThreads ?? 0}`,
+        `outdated ${reviewEvidence.outdatedThreads ?? 0}`,
+        `comments ${formatNamedValues(reviewCommentSources)}`,
+      ].join("; "),
+      [
+        `workflow ${validationEvidence.workflowRunSource ?? "unavailable"}`,
+        `review ${reviewEvidence.reviewThreadSource ?? "unavailable"}`,
+      ].join("; "),
+    ];
+  });
+}
+
+function renderEvidenceTable(observedData) {
+  return renderMarkdownTable(
+    ["PR", "Title", "Score", "Changed lines", "Validation evidence", "Review evidence", "Source labels"],
+    evidenceRows(observedData),
+  );
+}
+
+function recommendationCategoryLabel(bottleneck) {
+  return bottleneck.suggestedAction?.category ?? "unspecified";
+}
+
+function recommendationActionText(bottleneck) {
+  return bottleneck.suggestedAction?.action ?? "No recommendation was recorded.";
 }
 
 function renderList(items) {
   return items.length ? items.map(item => `- ${item}`).join("\n") : "- None";
 }
 
-function renderNamedValues(entries) {
-  return entries.length
-    ? entries.map(entry => `- ${entry.name}: ${entry.value}`).join("\n")
-    : "- None";
+function renderNamedValuesTable(entries) {
+  return renderMarkdownTable(
+    ["Name", "Value"],
+    (entries ?? []).map(entry => [entry.name, entry.value]),
+  );
 }
 
 function renderRecommendationCategories(categories) {
-  return categories.length
-    ? categories.map(category => `- ${category.label}: ${category.triggeredBottlenecks} triggered bottleneck(s)`).join("\n")
-    : "- None";
+  return renderMarkdownTable(
+    ["Category", "Triggered bottlenecks", "Meaning"],
+    (categories ?? []).map(category => [category.label, category.triggeredBottlenecks, category.description]),
+  );
+}
+
+function renderSummaryTable(summary) {
+  return renderMarkdownTable(
+    ["Metric", "Value"],
+    [
+      ["Pull requests analyzed", summary.pullRequests],
+      ["Changed lines", summary.changedLines],
+      ["Non-generated changed lines", summary.nonGeneratedChangedLines],
+      ["Review comments", summary.reviewComments],
+      ["Review threads", summary.reviewThreads],
+      ["Failed checks", summary.failedChecks ?? 0],
+      ["Cancelled workflow runs", summary.cancelledWorkflowRuns ?? 0],
+      ["Top bottlenecks", (summary.topBottleneckIds ?? []).join(", ") || "none"],
+    ],
+  );
+}
+
+function renderCoverageSummary(coverage) {
+  return renderMarkdownTable(
+    ["Evidence area", "Observed coverage"],
+    [
+      ["PR-open diff", formatCoverageEntries(sortedEntries(coverage.prOpenDiff))],
+      ["Workflow runs", formatCoverageEntries(sortedEntries(coverage.workflowRuns))],
+      ["Review thread sources", formatCoverageEntries(sortedEntries(coverage.reviewThreads))],
+    ],
+  );
+}
+
+function renderKeyFindings(report) {
+  const topBottlenecks = (report.summary.topBottleneckIds ?? []).join(", ") || "none";
+  const strongest = report.bottlenecks?.[0];
+  const dominanceCallouts = (report.bottlenecks ?? [])
+    .filter(bottleneck => bottleneck.dominance?.status === "single_pr_dominates")
+    .map(bottleneck => `${bottleneck.title}: ${bottleneck.dominance.note}`);
+  const coverageNotes = report.coverage?.notes?.length
+    ? report.coverage.notes.join(" ")
+    : "No coverage caveats were recorded for the displayed evidence.";
+
+  return renderList([
+    `Top bottlenecks: ${topBottlenecks}.`,
+    strongest
+      ? `Strongest displayed signal: ${strongest.title} (${strongest.metricLabel}).`
+      : "No bottleneck evidence was available.",
+    dominanceCallouts.length
+      ? `Outlier caveat: ${dominanceCallouts.join(" ")}`
+      : "Outlier caveat: displayed bottleneck examples are not dominated by a single PR.",
+    `Coverage caveat: ${coverageNotes}`,
+  ]);
+}
+
+function renderCommentSources(commentSources) {
+  const dominantSource = commentSources.dominantSource ?? { name: "none", value: 0 };
+  return [
+    renderMarkdownTable(
+      ["Metric", "Value"],
+      [
+        ["Total comments", commentSources.totalComments],
+        ["Bot/scanner comments", commentSources.botComments],
+        ["Human reviewer comments", commentSources.humanComments],
+        ["Author replies", commentSources.authorReplies],
+        ["Dominant source", `${dominantSource.name} (${dominantSource.value})`],
+      ],
+    ),
+    "",
+    "By source:",
+    renderNamedValuesTable(commentSources.bySource),
+  ].join("\n");
+}
+
+function renderSurfaces(surfaces) {
+  return [
+    renderMarkdownTable(
+      ["Metric", "Value"],
+      [
+        ["Core changed lines", surfaces.coreChangedLines],
+        ["Low-signal changed lines", surfaces.lowSignalChangedLines],
+        ["Low-signal files", surfaces.lowSignalFiles],
+        ["Weighted changed lines", surfaces.weightedChangedLines],
+        ["Small-diff wide-spread PRs", surfaces.smallDiffWideSpreadCount],
+      ],
+    ),
+    "",
+    "Functional surfaces:",
+    renderNamedValuesTable(surfaces.byFunctionalSurface),
+    "",
+    "File roles:",
+    renderNamedValuesTable(surfaces.byRole),
+  ].join("\n");
+}
+
+function renderGuardrails(guardrails) {
+  return renderMarkdownTable(
+    ["Guardrail", "Value"],
+    [
+      ["Avoids individual ranking", guardrails.avoidsIndividualRanking],
+      ["Separates observed, inferred, and suggested fields", guardrails.separatesObservedInferredAndSuggested],
+      ["Uses composite score", guardrails.usesCompositeScore],
+    ],
+  );
 }
 
 export function renderRepositoryFrictionMarkdown(report) {
   const repository = report.targetRepository
     ? `${report.targetRepository.owner}/${report.targetRepository.name}`
     : "unknown repository";
+  const sharedNotes = sharedEvidenceNotes(report.bottlenecks);
   const lines = [
     `# Repository Friction Report: ${repository}`,
     "",
@@ -449,14 +653,27 @@ export function renderRepositoryFrictionMarkdown(report) {
     `Metric version: ${report.metricVersion}`,
     `Analysis window: ${report.targetRepository?.analysisWindowDays ?? "unknown"} days`,
     "",
-    "## Summary",
+    "## Executive Summary",
     "",
-    `- Pull requests analyzed: ${report.summary.pullRequests}`,
-    `- Changed lines: ${report.summary.changedLines}`,
-    `- Non-generated changed lines: ${report.summary.nonGeneratedChangedLines}`,
-    `- Review comments: ${report.summary.reviewComments}`,
-    `- Review threads: ${report.summary.reviewThreads}`,
-    `- Top bottlenecks: ${report.summary.topBottleneckIds.join(", ") || "none"}`,
+    renderSummaryTable(report.summary),
+    "",
+    "## How To Read This Report",
+    "",
+    "- Observed evidence is measured from GitHub data and repository-profile classifications.",
+    "- Interpretation is the analyzer's explanation of what the observed evidence suggests.",
+    "- Recommendation is a workflow intervention to consider; the report does not modify repositories.",
+    "- Confidence and caveats call out outliers, missing coverage, and evidence-quality limits before you act.",
+    "",
+    "## Evidence Quality And Coverage",
+    "",
+    renderCoverageSummary(report.coverage),
+    "",
+    "Coverage notes:",
+    renderList(report.coverage.notes),
+    "",
+    "## Key Findings",
+    "",
+    renderKeyFindings(report),
     "",
     "## Ranked Bottlenecks",
     "",
@@ -466,12 +683,26 @@ export function renderRepositoryFrictionMarkdown(report) {
     lines.push(
       `### ${bottleneck.title}`,
       "",
-      `Observed data (${bottleneck.metricLabel}):`,
-      ...bottleneck.observedData.map(lineForEvidence),
-      `Dominance note: ${bottleneck.dominance?.note ?? "Not enough positive examples to evaluate outlier dominance."}`,
+      `Recommendation category: ${recommendationCategoryLabel(bottleneck)}`,
       "",
-      `Inferred diagnosis: ${bottleneck.inferredDiagnosis}`,
-      `Suggested action: ${bottleneck.suggestedAction.action}`,
+      `#### Observed Evidence (${bottleneck.metricLabel})`,
+      "",
+      renderEvidenceTable(bottleneck.observedData),
+      "",
+      "#### Interpretation",
+      "",
+      bottleneck.inferredDiagnosis,
+      "",
+      "#### Recommendation",
+      "",
+      recommendationActionText(bottleneck),
+      "",
+      "#### Confidence And Caveats",
+      "",
+      renderList([
+        bottleneck.dominance?.note ?? "Not enough positive examples to evaluate outlier dominance.",
+        sharedNotes.get(bottleneck.id),
+      ].filter(Boolean)),
       "",
     );
   }
@@ -483,51 +714,31 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     "## Comment Sources",
     "",
-    `- Total comments: ${report.commentSources.totalComments}`,
-    `- Bot/scanner comments: ${report.commentSources.botComments}`,
-    `- Human reviewer comments: ${report.commentSources.humanComments}`,
-    `- Author replies: ${report.commentSources.authorReplies}`,
-    "",
-    "By source:",
-    renderNamedValues(report.commentSources.bySource),
+    renderCommentSources(report.commentSources),
     "",
     "## Core And Support Surfaces",
     "",
-    `- Core changed lines: ${report.surfaces.coreChangedLines}`,
-    `- Low-signal changed lines: ${report.surfaces.lowSignalChangedLines}`,
-    `- Low-signal files: ${report.surfaces.lowSignalFiles}`,
-    `- Weighted changed lines: ${report.surfaces.weightedChangedLines}`,
-    `- Small-diff wide-spread PRs: ${report.surfaces.smallDiffWideSpreadCount}`,
+    renderSurfaces(report.surfaces),
     "",
-    "Functional surfaces:",
-    renderNamedValues(report.surfaces.byFunctionalSurface),
+    "## Methodology Summary",
     "",
-    "File roles:",
-    renderNamedValues(report.surfaces.byRole),
+    "- Pull requests are selected upstream by the collection or fixture workflow; this renderer explains the resulting metrics summary.",
+    "- File roles and functional surfaces come from repository-profile classification, not from language names alone.",
+    "- Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.",
+    "- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.",
+    "- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.",
     "",
-    "## Coverage",
+    "## Guardrails And Follow-Up",
     "",
-    "PR-open diff:",
-    renderNamedValues(sortedEntries(report.coverage.prOpenDiff)),
+    renderGuardrails(report.guardrails),
     "",
-    "Workflow runs:",
-    renderNamedValues(sortedEntries(report.coverage.workflowRuns)),
-    "",
-    "Review thread sources:",
-    renderNamedValues(sortedEntries(report.coverage.reviewThreads)),
-    "",
-    "Coverage notes:",
-    renderList(report.coverage.notes),
-    "",
-    "## Guardrails",
-    "",
-    `- Avoids individual ranking: ${report.guardrails.avoidsIndividualRanking}`,
-    `- Separates observed, inferred, and suggested fields: ${report.guardrails.separatesObservedInferredAndSuggested}`,
-    `- Uses composite score: ${report.guardrails.usesCompositeScore}`,
-    "",
-    "## Follow-up",
+    "Follow-up:",
     "",
     renderList(report.followUp),
+    "",
+    "Artifact sensitivity:",
+    "",
+    report.artifactSensitivity ?? "Generated artifacts may include repository names, PR URLs, titles, file paths, and comment metadata. Treat them as local/private unless intentionally shared.",
     "",
   );
 

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-10 — Report Readability And Evidence Transparency
+
+- What changed: Markdown friction reports now use a clearer reader path with executive summary, evidence-quality coverage, key findings, labeled bottleneck sections, scannable PR evidence tables, methodology summary, guardrails, and artifact-sensitivity guidance.
+- Why it matters: Maintainers can distinguish observed data, analyzer interpretation, recommendations, and caveats more quickly before acting on report findings.
+- Who is affected: Maintainers and contributors reviewing delivery-friction reports from fixture or live GitHub analysis.
+- Action needed: None.
+- PR: #9
+
 ### 2026-06-09 — Live Report Calibration
 
 - What changed: Report bottleneck examples now show validation sources, workflow conclusions, review-thread sources, comment-source evidence, and outlier dominance notes, with a redacted 30-PR calibration sample protecting the output shape.
