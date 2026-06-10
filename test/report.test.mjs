@@ -633,9 +633,155 @@ describe("friction report generation", () => {
     ].join(",")));
     assert(csvArtifacts.prMetricsCsv.includes("239,feat: resolve scene vocabulary variants,https://github.com/hannasdev/mcp-writing/pull/239,1245"));
     assert(csvArtifacts.bottleneckExamplesCsv.includes("review-churn,Review churn,pr_readiness_gate,239"));
+    assert(csvArtifacts.bottleneckExamplesCsv.includes(",rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed,graphql:repository.pullRequest.reviewThreads,"));
     assert(csvArtifacts.commentSourcesCsv.includes("copilot,15,true,false,0.5"));
     assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,available,3,rest:actions,sampled,validation evidence populated"));
     assert(!csvArtifacts.bottleneckExamplesCsv.includes("raw comment"));
+  });
+
+  it("leaves unavailable CSV counts empty while preserving source labels", () => {
+    const metricsSummary = {
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {
+        pullRequests: 2,
+        changedLines: 20,
+        nonGeneratedChangedLines: 20,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "unavailable coverage",
+          url: "https://example.test/pull/1",
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+          review: {
+            comments: { totalCount: 0, bySource: {} },
+            threads: {
+              source: "unavailable",
+              totalCount: 0,
+              resolvedCount: 0,
+              outdatedCount: 0,
+            },
+          },
+          ci: {
+            checkRuns: { failedCount: 0 },
+            workflowRuns: {
+              source: "unavailable",
+              coverage: "unavailable",
+              failedCount: 0,
+              cancelledCount: 0,
+              conclusions: {},
+            },
+          },
+          iteration: { commitsAfterFirstReview: null },
+          components: {},
+        },
+        {
+          number: 2,
+          title: "observed zero coverage",
+          url: "https://example.test/pull/2",
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+          review: {
+            comments: { totalCount: 0, bySource: {} },
+            threads: {
+              source: "graphql:repository.pullRequest.reviewThreads",
+              totalCount: 0,
+              resolvedCount: 0,
+              outdatedCount: 0,
+            },
+          },
+          ci: {
+            checkRuns: { failedCount: 0 },
+            workflowRuns: {
+              source: "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+              coverage: "observed",
+              failedCount: 0,
+              cancelledCount: 0,
+              conclusions: {},
+            },
+          },
+          iteration: { commitsAfterFirstReview: 0 },
+          components: {},
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "unavailable coverage", value: 1 },
+          { number: 2, title: "observed zero coverage", value: 1 },
+        ],
+      },
+    };
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const csvArtifacts = generateEvidenceCsvArtifacts({
+      metricsSummary,
+      report,
+      collectionCoverage: { apiFamilies: [] },
+    });
+
+    assert(csvArtifacts.prMetricsCsv.includes(
+      "1,unavailable coverage,https://example.test/pull/1,10,10,0,,0,,,,unavailable,unavailable,unavailable",
+    ));
+    assert(csvArtifacts.prMetricsCsv.includes(
+      "2,observed zero coverage,https://example.test/pull/2,10,10,0,0,0,0,0,0,graphql:repository.pullRequest.reviewThreads,rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed",
+    ));
+    assert(csvArtifacts.bottleneckExamplesCsv.includes(
+      "review-churn,Review churn,pr_readiness_gate,1,unavailable coverage,https://example.test/pull/1,1,10,0,,,",
+    ));
+    assert(csvArtifacts.bottleneckExamplesCsv.includes(
+      "review-churn,Review churn,pr_readiness_gate,2,observed zero coverage,https://example.test/pull/2,1,10,0,0,0,0,0,0",
+    ));
+  });
+
+  it("escapes CSV fields containing commas, quotes, and newlines", () => {
+    const csvArtifacts = generateEvidenceCsvArtifacts({
+      metricsSummary: {
+        rankings: {},
+        pullRequests: [
+          {
+            number: 7,
+            title: "fix \"quoted\", multiline\nvalue",
+            url: "https://example.test/pull/7",
+            diffAtMerge: { changedLines: 1 },
+            files: { nonGeneratedChangedLines: 1 },
+            review: { comments: { totalCount: 0 }, threads: { source: "unavailable" } },
+            ci: {
+              checkRuns: { failedCount: 0 },
+              workflowRuns: { source: "unavailable", coverage: "unavailable" },
+            },
+            iteration: { commitsAfterFirstReview: null },
+          },
+        ],
+      },
+      report: {
+        commentSources: { totalComments: 0, bySource: [] },
+        bottlenecks: [],
+      },
+      collectionCoverage: {
+        apiFamilies: [
+          {
+            family: "workflow_runs",
+            status: "partial",
+            attempts: 1,
+            source: "rest:actions",
+            diagnostics: ["warning, \"quoted\"\nline"],
+            downstreamImpact: "partial evidence",
+          },
+        ],
+      },
+    });
+
+    assert(csvArtifacts.prMetricsCsv.includes("\"fix \"\"quoted\"\", multiline\nvalue\""));
+    assert(csvArtifacts.collectionCoverageCsv.includes("\"warning, \"\"quoted\"\"\nline\""));
   });
 
   it("writes local JSON and Markdown report artifacts from a metrics summary", async () => {

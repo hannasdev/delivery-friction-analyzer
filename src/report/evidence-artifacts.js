@@ -53,6 +53,19 @@ function formatSourceLabels(evidence) {
   ].join("; ");
 }
 
+function hasObservedWorkflowRuns(workflowRuns = {}) {
+  return (workflowRuns.coverage ?? workflowRuns.workflowRunCoverage) === "observed";
+}
+
+function hasObservedReviewThreads(reviewThreads = {}) {
+  const source = reviewThreads.source ?? reviewThreads.reviewThreadSource ?? "unavailable";
+  return String(source).startsWith("graphql");
+}
+
+function unavailableUnlessObserved(value, observed) {
+  return observed ? value : null;
+}
+
 function prMetricsCsv(metricsSummary) {
   const scoreMaps = rankingValueMaps(metricsSummary);
   const headers = [
@@ -67,9 +80,14 @@ function prMetricsCsv(metricsSummary) {
     "failed_workflow_runs",
     "cancelled_workflow_runs",
     "post_review_commits",
+    "review_thread_source",
+    "workflow_run_source",
+    "workflow_run_coverage",
     ...SCORE_COLUMNS.map(([header]) => header),
   ];
   const rows = sortedPullRequests(metricsSummary).map(pr => {
+    const observedReviewThreads = hasObservedReviewThreads(pr.review?.threads);
+    const observedWorkflowRuns = hasObservedWorkflowRuns(pr.ci?.workflowRuns);
     const row = {
       pr_number: pr.number,
       title: pr.title,
@@ -77,11 +95,14 @@ function prMetricsCsv(metricsSummary) {
       changed_lines: pr.diffAtMerge?.changedLines,
       non_generated_changed_lines: pr.files?.nonGeneratedChangedLines,
       review_comments: pr.review?.comments?.totalCount,
-      review_threads: pr.review?.threads?.totalCount,
+      review_threads: unavailableUnlessObserved(pr.review?.threads?.totalCount, observedReviewThreads),
       failed_checks: pr.ci?.checkRuns?.failedCount,
-      failed_workflow_runs: pr.ci?.workflowRuns?.failedCount,
-      cancelled_workflow_runs: pr.ci?.workflowRuns?.cancelledCount,
+      failed_workflow_runs: unavailableUnlessObserved(pr.ci?.workflowRuns?.failedCount, observedWorkflowRuns),
+      cancelled_workflow_runs: unavailableUnlessObserved(pr.ci?.workflowRuns?.cancelledCount, observedWorkflowRuns),
       post_review_commits: pr.iteration?.commitsAfterFirstReview,
+      review_thread_source: pr.review?.threads?.source ?? "unavailable",
+      workflow_run_source: pr.ci?.workflowRuns?.source ?? "unavailable",
+      workflow_run_coverage: pr.ci?.workflowRuns?.coverage ?? "unavailable",
     };
     for (const [header, rankingKey] of SCORE_COLUMNS) {
       row[header] = scoreMaps[rankingKey].get(pr.number);
@@ -108,6 +129,9 @@ function bottleneckExamplesCsv(report) {
     "resolved_threads",
     "outdated_threads",
     "comment_sources",
+    "workflow_run_source",
+    "workflow_run_coverage",
+    "review_thread_source",
     "dominance_status",
     "dominant_pr_number",
     "evidence_source_labels",
@@ -115,6 +139,8 @@ function bottleneckExamplesCsv(report) {
   const rows = [];
   for (const bottleneck of report.bottlenecks ?? []) {
     for (const evidence of bottleneck.observedData ?? []) {
+      const observedWorkflowRuns = hasObservedWorkflowRuns(evidence.validationEvidence);
+      const observedReviewThreads = hasObservedReviewThreads(evidence.reviewEvidence);
       rows.push({
         bottleneck_id: bottleneck.id,
         bottleneck_title: bottleneck.title,
@@ -125,12 +151,15 @@ function bottleneckExamplesCsv(report) {
         score: evidence.value,
         changed_lines: evidence.changedLines,
         failed_checks: evidence.validationEvidence?.failedCheckRuns,
-        failed_workflow_runs: evidence.validationEvidence?.failedWorkflowRuns,
-        cancelled_workflow_runs: evidence.validationEvidence?.cancelledWorkflowRuns,
-        review_threads: evidence.reviewEvidence?.reviewThreads,
-        resolved_threads: evidence.reviewEvidence?.resolvedThreads,
-        outdated_threads: evidence.reviewEvidence?.outdatedThreads,
+        failed_workflow_runs: unavailableUnlessObserved(evidence.validationEvidence?.failedWorkflowRuns, observedWorkflowRuns),
+        cancelled_workflow_runs: unavailableUnlessObserved(evidence.validationEvidence?.cancelledWorkflowRuns, observedWorkflowRuns),
+        review_threads: unavailableUnlessObserved(evidence.reviewEvidence?.reviewThreads, observedReviewThreads),
+        resolved_threads: unavailableUnlessObserved(evidence.reviewEvidence?.resolvedThreads, observedReviewThreads),
+        outdated_threads: unavailableUnlessObserved(evidence.reviewEvidence?.outdatedThreads, observedReviewThreads),
         comment_sources: formatCommentSources(evidence.reviewEvidence?.commentSources),
+        workflow_run_source: evidence.validationEvidence?.workflowRunSource ?? "unavailable",
+        workflow_run_coverage: evidence.validationEvidence?.workflowRunCoverage ?? "unavailable",
+        review_thread_source: evidence.reviewEvidence?.reviewThreadSource ?? "unavailable",
         dominance_status: bottleneck.dominance?.status,
         dominant_pr_number: bottleneck.dominance?.topPrNumber,
         evidence_source_labels: formatSourceLabels(evidence),

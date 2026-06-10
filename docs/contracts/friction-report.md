@@ -104,12 +104,12 @@ CSV exports are supporting evidence trails, not replacements for JSON artifacts.
 
 Minimum CSV column groups:
 
-- `pr-metrics.csv`: PR number, title, URL, changed lines, non-generated changed lines, review comments, review threads, failed checks, failed workflow runs, cancelled workflow runs, post-review commits, and main ranking scores.
-- `bottleneck-examples.csv`: bottleneck identity, recommendation category, PR identity, score/value, changed lines, validation counts, review counts, comment-source counts, dominance, and source labels.
+- `pr-metrics.csv`: PR number, title, URL, changed lines, non-generated changed lines, review comments, review threads, failed checks, failed workflow runs, cancelled workflow runs, post-review commits, review-thread source, workflow-run source/coverage, and main ranking scores.
+- `bottleneck-examples.csv`: bottleneck identity, recommendation category, PR identity, score/value, changed lines, validation counts, review counts, comment-source counts, workflow/review source and coverage labels, dominance, and source labels.
 - `comment-sources.csv`: source name, total comments, bot/scanner classification, human/author classification, and share of all comments.
 - `collection-coverage.csv`: API family, status, attempts, source label, diagnostics, and downstream impact.
 
-Empty CSV cells mean unavailable or not applicable. Numeric zero should be used only for observed or computed zero counts. CSVs must not include raw comment bodies, raw workflow logs, tokens, secret-bearing environment details, or individual contributor/reviewer rankings.
+Empty CSV cells mean unavailable or not applicable. Numeric zero should be used only for observed or computed zero counts. Count columns that depend on optional GitHub coverage should keep source or coverage labels nearby so spreadsheet readers can tell unavailable evidence apart from observed zeroes. CSVs must not include raw comment bodies, raw workflow logs, tokens, secret-bearing environment details, or individual contributor/reviewer rankings.
 
 ## Guardrails
 
