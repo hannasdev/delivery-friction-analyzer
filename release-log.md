@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can distinguish observed data, analyzer interpretation, recommendations, and caveats more quickly before acting on report findings.
 - Who is affected: Maintainers and contributors reviewing delivery-friction reports from fixture or live GitHub analysis.
 - Action needed: None.
-- PR: TBD
+- PR: #9
 
 ### 2026-06-09 — Live Report Calibration
 

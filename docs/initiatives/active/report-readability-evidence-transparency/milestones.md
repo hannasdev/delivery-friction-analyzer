@@ -54,7 +54,7 @@ Make the Markdown report readable as a human-facing diagnostic artifact by addin
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M2: Methodology And Evidence Exports
