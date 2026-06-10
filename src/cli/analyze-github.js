@@ -203,8 +203,9 @@ async function writeText(path, value) {
   await writeFile(path, value, "utf8");
 }
 
-async function writeAnalysisArtifacts(outDir, paths, artifacts, { disabledPaths = {} } = {}) {
-  await assertWritableArtifactTargets({ ...paths, ...disabledPaths });
+export async function writeAnalysisArtifacts(outDir, paths, artifacts, { disabledPaths = {} } = {}) {
+  const finalPaths = { ...paths, ...disabledPaths };
+  await assertWritableArtifactTargets(finalPaths);
 
   const stagingDir = artifactTransactionDirectory(outDir, "staging");
   const backupDir = artifactTransactionDirectory(outDir, "backup");
@@ -212,7 +213,7 @@ async function writeAnalysisArtifacts(outDir, paths, artifacts, { disabledPaths 
     Object.keys(paths).map(key => [key, join(stagingDir, ANALYZE_GITHUB_ARTIFACTS[key])]),
   );
   const backupPaths = Object.fromEntries(
-    Object.keys({ ...paths, ...disabledPaths }).map(key => [key, join(backupDir, ANALYZE_GITHUB_ARTIFACTS[key])]),
+    Object.keys(finalPaths).map(key => [key, join(backupDir, ANALYZE_GITHUB_ARTIFACTS[key])]),
   );
   const backedUp = [];
   const promoted = [];
@@ -234,10 +235,10 @@ async function writeAnalysisArtifacts(outDir, paths, artifacts, { disabledPaths 
       throw rejectedStagingWrite.reason;
     }
 
-    await assertWritableArtifactTargets({ ...paths, ...disabledPaths });
+    await assertWritableArtifactTargets(finalPaths);
     await mkdir(backupDir, { recursive: false });
 
-    for (const [key, finalPath] of Object.entries({ ...paths, ...disabledPaths })) {
+    for (const [key, finalPath] of Object.entries(finalPaths)) {
       try {
         await rename(finalPath, backupPaths[key]);
         backedUp.push(key);
@@ -254,7 +255,7 @@ async function writeAnalysisArtifacts(outDir, paths, artifacts, { disabledPaths 
     }
   } catch (error) {
     await Promise.allSettled(promoted.map(key => rm(paths[key], { force: true })));
-    await Promise.allSettled(backedUp.map(key => rename(backupPaths[key], paths[key])));
+    await Promise.allSettled(backedUp.map(key => rename(backupPaths[key], finalPaths[key])));
     throw error;
   } finally {
     await Promise.allSettled([

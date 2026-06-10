@@ -100,7 +100,7 @@ The methodology artifact should stay aligned with this contract and the Markdown
 
 Full live analysis writes curated CSV exports by default. `--no-csv` suppresses CSV generation while preserving Markdown, JSON, source bundle, normalized data, metrics summary, and methodology artifacts.
 
-CSV exports are supporting evidence trails, not replacements for JSON artifacts. They should be deterministic, properly escaped, and safe for spreadsheet inspection without raw comments or logs.
+CSV exports are supporting evidence trails, not replacements for JSON artifacts. They should be deterministic, properly escaped, mitigate formula-like text cells for spreadsheet inspection, and avoid raw comments or logs.
 
 Minimum CSV column groups:
 

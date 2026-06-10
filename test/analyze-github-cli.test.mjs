@@ -7,6 +7,7 @@ import {
   ANALYZE_GITHUB_ARTIFACTS,
   parseAnalyzeGithubArgs,
   runAnalyzeGithub,
+  writeAnalysisArtifacts,
 } from "../src/cli/analyze-github.js";
 
 function repositoryMetadata() {
@@ -316,6 +317,44 @@ describe("GitHub live analyze CLI", () => {
       ]);
       const methodology = await readFile(join(outDir, "methodology.md"), "utf8");
       assert(methodology.includes("CSV export generation was disabled for this run."));
+    });
+  });
+
+  it("restores disabled CSV artifacts when artifact promotion rolls back", async () => {
+    await withTempDirectory(async directory => {
+      const outDir = join(directory, "out");
+      await mkdir(outDir, { recursive: true });
+
+      const paths = Object.fromEntries(
+        Object.entries(ANALYZE_GITHUB_ARTIFACTS)
+          .filter(([key]) => !key.endsWith("Csv"))
+          .map(([key, fileName]) => [key, join(outDir, fileName)]),
+      );
+      const disabledPaths = {
+        prMetricsCsv: join(outDir, ANALYZE_GITHUB_ARTIFACTS.prMetricsCsv),
+      };
+      const brokenPaths = {
+        ...paths,
+        reportJson: join(outDir, "missing-parent", ANALYZE_GITHUB_ARTIFACTS.reportJson),
+      };
+
+      await writeFile(paths.sourceBundle, "old source\n");
+      await writeFile(paths.normalized, "old normalized\n");
+      await writeFile(disabledPaths.prMetricsCsv, "stale csv\n");
+
+      await assert.rejects(() => writeAnalysisArtifacts(outDir, brokenPaths, {
+        sourceBundle: { ok: true },
+        normalized: { ok: true },
+        metricsSummary: { ok: true },
+        reportJson: { ok: true },
+        reportMarkdown: "new report\n",
+        methodology: "new methodology\n",
+        csv: {},
+      }), /ENOENT/);
+
+      assert.equal(await readFile(paths.sourceBundle, "utf8"), "old source\n");
+      assert.equal(await readFile(paths.normalized, "utf8"), "old normalized\n");
+      assert.equal(await readFile(disabledPaths.prMetricsCsv, "utf8"), "stale csv\n");
     });
   });
 

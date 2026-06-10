@@ -784,6 +784,54 @@ describe("friction report generation", () => {
     assert(csvArtifacts.collectionCoverageCsv.includes("\"warning, \"\"quoted\"\"\nline\""));
   });
 
+  it("mitigates spreadsheet formula injection in CSV text fields", () => {
+    const csvArtifacts = generateEvidenceCsvArtifacts({
+      metricsSummary: {
+        rankings: {},
+        pullRequests: [
+          {
+            number: 7,
+            title: "=IMPORTXML(\"https://example.test\")",
+            url: "+https://example.test/pull/7",
+            diffAtMerge: { changedLines: -1 },
+            files: { nonGeneratedChangedLines: 1 },
+            review: { comments: { totalCount: 0 }, threads: { source: "unavailable" } },
+            ci: {
+              checkRuns: { failedCount: 0 },
+              workflowRuns: { source: "unavailable", coverage: "unavailable" },
+            },
+            iteration: { commitsAfterFirstReview: null },
+          },
+        ],
+      },
+      report: {
+        commentSources: {
+          totalComments: 1,
+          bySource: [
+            { name: "@scanner", value: 1 },
+          ],
+        },
+        bottlenecks: [],
+      },
+      collectionCoverage: {
+        apiFamilies: [
+          {
+            family: "workflow_runs",
+            status: "partial",
+            attempts: 1,
+            source: "\tgraphql",
+            diagnostics: ["-looks like formula"],
+            downstreamImpact: "partial evidence",
+          },
+        ],
+      },
+    });
+
+    assert(csvArtifacts.prMetricsCsv.includes("7,\"'=IMPORTXML(\"\"https://example.test\"\")\",'+https://example.test/pull/7,-1"));
+    assert(csvArtifacts.commentSourcesCsv.includes("'@scanner,1,false,false,1"));
+    assert(csvArtifacts.collectionCoverageCsv.includes("'\tgraphql,'-looks like formula,partial evidence"));
+  });
+
   it("writes local JSON and Markdown report artifacts from a metrics summary", async () => {
     const tempDirectory = await mkdtemp(join(tmpdir(), "friction-report-"));
     try {
