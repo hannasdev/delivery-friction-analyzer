@@ -52,8 +52,8 @@ Make the Markdown report readable as a human-facing diagnostic artifact by addin
 
 - [ ] Not started
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
 
