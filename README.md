@@ -47,6 +47,8 @@ The command writes:
 
 Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. Use `--no-csv` when you want the Markdown, JSON, source, normalized, metrics, and methodology artifacts without spreadsheet-friendly CSV exports.
 
+Successful runs print a concise completion message with `friction-report.md` first, followed by the key supporting artifacts and collection coverage status. Use `--json` when automation needs the full machine-readable completion receipt on stdout.
+
 Read `friction-report.md` first, then inspect `methodology.md`, the CSV exports, `friction-report.json`, and `source-bundle.json` when a bottleneck looks surprising. Each ranked bottleneck example includes the workflow-run source, workflow-run conclusions, review-thread source, comment-source breakdown, and a dominance note when one PR contributes most of the displayed signal.
 
 Known MVP interpretation limits:

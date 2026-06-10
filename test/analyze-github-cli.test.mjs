@@ -5,8 +5,10 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 import {
   ANALYZE_GITHUB_ARTIFACTS,
+  formatAnalyzeGithubCompletion,
   parseAnalyzeGithubArgs,
   runAnalyzeGithub,
+  writeAnalyzeGithubCompletion,
   writeAnalysisArtifacts,
 } from "../src/cli/analyze-github.js";
 
@@ -214,7 +216,22 @@ describe("GitHub live analyze CLI", () => {
       dryRun: true,
       isValidationTarget: true,
       csv: true,
+      json: false,
     });
+  });
+
+  it("parses --json as a machine-readable completion output opt-in", () => {
+    assert.equal(parseAnalyzeGithubArgs([
+      "--repo",
+      "example/example-repo",
+      "--limit",
+      "1",
+      "--profile",
+      "profile.json",
+      "--out",
+      "reports/live",
+      "--json",
+    ]).json, true);
   });
 
   it("parses --no-csv as a CSV export opt-out", () => {
@@ -236,6 +253,7 @@ describe("GitHub live analyze CLI", () => {
       const profilePath = await writeProfile(directory);
       const outDir = join(directory, "out");
       const provider = createProvider();
+      const progressMessages = [];
 
       const result = await runAnalyzeGithub({
         repository: "example/example-repo",
@@ -246,6 +264,7 @@ describe("GitHub live analyze CLI", () => {
       }, {
         provider,
         now: () => "2026-06-09T00:00:00Z",
+        onProgress: message => progressMessages.push(message),
       });
 
       assert.equal(result.dryRun, false);
@@ -271,6 +290,12 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(result.csvArtifactsEnabled, true);
       assert.equal(result.artifactPaths.methodology, join(outDir, "methodology.md"));
       assert.equal(result.artifactPaths.prMetricsCsv, join(outDir, "pr-metrics.csv"));
+      assert.deepEqual(progressMessages, [
+        "Validating profile and output directory.",
+        "Collecting latest 1 merged pull request(s) from example/example-repo.",
+        "Normalizing source bundle and computing metrics.",
+        "Writing local artifacts.",
+      ]);
       assert(reportMarkdown.includes("# Repository Friction Report: example/example-repo"));
       assert(reportMarkdown.includes("`methodology.md`"));
       assert(reportMarkdown.includes("## Collection Coverage"));
@@ -279,6 +304,48 @@ describe("GitHub live analyze CLI", () => {
       assert(methodology.includes("- PR metrics CSV: `pr-metrics.csv`"));
       assert(prMetricsCsv.includes("pr_number,title,url,changed_lines"));
       assert(prMetricsCsv.includes("7,feat: live analyze,https://github.com/example/example-repo/pull/7,25"));
+
+      const completion = formatAnalyzeGithubCompletion(result);
+      assert(completion.startsWith(`Markdown report: ${join(outDir, "friction-report.md")}\n`));
+      assert(completion.includes("Analysis complete for example/example-repo."));
+      assert(completion.includes(`Methodology: ${join(outDir, "methodology.md")}`));
+      assert(completion.includes(`JSON report: ${join(outDir, "friction-report.json")}`));
+      assert(completion.includes("CSV evidence:\n"));
+      assert(completion.includes(`- PR metrics: ${join(outDir, "pr-metrics.csv")}`));
+      assert(completion.includes("Collection coverage: partial."));
+      assert(completion.includes("Coverage caveats:\n"));
+      assert(completion.includes("pr_open_diff"));
+      assert(!completion.includes("- repository_metadata: status=available"));
+      assert(completion.includes("Top bottlenecks:"));
+    });
+  });
+
+  it("writes parseable JSON completion output only when --json is requested", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "json-out");
+      const result = await runAnalyzeGithub({
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir,
+      }, {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+      });
+
+      let output = "";
+      writeAnalyzeGithubCompletion(result, {
+        json: true,
+        stdout: { write: chunk => { output += chunk; } },
+      });
+
+      const parsed = JSON.parse(output);
+      assert.equal(parsed.ok, true);
+      assert.equal(parsed.targetRepository.owner, "example");
+      assert.equal(parsed.artifactPaths.reportMarkdown, join(outDir, "friction-report.md"));
+      assert(!output.includes("Analysis complete"));
+      assert(!output.includes("Validating profile"));
     });
   });
 
@@ -307,6 +374,7 @@ describe("GitHub live analyze CLI", () => {
 
       assert.equal(result.csvArtifactsEnabled, false);
       assert(!("prMetricsCsv" in result.artifactPaths));
+      assert(formatAnalyzeGithubCompletion(result).includes("CSV evidence: disabled by --no-csv."));
       assert.deepEqual((await readdir(outDir)).sort(), [
         "friction-report.json",
         "friction-report.md",

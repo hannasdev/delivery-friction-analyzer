@@ -123,8 +123,8 @@ Add deeper transparency artifacts so maintainers can understand the methodology 
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] PR opened
+- [x] Merged
 
 ## M3: CLI Report Delivery Experience
 
@@ -175,8 +175,10 @@ Make the CLI completion experience point maintainers to the useful report artifa
 ### Status
 
 - [ ] Not started
-- [ ] Implemented
+- [x] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
+
+Lifecycle note: Final acceptance/completion bookkeeping and moving this initiative to `docs/initiatives/done/` are intentionally deferred until the M3 PR is reviewed and merged.

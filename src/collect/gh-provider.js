@@ -67,6 +67,8 @@ query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
 }
 `;
 
+const TRANSIENT_PR_VIEW_RETRY_DELAYS_MS = Object.freeze([2000, 5000]);
+
 function parseJson(stdout, args) {
   if (String(stdout ?? "").trim() === "") {
     throw new Error(`gh returned empty JSON output for ${args.slice(0, 3).join(" ")}.`);
@@ -103,7 +105,23 @@ function requireGraphqlPage(page, label) {
   return page;
 }
 
-export function createGhCliProvider({ ghPath = "gh", runCommand } = {}) {
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function isTransientPrViewAuthError(error) {
+  const message = `${error?.message ?? ""}\n${error?.stderr ?? ""}`;
+  return message.includes("HTTP 401")
+    && message.includes("Requires authentication")
+    && message.includes("api.github.com/graphql");
+}
+
+export function createGhCliProvider({
+  ghPath = "gh",
+  runCommand,
+  retryDelaysMs = TRANSIENT_PR_VIEW_RETRY_DELAYS_MS,
+  sleep = wait,
+} = {}) {
   async function runGh(args) {
     if (runCommand) {
       return runCommand(args);
@@ -157,7 +175,7 @@ export function createGhCliProvider({ ghPath = "gh", runCommand } = {}) {
     },
 
     async getPullRequest({ owner, name, number }) {
-      return runGhJson([
+      const args = [
         "pr",
         "view",
         String(number),
@@ -165,7 +183,21 @@ export function createGhCliProvider({ ghPath = "gh", runCommand } = {}) {
         `${owner}/${name}`,
         "--json",
         PR_VIEW_FIELDS.join(","),
-      ]);
+      ];
+
+      for (let attempt = 0; attempt <= retryDelaysMs.length; attempt += 1) {
+        try {
+          return await runGhJson(args);
+        } catch (error) {
+          const retryDelayMs = retryDelaysMs[attempt];
+          if (!isTransientPrViewAuthError(error) || retryDelayMs === undefined) {
+            throw error;
+          }
+          await sleep(retryDelayMs);
+        }
+      }
+
+      throw new Error("unreachable");
     },
 
     async getReviewThreads({ owner, name, number }) {

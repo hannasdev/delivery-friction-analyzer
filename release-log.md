@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 2026-06-10 — CLI Report Delivery Experience
+
+- What changed: Successful GitHub analysis runs now print a concise human-readable completion message by default, with the Markdown report path first; pass `--json` to print the full machine-readable completion receipt on stdout. Live collection also retries transient `gh pr view` GraphQL authentication failures.
+- Why it matters: Maintainers can jump straight to the main report, automation can keep parsing the existing receipt by opting into `--json`, and larger live samples are less likely to fail on brief GitHub CLI throttling/auth hiccups.
+- Who is affected: Maintainers and scripts running `npm run analyze:github`.
+- Action needed: Update scripts that parse default stdout JSON to pass `--json`.
+
 ### 2026-06-10 — Methodology And Evidence Exports
 
 - What changed: Full GitHub analysis now writes a detailed `methodology.md` artifact and curated CSV evidence exports by default, with `--no-csv` available to suppress CSV files.

@@ -24,6 +24,7 @@ const ALLOWED_OPTIONS = new Set([
   "metadata-only",
   "validation-target",
   "no-csv",
+  "json",
 ]);
 
 const REPOSITORY_SLUG = /^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/;
@@ -61,6 +62,7 @@ Options:
   --metadata-only           Alias for --dry-run.
   --validation-target       Mark the target repository as a validation target in output metadata.
   --no-csv                  Suppress curated CSV evidence exports.
+  --json                    Print the machine-readable completion receipt to stdout.
 `;
 
 export function parseAnalyzeGithubArgs(argv) {
@@ -79,7 +81,13 @@ export function parseAnalyzeGithubArgs(argv) {
       throw new Error(`Unknown option: ${arg}`);
     }
 
-    if (key === "dry-run" || key === "metadata-only" || key === "validation-target" || key === "no-csv") {
+    if (
+      key === "dry-run"
+      || key === "metadata-only"
+      || key === "validation-target"
+      || key === "no-csv"
+      || key === "json"
+    ) {
       options[key] = true;
       continue;
     }
@@ -100,6 +108,7 @@ export function parseAnalyzeGithubArgs(argv) {
     dryRun: Boolean(options["dry-run"] || options["metadata-only"]),
     isValidationTarget: Boolean(options["validation-target"]),
     csv: !options["no-csv"],
+    json: Boolean(options.json),
   };
 }
 
@@ -405,6 +414,83 @@ function writeProgress(message) {
   process.stderr.write(`${message}\n`);
 }
 
+function coverageLine(family) {
+  const diagnostics = (family.diagnostics ?? []).filter(Boolean);
+  const details = [
+    `status=${family.status}`,
+    `attempts=${family.attempts ?? 1}`,
+    family.source ? `source=${family.source}` : null,
+    family.downstreamImpact ? `impact=${family.downstreamImpact}` : null,
+    diagnostics.length ? `diagnostics=${diagnostics.join(" | ")}` : null,
+  ].filter(Boolean);
+  return `- ${family.family}: ${details.join("; ")}`;
+}
+
+function coverageCaveats(coverage) {
+  return (coverage?.apiFamilies ?? []).filter(family => {
+    const diagnostics = (family.diagnostics ?? []).filter(Boolean);
+    return family.status !== "available" || diagnostics.length > 0;
+  });
+}
+
+export function formatAnalyzeGithubCompletion(result) {
+  const target = result.targetRepository?.owner && result.targetRepository?.name
+    ? `${result.targetRepository.owner}/${result.targetRepository.name}`
+    : "unknown repository";
+  const lines = [];
+
+  if (result.dryRun) {
+    lines.push(
+      `Dry run complete for ${target}.`,
+      `Sampled pull requests: ${result.sampledLimit} of ${result.requestedLimit} requested.`,
+      "Artifacts: not written.",
+    );
+  } else {
+    const paths = result.artifactPaths ?? {};
+    lines.push(
+      `Markdown report: ${paths.reportMarkdown}`,
+      `Analysis complete for ${target}.`,
+      `Methodology: ${paths.methodology}`,
+      `JSON report: ${paths.reportJson}`,
+      `Metrics summary: ${paths.metricsSummary}`,
+      `Source bundle: ${paths.sourceBundle}`,
+    );
+
+    if (result.csvArtifactsEnabled) {
+      lines.push(
+        "CSV evidence:",
+        `- PR metrics: ${paths.prMetricsCsv}`,
+        `- Bottleneck examples: ${paths.bottleneckExamplesCsv}`,
+        `- Comment sources: ${paths.commentSourcesCsv}`,
+        `- Collection coverage: ${paths.collectionCoverageCsv}`,
+      );
+    } else {
+      lines.push("CSV evidence: disabled by --no-csv.");
+    }
+  }
+
+  lines.push(`Collection coverage: ${result.collectionCoverage?.status ?? "unknown"}.`);
+
+  const caveats = coverageCaveats(result.collectionCoverage);
+  if (caveats.length > 0) {
+    lines.push("Coverage caveats:", ...caveats.map(coverageLine));
+  }
+
+  if (!result.dryRun && Array.isArray(result.topBottleneckIds) && result.topBottleneckIds.length > 0) {
+    lines.push(`Top bottlenecks: ${result.topBottleneckIds.join(", ")}.`);
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+export function writeAnalyzeGithubCompletion(result, { json = false, stdout = process.stdout } = {}) {
+  if (json) {
+    stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    return;
+  }
+  stdout.write(formatAnalyzeGithubCompletion(result));
+}
+
 async function main(argv) {
   const options = parseAnalyzeGithubArgs(argv);
   if (options.help) {
@@ -413,7 +499,7 @@ async function main(argv) {
   }
 
   const result = await runAnalyzeGithub(options, { onProgress: writeProgress });
-  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  writeAnalyzeGithubCompletion(result, { json: options.json });
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
