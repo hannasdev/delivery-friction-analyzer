@@ -6,6 +6,10 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
+import {
+  generateEvidenceCsvArtifacts,
+  renderRepositoryFrictionMethodology,
+} from "../src/report/evidence-artifacts.js";
 import { writeRepositoryFrictionReport } from "../src/report/generate-report.js";
 import {
   generateRepositoryFrictionReport,
@@ -72,6 +76,29 @@ describe("friction report generation", () => {
       { name: "author_reply", value: 15 },
       { name: "copilot", value: 15 },
     ]);
+  });
+
+  it("adds sensitivity summaries as robustness context without replacing baseline rankings", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const pr239Summary = report.sensitivity.summaries.find(summary => summary.excludedPr.number === 239);
+
+    assert.deepEqual(pr239Summary.baselineTopBottleneckIds, [
+      "review-churn",
+      "repo-guidance-gap",
+      "changed-file-spread",
+    ]);
+    assert.deepEqual(pr239Summary.topBottleneckIdsWithoutPr, [
+      "changed-file-spread",
+      "review-churn",
+      "repo-guidance-gap",
+    ]);
+    assert.equal(pr239Summary.changedTopBottlenecks, true);
+    assert(pr239Summary.interpretation.includes("outlier-sensitive"));
+    assert(markdown.includes("## Outlier And Sensitivity Analysis"));
+    assert(markdown.includes("Sensitivity summaries are robustness context only"));
+    assert(markdown.includes("| [#239](https://github.com/hannasdev/mcp-writing/pull/239) |"));
   });
 
   it("counts bot comments even when a bot source is outside displayed source samples", () => {
@@ -520,6 +547,289 @@ describe("friction report generation", () => {
         "| [#7](https://example.test/pull/7) | fix \\*markdown\\* \\[link\\](https://example.test) \\`code\\` | 2 | 1 |",
       ),
     );
+  });
+
+  it("renders methodology with run-specific facts and artifact names", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = {
+      ...generateRepositoryFrictionReport(metricsSummary),
+      collectionCoverage: {
+        status: "partial",
+        apiFamilies: [
+          {
+            family: "workflow_runs",
+            status: "available",
+            attempts: 3,
+            source: "rest:actions",
+            diagnostics: [],
+            downstreamImpact: "validation evidence populated",
+          },
+        ],
+      },
+    };
+
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle: {
+        selection: { requestedLimit: 30, collectedCount: 3 },
+        coverage: report.collectionCoverage,
+      },
+      profilePath: "fixtures/github/mcp-writing/profile.json",
+      artifactFileNames: {
+        reportMarkdown: "friction-report.md",
+        reportJson: "friction-report.json",
+        methodology: "methodology.md",
+        sourceBundle: "source-bundle.json",
+        normalized: "normalized.json",
+        metricsSummary: "metrics-summary.json",
+        prMetricsCsv: "pr-metrics.csv",
+        bottleneckExamplesCsv: "bottleneck-examples.csv",
+        commentSourcesCsv: "comment-sources.csv",
+        collectionCoverageCsv: "collection-coverage.csv",
+      },
+      csvEnabled: true,
+    });
+
+    assert(methodology.includes("# Methodology: hannasdev/mcp-writing"));
+    assert(methodology.includes("Profile path: fixtures/github/mcp-writing/profile.json"));
+    assert(methodology.includes("Requested pull requests: 30"));
+    assert(methodology.includes("- workflow_runs: available; attempts=3; source=rest:actions."));
+    assert(methodology.includes("- PR metrics CSV: `pr-metrics.csv`"));
+    assert(methodology.includes("PR #239"));
+  });
+
+  it("generates curated deterministic CSV exports without raw comment text", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const csvArtifacts = generateEvidenceCsvArtifacts({
+      metricsSummary,
+      report,
+      collectionCoverage: {
+        apiFamilies: [
+          {
+            family: "workflow_runs",
+            status: "available",
+            attempts: 3,
+            source: "rest:actions",
+            diagnostics: ["sampled"],
+            downstreamImpact: "validation evidence populated",
+          },
+        ],
+      },
+    });
+
+    assert(csvArtifacts.prMetricsCsv.startsWith([
+      "pr_number",
+      "title",
+      "url",
+      "changed_lines",
+      "non_generated_changed_lines",
+      "review_comments",
+      "review_threads",
+      "failed_checks",
+      "failed_workflow_runs",
+      "cancelled_workflow_runs",
+      "post_review_commits",
+    ].join(",")));
+    assert(csvArtifacts.prMetricsCsv.includes("239,feat: resolve scene vocabulary variants,https://github.com/hannasdev/mcp-writing/pull/239,1245"));
+    assert(csvArtifacts.bottleneckExamplesCsv.includes("review-churn,Review churn,pr_readiness_gate,239"));
+    assert(csvArtifacts.bottleneckExamplesCsv.includes(",rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed,graphql:repository.pullRequest.reviewThreads,"));
+    assert(csvArtifacts.commentSourcesCsv.includes("copilot,15,true,false,0.5"));
+    assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,available,3,rest:actions,sampled,validation evidence populated"));
+    assert(!csvArtifacts.bottleneckExamplesCsv.includes("raw comment"));
+  });
+
+  it("leaves unavailable CSV counts empty while preserving source labels", () => {
+    const metricsSummary = {
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {
+        pullRequests: 2,
+        changedLines: 20,
+        nonGeneratedChangedLines: 20,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "unavailable coverage",
+          url: "https://example.test/pull/1",
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+          review: {
+            comments: { totalCount: 0, bySource: {} },
+            threads: {
+              source: "unavailable",
+              totalCount: 0,
+              resolvedCount: 0,
+              outdatedCount: 0,
+            },
+          },
+          ci: {
+            checkRuns: { failedCount: 0 },
+            workflowRuns: {
+              source: "unavailable",
+              coverage: "unavailable",
+              failedCount: 0,
+              cancelledCount: 0,
+              conclusions: {},
+            },
+          },
+          iteration: { commitsAfterFirstReview: null },
+          components: {},
+        },
+        {
+          number: 2,
+          title: "observed zero coverage",
+          url: "https://example.test/pull/2",
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+          review: {
+            comments: { totalCount: 0, bySource: {} },
+            threads: {
+              source: "graphql:repository.pullRequest.reviewThreads",
+              totalCount: 0,
+              resolvedCount: 0,
+              outdatedCount: 0,
+            },
+          },
+          ci: {
+            checkRuns: { failedCount: 0 },
+            workflowRuns: {
+              source: "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request",
+              coverage: "observed",
+              failedCount: 0,
+              cancelledCount: 0,
+              conclusions: {},
+            },
+          },
+          iteration: { commitsAfterFirstReview: 0 },
+          components: {},
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "unavailable coverage", value: 1 },
+          { number: 2, title: "observed zero coverage", value: 1 },
+        ],
+      },
+    };
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const csvArtifacts = generateEvidenceCsvArtifacts({
+      metricsSummary,
+      report,
+      collectionCoverage: { apiFamilies: [] },
+    });
+
+    assert(csvArtifacts.prMetricsCsv.includes(
+      "1,unavailable coverage,https://example.test/pull/1,10,10,0,,0,,,,unavailable,unavailable,unavailable",
+    ));
+    assert(csvArtifacts.prMetricsCsv.includes(
+      "2,observed zero coverage,https://example.test/pull/2,10,10,0,0,0,0,0,0,graphql:repository.pullRequest.reviewThreads,rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed",
+    ));
+    assert(csvArtifacts.bottleneckExamplesCsv.includes(
+      "review-churn,Review churn,pr_readiness_gate,1,unavailable coverage,https://example.test/pull/1,1,10,0,,,",
+    ));
+    assert(csvArtifacts.bottleneckExamplesCsv.includes(
+      "review-churn,Review churn,pr_readiness_gate,2,observed zero coverage,https://example.test/pull/2,1,10,0,0,0,0,0,0",
+    ));
+  });
+
+  it("escapes CSV fields containing commas, quotes, and newlines", () => {
+    const csvArtifacts = generateEvidenceCsvArtifacts({
+      metricsSummary: {
+        rankings: {},
+        pullRequests: [
+          {
+            number: 7,
+            title: "fix \"quoted\", multiline\nvalue",
+            url: "https://example.test/pull/7",
+            diffAtMerge: { changedLines: 1 },
+            files: { nonGeneratedChangedLines: 1 },
+            review: { comments: { totalCount: 0 }, threads: { source: "unavailable" } },
+            ci: {
+              checkRuns: { failedCount: 0 },
+              workflowRuns: { source: "unavailable", coverage: "unavailable" },
+            },
+            iteration: { commitsAfterFirstReview: null },
+          },
+        ],
+      },
+      report: {
+        commentSources: { totalComments: 0, bySource: [] },
+        bottlenecks: [],
+      },
+      collectionCoverage: {
+        apiFamilies: [
+          {
+            family: "workflow_runs",
+            status: "partial",
+            attempts: 1,
+            source: "rest:actions",
+            diagnostics: ["warning, \"quoted\"\nline"],
+            downstreamImpact: "partial evidence",
+          },
+        ],
+      },
+    });
+
+    assert(csvArtifacts.prMetricsCsv.includes("\"fix \"\"quoted\"\", multiline\nvalue\""));
+    assert(csvArtifacts.collectionCoverageCsv.includes("\"warning, \"\"quoted\"\"\nline\""));
+  });
+
+  it("mitigates spreadsheet formula injection in CSV text fields", () => {
+    const csvArtifacts = generateEvidenceCsvArtifacts({
+      metricsSummary: {
+        rankings: {},
+        pullRequests: [
+          {
+            number: 7,
+            title: " =IMPORTXML(\"https://example.test\")",
+            url: "+https://example.test/pull/7",
+            diffAtMerge: { changedLines: -1 },
+            files: { nonGeneratedChangedLines: 1 },
+            review: { comments: { totalCount: 0 }, threads: { source: "unavailable" } },
+            ci: {
+              checkRuns: { failedCount: 0 },
+              workflowRuns: { source: "unavailable", coverage: "unavailable" },
+            },
+            iteration: { commitsAfterFirstReview: null },
+          },
+        ],
+      },
+      report: {
+        commentSources: {
+          totalComments: 1,
+          bySource: [
+            { name: "@scanner", value: 1 },
+          ],
+        },
+        bottlenecks: [],
+      },
+      collectionCoverage: {
+        apiFamilies: [
+          {
+            family: "workflow_runs",
+            status: "partial",
+            attempts: 1,
+            source: "\tgraphql",
+            diagnostics: ["-looks like formula"],
+            downstreamImpact: "partial evidence",
+          },
+        ],
+      },
+    });
+
+    assert(csvArtifacts.prMetricsCsv.includes("7,\"' =IMPORTXML(\"\"https://example.test\"\")\",'+https://example.test/pull/7,-1"));
+    assert(csvArtifacts.commentSourcesCsv.includes("'@scanner,1,false,false,1"));
+    assert(csvArtifacts.collectionCoverageCsv.includes("'\tgraphql,'-looks like formula,partial evidence"));
   });
 
   it("writes local JSON and Markdown report artifacts from a metrics summary", async () => {

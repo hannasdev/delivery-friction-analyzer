@@ -967,6 +967,101 @@
       }
     }
   ],
+  "sensitivity": {
+    "summaries": [
+      {
+        "excludedPr": {
+          "number": 221,
+          "title": "feat(backup): apply project restores transactionally",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/221"
+        },
+        "affectedBottlenecks": [
+          {
+            "id": "review-surprise",
+            "title": "Review surprise",
+            "topShare": 0.556
+          }
+        ],
+        "baselineTopBottleneckIds": [
+          "review-churn",
+          "repo-guidance-gap",
+          "changed-file-spread"
+        ],
+        "topBottleneckIdsWithoutPr": [
+          "review-churn",
+          "repo-guidance-gap",
+          "changed-file-spread"
+        ],
+        "changedTopBottlenecks": false,
+        "interpretation": "Top bottleneck ordering is unchanged when this dominant PR is excluded; the baseline appears more robust to this outlier.",
+        "replacementTopBottlenecks": [
+          {
+            "id": "review-churn",
+            "title": "Review churn"
+          },
+          {
+            "id": "repo-guidance-gap",
+            "title": "Repo guidance gap"
+          },
+          {
+            "id": "changed-file-spread",
+            "title": "Changed-file spread"
+          }
+        ]
+      },
+      {
+        "excludedPr": {
+          "number": 239,
+          "title": "feat: resolve scene vocabulary variants",
+          "url": "https://github.com/hannasdev/mcp-writing/pull/239"
+        },
+        "affectedBottlenecks": [
+          {
+            "id": "review-churn",
+            "title": "Review churn",
+            "topShare": 0.625
+          },
+          {
+            "id": "repo-guidance-gap",
+            "title": "Repo guidance gap",
+            "topShare": 0.625
+          },
+          {
+            "id": "fix-amplification",
+            "title": "Fix amplification",
+            "topShare": 0.833
+          }
+        ],
+        "baselineTopBottleneckIds": [
+          "review-churn",
+          "repo-guidance-gap",
+          "changed-file-spread"
+        ],
+        "topBottleneckIdsWithoutPr": [
+          "changed-file-spread",
+          "review-churn",
+          "repo-guidance-gap"
+        ],
+        "changedTopBottlenecks": true,
+        "interpretation": "Top bottleneck ordering changes when this dominant PR is excluded; treat the baseline as outlier-sensitive.",
+        "replacementTopBottlenecks": [
+          {
+            "id": "changed-file-spread",
+            "title": "Changed-file spread"
+          },
+          {
+            "id": "review-churn",
+            "title": "Review churn"
+          },
+          {
+            "id": "repo-guidance-gap",
+            "title": "Repo guidance gap"
+          }
+        ]
+      }
+    ],
+    "note": "Sensitivity summaries are robustness context only. They do not remove PRs from the baseline report or replace the original ranking."
+  },
   "recommendationCategories": [
     {
       "id": "hooks",
