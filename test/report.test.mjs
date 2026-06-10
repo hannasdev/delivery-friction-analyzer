@@ -153,7 +153,7 @@ describe("friction report generation", () => {
       ),
     );
     assert(markdown.includes("- Workflow-run coverage is unavailable for some PRs"));
-    assert(markdown.includes("- Shares the same representative PR evidence as Repo guidance gap, Fix amplification."));
+    assert(markdown.includes("- Shares the same representative PR evidence as Repo guidance gap, Review surprise, Fix amplification."));
   });
 
   it("pins the redacted live-30 calibration sample for source-label regressions", async () => {
@@ -323,6 +323,88 @@ describe("friction report generation", () => {
 
     assert.equal(reviewChurn.dominance.status, "single_pr_dominates");
     assert.equal(reviewChurn.dominance.topShare, 0.5);
+  });
+
+  it("labels shared representative evidence regardless of PR ordering", () => {
+    const markdown = renderRepositoryFrictionMarkdown({
+      reportVersion: "friction-report.v1",
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      summary: {
+        pullRequests: 2,
+        changedLines: 3,
+        nonGeneratedChangedLines: 3,
+        reviewComments: 0,
+        reviewThreads: 0,
+        topBottleneckIds: ["review-churn", "repo-guidance-gap"],
+      },
+      bottlenecks: [
+        {
+          id: "review-churn",
+          title: "Review churn",
+          metricLabel: "iteration drag",
+          observedData: [
+            { number: 7, title: "first PR", value: 2, changedLines: 1 },
+            { number: 9, title: "second PR", value: 1, changedLines: 2 },
+          ],
+          inferredDiagnosis: "Review loops are concentrated in a small set of PRs.",
+          suggestedAction: {
+            category: "pr_readiness_gate",
+            action: "Add or tighten a PR readiness gate.",
+          },
+        },
+        {
+          id: "repo-guidance-gap",
+          title: "Repo guidance gap",
+          metricLabel: "iteration drag",
+          observedData: [
+            { number: 9, title: "second PR", value: 1, changedLines: 2 },
+            { number: 7, title: "first PR", value: 2, changedLines: 1 },
+          ],
+          inferredDiagnosis: "Repeated review loops suggest missing repository guidance.",
+          suggestedAction: {
+            category: "repo_specific_ai_skills",
+            action: "Add repo-specific AI skills.",
+          },
+        },
+      ],
+      recommendationCategories: [],
+      commentSources: {
+        totalComments: 0,
+        botComments: 0,
+        humanComments: 0,
+        authorReplies: 0,
+        bySource: [],
+      },
+      surfaces: {
+        coreChangedLines: 3,
+        lowSignalChangedLines: 0,
+        lowSignalFiles: 0,
+        weightedChangedLines: 3,
+        smallDiffWideSpreadCount: 0,
+        byFunctionalSurface: [],
+        byRole: [],
+      },
+      coverage: {
+        prOpenDiff: { unavailable: 2 },
+        workflowRuns: { unavailable: 2 },
+        reviewThreads: { unavailable: 2 },
+        notes: [],
+      },
+      guardrails: {
+        avoidsIndividualRanking: true,
+        separatesObservedInferredAndSuggested: true,
+        usesCompositeScore: false,
+      },
+      followUp: [],
+    });
+
+    assert(markdown.includes("- Shares the same representative PR evidence as Repo guidance gap."));
+    assert(markdown.includes("- Shares the same representative PR evidence as Review churn."));
   });
 
   it("renders legacy observed examples without nested evidence fields", () => {

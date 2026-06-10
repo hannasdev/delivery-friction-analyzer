@@ -441,7 +441,10 @@ function renderMarkdownTable(headers, rows) {
 }
 
 function evidenceSignature(bottleneck) {
-  return (bottleneck.observedData ?? []).map(evidence => evidence.number).join(",");
+  return (bottleneck.observedData ?? [])
+    .map(evidence => evidence.number)
+    .sort((left, right) => Number(left) - Number(right))
+    .join(",");
 }
 
 function sharedEvidenceNotes(bottlenecks) {

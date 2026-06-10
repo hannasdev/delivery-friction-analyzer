@@ -67,7 +67,7 @@ Add or tighten a PR readiness gate for changes that attract repeated review roun
 #### Confidence And Caveats
 
 - PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing.
-- Shares the same representative PR evidence as Repo guidance gap, Fix amplification.
+- Shares the same representative PR evidence as Repo guidance gap, Review surprise, Fix amplification.
 
 ### Repo guidance gap
 
@@ -91,7 +91,7 @@ Add repo-specific AI skills or instructions for repeated review themes before op
 #### Confidence And Caveats
 
 - PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing.
-- Shares the same representative PR evidence as Review churn, Fix amplification.
+- Shares the same representative PR evidence as Review churn, Review surprise, Fix amplification.
 
 ### Changed-file spread
 
@@ -116,6 +116,7 @@ Break broad changes into smaller milestones when core files, directories, or sur
 #### Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
+- Shares the same representative PR evidence as Planning gap.
 
 ### Review surprise
 
@@ -139,6 +140,7 @@ Call out multi-surface scope in the PR description or split cross-surface work.
 #### Confidence And Caveats
 
 - PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing.
+- Shares the same representative PR evidence as Review churn, Repo guidance gap, Fix amplification.
 
 ### Fix amplification
 
@@ -162,7 +164,7 @@ Use smaller delivery slices when review feedback causes meaningful post-review c
 #### Confidence And Caveats
 
 - PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
-- Shares the same representative PR evidence as Review churn, Repo guidance gap.
+- Shares the same representative PR evidence as Review churn, Repo guidance gap, Review surprise.
 
 ### Validation gap
 
@@ -256,6 +258,7 @@ Improve planning artifacts when planning or scope files are part of high-frictio
 #### Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
+- Shares the same representative PR evidence as Changed-file spread.
 
 ## Recommendation Categories
 
