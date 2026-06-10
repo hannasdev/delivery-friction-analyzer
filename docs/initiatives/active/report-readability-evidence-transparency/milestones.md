@@ -121,8 +121,8 @@ Add deeper transparency artifacts so maintainers can understand the methodology 
 
 - [ ] Not started
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
 
