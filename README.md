@@ -20,17 +20,6 @@ The report should answer:
 
 The product should eventually combine GitHub delivery friction with token and model usage, but GitHub-only analytics are enough to validate the first product wedge.
 
-## Planning Docs
-
-- Completed MVP foundation:
-  - [PRD](docs/initiatives/done/delivery-friction-analyzer/prd.md)
-  - [Milestones](docs/initiatives/done/delivery-friction-analyzer/milestones.md)
-  - [Architecture Notes](docs/initiatives/done/delivery-friction-analyzer/architecture.md)
-- Active: GitHub live collection:
-  - [PRD](docs/initiatives/active/github-live-collection/prd.md)
-  - [Milestones](docs/initiatives/active/github-live-collection/milestones.md)
-  - [Architecture Notes](docs/initiatives/active/github-live-collection/architecture.md)
-
 ## Local GitHub Analysis
 
 Run the live analyzer with local `gh` credentials:
