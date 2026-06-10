@@ -541,6 +541,68 @@ describe("gh CLI provider", () => {
     );
   });
 
+  it("retries transient GraphQL authentication failures from gh pr view", async () => {
+    const requestedArgs = [];
+    const delays = [];
+    const provider = createGhCliProvider({
+      retryDelaysMs: [2000, 5000],
+      async sleep(ms) {
+        delays.push(ms);
+      },
+      async runCommand(args) {
+        requestedArgs.push(args);
+        if (requestedArgs.length < 3) {
+          const error = new Error("HTTP 401: Requires authentication (https://api.github.com/graphql)");
+          error.stderr = "HTTP 401: Requires authentication (https://api.github.com/graphql)";
+          throw error;
+        }
+        return JSON.stringify(pullRequestDetails({ number: 42 }));
+      },
+    });
+
+    const pr = await provider.getPullRequest({
+      owner: "example",
+      name: "example-repo",
+      number: 42,
+    });
+
+    assert.equal(pr.number, 42);
+    assert.equal(requestedArgs.length, 3);
+    assert.deepEqual(delays, [2000, 5000]);
+    assert.deepEqual(requestedArgs[0].slice(0, 5), [
+      "pr",
+      "view",
+      "42",
+      "--repo",
+      "example/example-repo",
+    ]);
+  });
+
+  it("does not retry non-transient gh pr view failures", async () => {
+    const requestedArgs = [];
+    const provider = createGhCliProvider({
+      async sleep() {
+        throw new Error("sleep should not be called");
+      },
+      async runCommand(args) {
+        requestedArgs.push(args);
+        const error = new Error("HTTP 404: Not Found");
+        error.stderr = "HTTP 404: Not Found";
+        throw error;
+      },
+    });
+
+    await assert.rejects(
+      provider.getPullRequest({
+        owner: "example",
+        name: "example-repo",
+        number: 42,
+      }),
+      /HTTP 404: Not Found/,
+    );
+    assert.equal(requestedArgs.length, 1);
+  });
+
   it("unwraps GraphQL response data when collecting review threads", async () => {
     const provider = createGhCliProvider({
       async runCommand(args) {
