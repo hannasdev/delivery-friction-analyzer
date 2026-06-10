@@ -791,7 +791,7 @@ describe("friction report generation", () => {
         pullRequests: [
           {
             number: 7,
-            title: "=IMPORTXML(\"https://example.test\")",
+            title: " =IMPORTXML(\"https://example.test\")",
             url: "+https://example.test/pull/7",
             diffAtMerge: { changedLines: -1 },
             files: { nonGeneratedChangedLines: 1 },
@@ -827,7 +827,7 @@ describe("friction report generation", () => {
       },
     });
 
-    assert(csvArtifacts.prMetricsCsv.includes("7,\"'=IMPORTXML(\"\"https://example.test\"\")\",'+https://example.test/pull/7,-1"));
+    assert(csvArtifacts.prMetricsCsv.includes("7,\"' =IMPORTXML(\"\"https://example.test\"\")\",'+https://example.test/pull/7,-1"));
     assert(csvArtifacts.commentSourcesCsv.includes("'@scanner,1,false,false,1"));
     assert(csvArtifacts.collectionCoverageCsv.includes("'\tgraphql,'-looks like formula,partial evidence"));
   });

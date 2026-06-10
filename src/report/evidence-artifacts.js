@@ -19,7 +19,7 @@ const SCORE_COLUMNS = [
 function csvValue(value) {
   if (value === null || value === undefined) return "";
   const rawValue = String(value);
-  const stringValue = typeof value === "string" && /^[=+\-@\t\r\n]/.test(rawValue)
+  const stringValue = typeof value === "string" && (/^[=+\-@\t\r\n]/.test(rawValue) || /^\s*[=+\-@]/u.test(rawValue))
     ? `'${rawValue}`
     : rawValue;
   return /[",\n\r]/.test(stringValue) ? `"${stringValue.replace(/"/g, '""')}"` : stringValue;
