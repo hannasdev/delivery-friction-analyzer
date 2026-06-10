@@ -512,6 +512,14 @@ function renderEvidenceTable(observedData) {
   );
 }
 
+function recommendationCategoryLabel(bottleneck) {
+  return bottleneck.suggestedAction?.category ?? "unspecified";
+}
+
+function recommendationActionText(bottleneck) {
+  return bottleneck.suggestedAction?.action ?? "No recommendation was recorded.";
+}
+
 function renderList(items) {
   return items.length ? items.map(item => `- ${item}`).join("\n") : "- None";
 }
@@ -672,7 +680,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     lines.push(
       `### ${bottleneck.title}`,
       "",
-      `Recommendation category: ${bottleneck.suggestedAction.category}`,
+      `Recommendation category: ${recommendationCategoryLabel(bottleneck)}`,
       "",
       `#### Observed Evidence (${bottleneck.metricLabel})`,
       "",
@@ -684,7 +692,7 @@ export function renderRepositoryFrictionMarkdown(report) {
       "",
       "#### Recommendation",
       "",
-      bottleneck.suggestedAction.action,
+      recommendationActionText(bottleneck),
       "",
       "#### Confidence And Caveats",
       "",

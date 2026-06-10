@@ -393,6 +393,8 @@ describe("friction report generation", () => {
     });
 
     assert(markdown.includes("| #7 | legacy evidence shape | 2 | 1 |"));
+    assert(markdown.includes("Recommendation category: unspecified"));
+    assert(!markdown.includes("Recommendation category: undefined"));
     assert(
       markdown.includes(
         "coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0",
