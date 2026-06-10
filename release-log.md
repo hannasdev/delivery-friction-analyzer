@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-10 — Methodology And Evidence Exports
+
+- What changed: Full GitHub analysis now writes a detailed `methodology.md` artifact and curated CSV evidence exports by default, with `--no-csv` available to suppress CSV files.
+- Why it matters: Maintainers can understand the report methodology, inspect spreadsheet-friendly evidence, and see outlier sensitivity without reading nested JSON first.
+- Who is affected: Maintainers and contributors running local GitHub analysis.
+- Action needed: Use `--no-csv` for runs where spreadsheet-friendly artifacts should not be produced.
+- PR: TBD
+
 ### 2026-06-10 — Report Readability And Evidence Transparency
 
 - What changed: Markdown friction reports now use a clearer reader path with executive summary, evidence-quality coverage, key findings, labeled bottleneck sections, scannable PR evidence tables, methodology summary, guardrails, and artifact-sensitivity guidance.

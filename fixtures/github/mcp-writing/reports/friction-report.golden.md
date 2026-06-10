@@ -43,6 +43,15 @@ Coverage notes:
 - Outlier caveat: Review churn: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Repo guidance gap: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Review surprise: PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing. Fix amplification: PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
 - Coverage caveat: PR-open diff growth is unavailable for some PRs and is not inferred from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
 
+## Outlier And Sensitivity Analysis
+
+Sensitivity summaries are robustness context only. They do not remove PRs from the baseline report or replace the original ranking.
+
+| Excluded PR | Title | Affected bottlenecks | Baseline top bottlenecks | Top bottlenecks without PR | Robustness interpretation |
+| --- | --- | --- | --- | --- | --- |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | Review surprise (56%) | review-churn, repo-guidance-gap, changed-file-spread | review-churn, repo-guidance-gap, changed-file-spread | Top bottleneck ordering is unchanged when this dominant PR is excluded; the baseline appears more robust to this outlier. |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | Review churn (63%), Repo guidance gap (63%), Fix amplification (83%) | review-churn, repo-guidance-gap, changed-file-spread | changed-file-spread, review-churn, repo-guidance-gap | Top bottleneck ordering changes when this dominant PR is excluded; treat the baseline as outlier-sensitive. |
+
 ## Ranked Bottlenecks
 
 ### Review churn
@@ -332,6 +341,8 @@ File roles:
 - Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.
 - Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.
 - Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.
+- Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.
+- Full live analysis runs also write a detailed companion methodology artifact: `methodology.md`.
 
 ## Guardrails And Follow-Up
 

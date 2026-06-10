@@ -39,10 +39,15 @@ The command writes:
 - `metrics-summary.json`
 - `friction-report.json`
 - `friction-report.md`
+- `methodology.md`
+- `pr-metrics.csv`
+- `bottleneck-examples.csv`
+- `comment-sources.csv`
+- `collection-coverage.csv`
 
-Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts.
+Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. Use `--no-csv` when you want the Markdown, JSON, source, normalized, metrics, and methodology artifacts without spreadsheet-friendly CSV exports.
 
-Read `friction-report.md` first, then inspect `friction-report.json` and `source-bundle.json` when a bottleneck looks surprising. Each ranked bottleneck example includes the workflow-run source, workflow-run conclusions, review-thread source, comment-source breakdown, and a dominance note when one PR contributes most of the displayed signal.
+Read `friction-report.md` first, then inspect `methodology.md`, the CSV exports, `friction-report.json`, and `source-bundle.json` when a bottleneck looks surprising. Each ranked bottleneck example includes the workflow-run source, workflow-run conclusions, review-thread source, comment-source breakdown, and a dominance note when one PR contributes most of the displayed signal.
 
 Known MVP interpretation limits:
 
@@ -51,7 +56,7 @@ Known MVP interpretation limits:
 - Review-thread counts depend on GraphQL review-thread coverage; unavailable thread access is reported instead of silently treated as zero review churn.
 - A single dependency, bot, or unusually broad feature PR can dominate validation or review findings. Treat dominance notes as a prompt to inspect the raw PR evidence before generalizing.
 
-Generated artifacts may contain repository names, PR URLs, PR titles, file paths, and comment metadata. Treat source bundles, normalized data, metrics summaries, and reports as local/private unless you intentionally review and share them.
+Generated artifacts may contain repository names, PR URLs, PR titles, file paths, comment metadata, curated CSV evidence, and coverage diagnostics. Treat source bundles, normalized data, metrics summaries, reports, methodology, and CSV exports as local/private unless you intentionally review and share them.
 
 The existing metrics-summary-only report command remains available for fixture and advanced workflows:
 

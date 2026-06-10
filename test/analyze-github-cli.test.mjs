@@ -212,7 +212,22 @@ describe("GitHub live analyze CLI", () => {
       outDir: "reports/live",
       dryRun: true,
       isValidationTarget: true,
+      csv: true,
     });
+  });
+
+  it("parses --no-csv as a CSV export opt-out", () => {
+    assert.equal(parseAnalyzeGithubArgs([
+      "--repo",
+      "example/example-repo",
+      "--limit",
+      "1",
+      "--profile",
+      "profile.json",
+      "--out",
+      "reports/live",
+      "--no-csv",
+    ]).csv, false);
   });
 
   it("runs live collection through reports and writes expected artifacts", async () => {
@@ -237,12 +252,14 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(result.targetRepository.isValidationTarget, true);
       assert.deepEqual((await readdir(outDir)).sort(), Object.values(ANALYZE_GITHUB_ARTIFACTS).sort());
 
-      const [sourceBundle, normalized, metricsSummary, reportJson, reportMarkdown] = await Promise.all([
+      const [sourceBundle, normalized, metricsSummary, reportJson, reportMarkdown, methodology, prMetricsCsv] = await Promise.all([
         readJson(join(outDir, "source-bundle.json")),
         readJson(join(outDir, "normalized.json")),
         readJson(join(outDir, "metrics-summary.json")),
         readJson(join(outDir, "friction-report.json")),
         readFile(join(outDir, "friction-report.md"), "utf8"),
+        readFile(join(outDir, "methodology.md"), "utf8"),
+        readFile(join(outDir, "pr-metrics.csv"), "utf8"),
       ]);
 
       assert.equal(sourceBundle.schemaVersion, "github-source-bundle.v1");
@@ -250,9 +267,55 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(metricsSummary.metricVersion, "friction-metrics.v1");
       assert.equal(reportJson.reportVersion, "friction-report.v1");
       assert.equal(reportJson.collectionCoverage.status, "partial");
+      assert.equal(result.csvArtifactsEnabled, true);
+      assert.equal(result.artifactPaths.methodology, join(outDir, "methodology.md"));
+      assert.equal(result.artifactPaths.prMetricsCsv, join(outDir, "pr-metrics.csv"));
       assert(reportMarkdown.includes("# Repository Friction Report: example/example-repo"));
+      assert(reportMarkdown.includes("`methodology.md`"));
       assert(reportMarkdown.includes("## Collection Coverage"));
       assert(reportMarkdown.includes("pr_open_diff: unavailable"));
+      assert(methodology.includes("# Methodology: example/example-repo"));
+      assert(methodology.includes("- PR metrics CSV: `pr-metrics.csv`"));
+      assert(prMetricsCsv.includes("pr_number,title,url,changed_lines"));
+      assert(prMetricsCsv.includes("7,feat: live analyze,https://github.com/example/example-repo/pull/7,25"));
+    });
+  });
+
+  it("suppresses CSV exports when --no-csv is requested", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "out");
+      const provider = createProvider();
+
+      await writeFile(join(outDir, "pr-metrics.csv"), "stale csv\n").catch(async error => {
+        if (error.code !== "ENOENT") throw error;
+        await mkdir(outDir, { recursive: true });
+        await writeFile(join(outDir, "pr-metrics.csv"), "stale csv\n");
+      });
+
+      const result = await runAnalyzeGithub({
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir,
+        csv: false,
+      }, {
+        provider,
+        now: () => "2026-06-09T00:00:00Z",
+      });
+
+      assert.equal(result.csvArtifactsEnabled, false);
+      assert(!("prMetricsCsv" in result.artifactPaths));
+      assert.deepEqual((await readdir(outDir)).sort(), [
+        "friction-report.json",
+        "friction-report.md",
+        "methodology.md",
+        "metrics-summary.json",
+        "normalized.json",
+        "source-bundle.json",
+      ]);
+      const methodology = await readFile(join(outDir, "methodology.md"), "utf8");
+      assert(methodology.includes("CSV export generation was disabled for this run."));
     });
   });
 

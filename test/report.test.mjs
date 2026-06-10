@@ -6,6 +6,10 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
+import {
+  generateEvidenceCsvArtifacts,
+  renderRepositoryFrictionMethodology,
+} from "../src/report/evidence-artifacts.js";
 import { writeRepositoryFrictionReport } from "../src/report/generate-report.js";
 import {
   generateRepositoryFrictionReport,
@@ -72,6 +76,29 @@ describe("friction report generation", () => {
       { name: "author_reply", value: 15 },
       { name: "copilot", value: 15 },
     ]);
+  });
+
+  it("adds sensitivity summaries as robustness context without replacing baseline rankings", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const pr239Summary = report.sensitivity.summaries.find(summary => summary.excludedPr.number === 239);
+
+    assert.deepEqual(pr239Summary.baselineTopBottleneckIds, [
+      "review-churn",
+      "repo-guidance-gap",
+      "changed-file-spread",
+    ]);
+    assert.deepEqual(pr239Summary.topBottleneckIdsWithoutPr, [
+      "changed-file-spread",
+      "review-churn",
+      "repo-guidance-gap",
+    ]);
+    assert.equal(pr239Summary.changedTopBottlenecks, true);
+    assert(pr239Summary.interpretation.includes("outlier-sensitive"));
+    assert(markdown.includes("## Outlier And Sensitivity Analysis"));
+    assert(markdown.includes("Sensitivity summaries are robustness context only"));
+    assert(markdown.includes("| [#239](https://github.com/hannasdev/mcp-writing/pull/239) |"));
   });
 
   it("counts bot comments even when a bot source is outside displayed source samples", () => {
@@ -520,6 +547,95 @@ describe("friction report generation", () => {
         "| [#7](https://example.test/pull/7) | fix \\*markdown\\* \\[link\\](https://example.test) \\`code\\` | 2 | 1 |",
       ),
     );
+  });
+
+  it("renders methodology with run-specific facts and artifact names", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = {
+      ...generateRepositoryFrictionReport(metricsSummary),
+      collectionCoverage: {
+        status: "partial",
+        apiFamilies: [
+          {
+            family: "workflow_runs",
+            status: "available",
+            attempts: 3,
+            source: "rest:actions",
+            diagnostics: [],
+            downstreamImpact: "validation evidence populated",
+          },
+        ],
+      },
+    };
+
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle: {
+        selection: { requestedLimit: 30, collectedCount: 3 },
+        coverage: report.collectionCoverage,
+      },
+      profilePath: "fixtures/github/mcp-writing/profile.json",
+      artifactFileNames: {
+        reportMarkdown: "friction-report.md",
+        reportJson: "friction-report.json",
+        methodology: "methodology.md",
+        sourceBundle: "source-bundle.json",
+        normalized: "normalized.json",
+        metricsSummary: "metrics-summary.json",
+        prMetricsCsv: "pr-metrics.csv",
+        bottleneckExamplesCsv: "bottleneck-examples.csv",
+        commentSourcesCsv: "comment-sources.csv",
+        collectionCoverageCsv: "collection-coverage.csv",
+      },
+      csvEnabled: true,
+    });
+
+    assert(methodology.includes("# Methodology: hannasdev/mcp-writing"));
+    assert(methodology.includes("Profile path: fixtures/github/mcp-writing/profile.json"));
+    assert(methodology.includes("Requested pull requests: 30"));
+    assert(methodology.includes("- workflow_runs: available; attempts=3; source=rest:actions."));
+    assert(methodology.includes("- PR metrics CSV: `pr-metrics.csv`"));
+    assert(methodology.includes("PR #239"));
+  });
+
+  it("generates curated deterministic CSV exports without raw comment text", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const csvArtifacts = generateEvidenceCsvArtifacts({
+      metricsSummary,
+      report,
+      collectionCoverage: {
+        apiFamilies: [
+          {
+            family: "workflow_runs",
+            status: "available",
+            attempts: 3,
+            source: "rest:actions",
+            diagnostics: ["sampled"],
+            downstreamImpact: "validation evidence populated",
+          },
+        ],
+      },
+    });
+
+    assert(csvArtifacts.prMetricsCsv.startsWith([
+      "pr_number",
+      "title",
+      "url",
+      "changed_lines",
+      "non_generated_changed_lines",
+      "review_comments",
+      "review_threads",
+      "failed_checks",
+      "failed_workflow_runs",
+      "cancelled_workflow_runs",
+      "post_review_commits",
+    ].join(",")));
+    assert(csvArtifacts.prMetricsCsv.includes("239,feat: resolve scene vocabulary variants,https://github.com/hannasdev/mcp-writing/pull/239,1245"));
+    assert(csvArtifacts.bottleneckExamplesCsv.includes("review-churn,Review churn,pr_readiness_gate,239"));
+    assert(csvArtifacts.commentSourcesCsv.includes("copilot,15,true,false,0.5"));
+    assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,available,3,rest:actions,sampled,validation evidence populated"));
+    assert(!csvArtifacts.bottleneckExamplesCsv.includes("raw comment"));
   });
 
   it("writes local JSON and Markdown report artifacts from a metrics summary", async () => {

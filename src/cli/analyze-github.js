@@ -7,6 +7,10 @@ import { createGhCliProvider } from "../collect/gh-provider.js";
 import { computeRepositoryMetrics } from "../metrics/friction.js";
 import { normalizeFixtureBundle } from "../normalize/github-fixture.js";
 import {
+  generateEvidenceCsvArtifacts,
+  renderRepositoryFrictionMethodology,
+} from "../report/evidence-artifacts.js";
+import {
   generateRepositoryFrictionReport,
   renderRepositoryFrictionMarkdown,
 } from "../report/friction-report.js";
@@ -19,6 +23,7 @@ const ALLOWED_OPTIONS = new Set([
   "dry-run",
   "metadata-only",
   "validation-target",
+  "no-csv",
 ]);
 
 const REPOSITORY_SLUG = /^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/;
@@ -29,7 +34,19 @@ export const ANALYZE_GITHUB_ARTIFACTS = Object.freeze({
   metricsSummary: "metrics-summary.json",
   reportJson: "friction-report.json",
   reportMarkdown: "friction-report.md",
+  methodology: "methodology.md",
+  prMetricsCsv: "pr-metrics.csv",
+  bottleneckExamplesCsv: "bottleneck-examples.csv",
+  commentSourcesCsv: "comment-sources.csv",
+  collectionCoverageCsv: "collection-coverage.csv",
 });
+
+const CSV_ARTIFACT_KEYS = new Set([
+  "prMetricsCsv",
+  "bottleneckExamplesCsv",
+  "commentSourcesCsv",
+  "collectionCoverageCsv",
+]);
 
 export const USAGE = `Usage:
   node src/cli/analyze-github.js --repo <owner/name> --limit <1-100> --profile <path> --out <directory>
@@ -43,6 +60,7 @@ Options:
   --dry-run                 Validate inputs and sample GitHub coverage without writing artifacts.
   --metadata-only           Alias for --dry-run.
   --validation-target       Mark the target repository as a validation target in output metadata.
+  --no-csv                  Suppress curated CSV evidence exports.
 `;
 
 export function parseAnalyzeGithubArgs(argv) {
@@ -61,7 +79,7 @@ export function parseAnalyzeGithubArgs(argv) {
       throw new Error(`Unknown option: ${arg}`);
     }
 
-    if (key === "dry-run" || key === "metadata-only" || key === "validation-target") {
+    if (key === "dry-run" || key === "metadata-only" || key === "validation-target" || key === "no-csv") {
       options[key] = true;
       continue;
     }
@@ -81,6 +99,7 @@ export function parseAnalyzeGithubArgs(argv) {
     outDir: options.out,
     dryRun: Boolean(options["dry-run"] || options["metadata-only"]),
     isValidationTarget: Boolean(options["validation-target"]),
+    csv: !options["no-csv"],
   };
 }
 
@@ -143,9 +162,11 @@ async function validateOutputDirectory(outDir) {
   return resolvedOutDir;
 }
 
-function artifactPaths(outDir) {
+function artifactPaths(outDir, { includeCsv = true } = {}) {
   return Object.fromEntries(
-    Object.entries(ANALYZE_GITHUB_ARTIFACTS).map(([key, fileName]) => [key, join(outDir, fileName)]),
+    Object.entries(ANALYZE_GITHUB_ARTIFACTS)
+      .filter(([key]) => includeCsv || !CSV_ARTIFACT_KEYS.has(key))
+      .map(([key, fileName]) => [key, join(outDir, fileName)]),
   );
 }
 
@@ -182,13 +203,17 @@ async function writeText(path, value) {
   await writeFile(path, value, "utf8");
 }
 
-async function writeAnalysisArtifacts(outDir, paths, artifacts) {
-  await assertWritableArtifactTargets(paths);
+async function writeAnalysisArtifacts(outDir, paths, artifacts, { disabledPaths = {} } = {}) {
+  await assertWritableArtifactTargets({ ...paths, ...disabledPaths });
 
   const stagingDir = artifactTransactionDirectory(outDir, "staging");
   const backupDir = artifactTransactionDirectory(outDir, "backup");
-  const stagingPaths = artifactPaths(stagingDir);
-  const backupPaths = artifactPaths(backupDir);
+  const stagingPaths = Object.fromEntries(
+    Object.keys(paths).map(key => [key, join(stagingDir, ANALYZE_GITHUB_ARTIFACTS[key])]),
+  );
+  const backupPaths = Object.fromEntries(
+    Object.keys({ ...paths, ...disabledPaths }).map(key => [key, join(backupDir, ANALYZE_GITHUB_ARTIFACTS[key])]),
+  );
   const backedUp = [];
   const promoted = [];
 
@@ -201,16 +226,18 @@ async function writeAnalysisArtifacts(outDir, paths, artifacts) {
       writeJson(stagingPaths.metricsSummary, artifacts.metricsSummary),
       writeJson(stagingPaths.reportJson, artifacts.reportJson),
       writeText(stagingPaths.reportMarkdown, artifacts.reportMarkdown),
+      writeText(stagingPaths.methodology, artifacts.methodology),
+      ...Object.entries(artifacts.csv ?? {}).map(([key, value]) => writeText(stagingPaths[key], value)),
     ]);
     const rejectedStagingWrite = stagingResults.find(result => result.status === "rejected");
     if (rejectedStagingWrite) {
       throw rejectedStagingWrite.reason;
     }
 
-    await assertWritableArtifactTargets(paths);
+    await assertWritableArtifactTargets({ ...paths, ...disabledPaths });
     await mkdir(backupDir, { recursive: false });
 
-    for (const [key, finalPath] of Object.entries(paths)) {
+    for (const [key, finalPath] of Object.entries({ ...paths, ...disabledPaths })) {
       try {
         await rename(finalPath, backupPaths[key]);
         backedUp.push(key);
@@ -261,14 +288,15 @@ function attachCollectionCoverage(report, sourceBundle) {
   return {
     ...report,
     collectionCoverage: sourceBundle.coverage,
-    artifactSensitivity: "Generated artifacts may include repository names, PR URLs, titles, file paths, and comment metadata. Treat them as local/private unless intentionally shared.",
+    artifactSensitivity: "Generated artifacts may include repository names, PR URLs, titles, file paths, comment metadata, curated CSV evidence, and coverage diagnostics. Treat them as local/private unless intentionally shared.",
   };
 }
 
-function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit }) {
+function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv }) {
   return {
     ok: true,
     dryRun,
+    csvArtifactsEnabled: Boolean(csv),
     requestedLimit,
     sampledLimit,
     outputDirectory: outDir,
@@ -289,15 +317,19 @@ export async function runAnalyzeGithub(options, {
   requireOptions(options);
   validateRepositorySlug(options.repository);
   validateLimit(options.limit);
+  const csvEnabled = options.csv !== false;
 
   onProgress?.("Validating profile and output directory.");
   const [repositoryProfile, outDir] = await Promise.all([
     readProfile(options.profilePath),
     validateOutputDirectory(options.outDir),
   ]);
-  const paths = artifactPaths(outDir);
+  const generatedPaths = artifactPaths(outDir, { includeCsv: csvEnabled });
+  const disabledPaths = csvEnabled ? {} : Object.fromEntries(
+    Object.entries(artifactPaths(outDir, { includeCsv: true })).filter(([key]) => CSV_ARTIFACT_KEYS.has(key)),
+  );
   if (!options.dryRun) {
-    await assertWritableArtifactTargets(paths);
+    await assertWritableArtifactTargets({ ...generatedPaths, ...disabledPaths });
   }
 
   const collectionLimit = options.dryRun ? Math.min(options.limit, 1) : options.limit;
@@ -316,10 +348,11 @@ export async function runAnalyzeGithub(options, {
     return summarizeResult({
       dryRun: true,
       outDir,
-      paths,
+      paths: generatedPaths,
       sourceBundle,
       requestedLimit: options.limit,
       sampledLimit: collectionLimit,
+      csv: false,
     });
   }
 
@@ -328,25 +361,42 @@ export async function runAnalyzeGithub(options, {
   const metrics = computeRepositoryMetrics(normalized);
   const report = attachCollectionCoverage(generateRepositoryFrictionReport(metrics), sourceBundle);
   const markdown = `${renderRepositoryFrictionMarkdown(report)}${collectionCoverageMarkdown(sourceBundle)}`;
+  const methodology = renderRepositoryFrictionMethodology({
+    report,
+    sourceBundle,
+    profilePath: options.profilePath,
+    artifactFileNames: ANALYZE_GITHUB_ARTIFACTS,
+    csvEnabled,
+  });
+  const csv = csvEnabled
+    ? generateEvidenceCsvArtifacts({
+      metricsSummary: metrics,
+      report,
+      collectionCoverage: sourceBundle.coverage,
+    })
+    : {};
 
   onProgress?.("Writing local artifacts.");
-  await writeAnalysisArtifacts(outDir, paths, {
+  await writeAnalysisArtifacts(outDir, generatedPaths, {
     sourceBundle,
     normalized,
     metricsSummary: metrics,
     reportJson: report,
     reportMarkdown: markdown,
-  });
+    methodology,
+    csv,
+  }, { disabledPaths });
 
   return summarizeResult({
     dryRun: false,
     outDir,
-    paths,
+    paths: generatedPaths,
     sourceBundle,
     metrics,
     report,
     requestedLimit: options.limit,
     sampledLimit: collectionLimit,
+    csv: csvEnabled,
   });
 }
 

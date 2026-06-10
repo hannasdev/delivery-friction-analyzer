@@ -361,6 +361,79 @@ function summarizeRecommendationCategories(bottlenecks) {
   }));
 }
 
+function metricsWithoutPullRequest(metricsSummary, excludedPrNumber) {
+  return {
+    ...metricsSummary,
+    pullRequests: (metricsSummary.pullRequests ?? [])
+      .filter(pr => pr.number !== excludedPrNumber),
+    rankings: Object.fromEntries(
+      Object.entries(metricsSummary.rankings ?? {})
+        .map(([key, ranking]) => [
+          key,
+          (ranking ?? []).filter(entry => entry.number !== excludedPrNumber),
+        ]),
+    ),
+  };
+}
+
+function summarizeSensitivity(metricsSummary, baselineBottlenecks) {
+  const dominantPrNumbers = [
+    ...new Set(
+      (baselineBottlenecks ?? [])
+        .filter(bottleneck => bottleneck.dominance?.status === "single_pr_dominates")
+        .map(bottleneck => bottleneck.dominance.topPrNumber)
+        .filter(Number.isInteger),
+    ),
+  ].sort((left, right) => left - right);
+
+  if (!dominantPrNumbers.length) {
+    return {
+      summaries: [],
+      note: "No displayed bottleneck examples were dominated by one PR.",
+    };
+  }
+
+  const baselineTopBottleneckIds = baselineBottlenecks.slice(0, 3).map(bottleneck => bottleneck.id);
+  const baselineById = new Map(baselineBottlenecks.map(bottleneck => [bottleneck.id, bottleneck]));
+
+  return {
+    summaries: dominantPrNumbers.map(excludedPrNumber => {
+      const excludedPr = findPullRequest(metricsSummary, excludedPrNumber);
+      const filteredBottlenecks = summarizeBottlenecks(metricsWithoutPullRequest(metricsSummary, excludedPrNumber));
+      const filteredTopBottleneckIds = filteredBottlenecks.slice(0, 3).map(bottleneck => bottleneck.id);
+      const affectedBottlenecks = baselineBottlenecks
+        .filter(bottleneck => bottleneck.dominance?.status === "single_pr_dominates"
+          && bottleneck.dominance?.topPrNumber === excludedPrNumber)
+        .map(bottleneck => ({
+          id: bottleneck.id,
+          title: bottleneck.title,
+          topShare: bottleneck.dominance?.topShare ?? null,
+        }));
+      const changedTopBottlenecks = baselineTopBottleneckIds.join(",") !== filteredTopBottleneckIds.join(",");
+
+      return {
+        excludedPr: {
+          number: excludedPrNumber,
+          title: excludedPr?.title ?? null,
+          url: excludedPr?.url ?? null,
+        },
+        affectedBottlenecks,
+        baselineTopBottleneckIds,
+        topBottleneckIdsWithoutPr: filteredTopBottleneckIds,
+        changedTopBottlenecks,
+        interpretation: changedTopBottlenecks
+          ? "Top bottleneck ordering changes when this dominant PR is excluded; treat the baseline as outlier-sensitive."
+          : "Top bottleneck ordering is unchanged when this dominant PR is excluded; the baseline appears more robust to this outlier.",
+        replacementTopBottlenecks: filteredTopBottleneckIds
+          .map(id => filteredBottlenecks.find(bottleneck => bottleneck.id === id) ?? baselineById.get(id))
+          .filter(Boolean)
+          .map(bottleneck => ({ id: bottleneck.id, title: bottleneck.title })),
+      };
+    }),
+    note: "Sensitivity summaries are robustness context only. They do not remove PRs from the baseline report or replace the original ranking.",
+  };
+}
+
 export function generateRepositoryFrictionReport(metricsSummary) {
   const bottlenecks = summarizeBottlenecks(metricsSummary);
   return {
@@ -381,6 +454,7 @@ export function generateRepositoryFrictionReport(metricsSummary) {
     commentSources: summarizeCommentSources(metricsSummary),
     surfaces: summarizeSurfaces(metricsSummary),
     bottlenecks,
+    sensitivity: summarizeSensitivity(metricsSummary, bottlenecks),
     recommendationCategories: summarizeRecommendationCategories(bottlenecks),
     guardrails: {
       avoidsIndividualRanking: true,
@@ -469,6 +543,11 @@ function sharedEvidenceNotes(bottlenecks) {
 function prReference(evidence) {
   const label = `#${evidence.number}`;
   return evidence.url ? rawMarkdownCell(`[${label}](${evidence.url})`) : label;
+}
+
+function sensitivityPrReference(summary) {
+  const label = `#${summary.excludedPr.number}`;
+  return summary.excludedPr.url ? rawMarkdownCell(`[${label}](${summary.excludedPr.url})`) : label;
 }
 
 function changedLinesLabel(value) {
@@ -590,6 +669,41 @@ function renderKeyFindings(report) {
   ]);
 }
 
+function renderSensitivityAnalysis(sensitivity) {
+  const summaries = sensitivity?.summaries ?? [];
+  if (!summaries.length) return "";
+
+  const rows = summaries.map(summary => [
+    sensitivityPrReference(summary),
+    summary.excludedPr.title ?? "unknown",
+    summary.affectedBottlenecks
+      .map(bottleneck => `${bottleneck.title} (${Math.round(Number(bottleneck.topShare ?? 0) * 100)}%)`)
+      .join(", "),
+    (summary.baselineTopBottleneckIds ?? []).join(", ") || "none",
+    (summary.topBottleneckIdsWithoutPr ?? []).join(", ") || "none",
+    summary.interpretation,
+  ]);
+
+  return [
+    "## Outlier And Sensitivity Analysis",
+    "",
+    sensitivity.note ?? "Sensitivity summaries are robustness context only.",
+    "",
+    renderMarkdownTable(
+      [
+        "Excluded PR",
+        "Title",
+        "Affected bottlenecks",
+        "Baseline top bottlenecks",
+        "Top bottlenecks without PR",
+        "Robustness interpretation",
+      ],
+      rows,
+    ),
+    "",
+  ].join("\n");
+}
+
 function renderCommentSources(commentSources) {
   const dominantSource = commentSources.dominantSource ?? { name: "none", value: 0 };
   return [
@@ -675,6 +789,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     renderKeyFindings(report),
     "",
+    renderSensitivityAnalysis(report.sensitivity),
     "## Ranked Bottlenecks",
     "",
   ];
@@ -727,6 +842,8 @@ export function renderRepositoryFrictionMarkdown(report) {
     "- Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.",
     "- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.",
     "- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.",
+    "- Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.",
+    "- Full live analysis runs also write a detailed companion methodology artifact: `methodology.md`.",
     "",
     "## Guardrails And Follow-Up",
     "",
