@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can compare PR size against review, validation, and planning friction without reading dense semicolon-packed table cells.
 - Who is affected: Maintainers and contributors reviewing delivery-friction reports.
 - Action needed: None.
-- PR: Pending.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/12
 
 ### 2026-06-10 — CLI Report Delivery Experience
 
