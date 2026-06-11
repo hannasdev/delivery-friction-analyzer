@@ -128,6 +128,8 @@ Add deeper transparency artifacts so maintainers can understand the methodology 
 
 ## M3: CLI Report Delivery Experience
 
+Status: Merged in PR #11 on 2026-06-10.
+
 ### Outcome
 
 Make the CLI completion experience point maintainers to the useful report artifacts while preserving machine-readable output through an explicit flag.
@@ -176,9 +178,9 @@ Make the CLI completion experience point maintainers to the useful report artifa
 
 - [ ] Not started
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged
 
-Lifecycle note: Final acceptance/completion bookkeeping and moving this initiative to `docs/initiatives/done/` are intentionally deferred until the M3 PR is reviewed and merged.
+Completion note: M3 merged in PR #11 on 2026-06-10. Follow-up report evidence readability polish merged in PR #12 on 2026-06-11.

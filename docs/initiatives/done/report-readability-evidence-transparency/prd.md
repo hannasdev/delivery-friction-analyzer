@@ -2,7 +2,9 @@
 
 ## Status
 
-- State: Active
+Status: Completed in PR #11 on 2026-06-10, with follow-up report evidence readability polish in PR #12 on 2026-06-11.
+
+- State: Done
 - Owner: Hanna
 - Created: 2026-06-09
 - Related docs:
@@ -10,7 +12,7 @@
   - [Architecture Notes](architecture.md)
   - [Friction Report Contract](../../../contracts/friction-report.md)
   - [Friction Metrics Contract](../../../contracts/friction-metrics.md)
-  - [GitHub Live Collection](../../active/github-live-collection/prd.md)
+  - [GitHub Live Collection](../github-live-collection/prd.md)
 
 ## Problem
 
