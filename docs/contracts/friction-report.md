@@ -31,6 +31,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `commentSources`: total and source-grouped review comments for Copilot, human, bot, scanner, author replies, and unknown sources.
 - `surfaces`: core, low-signal, generated, support-surface, role, and functional-surface breakdowns.
 - `bottlenecks`: ranked friction patterns with observed data, inferred diagnosis, and suggested action kept as separate fields.
+- `bottlenecks[].observedData[]`: representative PR examples with PR identity, score/value, final/current additions, deletions, changed-file count, and changed-line count.
 - `bottlenecks[].observedData[].validationEvidence`: workflow-run source label, workflow-run coverage, workflow-run conclusions, failed check-run count, failed workflow-run count, and cancelled workflow-run count for representative PR examples.
 - `bottlenecks[].observedData[].reviewEvidence`: review-thread source label, thread counts, resolution/outdated counts, comment-source breakdown, bot comment count, human reviewer comment count, and author reply count for representative PR examples.
 - `bottlenecks[].dominance`: whether the displayed examples are dominated by a single PR, including the top PR number, share of displayed signal, and a human-readable interpretation note.
@@ -39,7 +40,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `guardrails`: machine-readable checks that the report avoids individual ranking, separates evidence from inference, and does not use an opaque composite score.
 - `followUp`: non-automated future work suggested by the report.
 
-Bottlenecks are ordered by their strongest observed representative metric value, with stable category order used only to break ties.
+Bottlenecks are ordered by their strongest observed representative metric value, with stable category order used only to break ties. Final/current PR size fields are context for comparing size against friction signals; they only affect ordering for metric families that explicitly measure changed-file spread.
 
 ## Markdown Output
 
@@ -50,9 +51,10 @@ The Markdown renderer presents the same report data for human review:
 - evidence-quality and coverage tables before detailed recommendations;
 - key findings that highlight top bottlenecks, strongest displayed signal, outlier caveats, and coverage caveats;
 - outlier and sensitivity analysis when displayed examples are dominated by one PR;
-- ranked bottlenecks with representative PR examples rendered as tables;
-- validation, review, changed-line, score, and source-label evidence for each representative PR example;
-- separately labeled interpretation, recommendation, and confidence/caveat blocks for each bottleneck;
+- a prioritization explanation that describes strongest-signal ordering and how PR size is used as context;
+- ranked bottlenecks with representative PR examples rendered as compact PR-size tables;
+- validation, review, and source-label evidence for each representative PR example rendered as plain Markdown detail lists;
+- separately labeled inferred diagnosis, suggested action, and confidence/caveat blocks for each bottleneck;
 - shared-evidence notes when multiple recommendation categories use the same representative PR set;
 - recommendation-category, comment-source, and core/support-surface tables;
 - a concise methodology summary;

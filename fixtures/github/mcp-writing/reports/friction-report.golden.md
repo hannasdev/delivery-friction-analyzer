@@ -33,7 +33,8 @@ Analysis window: 30 days
 | Review thread sources | graphql:repository.pullRequest.reviewThreads: 1, not\_sampled\_for\_broad\_file\_spread: 1, not\_sampled\_low\_friction: 1 |
 
 Coverage notes:
-- PR-open diff growth is unavailable for some PRs and is not inferred from merge-time data.
+
+- PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.
 - Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
 
 ## Key Findings
@@ -41,7 +42,7 @@ Coverage notes:
 - Top bottlenecks: review-churn, repo-guidance-gap, changed-file-spread.
 - Strongest displayed signal: Review churn (iteration drag).
 - Outlier caveat: Review churn: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Repo guidance gap: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Review surprise: PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing. Fix amplification: PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
-- Coverage caveat: PR-open diff growth is unavailable for some PRs and is not inferred from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
+- Coverage caveat: PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
 
 ## Outlier And Sensitivity Analysis
 
@@ -52,28 +53,79 @@ Sensitivity summaries are robustness context only. They do not remove PRs from t
 | [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | Review surprise (56%) | review-churn, repo-guidance-gap, changed-file-spread | review-churn, repo-guidance-gap, changed-file-spread | Top bottleneck ordering is unchanged when this dominant PR is excluded; the baseline appears more robust to this outlier. |
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | Review churn (63%), Repo guidance gap (63%), Fix amplification (83%) | review-churn, repo-guidance-gap, changed-file-spread | changed-file-spread, review-churn, repo-guidance-gap | Top bottleneck ordering changes when this dominant PR is excluded; treat the baseline as outlier-sensitive. |
 
+## How Bottlenecks Are Prioritized
+
+- Bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score.
+- Each score comes from one metric family, such as review-loop drag, validation failures, changed-file spread, planning signals, review surprise, or post-review commits.
+- PR size columns show final/current additions, deletions, changed files, and changed lines so readers can compare size against the detected friction signals.
+- PR size is context for interpretation; it only affects ordering when the bottleneck metric itself is about changed-file spread.
+- Coverage caveats and outlier dominance should be considered before treating the first bottleneck as the most important repository problem.
+
 ## Ranked Bottlenecks
 
 ### Review churn
 
 Recommendation category: pr_readiness_gate
 
-#### Observed Evidence (iteration drag)
+#### Review churn Observed Evidence (iteration drag)
 
-| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |
+| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1 | threads 15; resolved 15; outdated 10; comments author\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request; review graphql:repository.pullRequest.reviewThreads |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | 1207 | coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0 | threads 10; resolved 0; outdated 0; comments none | workflow unavailable; review not\_sampled\_for\_broad\_file\_spread |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | 1168 | 77 | 13 | 1245 |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | 1149 | 58 | 15 | 1207 |
 
-#### Interpretation
+Evidence details for PR #239:
 
-Review loops are concentrated in a small set of PRs.
+Validation:
 
-#### Recommendation
+- Workflow coverage: observed
+- Workflow conclusions: success=8, cancelled=1
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 1
 
-Add or tighten a PR readiness gate for changes that attract repeated review rounds.
+Review:
 
-#### Confidence And Caveats
+- Review thread source: graphql:repository.pullRequest.reviewThreads
+- Threads: 15
+- Resolved threads: 15
+- Outdated threads: 10
+- Comment sources: author\_reply=15, copilot=15
+
+Source labels:
+
+- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+
+Evidence details for PR #221:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: not\_sampled\_for\_broad\_file\_spread
+- Threads: 10
+- Resolved threads: 0
+- Outdated threads: 0
+- Comment sources: none
+
+Source labels:
+
+- Workflow source: unavailable
+
+#### Review churn Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Review loops are concentrated in a small set of PRs. |
+| Suggested action | Add or tighten a PR readiness gate for changes that attract repeated review rounds. |
+
+#### Review churn Confidence And Caveats
 
 - PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing.
 - Shares the same representative PR evidence as Repo guidance gap, Review surprise, Fix amplification.
@@ -82,22 +134,65 @@ Add or tighten a PR readiness gate for changes that attract repeated review roun
 
 Recommendation category: repo_specific_ai_skills
 
-#### Observed Evidence (iteration drag)
+#### Repo guidance gap Observed Evidence (iteration drag)
 
-| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |
+| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1 | threads 15; resolved 15; outdated 10; comments author\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request; review graphql:repository.pullRequest.reviewThreads |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | 1207 | coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0 | threads 10; resolved 0; outdated 0; comments none | workflow unavailable; review not\_sampled\_for\_broad\_file\_spread |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | 1168 | 77 | 13 | 1245 |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | 1149 | 58 | 15 | 1207 |
 
-#### Interpretation
+Evidence details for PR #239:
 
-Repeated review loops suggest some repository expectations are not yet available at implementation time.
+Validation:
 
-#### Recommendation
+- Workflow coverage: observed
+- Workflow conclusions: success=8, cancelled=1
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 1
 
-Add repo-specific AI skills or instructions for repeated review themes before opening the next PR.
+Review:
 
-#### Confidence And Caveats
+- Review thread source: graphql:repository.pullRequest.reviewThreads
+- Threads: 15
+- Resolved threads: 15
+- Outdated threads: 10
+- Comment sources: author\_reply=15, copilot=15
+
+Source labels:
+
+- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+
+Evidence details for PR #221:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: not\_sampled\_for\_broad\_file\_spread
+- Threads: 10
+- Resolved threads: 0
+- Outdated threads: 0
+- Comment sources: none
+
+Source labels:
+
+- Workflow source: unavailable
+
+#### Repo guidance gap Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Repeated review loops suggest some repository expectations are not yet available at implementation time. |
+| Suggested action | Add repo-specific AI skills or instructions for repeated review themes before opening the next PR. |
+
+#### Repo guidance gap Confidence And Caveats
 
 - PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing.
 - Shares the same representative PR evidence as Review churn, Review surprise, Fix amplification.
@@ -106,23 +201,88 @@ Add repo-specific AI skills or instructions for repeated review themes before op
 
 Recommendation category: smaller_milestones
 
-#### Observed Evidence (spread score)
+#### Changed-file spread Observed Evidence (spread score)
 
-| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |
+| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 17 | 1207 | coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0 | threads 10; resolved 0; outdated 0; comments none | workflow unavailable; review not\_sampled\_for\_broad\_file\_spread |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 16 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1 | threads 15; resolved 15; outdated 10; comments author\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request; review graphql:repository.pullRequest.reviewThreads |
-| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 2 | 2 | coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0 | threads 0; resolved 0; outdated 0; comments none | workflow unavailable; review not\_sampled\_low\_friction |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 17 | 1149 | 58 | 15 | 1207 |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 16 | 1168 | 77 | 13 | 1245 |
+| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 2 | 1 | 1 | 1 | 2 |
 
-#### Interpretation
+Evidence details for PR #221:
 
-Broad file and surface spread can hide review and validation risk.
+Validation:
 
-#### Recommendation
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
 
-Break broad changes into smaller milestones when core files, directories, or surfaces spread out.
+Review:
 
-#### Confidence And Caveats
+- Review thread source: not\_sampled\_for\_broad\_file\_spread
+- Threads: 10
+- Resolved threads: 0
+- Outdated threads: 0
+- Comment sources: none
+
+Source labels:
+
+- Workflow source: unavailable
+
+Evidence details for PR #239:
+
+Validation:
+
+- Workflow coverage: observed
+- Workflow conclusions: success=8, cancelled=1
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 1
+
+Review:
+
+- Review thread source: graphql:repository.pullRequest.reviewThreads
+- Threads: 15
+- Resolved threads: 15
+- Outdated threads: 10
+- Comment sources: author\_reply=15, copilot=15
+
+Source labels:
+
+- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+
+Evidence details for PR #223:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: not\_sampled\_low\_friction
+- Threads: 0
+- Resolved threads: 0
+- Outdated threads: 0
+- Comment sources: none
+
+Source labels:
+
+- Workflow source: unavailable
+
+#### Changed-file spread Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Broad file and surface spread can hide review and validation risk. |
+| Suggested action | Break broad changes into smaller milestones when core files, directories, or surfaces spread out. |
+
+#### Changed-file spread Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
 - Shares the same representative PR evidence as Planning gap.
@@ -131,22 +291,65 @@ Break broad changes into smaller milestones when core files, directories, or sur
 
 Recommendation category: pr_readiness_gate
 
-#### Observed Evidence (surface surprise score)
+#### Review surprise Observed Evidence (surface surprise score)
 
-| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |
+| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 5 | 1207 | coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0 | threads 10; resolved 0; outdated 0; comments none | workflow unavailable; review not\_sampled\_for\_broad\_file\_spread |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 4 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1 | threads 15; resolved 15; outdated 10; comments author\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request; review graphql:repository.pullRequest.reviewThreads |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 5 | 1149 | 58 | 15 | 1207 |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 4 | 1168 | 77 | 13 | 1245 |
 
-#### Interpretation
+Evidence details for PR #221:
 
-Changes spanning several functional surfaces are more likely to surprise reviewers.
+Validation:
 
-#### Recommendation
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
 
-Call out multi-surface scope in the PR description or split cross-surface work.
+Review:
 
-#### Confidence And Caveats
+- Review thread source: not\_sampled\_for\_broad\_file\_spread
+- Threads: 10
+- Resolved threads: 0
+- Outdated threads: 0
+- Comment sources: none
+
+Source labels:
+
+- Workflow source: unavailable
+
+Evidence details for PR #239:
+
+Validation:
+
+- Workflow coverage: observed
+- Workflow conclusions: success=8, cancelled=1
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 1
+
+Review:
+
+- Review thread source: graphql:repository.pullRequest.reviewThreads
+- Threads: 15
+- Resolved threads: 15
+- Outdated threads: 10
+- Comment sources: author\_reply=15, copilot=15
+
+Source labels:
+
+- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+
+#### Review surprise Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Changes spanning several functional surfaces are more likely to surprise reviewers. |
+| Suggested action | Call out multi-surface scope in the PR description or split cross-surface work. |
+
+#### Review surprise Confidence And Caveats
 
 - PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing.
 - Shares the same representative PR evidence as Review churn, Repo guidance gap, Fix amplification.
@@ -155,22 +358,65 @@ Call out multi-surface scope in the PR description or split cross-surface work.
 
 Recommendation category: smaller_milestones
 
-#### Observed Evidence (post-review commits)
+#### Fix amplification Observed Evidence (post-review commits)
 
-| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |
+| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 5 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1 | threads 15; resolved 15; outdated 10; comments author\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request; review graphql:repository.pullRequest.reviewThreads |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 1 | 1207 | coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0 | threads 10; resolved 0; outdated 0; comments none | workflow unavailable; review not\_sampled\_for\_broad\_file\_spread |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 5 | 1168 | 77 | 13 | 1245 |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 1 | 1149 | 58 | 15 | 1207 |
 
-#### Interpretation
+Evidence details for PR #239:
 
-Post-review commits show where initial PR shape did not stay stable.
+Validation:
 
-#### Recommendation
+- Workflow coverage: observed
+- Workflow conclusions: success=8, cancelled=1
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 1
 
-Use smaller delivery slices when review feedback causes meaningful post-review change.
+Review:
 
-#### Confidence And Caveats
+- Review thread source: graphql:repository.pullRequest.reviewThreads
+- Threads: 15
+- Resolved threads: 15
+- Outdated threads: 10
+- Comment sources: author\_reply=15, copilot=15
+
+Source labels:
+
+- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+
+Evidence details for PR #221:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: not\_sampled\_for\_broad\_file\_spread
+- Threads: 10
+- Resolved threads: 0
+- Outdated threads: 0
+- Comment sources: none
+
+Source labels:
+
+- Workflow source: unavailable
+
+#### Fix amplification Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Post-review commits show where initial PR shape did not stay stable. |
+| Suggested action | Use smaller delivery slices when review feedback causes meaningful post-review change. |
+
+#### Fix amplification Confidence And Caveats
 
 - PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
 - Shares the same representative PR evidence as Review churn, Repo guidance gap, Review surprise.
@@ -179,21 +425,42 @@ Use smaller delivery slices when review feedback causes meaningful post-review c
 
 Recommendation category: preflight_scripts
 
-#### Observed Evidence (validation gap score)
+#### Validation gap Observed Evidence (validation gap score)
 
-| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |
+| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1 | threads 15; resolved 15; outdated 10; comments author\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request; review graphql:repository.pullRequest.reviewThreads |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1168 | 77 | 13 | 1245 |
 
-#### Interpretation
+Evidence details for PR #239:
 
-Validation friction appears where checks, workflows, or cancellations add corrective loops.
+Validation:
 
-#### Recommendation
+- Workflow coverage: observed
+- Workflow conclusions: success=8, cancelled=1
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 1
 
-Add local preflight scripts for recurring CI or workflow interruptions.
+Review:
 
-#### Confidence And Caveats
+- Review thread source: graphql:repository.pullRequest.reviewThreads
+- Threads: 15
+- Resolved threads: 15
+- Outdated threads: 10
+- Comment sources: author\_reply=15, copilot=15
+
+Source labels:
+
+- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+
+#### Validation gap Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Validation friction appears where checks, workflows, or cancellations add corrective loops. |
+| Suggested action | Add local preflight scripts for recurring CI or workflow interruptions. |
+
+#### Validation gap Confidence And Caveats
 
 - Not enough positive examples to evaluate outlier dominance.
 - Shares the same representative PR evidence as Local hook gap, Test infrastructure gap.
@@ -202,21 +469,42 @@ Add local preflight scripts for recurring CI or workflow interruptions.
 
 Recommendation category: hooks
 
-#### Observed Evidence (validation gap score)
+#### Local hook gap Observed Evidence (validation gap score)
 
-| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |
+| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1 | threads 15; resolved 15; outdated 10; comments author\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request; review graphql:repository.pullRequest.reviewThreads |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1168 | 77 | 13 | 1245 |
 
-#### Interpretation
+Evidence details for PR #239:
 
-Validation signals point to checks that may be cheaper to catch before a branch reaches CI.
+Validation:
 
-#### Recommendation
+- Workflow coverage: observed
+- Workflow conclusions: success=8, cancelled=1
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 1
 
-Add or improve local hooks for recurring formatting, lint, typecheck, snapshot, or generated-output churn.
+Review:
 
-#### Confidence And Caveats
+- Review thread source: graphql:repository.pullRequest.reviewThreads
+- Threads: 15
+- Resolved threads: 15
+- Outdated threads: 10
+- Comment sources: author\_reply=15, copilot=15
+
+Source labels:
+
+- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+
+#### Local hook gap Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Validation signals point to checks that may be cheaper to catch before a branch reaches CI. |
+| Suggested action | Add or improve local hooks for recurring formatting, lint, typecheck, snapshot, or generated-output churn. |
+
+#### Local hook gap Confidence And Caveats
 
 - Not enough positive examples to evaluate outlier dominance.
 - Shares the same representative PR evidence as Validation gap, Test infrastructure gap.
@@ -225,21 +513,42 @@ Add or improve local hooks for recurring formatting, lint, typecheck, snapshot, 
 
 Recommendation category: test_infrastructure
 
-#### Observed Evidence (validation gap score)
+#### Test infrastructure gap Observed Evidence (validation gap score)
 
-| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |
+| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1 | threads 15; resolved 15; outdated 10; comments author\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request; review graphql:repository.pullRequest.reviewThreads |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1168 | 77 | 13 | 1245 |
 
-#### Interpretation
+Evidence details for PR #239:
 
-Validation friction may indicate a missing or inconvenient local safety net.
+Validation:
 
-#### Recommendation
+- Workflow coverage: observed
+- Workflow conclusions: success=8, cancelled=1
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 1
 
-Invest in test infrastructure when recurring CI or workflow signals are a primary delivery loop.
+Review:
 
-#### Confidence And Caveats
+- Review thread source: graphql:repository.pullRequest.reviewThreads
+- Threads: 15
+- Resolved threads: 15
+- Outdated threads: 10
+- Comment sources: author\_reply=15, copilot=15
+
+Source labels:
+
+- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+
+#### Test infrastructure gap Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Validation friction may indicate a missing or inconvenient local safety net. |
+| Suggested action | Invest in test infrastructure when recurring CI or workflow signals are a primary delivery loop. |
+
+#### Test infrastructure gap Confidence And Caveats
 
 - Not enough positive examples to evaluate outlier dominance.
 - Shares the same representative PR evidence as Validation gap, Local hook gap.
@@ -248,23 +557,88 @@ Invest in test infrastructure when recurring CI or workflow signals are a primar
 
 Recommendation category: planning_artifacts
 
-#### Observed Evidence (planning gap score)
+#### Planning gap Observed Evidence (planning gap score)
 
-| PR | Title | Score | Changed lines | Validation evidence | Review evidence | Source labels |
+| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 1 | 1207 | coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0 | threads 10; resolved 0; outdated 0; comments none | workflow unavailable; review not\_sampled\_for\_broad\_file\_spread |
-| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 1 | 2 | coverage unavailable; conclusions none; failed checks 0; failed workflows 0; cancelled workflows 0 | threads 0; resolved 0; outdated 0; comments none | workflow unavailable; review not\_sampled\_low\_friction |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1245 | coverage observed; conclusions success=8, cancelled=1; failed checks 0; failed workflows 0; cancelled workflows 1 | threads 15; resolved 15; outdated 10; comments author\_reply=15, copilot=15 | workflow rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request; review graphql:repository.pullRequest.reviewThreads |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 1 | 1149 | 58 | 15 | 1207 |
+| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 1 | 1 | 1 | 1 | 2 |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1168 | 77 | 13 | 1245 |
 
-#### Interpretation
+Evidence details for PR #221:
 
-Planning-related changes show up in the same PRs as delivery friction.
+Validation:
 
-#### Recommendation
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
 
-Improve planning artifacts when planning or scope files are part of high-friction changes.
+Review:
 
-#### Confidence And Caveats
+- Review thread source: not\_sampled\_for\_broad\_file\_spread
+- Threads: 10
+- Resolved threads: 0
+- Outdated threads: 0
+- Comment sources: none
+
+Source labels:
+
+- Workflow source: unavailable
+
+Evidence details for PR #223:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: not\_sampled\_low\_friction
+- Threads: 0
+- Resolved threads: 0
+- Outdated threads: 0
+- Comment sources: none
+
+Source labels:
+
+- Workflow source: unavailable
+
+Evidence details for PR #239:
+
+Validation:
+
+- Workflow coverage: observed
+- Workflow conclusions: success=8, cancelled=1
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 1
+
+Review:
+
+- Review thread source: graphql:repository.pullRequest.reviewThreads
+- Threads: 15
+- Resolved threads: 15
+- Outdated threads: 10
+- Comment sources: author\_reply=15, copilot=15
+
+Source labels:
+
+- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+
+#### Planning gap Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Planning-related changes show up in the same PRs as delivery friction. |
+| Suggested action | Improve planning artifacts when planning or scope files are part of high-friction changes. |
+
+#### Planning gap Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
 - Shares the same representative PR evidence as Changed-file spread.
@@ -292,6 +666,7 @@ Improve planning artifacts when planning or scope files are part of high-frictio
 | Dominant source | author\_reply (15) |
 
 By source:
+
 | Name | Value |
 | --- | --- |
 | author\_reply | 15 |
@@ -314,6 +689,7 @@ By source:
 | Small-diff wide-spread PRs | 1 |
 
 Functional surfaces:
+
 | Name | Value |
 | --- | --- |
 | runtime | 1257 |
@@ -325,6 +701,7 @@ Functional surfaces:
 | release\_notes | 16 |
 
 File roles:
+
 | Name | Value |
 | --- | --- |
 | core\_product\_code | 1257 |

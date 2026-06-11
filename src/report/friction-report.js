@@ -173,6 +173,9 @@ function formatPr(pr, rankingEntry) {
     title: rankingEntry.title,
     url: pr?.url ?? null,
     value: rankingEntry.value,
+    additions: pr?.diffAtMerge?.additions ?? null,
+    deletions: pr?.diffAtMerge?.deletions ?? null,
+    changedFiles: pr?.diffAtMerge?.changedFiles ?? null,
     changedLines: pr?.diffAtMerge?.changedLines ?? null,
     reviewThreads: pr?.review?.threads?.totalCount ?? null,
     functionalSurfaces: pr?.files?.functionalSurfaces ?? null,
@@ -277,7 +280,9 @@ function summarizeCoverage(metricsSummary) {
 
   const notes = [];
   if (prOpenDiff.unavailable) {
-    notes.push("PR-open diff growth is unavailable for some PRs and is not inferred from merge-time data.");
+    notes.push(
+      "PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.",
+    );
   }
   if (workflowRuns.unavailable) {
     notes.push("Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.");
@@ -550,11 +555,42 @@ function sensitivityPrReference(summary) {
   return summary.excludedPr.url ? rawMarkdownCell(`[${label}](${summary.excludedPr.url})`) : label;
 }
 
-function changedLinesLabel(value) {
+function evidenceCountLabel(value) {
   return value === null || value === undefined ? "unknown" : String(value);
 }
 
 function evidenceRows(observedData) {
+  return (observedData ?? []).map(evidence => [
+      prReference(evidence),
+      evidence.title,
+      evidence.value,
+      evidenceCountLabel(evidence.additions),
+      evidenceCountLabel(evidence.deletions),
+      evidenceCountLabel(evidence.changedFiles),
+      evidenceCountLabel(evidence.changedLines),
+    ]);
+}
+
+function renderEvidenceTable(observedData) {
+  return renderMarkdownTable(
+    [
+      "PR",
+      "Title",
+      "Score",
+      "Additions",
+      "Deletions",
+      "Files changed",
+      "Changed lines",
+    ],
+    evidenceRows(observedData),
+  );
+}
+
+function renderDetailList(items) {
+  return items.length ? items.map(item => `- ${escapeMarkdownText(item)}`).join("\n") : "- None";
+}
+
+function renderEvidenceDetails(observedData) {
   return (observedData ?? []).map(evidence => {
     const validationEvidence = evidence.validationEvidence ?? {};
     const reviewEvidence = evidence.reviewEvidence ?? {};
@@ -562,36 +598,35 @@ function evidenceRows(observedData) {
     const reviewCommentSources = reviewEvidence.commentSources ?? [];
 
     return [
-      prReference(evidence),
-      evidence.title,
-      evidence.value,
-      changedLinesLabel(evidence.changedLines),
-      [
-        `coverage ${validationEvidence.workflowRunCoverage ?? "unavailable"}`,
-        `conclusions ${formatNamedValues(workflowRunConclusions)}`,
-        `failed checks ${validationEvidence.failedCheckRuns ?? 0}`,
-        `failed workflows ${validationEvidence.failedWorkflowRuns ?? 0}`,
-        `cancelled workflows ${validationEvidence.cancelledWorkflowRuns ?? 0}`,
-      ].join("; "),
-      [
-        `threads ${reviewEvidence.reviewThreads ?? 0}`,
-        `resolved ${reviewEvidence.resolvedThreads ?? 0}`,
-        `outdated ${reviewEvidence.outdatedThreads ?? 0}`,
-        `comments ${formatNamedValues(reviewCommentSources)}`,
-      ].join("; "),
-      [
-        `workflow ${validationEvidence.workflowRunSource ?? "unavailable"}`,
-        `review ${reviewEvidence.reviewThreadSource ?? "unavailable"}`,
-      ].join("; "),
-    ];
-  });
-}
-
-function renderEvidenceTable(observedData) {
-  return renderMarkdownTable(
-    ["PR", "Title", "Score", "Changed lines", "Validation evidence", "Review evidence", "Source labels"],
-    evidenceRows(observedData),
-  );
+      `Evidence details for PR #${evidence.number}:`,
+      "",
+      "Validation:",
+      "",
+      renderDetailList([
+        `Workflow coverage: ${validationEvidence.workflowRunCoverage ?? "unavailable"}`,
+        `Workflow conclusions: ${formatNamedValues(workflowRunConclusions)}`,
+        `Failed checks: ${validationEvidence.failedCheckRuns ?? 0}`,
+        `Failed workflows: ${validationEvidence.failedWorkflowRuns ?? 0}`,
+        `Cancelled workflows: ${validationEvidence.cancelledWorkflowRuns ?? 0}`,
+      ]),
+      "",
+      "Review:",
+      "",
+      renderDetailList([
+        `Review thread source: ${reviewEvidence.reviewThreadSource ?? "unavailable"}`,
+        `Threads: ${reviewEvidence.reviewThreads ?? 0}`,
+        `Resolved threads: ${reviewEvidence.resolvedThreads ?? 0}`,
+        `Outdated threads: ${reviewEvidence.outdatedThreads ?? 0}`,
+        `Comment sources: ${formatNamedValues(reviewCommentSources)}`,
+      ]),
+      "",
+      "Source labels:",
+      "",
+      renderDetailList([
+        `Workflow source: ${validationEvidence.workflowRunSource ?? "unavailable"}`,
+      ]),
+    ].join("\n");
+  }).join("\n\n");
 }
 
 function recommendationCategoryLabel(bottleneck) {
@@ -618,6 +653,26 @@ function renderRecommendationCategories(categories) {
     ["Category", "Triggered bottlenecks", "Meaning"],
     (categories ?? []).map(category => [category.label, category.triggeredBottlenecks, category.description]),
   );
+}
+
+function renderInterpretationAndRecommendation(bottleneck) {
+  return renderMarkdownTable(
+    ["Field", "Value"],
+    [
+      ["Inferred diagnosis", bottleneck.inferredDiagnosis],
+      ["Suggested action", recommendationActionText(bottleneck)],
+    ],
+  );
+}
+
+function renderPriorityExplanation() {
+  return renderList([
+    "Bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score.",
+    "Each score comes from one metric family, such as review-loop drag, validation failures, changed-file spread, planning signals, review surprise, or post-review commits.",
+    "PR size columns show final/current additions, deletions, changed files, and changed lines so readers can compare size against the detected friction signals.",
+    "PR size is context for interpretation; it only affects ordering when the bottleneck metric itself is about changed-file spread.",
+    "Coverage caveats and outlier dominance should be considered before treating the first bottleneck as the most important repository problem.",
+  ]);
 }
 
 function renderSummaryTable(summary) {
@@ -719,6 +774,7 @@ function renderCommentSources(commentSources) {
     ),
     "",
     "By source:",
+    "",
     renderNamedValuesTable(commentSources.bySource),
   ].join("\n");
 }
@@ -737,9 +793,11 @@ function renderSurfaces(surfaces) {
     ),
     "",
     "Functional surfaces:",
+    "",
     renderNamedValuesTable(surfaces.byFunctionalSurface),
     "",
     "File roles:",
+    "",
     renderNamedValuesTable(surfaces.byRole),
   ].join("\n");
 }
@@ -783,6 +841,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     renderCoverageSummary(report.coverage),
     "",
     "Coverage notes:",
+    "",
     renderList(report.coverage.notes),
     "",
     "## Key Findings",
@@ -790,6 +849,10 @@ export function renderRepositoryFrictionMarkdown(report) {
     renderKeyFindings(report),
     "",
     renderSensitivityAnalysis(report.sensitivity),
+    "## How Bottlenecks Are Prioritized",
+    "",
+    renderPriorityExplanation(),
+    "",
     "## Ranked Bottlenecks",
     "",
   ];
@@ -800,19 +863,17 @@ export function renderRepositoryFrictionMarkdown(report) {
       "",
       `Recommendation category: ${recommendationCategoryLabel(bottleneck)}`,
       "",
-      `#### Observed Evidence (${bottleneck.metricLabel})`,
+      `#### ${bottleneck.title} Observed Evidence (${bottleneck.metricLabel})`,
       "",
       renderEvidenceTable(bottleneck.observedData),
       "",
-      "#### Interpretation",
+      renderEvidenceDetails(bottleneck.observedData),
       "",
-      bottleneck.inferredDiagnosis,
+      `#### ${bottleneck.title} Interpretation And Recommendation`,
       "",
-      "#### Recommendation",
+      renderInterpretationAndRecommendation(bottleneck),
       "",
-      recommendationActionText(bottleneck),
-      "",
-      "#### Confidence And Caveats",
+      `#### ${bottleneck.title} Confidence And Caveats`,
       "",
       renderList([
         bottleneck.dominance?.note ?? "Not enough positive examples to evaluate outlier dominance.",
