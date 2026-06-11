@@ -95,7 +95,6 @@ Review:
 Source labels:
 
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-- Review source: graphql:repository.pullRequest.reviewThreads
 
 Evidence details for PR #221:
 
@@ -118,7 +117,6 @@ Review:
 Source labels:
 
 - Workflow source: unavailable
-- Review source: not\_sampled\_for\_broad\_file\_spread
 
 #### Review churn Interpretation And Recommendation
 
@@ -164,7 +162,6 @@ Review:
 Source labels:
 
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-- Review source: graphql:repository.pullRequest.reviewThreads
 
 Evidence details for PR #221:
 
@@ -187,7 +184,6 @@ Review:
 Source labels:
 
 - Workflow source: unavailable
-- Review source: not\_sampled\_for\_broad\_file\_spread
 
 #### Repo guidance gap Interpretation And Recommendation
 
@@ -234,7 +230,6 @@ Review:
 Source labels:
 
 - Workflow source: unavailable
-- Review source: not\_sampled\_for\_broad\_file\_spread
 
 Evidence details for PR #239:
 
@@ -257,7 +252,6 @@ Review:
 Source labels:
 
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-- Review source: graphql:repository.pullRequest.reviewThreads
 
 Evidence details for PR #223:
 
@@ -280,7 +274,6 @@ Review:
 Source labels:
 
 - Workflow source: unavailable
-- Review source: not\_sampled\_low\_friction
 
 #### Changed-file spread Interpretation And Recommendation
 
@@ -326,7 +319,6 @@ Review:
 Source labels:
 
 - Workflow source: unavailable
-- Review source: not\_sampled\_for\_broad\_file\_spread
 
 Evidence details for PR #239:
 
@@ -349,7 +341,6 @@ Review:
 Source labels:
 
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-- Review source: graphql:repository.pullRequest.reviewThreads
 
 #### Review surprise Interpretation And Recommendation
 
@@ -395,7 +386,6 @@ Review:
 Source labels:
 
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-- Review source: graphql:repository.pullRequest.reviewThreads
 
 Evidence details for PR #221:
 
@@ -418,7 +408,6 @@ Review:
 Source labels:
 
 - Workflow source: unavailable
-- Review source: not\_sampled\_for\_broad\_file\_spread
 
 #### Fix amplification Interpretation And Recommendation
 
@@ -463,7 +452,6 @@ Review:
 Source labels:
 
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-- Review source: graphql:repository.pullRequest.reviewThreads
 
 #### Validation gap Interpretation And Recommendation
 
@@ -508,7 +496,6 @@ Review:
 Source labels:
 
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-- Review source: graphql:repository.pullRequest.reviewThreads
 
 #### Local hook gap Interpretation And Recommendation
 
@@ -553,7 +540,6 @@ Review:
 Source labels:
 
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-- Review source: graphql:repository.pullRequest.reviewThreads
 
 #### Test infrastructure gap Interpretation And Recommendation
 
@@ -600,7 +586,6 @@ Review:
 Source labels:
 
 - Workflow source: unavailable
-- Review source: not\_sampled\_for\_broad\_file\_spread
 
 Evidence details for PR #223:
 
@@ -623,7 +608,6 @@ Review:
 Source labels:
 
 - Workflow source: unavailable
-- Review source: not\_sampled\_low\_friction
 
 Evidence details for PR #239:
 
@@ -646,7 +630,6 @@ Review:
 Source labels:
 
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-- Review source: graphql:repository.pullRequest.reviewThreads
 
 #### Planning gap Interpretation And Recommendation
 

@@ -555,11 +555,7 @@ function sensitivityPrReference(summary) {
   return summary.excludedPr.url ? rawMarkdownCell(`[${label}](${summary.excludedPr.url})`) : label;
 }
 
-function changedLinesLabel(value) {
-  return value === null || value === undefined ? "unknown" : String(value);
-}
-
-function countLabel(value) {
+function evidenceCountLabel(value) {
   return value === null || value === undefined ? "unknown" : String(value);
 }
 
@@ -568,10 +564,10 @@ function evidenceRows(observedData) {
       prReference(evidence),
       evidence.title,
       evidence.value,
-      countLabel(evidence.additions),
-      countLabel(evidence.deletions),
-      countLabel(evidence.changedFiles),
-      changedLinesLabel(evidence.changedLines),
+      evidenceCountLabel(evidence.additions),
+      evidenceCountLabel(evidence.deletions),
+      evidenceCountLabel(evidence.changedFiles),
+      evidenceCountLabel(evidence.changedLines),
     ]);
 }
 
@@ -628,7 +624,6 @@ function renderEvidenceDetails(observedData) {
       "",
       renderDetailList([
         `Workflow source: ${validationEvidence.workflowRunSource ?? "unavailable"}`,
-        `Review source: ${reviewEvidence.reviewThreadSource ?? "unavailable"}`,
       ]),
     ].join("\n");
   }).join("\n\n");

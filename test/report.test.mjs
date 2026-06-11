@@ -527,7 +527,7 @@ describe("friction report generation", () => {
     assert(markdown.includes("- Outdated threads: 0"));
     assert(markdown.includes("- Comment sources: none"));
     assert(markdown.includes("- Workflow source: unavailable"));
-    assert(markdown.includes("- Review source: unavailable"));
+    assert(!markdown.includes("- Review source: unavailable"));
     assert(markdown.includes("- Not enough positive examples to evaluate outlier dominance."));
   });
 
