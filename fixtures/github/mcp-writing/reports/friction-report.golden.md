@@ -90,6 +90,10 @@ Review:
 - Threads: 15
 - Resolved threads: 15
 - Outdated threads: 10
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: author\_reply=15, copilot=15
 
 Source labels:
@@ -112,6 +116,10 @@ Review:
 - Threads: 10
 - Resolved threads: 0
 - Outdated threads: 0
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: none
 
 Source labels:
@@ -157,6 +165,10 @@ Review:
 - Threads: 15
 - Resolved threads: 15
 - Outdated threads: 10
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: author\_reply=15, copilot=15
 
 Source labels:
@@ -179,6 +191,10 @@ Review:
 - Threads: 10
 - Resolved threads: 0
 - Outdated threads: 0
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: none
 
 Source labels:
@@ -225,6 +241,10 @@ Review:
 - Threads: 10
 - Resolved threads: 0
 - Outdated threads: 0
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: none
 
 Source labels:
@@ -247,6 +267,10 @@ Review:
 - Threads: 15
 - Resolved threads: 15
 - Outdated threads: 10
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: author\_reply=15, copilot=15
 
 Source labels:
@@ -269,6 +293,10 @@ Review:
 - Threads: 0
 - Resolved threads: 0
 - Outdated threads: 0
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: none
 
 Source labels:
@@ -314,6 +342,10 @@ Review:
 - Threads: 10
 - Resolved threads: 0
 - Outdated threads: 0
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: none
 
 Source labels:
@@ -336,6 +368,10 @@ Review:
 - Threads: 15
 - Resolved threads: 15
 - Outdated threads: 10
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: author\_reply=15, copilot=15
 
 Source labels:
@@ -381,6 +417,10 @@ Review:
 - Threads: 15
 - Resolved threads: 15
 - Outdated threads: 10
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: author\_reply=15, copilot=15
 
 Source labels:
@@ -403,6 +443,10 @@ Review:
 - Threads: 10
 - Resolved threads: 0
 - Outdated threads: 0
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: none
 
 Source labels:
@@ -447,6 +491,10 @@ Review:
 - Threads: 15
 - Resolved threads: 15
 - Outdated threads: 10
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: author\_reply=15, copilot=15
 
 Source labels:
@@ -491,6 +539,10 @@ Review:
 - Threads: 15
 - Resolved threads: 15
 - Outdated threads: 10
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: author\_reply=15, copilot=15
 
 Source labels:
@@ -535,6 +587,10 @@ Review:
 - Threads: 15
 - Resolved threads: 15
 - Outdated threads: 10
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: author\_reply=15, copilot=15
 
 Source labels:
@@ -581,6 +637,10 @@ Review:
 - Threads: 10
 - Resolved threads: 0
 - Outdated threads: 0
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: none
 
 Source labels:
@@ -603,6 +663,10 @@ Review:
 - Threads: 0
 - Resolved threads: 0
 - Outdated threads: 0
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: none
 
 Source labels:
@@ -625,6 +689,10 @@ Review:
 - Threads: 15
 - Resolved threads: 15
 - Outdated threads: 10
+- Review decision: none (source: reviews)
+- Human reviewers: 0
+- Human approved: no
+- Human changes requested: no
 - Comment sources: author\_reply=15, copilot=15
 
 Source labels:

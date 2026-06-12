@@ -335,6 +335,47 @@ describe("GitHub source collector", () => {
     assert.equal(bundle.pullRequests[0].reviews[0].id, null);
   });
 
+  it("normalizes live human approval separately from zero review threads", async () => {
+    const provider = createProvider({
+      async getPullRequest(input) {
+        this.calls.push(["getPullRequest", input]);
+        return pullRequestDetails({
+          reviews: [
+            {
+              id: "review-human-approval",
+              author: { login: "reviewer", type: "User" },
+              submittedAt: "2026-06-01T10:30:00Z",
+              state: "APPROVED",
+              commitOid: "abc123",
+            },
+          ],
+        });
+      },
+      async getReviewThreads(input) {
+        this.calls.push(["getReviewThreads", input]);
+        return { totalCount: 0, nodes: [] };
+      },
+    });
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      provider,
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+    const normalized = normalizeFixtureBundle(bundle);
+
+    assert.equal(bundle.pullRequests[0].reviewThreads.totalCount, 0);
+    assert.deepEqual(normalized.pullRequests[0].reviewDecision, {
+      state: "approved",
+      humanApproved: true,
+      humanChangesRequested: false,
+      humanReviewerCount: 1,
+      source: "reviews",
+    });
+    assert.equal(normalized.pullRequests[0].reviewThreads.totalCount, 0);
+  });
+
   it("degrades workflow-run coverage when Actions access is unavailable", async () => {
     const provider = createProvider({
       async getWorkflowRuns(input) {

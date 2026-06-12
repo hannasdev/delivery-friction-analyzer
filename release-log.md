@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-12 — Review Decision Evidence
+
+- What changed: Friction metrics, Markdown reports, and `pr-metrics.csv` now include review decision evidence derived from review events, including human approval, changes-requested, reviewer count, and unavailable review-event coverage.
+- Why it matters: Maintainers can distinguish zero inline review threads from missing review evidence or clean human approval, so `review_threads = 0` is less likely to be misread as "unreviewed."
+- Who is affected: Maintainers and contributors reviewing delivery-friction reports or CSV evidence exports.
+- Action needed: Treat `review_threads` as review churn and use the adjacent review-decision fields for review coverage context.
+- PR: TBD
+
 ### 2026-06-10 — Report Evidence Readability
 
 - What changed: Markdown friction reports now show final/current PR additions, deletions, changed files, and changed lines in representative evidence tables, with validation and review details rendered as plain Markdown lists.

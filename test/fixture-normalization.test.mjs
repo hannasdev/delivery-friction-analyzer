@@ -78,6 +78,104 @@ describe("mcp-writing compact fixture normalization", () => {
     assert.equal(pr221.reviews.reduce((sum, review) => sum + review.generatedCommentCount, 0), 10);
   });
 
+  it("derives human review decision without treating missing reviews as observed absence", async () => {
+    const [bundle, profile] = await Promise.all([
+      readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),
+      readJson("../fixtures/github/mcp-writing/profile.json"),
+    ]);
+    const decisionBundle = structuredClone(bundle);
+    decisionBundle.pullRequests = [
+      {
+        ...decisionBundle.pullRequests[0],
+        number: 301,
+        reviews: [
+          {
+            id: "changes-requested",
+            author: { login: "reviewer", type: "User" },
+            submittedAt: "2026-06-01T10:00:00Z",
+            state: "CHANGES_REQUESTED",
+          },
+          {
+            id: "approved",
+            author: { login: "reviewer", type: "User" },
+            submittedAt: "2026-06-01T11:00:00Z",
+            state: "APPROVED",
+          },
+        ],
+      },
+      {
+        ...decisionBundle.pullRequests[0],
+        number: 302,
+        reviews: [
+          {
+            id: "copilot-only",
+            author: { login: "copilot-pull-request-reviewer", type: "Bot" },
+            submittedAt: "2026-06-01T10:00:00Z",
+            state: "COMMENTED",
+          },
+        ],
+      },
+      {
+        ...decisionBundle.pullRequests[0],
+        number: 303,
+      },
+      {
+        ...decisionBundle.pullRequests[0],
+        number: 304,
+        reviews: [
+          {
+            id: "untimed-approved",
+            author: { login: "reviewer", type: "User" },
+            submittedAt: null,
+            state: "APPROVED",
+          },
+          {
+            id: "untimed-changes-requested",
+            author: { login: "reviewer", type: "User" },
+            submittedAt: null,
+            state: "CHANGES_REQUESTED",
+          },
+        ],
+      },
+    ];
+    delete decisionBundle.pullRequests[2].reviews;
+
+    const normalized = normalizeFixtureBundle(decisionBundle, { repositoryProfile: profile });
+    const approved = normalized.pullRequests.find(pr => pr.number === 301);
+    const botOnly = normalized.pullRequests.find(pr => pr.number === 302);
+    const unavailable = normalized.pullRequests.find(pr => pr.number === 303);
+    const conflictingUntimed = normalized.pullRequests.find(pr => pr.number === 304);
+
+    assert.deepEqual(approved.reviewDecision, {
+      state: "approved",
+      humanApproved: true,
+      humanChangesRequested: true,
+      humanReviewerCount: 1,
+      source: "reviews",
+    });
+    assert.deepEqual(botOnly.reviewDecision, {
+      state: "none",
+      humanApproved: false,
+      humanChangesRequested: false,
+      humanReviewerCount: 0,
+      source: "reviews",
+    });
+    assert.deepEqual(unavailable.reviewDecision, {
+      state: "unavailable",
+      humanApproved: false,
+      humanChangesRequested: false,
+      humanReviewerCount: 0,
+      source: "unavailable",
+    });
+    assert.deepEqual(conflictingUntimed.reviewDecision, {
+      state: "changes_requested",
+      humanApproved: true,
+      humanChangesRequested: true,
+      humanReviewerCount: 1,
+      source: "reviews",
+    });
+  });
+
   it("normalizes missing check-run names to null", async () => {
     const [bundle, profile] = await Promise.all([
       readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),

@@ -232,6 +232,13 @@
           "totalCount": 0,
           "resolvedCount": 0,
           "outdatedCount": 0
+        },
+        "decision": {
+          "state": "none",
+          "humanApproved": false,
+          "humanChangesRequested": false,
+          "humanReviewerCount": 0,
+          "source": "reviews"
         }
       },
       "ci": {
@@ -482,6 +489,13 @@
           "totalCount": 15,
           "resolvedCount": 15,
           "outdatedCount": 10
+        },
+        "decision": {
+          "state": "none",
+          "humanApproved": false,
+          "humanChangesRequested": false,
+          "humanReviewerCount": 0,
+          "source": "reviews"
         }
       },
       "ci": {
@@ -741,6 +755,13 @@
           "totalCount": 10,
           "resolvedCount": 0,
           "outdatedCount": 0
+        },
+        "decision": {
+          "state": "none",
+          "humanApproved": false,
+          "humanChangesRequested": false,
+          "humanReviewerCount": 0,
+          "source": "reviews"
         }
       },
       "ci": {

@@ -21,16 +21,72 @@ function flattenThreadComments(reviewThreads = {}) {
   ));
 }
 
-function normalizeReview(review) {
+function normalizeReview(review, { pullRequestAuthorLogin } = {}) {
   const author = review.author ?? {};
   return {
     id: review.id,
     submittedAt: review.submittedAt,
     state: review.state,
     commitOid: review.commitOid ?? review.commit?.oid ?? null,
-    source: classifyCommentSource(author),
+    source: classifyCommentSource(author, { pullRequestAuthorLogin }),
     generatedCommentCount: review.generatedCommentCount ?? null,
     failedAttempt: Boolean(review.failedAttempt),
+  };
+}
+
+function reviewAuthorKey(review) {
+  const author = review.author ?? {};
+  return author.login ?? author.id ?? author.node_id ?? author.nodeId ?? review.id ?? null;
+}
+
+function reviewState(review) {
+  return String(review.state ?? "").toLowerCase();
+}
+
+function submittedAtMs(review) {
+  const submittedAt = Date.parse(review.submittedAt);
+  return Number.isFinite(submittedAt) ? submittedAt : null;
+}
+
+function reviewDecisionState(humanReviews) {
+  const reviewStates = new Set(humanReviews.map(reviewState));
+  const terminalReviews = humanReviews.filter(review => ["approved", "changes_requested"].includes(reviewState(review)));
+  const allTerminalReviewsHaveTimestamps = terminalReviews.length > 0
+    && terminalReviews.every(review => submittedAtMs(review) !== null);
+
+  if (allTerminalReviewsHaveTimestamps) {
+    const latestTerminalReview = [...terminalReviews].sort((left, right) => submittedAtMs(right) - submittedAtMs(left))[0];
+    return reviewState(latestTerminalReview);
+  }
+  if (reviewStates.has("changes_requested")) return "changes_requested";
+  if (reviewStates.has("approved")) return "approved";
+  if (humanReviews.length > 0) return "commented";
+  return "none";
+}
+
+function summarizeReviewDecision(pr) {
+  if (!Array.isArray(pr.reviews)) {
+    return {
+      state: "unavailable",
+      humanApproved: false,
+      humanChangesRequested: false,
+      humanReviewerCount: 0,
+      source: "unavailable",
+    };
+  }
+
+  const humanReviews = pr.reviews.filter(review => (
+    classifyCommentSource(review.author, { pullRequestAuthorLogin: pr.author?.login }) === "human_reviewer"
+  ));
+  const humanReviewerKeys = new Set(humanReviews.map(reviewAuthorKey).filter(Boolean));
+  const states = new Set(humanReviews.map(reviewState));
+
+  return {
+    state: reviewDecisionState(humanReviews),
+    humanApproved: states.has("approved"),
+    humanChangesRequested: states.has("changes_requested"),
+    humanReviewerCount: humanReviewerKeys.size,
+    source: "reviews",
   };
 }
 
@@ -73,7 +129,8 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
         deletions: file.deletions,
         changeType: file.changeType,
       })),
-      reviews: (pr.reviews ?? []).map(normalizeReview),
+      reviews: (pr.reviews ?? []).map(review => normalizeReview(review, { pullRequestAuthorLogin: pr.author?.login })),
+      reviewDecision: summarizeReviewDecision(pr),
       reviewThreads: {
         source: pr.reviewThreads?.source ?? "unavailable",
         totalCount: pr.reviewThreads?.totalCount ?? 0,

@@ -320,6 +320,64 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("carries zero-thread human approvals through live analysis artifacts", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "approved-out");
+      const provider = createProvider({
+        async getPullRequest(input) {
+          this.calls.push(["getPullRequest", input]);
+          return pullRequestDetails({
+            reviews: [
+              {
+                id: "review-human-approval",
+                author: { login: "reviewer", type: "User" },
+                submittedAt: "2026-06-01T10:30:00Z",
+                state: "APPROVED",
+                commitOid: "abc123",
+              },
+            ],
+          });
+        },
+        async getReviewThreads(input) {
+          this.calls.push(["getReviewThreads", input]);
+          return { totalCount: 0, nodes: [] };
+        },
+      });
+
+      await runAnalyzeGithub({
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir,
+        isValidationTarget: true,
+      }, {
+        provider,
+        now: () => "2026-06-09T00:00:00Z",
+      });
+
+      const [normalized, metricsSummary, reportMarkdown, prMetricsCsv] = await Promise.all([
+        readJson(join(outDir, "normalized.json")),
+        readJson(join(outDir, "metrics-summary.json")),
+        readFile(join(outDir, "friction-report.md"), "utf8"),
+        readFile(join(outDir, "pr-metrics.csv"), "utf8"),
+      ]);
+
+      assert.deepEqual(normalized.pullRequests[0].reviewDecision, {
+        state: "approved",
+        humanApproved: true,
+        humanChangesRequested: false,
+        humanReviewerCount: 1,
+        source: "reviews",
+      });
+      assert.deepEqual(metricsSummary.pullRequests[0].review.decision, normalized.pullRequests[0].reviewDecision);
+      assert.equal(metricsSummary.pullRequests[0].review.threads.totalCount, 0);
+      assert(reportMarkdown.includes("- Review decision: approved (source: reviews)"));
+      assert(reportMarkdown.includes("- Human approved: yes"));
+      assert(prMetricsCsv.includes(",0,approved,1,true,false,"));
+    });
+  });
+
   it("writes parseable JSON completion output only when --json is requested", async () => {
     await withTempDirectory(async directory => {
       const profilePath = await writeProfile(directory);

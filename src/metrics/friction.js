@@ -340,6 +340,13 @@ export function computePullRequestMetrics(pr) {
     review: {
       comments,
       threads: reviewThreads,
+      decision: pr.reviewDecision ?? {
+        state: "unavailable",
+        humanApproved: false,
+        humanChangesRequested: false,
+        humanReviewerCount: 0,
+        source: "unavailable",
+      },
     },
     ci: checks,
     lifecycle,
