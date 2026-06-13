@@ -827,14 +827,23 @@ describe("friction report generation", () => {
       },
     };
     const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
     const csvArtifacts = generateEvidenceCsvArtifacts({
       metricsSummary,
       report,
       collectionCoverage: { apiFamilies: [] },
     });
 
+    assert(markdown.includes("- Review decision: unavailable (source: unavailable)"));
+    assert(markdown.includes("- Human reviewers: unavailable"));
+    assert(markdown.includes("- Human approved: unavailable"));
+    assert(markdown.includes("- Human changes requested: unavailable"));
+    assert(markdown.includes("- Review decision: none (source: reviews)"));
+    assert(markdown.includes("- Human reviewers: 0"));
+    assert(markdown.includes("- Human approved: no"));
+    assert(markdown.includes("- Human changes requested: no"));
     assert(csvArtifacts.prMetricsCsv.includes(
-      "1,unavailable coverage,https://example.test/pull/1,10,10,0,,unavailable,0,false,false,0,,,,unavailable,unavailable,unavailable",
+      "1,unavailable coverage,https://example.test/pull/1,10,10,0,,unavailable,,,,0,,,,unavailable,unavailable,unavailable",
     ));
     assert(csvArtifacts.prMetricsCsv.includes(
       "2,observed zero coverage,https://example.test/pull/2,10,10,0,0,none,0,false,false,0,0,0,0,graphql:repository.pullRequest.reviewThreads,rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed",

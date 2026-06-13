@@ -65,6 +65,11 @@ function hasObservedReviewThreads(reviewThreads = {}) {
   return String(source).startsWith("graphql");
 }
 
+function hasObservedReviewDecision(reviewDecision = {}) {
+  return (reviewDecision.source ?? "unavailable") !== "unavailable"
+    && (reviewDecision.state ?? "unavailable") !== "unavailable";
+}
+
 function unavailableUnlessObserved(value, observed) {
   return observed ? value : null;
 }
@@ -94,6 +99,7 @@ function prMetricsCsv(metricsSummary) {
   ];
   const rows = sortedPullRequests(metricsSummary).map(pr => {
     const observedReviewThreads = hasObservedReviewThreads(pr.review?.threads);
+    const observedReviewDecision = hasObservedReviewDecision(pr.review?.decision);
     const observedWorkflowRuns = hasObservedWorkflowRuns(pr.ci?.workflowRuns);
     const row = {
       pr_number: pr.number,
@@ -104,9 +110,9 @@ function prMetricsCsv(metricsSummary) {
       review_comments: pr.review?.comments?.totalCount,
       review_threads: unavailableUnlessObserved(pr.review?.threads?.totalCount, observedReviewThreads),
       review_decision: pr.review?.decision?.state ?? "unavailable",
-      human_reviewer_count: pr.review?.decision?.humanReviewerCount ?? 0,
-      human_approved: pr.review?.decision?.humanApproved ?? false,
-      human_changes_requested: pr.review?.decision?.humanChangesRequested ?? false,
+      human_reviewer_count: unavailableUnlessObserved(pr.review?.decision?.humanReviewerCount ?? 0, observedReviewDecision),
+      human_approved: unavailableUnlessObserved(pr.review?.decision?.humanApproved ?? false, observedReviewDecision),
+      human_changes_requested: unavailableUnlessObserved(pr.review?.decision?.humanChangesRequested ?? false, observedReviewDecision),
       failed_checks: pr.ci?.checkRuns?.failedCount,
       failed_workflow_runs: unavailableUnlessObserved(pr.ci?.workflowRuns?.failedCount, observedWorkflowRuns),
       cancelled_workflow_runs: unavailableUnlessObserved(pr.ci?.workflowRuns?.cancelledCount, observedWorkflowRuns),
