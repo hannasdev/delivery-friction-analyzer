@@ -37,6 +37,7 @@
           "prOpenDiff",
           "files",
           "reviews",
+          "reviewDecision",
           "reviewThreads",
           "reviewComments",
           "checkRuns",
@@ -209,6 +210,26 @@
                 "generatedCommentCount": { "type": ["integer", "null"], "minimum": 0 },
                 "failedAttempt": { "type": "boolean" }
               }
+            }
+          },
+          "reviewDecision": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "state",
+              "humanApproved",
+              "humanChangesRequested",
+              "humanReviewerCount",
+              "source"
+            ],
+            "properties": {
+              "state": {
+                "enum": ["approved", "changes_requested", "commented", "review_required", "none", "unavailable"]
+              },
+              "humanApproved": { "type": "boolean" },
+              "humanChangesRequested": { "type": "boolean" },
+              "humanReviewerCount": { "type": "integer", "minimum": 0 },
+              "source": { "enum": ["reviews", "unavailable"] }
             }
           },
           "reviewThreads": {

@@ -33,7 +33,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `bottlenecks`: ranked friction patterns with observed data, inferred diagnosis, and suggested action kept as separate fields.
 - `bottlenecks[].observedData[]`: representative PR examples with PR identity, score/value, final/current additions, deletions, changed-file count, and changed-line count.
 - `bottlenecks[].observedData[].validationEvidence`: workflow-run source label, workflow-run coverage, workflow-run conclusions, failed check-run count, failed workflow-run count, and cancelled workflow-run count for representative PR examples.
-- `bottlenecks[].observedData[].reviewEvidence`: review-thread source label, thread counts, resolution/outdated counts, comment-source breakdown, bot comment count, human reviewer comment count, and author reply count for representative PR examples.
+- `bottlenecks[].observedData[].reviewEvidence`: review-thread source label, thread counts, resolution/outdated counts, review decision label/source, human reviewer count, human approval / changes-requested booleans, comment-source breakdown, bot comment count, human reviewer comment count, and author reply count for representative PR examples.
 - `bottlenecks[].dominance`: whether the displayed examples are dominated by a single PR, including the top PR number, share of displayed signal, and a human-readable interpretation note.
 - `sensitivity`: optional robustness summaries for displayed bottlenecks dominated by one PR. Each summary names the excluded PR, affected bottlenecks, baseline top bottlenecks, top bottlenecks without that PR, and an interpretation note.
 - `recommendationCategories`: supported recommendation categories and how many bottlenecks triggered each one.
@@ -81,7 +81,7 @@ The M3 report contract supports these recommendation categories:
 
 Reports must label unavailable or partial GitHub data instead of inferring unavailable values from merge-time data. PR-open diff growth remains unavailable unless direct or reconstructed counts exist. Workflow coverage and review-thread sources are summarized separately.
 
-Representative examples should carry enough source evidence to trace a report claim back to generated artifacts. Validation examples should name the workflow-run source and conclusions. Review churn examples should name the review-thread source and comment sources. When displayed examples are dominated by one PR, the report should say so instead of implying a repository-wide pattern from an outlier.
+Representative examples should carry enough source evidence to trace a report claim back to generated artifacts. Validation examples should name the workflow-run source and conclusions. Review churn examples should name the review-thread source, review decision evidence, and comment sources. When `reviewThreads` is zero, review decision evidence should make clean human approval distinguishable from unavailable review evidence and from observed absence of human review. When displayed examples are dominated by one PR, the report should say so instead of implying a repository-wide pattern from an outlier.
 
 Sensitivity summaries are robustness context only. They must preserve the baseline ranking, avoid implying that the analyzer discarded inconvenient data, and label excluded-PR summaries as "without this PR" comparisons rather than replacement truth.
 
@@ -106,7 +106,7 @@ CSV exports are supporting evidence trails, not replacements for JSON artifacts.
 
 Minimum CSV column groups:
 
-- `pr-metrics.csv`: PR number, title, URL, changed lines, non-generated changed lines, review comments, review threads, failed checks, failed workflow runs, cancelled workflow runs, post-review commits, review-thread source, workflow-run source/coverage, and main ranking scores.
+- `pr-metrics.csv`: PR number, title, URL, changed lines, non-generated changed lines, review comments, review threads, review decision, human reviewer count, human approval / changes-requested booleans, failed checks, failed workflow runs, cancelled workflow runs, post-review commits, review-thread source, workflow-run source/coverage, and main ranking scores.
 - `bottleneck-examples.csv`: bottleneck identity, recommendation category, PR identity, score/value, changed lines, validation counts, review counts, comment-source counts, workflow/review source and coverage labels, dominance, and source labels.
 - `comment-sources.csv`: source name, total comments, bot/scanner classification, human/author classification, and share of all comments.
 - `collection-coverage.csv`: API family, status, attempts, source label, diagnostics, and downstream impact.

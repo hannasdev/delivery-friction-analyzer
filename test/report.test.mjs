@@ -172,11 +172,11 @@ describe("friction report generation", () => {
     assert(markdown.includes("Evidence details for PR #239:"));
     assert(markdown.includes("- Workflow coverage: observed"));
     assert(markdown.includes("- Workflow conclusions: success=8, cancelled=1"));
-    assert(
-      markdown.includes(
-        "- Review thread source: graphql:repository.pullRequest.reviewThreads\n- Threads: 15\n- Resolved threads: 15\n- Outdated threads: 10\n- Comment sources: author\\_reply=15, copilot=15",
-      ),
-    );
+    assert(markdown.includes("- Review thread source: graphql:repository.pullRequest.reviewThreads"));
+    assert(markdown.includes("- Threads: 15\n- Resolved threads: 15\n- Outdated threads: 10"));
+    assert(markdown.includes("- Review decision: none (source: reviews)"));
+    assert(markdown.includes("- Human reviewers: 0"));
+    assert(markdown.includes("- Comment sources: author\\_reply=15, copilot=15"));
     assert(markdown.includes("- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\\_request"));
     assert(markdown.includes("#### Review churn Interpretation And Recommendation"));
     assert(markdown.includes("| Inferred diagnosis | Review loops are concentrated in a small set of PRs. |"));
@@ -644,6 +644,10 @@ describe("friction report generation", () => {
       "non_generated_changed_lines",
       "review_comments",
       "review_threads",
+      "review_decision",
+      "human_reviewer_count",
+      "human_approved",
+      "human_changes_requested",
       "failed_checks",
       "failed_workflow_runs",
       "cancelled_workflow_runs",
@@ -655,6 +659,75 @@ describe("friction report generation", () => {
     assert(csvArtifacts.commentSourcesCsv.includes("copilot,15,true,false,0.5"));
     assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,available,3,rest:actions,sampled,validation evidence populated"));
     assert(!csvArtifacts.bottleneckExamplesCsv.includes("raw comment"));
+  });
+
+  it("renders review decision evidence for zero-thread human approvals", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisWindowDays: 30,
+      },
+      totals: {
+        pullRequests: 1,
+        changedLines: 10,
+        nonGeneratedChangedLines: 10,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 9,
+          title: "clean approval",
+          url: "https://example.test/pull/9",
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+          review: {
+            decision: {
+              state: "approved",
+              humanApproved: true,
+              humanChangesRequested: false,
+              humanReviewerCount: 1,
+              source: "reviews",
+            },
+            comments: { totalCount: 0, bySource: {} },
+            threads: {
+              source: "graphql:repository.pullRequest.reviewThreads",
+              totalCount: 0,
+              resolvedCount: 0,
+              outdatedCount: 0,
+            },
+          },
+          ci: {
+            checkRuns: { failedCount: 0 },
+            workflowRuns: {
+              source: "unavailable",
+              coverage: "unavailable",
+              failedCount: 0,
+              cancelledCount: 0,
+              conclusions: {},
+            },
+          },
+          iteration: { commitsAfterFirstReview: 1 },
+          components: {},
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 9, title: "clean approval", value: 1 },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assert(markdown.includes("- Threads: 0"));
+    assert(markdown.includes("- Review decision: approved (source: reviews)"));
+    assert(markdown.includes("- Human reviewers: 1"));
+    assert(markdown.includes("- Human approved: yes"));
+    assert(markdown.includes("- Human changes requested: no"));
   });
 
   it("leaves unavailable CSV counts empty while preserving source labels", () => {
@@ -682,6 +755,13 @@ describe("friction report generation", () => {
           diffAtMerge: { changedLines: 10 },
           files: { nonGeneratedChangedLines: 10 },
           review: {
+            decision: {
+              state: "unavailable",
+              humanApproved: false,
+              humanChangesRequested: false,
+              humanReviewerCount: 0,
+              source: "unavailable",
+            },
             comments: { totalCount: 0, bySource: {} },
             threads: {
               source: "unavailable",
@@ -710,6 +790,13 @@ describe("friction report generation", () => {
           diffAtMerge: { changedLines: 10 },
           files: { nonGeneratedChangedLines: 10 },
           review: {
+            decision: {
+              state: "none",
+              humanApproved: false,
+              humanChangesRequested: false,
+              humanReviewerCount: 0,
+              source: "reviews",
+            },
             comments: { totalCount: 0, bySource: {} },
             threads: {
               source: "graphql:repository.pullRequest.reviewThreads",
@@ -740,17 +827,26 @@ describe("friction report generation", () => {
       },
     };
     const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
     const csvArtifacts = generateEvidenceCsvArtifacts({
       metricsSummary,
       report,
       collectionCoverage: { apiFamilies: [] },
     });
 
+    assert(markdown.includes("- Review decision: unavailable (source: unavailable)"));
+    assert(markdown.includes("- Human reviewers: unavailable"));
+    assert(markdown.includes("- Human approved: unavailable"));
+    assert(markdown.includes("- Human changes requested: unavailable"));
+    assert(markdown.includes("- Review decision: none (source: reviews)"));
+    assert(markdown.includes("- Human reviewers: 0"));
+    assert(markdown.includes("- Human approved: no"));
+    assert(markdown.includes("- Human changes requested: no"));
     assert(csvArtifacts.prMetricsCsv.includes(
-      "1,unavailable coverage,https://example.test/pull/1,10,10,0,,0,,,,unavailable,unavailable,unavailable",
+      "1,unavailable coverage,https://example.test/pull/1,10,10,0,,unavailable,,,,0,,,,unavailable,unavailable,unavailable",
     ));
     assert(csvArtifacts.prMetricsCsv.includes(
-      "2,observed zero coverage,https://example.test/pull/2,10,10,0,0,0,0,0,0,graphql:repository.pullRequest.reviewThreads,rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed",
+      "2,observed zero coverage,https://example.test/pull/2,10,10,0,0,none,0,false,false,0,0,0,0,graphql:repository.pullRequest.reviewThreads,rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed",
     ));
     assert(csvArtifacts.bottleneckExamplesCsv.includes(
       "review-churn,Review churn,pr_readiness_gate,1,unavailable coverage,https://example.test/pull/1,1,10,0,,,",

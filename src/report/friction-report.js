@@ -156,6 +156,20 @@ function nonZeroEntries(object = {}) {
   return sortedEntries(object).filter(entry => entry.value > 0);
 }
 
+function hasObservedReviewDecision(reviewDecision = {}) {
+  return (reviewDecision.source ?? "unavailable") !== "unavailable"
+    && (reviewDecision.state ?? "unavailable") !== "unavailable";
+}
+
+function formatObservedCount(value, observed) {
+  return observed ? String(value ?? 0) : "unavailable";
+}
+
+function formatObservedBoolean(value, observed) {
+  if (!observed) return "unavailable";
+  return value ? "yes" : "no";
+}
+
 function findPullRequest(metricsSummary, number) {
   return (metricsSummary.pullRequests ?? []).find(pr => pr.number === number);
 }
@@ -167,6 +181,7 @@ function formatPr(pr, rankingEntry) {
   const botComments = allCommentSources
     .filter(entry => BOT_SOURCES.has(entry.name))
     .reduce((sum, entry) => sum + entry.value, 0);
+  const reviewDecision = pr?.review?.decision ?? {};
 
   return {
     number: rankingEntry.number,
@@ -194,6 +209,11 @@ function formatPr(pr, rankingEntry) {
       reviewThreads: pr?.review?.threads?.totalCount ?? 0,
       resolvedThreads: pr?.review?.threads?.resolvedCount ?? 0,
       outdatedThreads: pr?.review?.threads?.outdatedCount ?? 0,
+      reviewDecision: reviewDecision.state ?? "unavailable",
+      humanReviewerCount: reviewDecision.humanReviewerCount ?? 0,
+      humanApproved: reviewDecision.humanApproved ?? false,
+      humanChangesRequested: reviewDecision.humanChangesRequested ?? false,
+      reviewDecisionSource: reviewDecision.source ?? "unavailable",
       commentSources,
       botComments,
       humanReviewerComments: pr?.review?.comments?.bySource?.human_reviewer ?? 0,
@@ -596,6 +616,10 @@ function renderEvidenceDetails(observedData) {
     const reviewEvidence = evidence.reviewEvidence ?? {};
     const workflowRunConclusions = validationEvidence.workflowRunConclusions ?? [];
     const reviewCommentSources = reviewEvidence.commentSources ?? [];
+    const observedReviewDecision = hasObservedReviewDecision({
+      state: reviewEvidence.reviewDecision,
+      source: reviewEvidence.reviewDecisionSource,
+    });
 
     return [
       `Evidence details for PR #${evidence.number}:`,
@@ -617,6 +641,10 @@ function renderEvidenceDetails(observedData) {
         `Threads: ${reviewEvidence.reviewThreads ?? 0}`,
         `Resolved threads: ${reviewEvidence.resolvedThreads ?? 0}`,
         `Outdated threads: ${reviewEvidence.outdatedThreads ?? 0}`,
+        `Review decision: ${reviewEvidence.reviewDecision ?? "unavailable"} (source: ${reviewEvidence.reviewDecisionSource ?? "unavailable"})`,
+        `Human reviewers: ${formatObservedCount(reviewEvidence.humanReviewerCount, observedReviewDecision)}`,
+        `Human approved: ${formatObservedBoolean(reviewEvidence.humanApproved, observedReviewDecision)}`,
+        `Human changes requested: ${formatObservedBoolean(reviewEvidence.humanChangesRequested, observedReviewDecision)}`,
         `Comment sources: ${formatNamedValues(reviewCommentSources)}`,
       ]),
       "",

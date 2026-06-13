@@ -212,6 +212,29 @@ describe("friction metric formulas", () => {
     assert.equal(metrics.ci.workflowRuns.coverage, "unavailable");
   });
 
+  it("carries normalized review decision evidence without changing review churn counts", () => {
+    const metrics = computePullRequestMetrics(buildSyntheticPr({
+      reviewThreads: { source: "graphql", totalCount: 0, resolvedCount: 0, outdatedCount: 0 },
+      reviewDecision: {
+        state: "approved",
+        humanApproved: true,
+        humanChangesRequested: false,
+        humanReviewerCount: 2,
+        source: "reviews",
+      },
+    }));
+
+    assert.deepEqual(metrics.review.decision, {
+      state: "approved",
+      humanApproved: true,
+      humanChangesRequested: false,
+      humanReviewerCount: 2,
+      source: "reviews",
+    });
+    assert.equal(metrics.review.threads.totalCount, 0);
+    assert.equal(metrics.components.iterationDrag.inputs.reviewThreads, 0);
+  });
+
   it("keeps partial PR file and review thread inputs safe and transparent", () => {
     const pr = buildSyntheticPr();
     delete pr.files;

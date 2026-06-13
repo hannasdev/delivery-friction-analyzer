@@ -8,10 +8,11 @@ Milestone 1 defines the first normalized fixture shape. It is intentionally limi
 
 - `TargetRepository`: owner/name/default branch/visibility/window for the repository being analyzed.
 - `RepositoryLanguageDistribution`: byte counts from `GET /repos/{owner}/{repo}/languages`, stored as context only.
-- `PullRequest`: source IDs, author login when known, URL, state, lifecycle timestamps, final diff shape, PR-open diff source confidence, optional PR-open additions/deletions/changed-file counts when direct or reconstructed data is available, files, reviews, review threads, comments, checks, and workflow-run coverage.
+- `PullRequest`: source IDs, author login when known, URL, state, lifecycle timestamps, final diff shape, PR-open diff source confidence, optional PR-open additions/deletions/changed-file counts when direct or reconstructed data is available, files, reviews, review decision summary, review threads, comments, checks, and workflow-run coverage.
 - `Commit`: commit OID, authored timestamp, committed timestamp when present, and message headline.
 - `ChangedFile`: path, additions, deletions, change type, category, role, functional surface, generated flag, and classification source.
 - `Review`: review attempt with author source, submitted timestamp, commit OID, generated comment count when known, and failed-attempt marker.
+- `ReviewDecisionSummary`: coarse human review state derived from observed review events, with human approval / changes-requested booleans, unique human reviewer count, and source label. `none` means review events were collected and no human review events were observed; `unavailable` means review-event coverage cannot support an absence claim.
 - `ReviewThread`: GraphQL thread count, resolved count, outdated count, and source coverage.
 - `ReviewCommentSummary`: source-grouped comment counts, separating PR-author replies from human reviewer feedback when author context is available.
 - `CheckRun`: final check/status rollup entries.
