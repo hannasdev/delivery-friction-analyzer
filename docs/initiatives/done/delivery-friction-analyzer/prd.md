@@ -161,26 +161,26 @@ Composite scores are not required for the MVP. If a score-like value is included
 
 ## User / Maintainer Workflows
 
-- A maintainer runs the analyzer locally against a configured GitHub target repository and receives a friction report for the last 30, 60, or 90 days of merged PRs.
+- A maintainer runs the analyzer locally against a configured GitHub target repository and receives a friction report for the latest 30, 60, or 90 merged PRs.
 - A team lead inspects the highest-friction PR examples and sees whether waste came from review churn, validation failures, scope growth, or planning gaps.
 - A team compares before-and-after friction after adding a hook, skill, validation script, or planning gate.
 - A product owner reviews whether AI-assisted delivery is becoming faster in mergeable output, not just faster in draft generation.
 
 ## Acceptance Criteria
 
-- [ ] The product can ingest GitHub PRs, reviews, review comments, commits, check runs, and changed-file metadata for a configured target repository.
-- [ ] The product can ingest GitHub repository language distribution and preserve it as context, not as a direct risk score.
-- [ ] The product can distinguish at least these file categories: code, tests, docs, config, generated, infrastructure, unknown.
-- [ ] The product can apply a repository profile that distinguishes core product files from tests, generated docs, release notes, planning docs, marketing site files, config, infrastructure, fixtures, generated/vendored artifacts, and unknown files.
-- [ ] The product can break review comments down by source: Copilot, human reviewer, GitHub Actions bot, dependency bot, code scanning, unknown bot.
-- [ ] The product can compute raw counts and normalized metrics for review feedback, CI failures, lifecycle time, iteration churn, and diff growth.
-- [ ] The product can compute changed-file spread and flag small diffs that touch many non-generated core files.
-- [ ] The product can preserve Copilot review comment severity and confidence/visibility data when GitHub exposes it, but does not use unstable vendor labels as primary trend metrics.
-- [ ] The product can generate Markdown and JSON repository friction reports with ranked bottlenecks, evidence, representative PR examples, and suggested interventions.
-- [ ] The product can include coverage metadata that labels unavailable or partial GitHub data, missing scopes, rate limits, deleted branches, and PR-open diff reconstruction confidence.
-- [ ] The product clearly labels inferred classifications separately from directly observed GitHub data.
-- [ ] The product avoids individual developer ranking in the default reporting experience.
-- [ ] Token and model usage integration is documented as a later extension, not a blocker for the MVP.
+- [x] The product can ingest GitHub PRs, reviews, review comments, commits, check runs, and changed-file metadata for a configured target repository.
+- [x] The product can ingest GitHub repository language distribution and preserve it as context, not as a direct risk score.
+- [x] The product can distinguish at least these file categories: code, tests, docs, config, generated, infrastructure, unknown.
+- [x] The product can apply a repository profile that distinguishes core product files from tests, generated docs, release notes, planning docs, marketing site files, config, infrastructure, fixtures, generated/vendored artifacts, and unknown files.
+- [x] The product can break review comments down by source: Copilot, human reviewer, GitHub Actions bot, dependency bot, code scanning, unknown bot.
+- [x] The product can compute raw counts and normalized metrics for review feedback, CI failures, lifecycle time, iteration churn, and diff growth.
+- [x] The product can compute changed-file spread and flag small diffs that touch many non-generated core files.
+- [x] The product can preserve Copilot review comment severity and confidence/visibility data when GitHub exposes it, but does not use unstable vendor labels as primary trend metrics.
+- [x] The product can generate Markdown and JSON repository friction reports with ranked bottlenecks, evidence, representative PR examples, and suggested interventions.
+- [x] The product can include coverage metadata that labels unavailable or partial GitHub data, missing scopes, rate limits, deleted branches, and PR-open diff reconstruction confidence.
+- [x] The product clearly labels inferred classifications separately from directly observed GitHub data.
+- [x] The product avoids individual developer ranking in the default reporting experience.
+- [x] Token and model usage integration is documented as a later extension, not a blocker for the MVP.
 
 ## Risks And Tradeoffs
 
@@ -212,18 +212,18 @@ Testing should focus on correctness of data extraction, metric calculation, clas
 
 ## Open Questions
 
-- [ ] What should the product be called publicly?
+- [x] What should the product be called publicly? Use `Delivery Friction Analyzer` for the MVP.
 - [x] Should the MVP be a GitHub App, CLI, hosted dashboard, or local report generator? Start as a local GitHub report generator; GitHub App/webhook snapshot capture is post-MVP.
 - [x] Which repositories should be used as the first validation dataset? Use `hannasdev/mcp-writing` as target repository fixture data only, not as product-specific scope.
-- [ ] Can Copilot review effort be fetched reliably through GitHub APIs, or does it require a different integration path?
-- [ ] Should the MVP include an experimental GitHub UI-partial extractor for Copilot comment severity, or avoid severity weighting until a stable public API source exists?
+- [x] Can Copilot review effort be fetched reliably through GitHub APIs, or does it require a different integration path? Treat review effort as unavailable through checked public GitHub payloads unless a stable API appears later.
+- [x] Should the MVP include an experimental GitHub UI-partial extractor for Copilot comment severity, or avoid severity weighting until a stable public API source exists? Avoid severity weighting in the MVP; document UI partials as unstable vendor signals only.
 - [x] Can GitHub expose repository language distribution? Yes, through `GET /repos/{owner}/{repo}/languages`.
 - [x] Should language distribution drive risk directly? No. It should inform a repository profile; file role and functional surface drive risk weighting.
 - [x] Can GitHub expose review-thread resolution/outdated state? Yes, through GraphQL `reviewThreads`.
 - [x] Is Copilot severity exposed in the checked review-comment/thread payloads? Not in checked public REST or GraphQL payloads. It is exposed in the GitHub web UI's deferred `automated-review-comment` React partial as `automatedComment.severity`.
 - [x] Is full CI churn available beyond the final status rollup? Yes, workflow runs can be queried by PR branch/event, but branch deletion or rename may reduce reliability.
-- [ ] Should recommendation mappings be manually configured per repo before the product attempts automated suggestions?
-- [ ] What join keys are realistic for future token and model usage integration?
+- [x] Should recommendation mappings be manually configured per repo before the product attempts automated suggestions? Use built-in transparent recommendation categories for the MVP; repository-specific tuning remains a later profile/config extension.
+- [x] What join keys are realistic for future token and model usage integration? Candidate future join keys are branch, PR number, commit SHA, session ID, and timestamp windows; token/model integration remains post-MVP.
 - [x] Which report format should come first? Markdown plus JSON; web UI is post-MVP.
 
 ## Shaped Backlog Features

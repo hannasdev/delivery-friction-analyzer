@@ -88,7 +88,7 @@ Core entities:
 Important fields:
 
 - stable source IDs and URLs;
-- target repository owner, name, default branch, visibility, and analysis window;
+- target repository owner, name, default branch, visibility, and pull request sample size;
 - repository language byte counts and percentages;
 - repository profile version and rule source;
 - timestamps for lifecycle and waiting-time calculations;
@@ -133,7 +133,7 @@ There is no existing product data to migrate. The first implementation should st
 ## Open Questions
 
 - [x] Should the MVP persist raw GitHub payloads, or only normalized data and report artifacts? Persist redacted fixture payloads for tests; keep runtime raw payload caches local and user-controlled; emit normalized JSON and Markdown reports.
-- [ ] What is the minimum viable GitHub permission set for a public and private repository?
+- [x] What is the minimum viable GitHub permission set for a public and private repository? Documented in the GitHub access and coverage matrix; public read is enough for public metadata, while private repositories need repository, pull request, checks, and Actions read permissions depending on desired coverage.
 - [x] Which report format should come first: Markdown, JSON, web UI, or all three? Markdown plus JSON first; web UI is deferred.
 - [x] Should file categorization be globally defined or repo-configurable from the start? Use global base categories with repository-configurable file-role and functional-surface rules.
-- [ ] What confidence threshold is required before token/model usage can be attributed to a PR?
+- [x] What confidence threshold is required before token/model usage can be attributed to a PR? Deferred from the GitHub-only MVP; future attribution should require explicit join keys such as branch, PR number, commit SHA, session ID, or timestamp windows.

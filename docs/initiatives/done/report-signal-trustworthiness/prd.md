@@ -86,15 +86,15 @@ Add a report-level shared-signal summary that appears near the key findings or r
 
 ## Acceptance Criteria
 
-- [ ] Metrics expose a per-PR review decision summary derived from review events.
-- [ ] Metrics distinguish observed clean approval from unavailable review evidence and from no observed review.
-- [ ] `pr-metrics.csv` includes review decision and human reviewer count or documented equivalent fields.
-- [ ] Markdown report evidence details annotate zero review-thread PRs when human approval is observed.
-- [ ] Report language consistently treats review threads as review churn, not review coverage.
-- [ ] Reports include a top-level shared-signal callout when multiple bottlenecks share the same ranking key or representative PR evidence.
-- [ ] `planning_gap_score` has a regression test proving it can be non-zero on realistic repository-profile input.
-- [ ] Existing JSON, Markdown, CSV, and fixture outputs remain deterministic.
-- [ ] No output ranks individual reviewers, authors, or contributors.
+- [x] Metrics expose a per-PR review decision summary derived from review events.
+- [x] Metrics distinguish observed clean approval from unavailable review evidence and from no observed review.
+- [x] `pr-metrics.csv` includes review decision and human reviewer count or documented equivalent fields.
+- [x] Markdown report evidence details annotate zero review-thread PRs when human approval is observed.
+- [x] Report language consistently treats review threads as review churn, not review coverage.
+- [x] Reports include a top-level shared-signal callout when multiple bottlenecks share the same ranking key or representative PR evidence.
+- [x] `planning_gap_score` has a regression test proving it can be non-zero on realistic repository-profile input.
+- [x] Existing JSON, Markdown, CSV, and fixture outputs remain deterministic.
+- [x] No output ranks individual reviewers, authors, or contributors.
 
 ## Risks And Tradeoffs
 

@@ -25,12 +25,12 @@ Make review approval state visible alongside review-thread churn so cleanly appr
 
 ### Acceptance Criteria
 
-- [ ] Metrics expose a stable review decision summary for each PR.
-- [ ] Clean human approval with zero review threads is distinguishable from no observed review.
-- [ ] Missing review-event coverage remains explicit rather than converted to `none`.
-- [ ] `pr-metrics.csv` includes the new review decision evidence.
-- [ ] Markdown evidence details explain zero-thread human-approved PRs.
-- [ ] Contract docs and golden fixtures are updated.
+- [x] Metrics expose a stable review decision summary for each PR.
+- [x] Clean human approval with zero review threads is distinguishable from no observed review.
+- [x] Missing review-event coverage remains explicit rather than converted to `none`.
+- [x] `pr-metrics.csv` includes the new review decision evidence.
+- [x] Markdown evidence details explain zero-thread human-approved PRs.
+- [x] Contract docs and golden fixtures are updated.
 
 ### Required Validation
 
@@ -83,10 +83,10 @@ Prove `planning_gap_score` can become non-zero on realistic input and guard agai
 
 ### Acceptance Criteria
 
-- [ ] A test asserts `planningGapScore.value > 0` when planning-doc changed lines are present.
-- [ ] The test validates the relevant formula inputs, including changed planning lines.
-- [ ] Existing fixture tests remain deterministic.
-- [ ] Any formula or classification bug found while adding the test is fixed and documented.
+- [x] A test asserts `planningGapScore.value > 0` when planning-doc changed lines are present.
+- [x] The test validates the relevant formula inputs, including changed planning lines.
+- [x] Existing fixture tests remain deterministic.
+- [x] Any formula or classification bug found while adding the test is fixed and documented.
 
 ### Required Validation
 
@@ -136,11 +136,11 @@ Make it clear when multiple ranked bottlenecks are different recommendation fram
 
 ### Acceptance Criteria
 
-- [ ] Reports identify shared ranking keys or shared representative PR evidence before detailed bottleneck sections.
-- [ ] The callout distinguishes "same underlying signal" from "same recommended action."
-- [ ] Existing per-section shared-evidence notes still render or are replaced by an equivalent clearer mechanism.
-- [ ] Golden Markdown/JSON tests cover the shared-signal output.
-- [ ] Report ordering remains deterministic.
+- [x] Reports identify shared ranking keys or shared representative PR evidence before detailed bottleneck sections.
+- [x] The callout distinguishes "same underlying signal" from "same recommended action."
+- [x] Existing per-section shared-evidence notes still render or are replaced by an equivalent clearer mechanism.
+- [x] Golden Markdown/JSON tests cover the shared-signal output.
+- [x] Report ordering remains deterministic.
 
 ### Required Validation
 

@@ -27,13 +27,13 @@ Make the Markdown report readable as a human-facing diagnostic artifact by addin
 
 ### Acceptance Criteria
 
-- [ ] Markdown reports include the new high-level sections in a stable order.
-- [ ] Each bottleneck visibly distinguishes observed evidence, interpretation, recommendation, and confidence/caveats.
-- [ ] Representative PR examples render in Markdown tables with score, changed-line, validation, review, and source fields.
-- [ ] Coverage caveats appear before users reach detailed bottleneck recommendations.
-- [ ] Shared evidence across related bottlenecks is grouped or labeled clearly enough to avoid implying independent findings.
-- [ ] Existing JSON report output remains deterministic and compatible.
-- [ ] Golden tests cover the revised Markdown report structure and representative table rows.
+- [x] Markdown reports include the new high-level sections in a stable order.
+- [x] Each bottleneck visibly distinguishes observed evidence, interpretation, recommendation, and confidence/caveats.
+- [x] Representative PR examples render in Markdown tables with score, changed-line, validation, review, and source fields.
+- [x] Coverage caveats appear before users reach detailed bottleneck recommendations.
+- [x] Shared evidence across related bottlenecks is grouped or labeled clearly enough to avoid implying independent findings.
+- [x] Existing JSON report output remains deterministic and compatible.
+- [x] Golden tests cover the revised Markdown report structure and representative table rows.
 
 ### Required Validation
 
@@ -50,7 +50,7 @@ Make the Markdown report readable as a human-facing diagnostic artifact by addin
 
 ### Status
 
-- [ ] Not started
+- Not started: no
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
@@ -94,16 +94,16 @@ Add deeper transparency artifacts so maintainers can understand the methodology 
 
 ### Acceptance Criteria
 
-- [ ] Full analysis writes `methodology.md` with selection, profile, scoring, coverage, dominance, sensitivity, and limitation explanations.
-- [ ] Full analysis writes curated CSV exports by default.
-- [ ] `--no-csv` suppresses CSV artifacts while still writing Markdown, JSON, source bundle, normalized data, and metrics summary.
-- [ ] CSV rows are deterministic, properly escaped, and include the minimum PRD column groups for each artifact.
-- [ ] CSV empty cells represent unavailable values without inventing metrics; real zero counts remain numeric zeroes.
-- [ ] CSV exports do not include raw comment text or secret-bearing data.
-- [ ] Outlier/sensitivity analysis appears in the Markdown report when dominance is detected.
-- [ ] Sensitivity output preserves original rankings and labels excluded-PR summaries as robustness context, not filtered truth.
-- [ ] Sensitivity calculation reuses existing normalized data and metric formulas through report-layer recomputation or an equivalent helper without changing metric formulas.
-- [ ] Tests cover default CSV output, `--no-csv`, methodology generation, and sensitivity behavior.
+- [x] Full analysis writes `methodology.md` with selection, profile, scoring, coverage, dominance, sensitivity, and limitation explanations.
+- [x] Full analysis writes curated CSV exports by default.
+- [x] `--no-csv` suppresses CSV artifacts while still writing Markdown, JSON, source bundle, normalized data, and metrics summary.
+- [x] CSV rows are deterministic, properly escaped, and include the minimum PRD column groups for each artifact.
+- [x] CSV empty cells represent unavailable values without inventing metrics; real zero counts remain numeric zeroes.
+- [x] CSV exports do not include raw comment text or secret-bearing data.
+- [x] Outlier/sensitivity analysis appears in the Markdown report when dominance is detected.
+- [x] Sensitivity output preserves original rankings and labels excluded-PR summaries as robustness context, not filtered truth.
+- [x] Sensitivity calculation reuses existing normalized data and metric formulas through report-layer recomputation or an equivalent helper without changing metric formulas.
+- [x] Tests cover default CSV output, `--no-csv`, methodology generation, and sensitivity behavior.
 
 ### Required Validation
 
@@ -119,7 +119,7 @@ Add deeper transparency artifacts so maintainers can understand the methodology 
 
 ### Status
 
-- [ ] Not started
+- Not started: no
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
@@ -154,13 +154,13 @@ Make the CLI completion experience point maintainers to the useful report artifa
 
 ### Acceptance Criteria
 
-- [ ] Successful default CLI runs print a concise human-readable completion message with primary artifact paths.
-- [ ] `--json` preserves the full machine-readable completion receipt as parseable JSON on stdout.
-- [ ] Progress messages and caveats are written to stderr or suppressed when `--json` is used.
-- [ ] Progress messages remain useful and do not hide long-running collection phases.
-- [ ] Error output remains actionable and avoids leaking secrets.
-- [ ] README, release-log, and tests cover default output, `--json`, `--no-csv`, and failure paths.
-- [ ] Existing partial-write safety behavior remains covered by tests.
+- [x] Successful default CLI runs print a concise human-readable completion message with primary artifact paths.
+- [x] `--json` preserves the full machine-readable completion receipt as parseable JSON on stdout.
+- [x] Progress messages and caveats are written to stderr or suppressed when `--json` is used.
+- [x] Progress messages remain useful and do not hide long-running collection phases.
+- [x] Error output remains actionable and avoids leaking secrets.
+- [x] README, release-log, and tests cover default output, `--json`, `--no-csv`, and failure paths.
+- [x] Existing partial-write safety behavior remains covered by tests.
 
 ### Required Validation
 
@@ -176,7 +176,7 @@ Make the CLI completion experience point maintainers to the useful report artifa
 
 ### Status
 
-- [ ] Not started
+- Not started: no
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed

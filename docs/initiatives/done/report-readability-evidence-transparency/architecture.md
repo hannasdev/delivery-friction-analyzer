@@ -135,6 +135,6 @@ Before M2 activation, the implementation packet should decide whether `src/repor
 ## Open Questions
 
 - [x] Should `methodology.md` be generated entirely from a template, from report metadata, or from a hybrid renderer that combines static explanation with run-specific facts? Use a hybrid renderer.
-- [ ] Should `src/report/generate-report.js` support CSV/methodology outputs, or should those artifacts be limited to the live CLI for now?
+- [x] Should `src/report/generate-report.js` support CSV/methodology outputs, or should those artifacts be limited to the live CLI for now? Limit CSV and methodology generation to the live CLI for now; keep `generate-report.js` JSON/Markdown-only for fixture and advanced workflows.
 - [x] Should sensitivity analysis compute one exclusion for the highest dominant bottleneck or separate exclusions for each distinct dominant PR across bottlenecks? Compute one summary per distinct dominant PR and deduplicate shared outliers.
-- [ ] Should M2 remain one implementation milestone, or split CSV exports from methodology/sensitivity if the implementation packet becomes too large?
+- [x] Should M2 remain one implementation milestone, or split CSV exports from methodology/sensitivity if the implementation packet becomes too large? It remained one implementation milestone and shipped with focused tests.

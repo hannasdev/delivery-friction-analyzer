@@ -156,8 +156,8 @@ Live collection should add a new path into the existing contracts rather than re
 ## Open Questions
 
 - [x] Should the adapter call `gh` or use direct REST/GraphQL HTTP requests first? Use a `gh`-backed adapter first behind a provider boundary.
-- [ ] How much retry/backoff is needed for the local MVP?
+- [x] How much retry/backoff is needed for the local MVP? Retry transient `gh pr view` GraphQL authentication failures; keep broader API retry/backoff as follow-up until real failures justify it.
 - [x] Should live collection support date windows in the first milestone or defer them until after latest-N works? Defer date windows until latest-N works.
 - [x] Should the primary command live beside `src/report/generate-report.js` or under a dedicated `src/cli/` entry point? Use `src/cli/analyze-github.js`.
-- [ ] Should workflow-run filtering use PR head SHAs immediately, or should branch/event lookup ship first with explicit source caveats?
-- [ ] Should source bundles be redacted by default for private repositories?
+- [x] Should workflow-run filtering use PR head SHAs immediately, or should branch/event lookup ship first with explicit source caveats? Ship branch/event lookup first with explicit source and coverage caveats.
+- [x] Should source bundles be redacted by default for private repositories? No for the local MVP; write local/private artifacts and document sensitivity instead of silently redacting evidence.
