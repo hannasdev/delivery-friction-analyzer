@@ -2,14 +2,14 @@
 
 ## Status
 
-Status: Active after M1 implementation.
+Status: Active after M2 implementation.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-12
 - Activated: 2026-06-12
-- Active milestone: M1: Review Decision Evidence
-- Current milestone state: Implemented and reviewed for PR packaging; M2 remains not started.
+- Active milestone: M2: Planning Gap Regression Guard
+- Current milestone state: M1 merged in PR #18; M2 opened in PR #19 after implementation and review; M3 remains not started.
 - Related issues:
   - [#14: review_threads=0 reads as "unreviewed" but usually means "approved cleanly"](https://github.com/hannasdev/delivery-friction-analyzer/issues/14)
   - [#15: Three ranked bottlenecks are driven by one near-duplicate signal](https://github.com/hannasdev/delivery-friction-analyzer/issues/15)

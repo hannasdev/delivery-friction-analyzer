@@ -59,8 +59,8 @@ Make review approval state visible alongside review-thread churn so cleanly appr
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] PR opened
+- [x] Merged
 
 ## M2: Planning Gap Regression Guard
 
@@ -107,7 +107,12 @@ Prove `planning_gap_score` can become non-zero on realistic input and guard agai
 
 ### Status
 
-- [ ] Not started
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [ ] Merged
 
 ## M3: Shared Signal Interpretation
 

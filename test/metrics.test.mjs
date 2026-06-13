@@ -235,6 +235,62 @@ describe("friction metric formulas", () => {
     assert.equal(metrics.components.iterationDrag.inputs.reviewThreads, 0);
   });
 
+  it("proves planning gap score is live for repository-profile planning docs", () => {
+    const planningDocPr = buildSyntheticPr({
+      number: 10,
+      title: "docs: update initiative plan",
+      files: [
+        {
+          path: "docs/initiatives/example/prd.md",
+          category: "docs",
+          role: "planning_docs",
+          functionalSurface: "planning",
+          generated: false,
+          classificationSource: "repository_profile",
+          ruleId: "planning-docs",
+          additions: 8,
+          deletions: 4,
+          changeType: "modified",
+        },
+      ],
+    });
+    const implementationOnlyPr = buildSyntheticPr({
+      number: 11,
+      title: "feat: implementation only",
+      files: [
+        {
+          path: "src/feature.js",
+          category: "code",
+          role: "core_product_code",
+          functionalSurface: "runtime",
+          generated: false,
+          classificationSource: "repository_profile",
+          ruleId: "runtime",
+          additions: 8,
+          deletions: 4,
+          changeType: "modified",
+        },
+      ],
+    });
+    const metrics = computePullRequestMetrics(planningDocPr);
+    const repositoryMetrics = computeRepositoryMetrics({
+      targetRepository: { owner: "example", name: "repo" },
+      pullRequests: [implementationOnlyPr, planningDocPr],
+    });
+
+    assert.equal(metrics.components.planningGapScore.value, 1);
+    assert.deepEqual(metrics.components.planningGapScore.inputs, {
+      planningChangedLines: 12,
+      source: "repository_profile",
+    });
+    assert.equal(metrics.files.byRole.planning_docs, 12);
+    assert.equal(metrics.files.byFunctionalSurface.planning, 12);
+    assert.deepEqual(repositoryMetrics.rankings.planningGap.map(entry => [entry.number, entry.value]), [
+      [10, 1],
+      [11, 0],
+    ]);
+  });
+
   it("keeps partial PR file and review thread inputs safe and transparent", () => {
     const pr = buildSyntheticPr();
     delete pr.files;
