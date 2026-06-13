@@ -137,6 +137,18 @@ describe("mcp-writing compact fixture normalization", () => {
           },
         ],
       },
+      {
+        ...decisionBundle.pullRequests[0],
+        number: 305,
+        reviews: [
+          {
+            id: "human-commented",
+            author: { login: "reviewer", type: "User" },
+            submittedAt: "2026-06-01T10:00:00Z",
+            state: "COMMENTED",
+          },
+        ],
+      },
     ];
     delete decisionBundle.pullRequests[2].reviews;
 
@@ -145,6 +157,7 @@ describe("mcp-writing compact fixture normalization", () => {
     const botOnly = normalized.pullRequests.find(pr => pr.number === 302);
     const unavailable = normalized.pullRequests.find(pr => pr.number === 303);
     const conflictingUntimed = normalized.pullRequests.find(pr => pr.number === 304);
+    const commented = normalized.pullRequests.find(pr => pr.number === 305);
 
     assert.deepEqual(approved.reviewDecision, {
       state: "approved",
@@ -171,6 +184,13 @@ describe("mcp-writing compact fixture normalization", () => {
       state: "changes_requested",
       humanApproved: true,
       humanChangesRequested: true,
+      humanReviewerCount: 1,
+      source: "reviews",
+    });
+    assert.deepEqual(commented.reviewDecision, {
+      state: "commented",
+      humanApproved: false,
+      humanChangesRequested: false,
       humanReviewerCount: 1,
       source: "reviews",
     });
