@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-13 — Shared Signal Interpretation
+
+- What changed: Markdown and JSON friction reports now call out when displayed bottlenecks share the same ranking signal or representative PR evidence while keeping their recommendation categories distinct.
+- Why it matters: Maintainers can tell when several ranked findings are related interpretations of one underlying pattern instead of treating them as independent repository problems.
+- Who is affected: Maintainers and contributors reviewing generated friction reports.
+- Action needed: None.
+- PR: TBD
+
 ### 2026-06-12 — Review Decision Evidence
 
 - What changed: Friction metrics, Markdown reports, and `pr-metrics.csv` now include review decision evidence derived from review events, including human approval, changes-requested, reviewer count, and unavailable review-event coverage.

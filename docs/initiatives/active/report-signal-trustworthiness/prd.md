@@ -2,14 +2,14 @@
 
 ## Status
 
-Status: Active for M3 implementation.
+Status: M3 implemented; final completion move deferred until the M3 PR merges.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-12
 - Activated: 2026-06-12
 - Active milestone: M3: Shared Signal Interpretation
-- Current milestone state: M1 merged in PR #18; M2 merged in PR #19; M3 activated for implementation.
+- Current milestone state: M1 merged in PR #18; M2 merged in PR #19; M3 implemented and reviewed for PR packaging. Final initiative completion remains deferred until the M3 PR merges.
 - Related issues:
   - [#14: review_threads=0 reads as "unreviewed" but usually means "approved cleanly"](https://github.com/hannasdev/delivery-friction-analyzer/issues/14)
   - [#15: Three ranked bottlenecks are driven by one near-duplicate signal](https://github.com/hannasdev/delivery-friction-analyzer/issues/15)

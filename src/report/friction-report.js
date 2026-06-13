@@ -48,6 +48,19 @@ const RECOMMENDATION_CATEGORIES = [
   },
 ];
 
+const RECOMMENDATION_CATEGORY_LABELS = new Map(
+  RECOMMENDATION_CATEGORIES.map(category => [category.id, category.label]),
+);
+
+const RANKING_SIGNAL_LABELS = new Map([
+  ["reviewChurn", "review churn"],
+  ["changedFileSpread", "changed-file spread"],
+  ["validationGap", "validation gap"],
+  ["planningGap", "planning gap"],
+  ["reviewSurprise", "review surprise"],
+  ["fixAmplification", "fix amplification"],
+]);
+
 const BOTTLENECK_DEFINITIONS = [
   {
     id: "review-churn",
@@ -325,6 +338,7 @@ function summarizeBottlenecks(metricsSummary) {
         definitionIndex,
         rankValue: evidence[0]?.value ?? 0,
         id: definition.id,
+        rankingKey: definition.rankingKey,
         title: definition.title,
         metricLabel: definition.metricLabel,
         observedData: evidence,
@@ -384,6 +398,82 @@ function summarizeRecommendationCategories(bottlenecks) {
     ...category,
     triggeredBottlenecks: triggeredCounts[category.id] ?? 0,
   }));
+}
+
+function evidenceSignature(bottleneck) {
+  return (bottleneck.observedData ?? [])
+    .map(evidence => evidence.number)
+    .sort((left, right) => Number(left) - Number(right))
+    .join(",");
+}
+
+function formatSharedSignalBottleneck(bottleneck) {
+  return {
+    id: bottleneck.id,
+    title: bottleneck.title,
+    recommendationCategory: bottleneck.suggestedAction?.category ?? "unspecified",
+  };
+}
+
+function rankingSignalLabel(rankingKey) {
+  return RANKING_SIGNAL_LABELS.get(rankingKey) ?? rankingKey;
+}
+
+function recommendationCategoryDisplay(category) {
+  return RECOMMENDATION_CATEGORY_LABELS.get(category) ?? category;
+}
+
+function summarizeSharedSignals(bottlenecks) {
+  const groups = [];
+  const byRankingKey = new Map();
+  const byEvidenceSignature = new Map();
+
+  for (const bottleneck of bottlenecks ?? []) {
+    if (bottleneck.rankingKey) {
+      byRankingKey.set(bottleneck.rankingKey, [
+        ...(byRankingKey.get(bottleneck.rankingKey) ?? []),
+        bottleneck,
+      ]);
+    }
+
+    const signature = evidenceSignature(bottleneck);
+    if (signature) {
+      byEvidenceSignature.set(signature, [
+        ...(byEvidenceSignature.get(signature) ?? []),
+        bottleneck,
+      ]);
+    }
+  }
+
+  for (const [rankingKey, sharedBottlenecks] of byRankingKey) {
+    if (sharedBottlenecks.length < 2) continue;
+    const titles = sharedBottlenecks.map(bottleneck => bottleneck.title).join(", ");
+    groups.push({
+      type: "ranking_key",
+      key: rankingKey,
+      bottlenecks: sharedBottlenecks.map(formatSharedSignalBottleneck),
+      note: `${titles} share the ${rankingSignalLabel(rankingKey)} ranking signal; treat them as related interpretations, not separate independent findings.`,
+    });
+  }
+
+  for (const [signature, sharedBottlenecks] of byEvidenceSignature) {
+    if (sharedBottlenecks.length < 2) continue;
+    const prNumbers = signature.split(",").map(number => Number(number));
+    const titles = sharedBottlenecks.map(bottleneck => bottleneck.title).join(", ");
+    groups.push({
+      type: "representative_evidence",
+      prNumbers,
+      bottlenecks: sharedBottlenecks.map(formatSharedSignalBottleneck),
+      note: `${titles} display the same representative PR evidence (${prNumbers.map(number => `#${number}`).join(", ")}); keep recommendation actions distinct while reading the shared evidence as one underlying signal.`,
+    });
+  }
+
+  return {
+    groups,
+    note: groups.length
+      ? "Shared-signal groups are report interpretation only; they do not change scores, ranking, or recommendation categories."
+      : "No displayed bottlenecks shared a ranking key or representative PR evidence.",
+  };
 }
 
 function metricsWithoutPullRequest(metricsSummary, excludedPrNumber) {
@@ -460,7 +550,9 @@ function summarizeSensitivity(metricsSummary, baselineBottlenecks) {
 }
 
 export function generateRepositoryFrictionReport(metricsSummary) {
-  const bottlenecks = summarizeBottlenecks(metricsSummary);
+  const bottlenecksWithSharedSignalKeys = summarizeBottlenecks(metricsSummary);
+  const sharedSignals = summarizeSharedSignals(bottlenecksWithSharedSignalKeys);
+  const bottlenecks = bottlenecksWithSharedSignalKeys.map(({ rankingKey, ...bottleneck }) => bottleneck);
   return {
     reportVersion: FRICTION_REPORT_VERSION,
     metricVersion: metricsSummary.metricVersion,
@@ -479,6 +571,7 @@ export function generateRepositoryFrictionReport(metricsSummary) {
     commentSources: summarizeCommentSources(metricsSummary),
     surfaces: summarizeSurfaces(metricsSummary),
     bottlenecks,
+    sharedSignals,
     sensitivity: summarizeSensitivity(metricsSummary, bottlenecks),
     recommendationCategories: summarizeRecommendationCategories(bottlenecks),
     guardrails: {
@@ -537,13 +630,6 @@ function renderMarkdownTable(headers, rows) {
     `| ${headers.map(() => "---").join(" | ")} |`,
     ...rows.map(row => `| ${row.map(formatMarkdownTableCell).join(" | ")} |`),
   ].join("\n");
-}
-
-function evidenceSignature(bottleneck) {
-  return (bottleneck.observedData ?? [])
-    .map(evidence => evidence.number)
-    .sort((left, right) => Number(left) - Number(right))
-    .join(",");
 }
 
 function sharedEvidenceNotes(bottlenecks) {
@@ -752,6 +838,25 @@ function renderKeyFindings(report) {
   ]);
 }
 
+function renderSharedSignalInterpretation(sharedSignals) {
+  const groups = sharedSignals?.groups ?? [];
+  if (!groups.length) return "";
+
+  return [
+    "## Shared Signal Interpretation",
+    "",
+    sharedSignals.note ?? "Shared-signal groups are report interpretation only.",
+    "",
+    renderList(groups.map(group => {
+      const categories = [
+        ...new Set((group.bottlenecks ?? []).map(bottleneck => bottleneck.recommendationCategory)),
+      ].map(recommendationCategoryDisplay).join(", ");
+      return `${group.note} Recommendation categories remain distinct: ${categories || "none"}.`;
+    })),
+    "",
+  ].join("\n");
+}
+
 function renderSensitivityAnalysis(sensitivity) {
   const summaries = sensitivity?.summaries ?? [];
   if (!summaries.length) return "";
@@ -845,6 +950,7 @@ export function renderRepositoryFrictionMarkdown(report) {
   const repository = report.targetRepository
     ? `${report.targetRepository.owner}/${report.targetRepository.name}`
     : "unknown repository";
+  const sharedSignals = report.sharedSignals ?? summarizeSharedSignals(report.bottlenecks);
   const sharedNotes = sharedEvidenceNotes(report.bottlenecks);
   const lines = [
     `# Repository Friction Report: ${repository}`,
@@ -876,6 +982,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     renderKeyFindings(report),
     "",
+    renderSharedSignalInterpretation(sharedSignals),
     renderSensitivityAnalysis(report.sensitivity),
     "## How Bottlenecks Are Prioritized",
     "",

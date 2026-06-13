@@ -58,6 +58,8 @@ describe("friction report generation", () => {
     const report = generateRepositoryFrictionReport(metricsSummary);
     const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
     const topExample = reviewChurn.observedData[0];
+    const sharedRankingGroup = report.sharedSignals.groups.find(group => group.type === "ranking_key"
+      && group.key === "reviewChurn");
 
     assert.equal(reviewChurn.dominance.status, "single_pr_dominates");
     assert.equal(reviewChurn.dominance.topPrNumber, 239);
@@ -75,6 +77,10 @@ describe("friction report generation", () => {
     assert.deepEqual(topExample.reviewEvidence.commentSources, [
       { name: "author_reply", value: 15 },
       { name: "copilot", value: 15 },
+    ]);
+    assert.deepEqual(sharedRankingGroup.bottlenecks.map(bottleneck => bottleneck.id), [
+      "review-churn",
+      "repo-guidance-gap",
     ]);
   });
 
@@ -162,6 +168,9 @@ describe("friction report generation", () => {
     assert(markdown.includes("| PR-open diff | unavailable: 3 |"));
     assert(markdown.includes("#### Review churn Observed Evidence (iteration drag)"));
     assert(markdown.includes("## How Bottlenecks Are Prioritized"));
+    assert(markdown.includes("## Shared Signal Interpretation"));
+    assert(markdown.includes("- Review churn, Repo guidance gap share the review churn ranking signal"));
+    assert(markdown.includes("Recommendation categories remain distinct: PR readiness gates, Repo-specific AI skills."));
     assert(markdown.includes("- Bottlenecks are ordered by their strongest displayed representative score"));
     assert(markdown.includes("| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |"));
     assert(
@@ -445,6 +454,12 @@ describe("friction report generation", () => {
 
     assert(markdown.includes("- Shares the same representative PR evidence as Repo guidance gap."));
     assert(markdown.includes("- Shares the same representative PR evidence as Review churn."));
+    assert(markdown.includes("## Shared Signal Interpretation"));
+    assert(
+      markdown.includes(
+        "- Review churn, Repo guidance gap display the same representative PR evidence (#7, #9); keep recommendation actions distinct while reading the shared evidence as one underlying signal. Recommendation categories remain distinct: PR readiness gates, Repo-specific AI skills.",
+      ),
+    );
   });
 
   it("renders legacy observed examples without nested evidence fields", () => {

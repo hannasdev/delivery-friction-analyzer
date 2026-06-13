@@ -162,9 +162,11 @@ Make it clear when multiple ranked bottlenecks are different recommendation fram
 
 ### Status
 
+Status: Implemented; final completion move deferred until the M3 PR merges.
+
 - [x] Active
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
