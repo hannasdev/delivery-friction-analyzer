@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can tell when several ranked findings are related interpretations of one underlying pattern instead of treating them as independent repository problems.
 - Who is affected: Maintainers and contributors reviewing generated friction reports.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/20
 
 ### 2026-06-12 — Review Decision Evidence
 
