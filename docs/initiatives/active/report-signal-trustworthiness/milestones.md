@@ -111,7 +111,7 @@ Prove `planning_gap_score` can become non-zero on realistic input and guard agai
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M3: Shared Signal Interpretation
