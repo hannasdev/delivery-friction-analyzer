@@ -61,6 +61,7 @@ describe("friction report generation", () => {
     const sharedRankingGroup = report.sharedSignals.groups.find(group => group.type === "ranking_key"
       && group.key === "reviewChurn");
 
+    assert.ok(sharedRankingGroup);
     assert.equal(reviewChurn.dominance.status, "single_pr_dominates");
     assert.equal(reviewChurn.dominance.topPrNumber, 239);
     assert.equal(reviewChurn.dominance.topShare, 0.625);

@@ -168,5 +168,5 @@ Status: Implemented; final completion move deferred until the M3 PR merges.
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
