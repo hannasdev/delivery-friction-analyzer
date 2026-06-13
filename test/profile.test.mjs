@@ -22,7 +22,15 @@ describe("repository profile classification", () => {
       ruleId: "ui",
     });
 
-    assert.equal(classifyFilePath("docs/initiatives/example/prd.md", profile).role, "planning_docs");
+    assert.deepEqual(classifyFilePath("docs/initiatives/example/prd.md", profile), {
+      path: "docs/initiatives/example/prd.md",
+      category: "docs",
+      role: "planning_docs",
+      functionalSurface: "planning",
+      generated: false,
+      classificationSource: "repository_profile",
+      ruleId: "docs",
+    });
   });
 
   it("does not hardcode language or extension into product role", () => {

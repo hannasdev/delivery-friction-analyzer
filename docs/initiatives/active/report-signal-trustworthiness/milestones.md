@@ -110,7 +110,7 @@ Prove `planning_gap_score` can become non-zero on realistic input and guard agai
 - [x] Active
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
 
