@@ -1103,6 +1103,125 @@
       }
     }
   ],
+  "sharedSignals": {
+    "groups": [
+      {
+        "type": "ranking_key",
+        "key": "reviewChurn",
+        "bottlenecks": [
+          {
+            "id": "review-churn",
+            "title": "Review churn",
+            "recommendationCategory": "pr_readiness_gate"
+          },
+          {
+            "id": "repo-guidance-gap",
+            "title": "Repo guidance gap",
+            "recommendationCategory": "repo_specific_ai_skills"
+          }
+        ],
+        "note": "Review churn, Repo guidance gap share the review churn ranking signal; treat them as related interpretations, not separate independent findings."
+      },
+      {
+        "type": "ranking_key",
+        "key": "validationGap",
+        "bottlenecks": [
+          {
+            "id": "validation-gap",
+            "title": "Validation gap",
+            "recommendationCategory": "preflight_scripts"
+          },
+          {
+            "id": "local-hook-gap",
+            "title": "Local hook gap",
+            "recommendationCategory": "hooks"
+          },
+          {
+            "id": "test-infrastructure-gap",
+            "title": "Test infrastructure gap",
+            "recommendationCategory": "test_infrastructure"
+          }
+        ],
+        "note": "Validation gap, Local hook gap, Test infrastructure gap share the validation gap ranking signal; treat them as related interpretations, not separate independent findings."
+      },
+      {
+        "type": "representative_evidence",
+        "prNumbers": [
+          221,
+          239
+        ],
+        "bottlenecks": [
+          {
+            "id": "review-churn",
+            "title": "Review churn",
+            "recommendationCategory": "pr_readiness_gate"
+          },
+          {
+            "id": "repo-guidance-gap",
+            "title": "Repo guidance gap",
+            "recommendationCategory": "repo_specific_ai_skills"
+          },
+          {
+            "id": "review-surprise",
+            "title": "Review surprise",
+            "recommendationCategory": "pr_readiness_gate"
+          },
+          {
+            "id": "fix-amplification",
+            "title": "Fix amplification",
+            "recommendationCategory": "smaller_milestones"
+          }
+        ],
+        "note": "Review churn, Repo guidance gap, Review surprise, Fix amplification display the same representative PR evidence (#221, #239); keep recommendation actions distinct while reading the shared evidence as one underlying signal."
+      },
+      {
+        "type": "representative_evidence",
+        "prNumbers": [
+          221,
+          223,
+          239
+        ],
+        "bottlenecks": [
+          {
+            "id": "changed-file-spread",
+            "title": "Changed-file spread",
+            "recommendationCategory": "smaller_milestones"
+          },
+          {
+            "id": "planning-gap",
+            "title": "Planning gap",
+            "recommendationCategory": "planning_artifacts"
+          }
+        ],
+        "note": "Changed-file spread, Planning gap display the same representative PR evidence (#221, #223, #239); keep recommendation actions distinct while reading the shared evidence as one underlying signal."
+      },
+      {
+        "type": "representative_evidence",
+        "prNumbers": [
+          239
+        ],
+        "bottlenecks": [
+          {
+            "id": "validation-gap",
+            "title": "Validation gap",
+            "recommendationCategory": "preflight_scripts"
+          },
+          {
+            "id": "local-hook-gap",
+            "title": "Local hook gap",
+            "recommendationCategory": "hooks"
+          },
+          {
+            "id": "test-infrastructure-gap",
+            "title": "Test infrastructure gap",
+            "recommendationCategory": "test_infrastructure"
+          }
+        ],
+        "note": "Validation gap, Local hook gap, Test infrastructure gap display the same representative PR evidence (#239); keep recommendation actions distinct while reading the shared evidence as one underlying signal."
+      }
+    ],
+    "note": "Shared-signal groups are report interpretation only; they do not change scores, ranking, or recommendation categories."
+  },
   "sensitivity": {
     "summaries": [
       {

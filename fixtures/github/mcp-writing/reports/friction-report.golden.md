@@ -44,6 +44,16 @@ Coverage notes:
 - Outlier caveat: Review churn: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Repo guidance gap: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Review surprise: PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing. Fix amplification: PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
 - Coverage caveat: PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
 
+## Shared Signal Interpretation
+
+Shared-signal groups are report interpretation only; they do not change scores, ranking, or recommendation categories.
+
+- Review churn, Repo guidance gap share the review churn ranking signal; treat them as related interpretations, not separate independent findings. Recommendation categories remain distinct: PR readiness gates, Repo-specific AI skills.
+- Validation gap, Local hook gap, Test infrastructure gap share the validation gap ranking signal; treat them as related interpretations, not separate independent findings. Recommendation categories remain distinct: Preflight scripts, Hooks, Test infrastructure.
+- Review churn, Repo guidance gap, Review surprise, Fix amplification display the same representative PR evidence (#221, #239); keep recommendation actions distinct while reading the shared evidence as one underlying signal. Recommendation categories remain distinct: PR readiness gates, Repo-specific AI skills, Smaller milestones.
+- Changed-file spread, Planning gap display the same representative PR evidence (#221, #223, #239); keep recommendation actions distinct while reading the shared evidence as one underlying signal. Recommendation categories remain distinct: Smaller milestones, Planning artifacts.
+- Validation gap, Local hook gap, Test infrastructure gap display the same representative PR evidence (#239); keep recommendation actions distinct while reading the shared evidence as one underlying signal. Recommendation categories remain distinct: Preflight scripts, Hooks, Test infrastructure.
+
 ## Outlier And Sensitivity Analysis
 
 Sensitivity summaries are robustness context only. They do not remove PRs from the baseline report or replace the original ranking.

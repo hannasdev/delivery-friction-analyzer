@@ -112,7 +112,7 @@ Prove `planning_gap_score` can become non-zero on realistic input and guard agai
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged
 
 ## M3: Shared Signal Interpretation
 
@@ -162,4 +162,11 @@ Make it clear when multiple ranked bottlenecks are different recommendation fram
 
 ### Status
 
-- [ ] Not started
+Status: Implemented; final completion move deferred until the M3 PR merges.
+
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [ ] Merged
