@@ -254,6 +254,69 @@ describe("friction report generation", () => {
     assert(markdown.includes("| [#1](https://example.test/pull/1) | Release unavailable one | unknown | release | unknown | unknown | unknown | 10 |"));
   });
 
+  it("falls back to displayed example count when displayed ranking scores are zero", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 3,
+        changedLines: 30,
+        nonGeneratedChangedLines: 30,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "Release zero one",
+          url: "https://example.test/pull/1",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "Release zero two",
+          url: "https://example.test/pull/2",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 3,
+          title: "Development zero",
+          url: "https://example.test/pull/3",
+          prClass: { class: "development", classificationSource: "fallback_rule", ruleId: null },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "Release zero one", value: 0 },
+          { number: 2, title: "Release zero two", value: 0 },
+          { number: 3, title: "Development zero", value: 0 },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.classDominance.status, "single_class_dominates");
+    assert.equal(reviewChurn.classDominance.class, "release");
+    assert.equal(reviewChurn.classDominance.topShare, 0.667);
+    assert.equal(reviewChurn.classDominance.basis, "displayed_example_count");
+    assert.equal(reviewChurn.classDominance.displayedExamples, 2);
+    assert(markdown.includes("PR class release contributes 67% of the displayed example count"));
+    assert(markdown.includes("| [#1](https://example.test/pull/1) | Release zero one | 0 | release | unknown | unknown | unknown | 10 |"));
+  });
+
   it("matches the class-dominance golden report fixture", async () => {
     const [metricsSummary, goldenJson, goldenMarkdown] = await Promise.all([
       readJson("../fixtures/github/mcp-writing/metrics-summary.class-dominance.json"),

@@ -298,8 +298,10 @@ function summarizePrClasses(metricsSummary) {
 function topEvidence(metricsSummary, rankingKey) {
   const ranking = metricsSummary.rankings?.[rankingKey] ?? [];
   const positiveEntries = ranking.filter(entry => Number(entry.value ?? 0) > 0);
-  const unavailableEntries = ranking.filter(entry => entry.value === null || entry.value === undefined);
-  const displayedEntries = positiveEntries.length ? positiveEntries : unavailableEntries;
+  const fallbackEntries = ranking.filter(entry => entry.value === null
+    || entry.value === undefined
+    || Number(entry.value) <= 0);
+  const displayedEntries = positiveEntries.length ? positiveEntries : fallbackEntries;
 
   return displayedEntries
     .slice(0, 3)
