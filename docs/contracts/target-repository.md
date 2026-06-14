@@ -10,7 +10,7 @@ The local analyzer accepts a target repository and a pull request sample size. T
 - `name`: GitHub repository name.
 - `defaultBranch`: expected default branch for merge-base and branch lookup context.
 - `visibility`: `public`, `private`, or `unknown`.
-- PR sample size: latest merged pull request count from 1 to 100, supplied by the live CLI as `--limit`.
+- `analysisPullRequestLimit`: latest merged pull request count from 1 to 100, supplied by the live CLI as `--limit`.
 - `isValidationTarget`: optional flag for fixture-source repositories such as `hannasdev/mcp-writing`.
 
 Schema: `schemas/target-repository.schema.json`. Live analysis selection is latest-N merged pull requests, not a rolling day window.
