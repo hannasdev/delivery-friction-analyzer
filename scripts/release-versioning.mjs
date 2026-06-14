@@ -2,16 +2,51 @@
 import { pathToFileURL } from "node:url";
 
 export function parseSemver(version) {
-  const match = /^v?(\d+)\.(\d+)\.(\d+)(?:-.+)?$/.exec(version);
+  const match = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/.exec(version);
   if (!match) {
     throw new Error(`Invalid semantic version: ${version}`);
+  }
+
+  const prerelease = match[4] ? match[4].split(".") : [];
+  for (const identifier of prerelease) {
+    if (/^\d+$/.test(identifier) && !/^(0|[1-9]\d*)$/.test(identifier)) {
+      throw new Error(`Invalid semantic version: ${version}`);
+    }
   }
 
   return {
     major: Number(match[1]),
     minor: Number(match[2]),
     patch: Number(match[3]),
+    prerelease,
+    build: match[5] ?? null,
   };
+}
+
+function comparePrerelease(left, right) {
+  if (!left.length && !right.length) return 0;
+  if (!left.length) return 1;
+  if (!right.length) return -1;
+
+  const length = Math.max(left.length, right.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftIdentifier = left[index];
+    const rightIdentifier = right[index];
+    if (leftIdentifier === undefined) return -1;
+    if (rightIdentifier === undefined) return 1;
+    if (leftIdentifier === rightIdentifier) continue;
+
+    const leftNumeric = /^(0|[1-9]\d*)$/.test(leftIdentifier);
+    const rightNumeric = /^(0|[1-9]\d*)$/.test(rightIdentifier);
+    if (leftNumeric && rightNumeric) {
+      return Number(leftIdentifier) > Number(rightIdentifier) ? 1 : -1;
+    }
+    if (leftNumeric) return -1;
+    if (rightNumeric) return 1;
+    return leftIdentifier > rightIdentifier ? 1 : -1;
+  }
+
+  return 0;
 }
 
 export function compareSemver(left, right) {
@@ -23,7 +58,7 @@ export function compareSemver(left, right) {
     if (leftVersion[key] < rightVersion[key]) return -1;
   }
 
-  return 0;
+  return comparePrerelease(leftVersion.prerelease, rightVersion.prerelease);
 }
 
 export function assertNotBehind(packageVersion, tagVersion) {

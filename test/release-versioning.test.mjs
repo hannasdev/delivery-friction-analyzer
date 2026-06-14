@@ -10,13 +10,27 @@ import {
 
 describe("release versioning", () => {
   it("parses semantic versions with or without a leading v", () => {
-    assert.deepEqual(parseSemver("1.2.3"), { major: 1, minor: 2, patch: 3 });
-    assert.deepEqual(parseSemver("v4.5.6"), { major: 4, minor: 5, patch: 6 });
+    assert.deepEqual(parseSemver("1.2.3"), {
+      major: 1,
+      minor: 2,
+      patch: 3,
+      prerelease: [],
+      build: null,
+    });
+    assert.deepEqual(parseSemver("v4.5.6-beta.1+build.7"), {
+      major: 4,
+      minor: 5,
+      patch: 6,
+      prerelease: ["beta", "1"],
+      build: "build.7",
+    });
   });
 
   it("rejects invalid semantic versions", () => {
     assert.throws(() => parseSemver("1.2"), /Invalid semantic version/);
     assert.throws(() => parseSemver("latest"), /Invalid semantic version/);
+    assert.throws(() => parseSemver("1.2.3-alpha..1"), /Invalid semantic version/);
+    assert.throws(() => parseSemver("1.2.3-alpha.01"), /Invalid semantic version/);
   });
 
   it("compares semantic versions by major, minor, and patch", () => {
@@ -25,6 +39,16 @@ describe("release versioning", () => {
     assert.equal(compareSemver("1.2.4", "1.2.3"), 1);
     assert.equal(compareSemver("1.2.3", "1.2.3"), 0);
     assert.equal(compareSemver("1.2.3", "1.2.4"), -1);
+  });
+
+  it("compares prerelease versions using semantic version precedence", () => {
+    assert.equal(compareSemver("1.2.3", "1.2.3-beta.1"), 1);
+    assert.equal(compareSemver("1.2.3-beta.1", "1.2.3"), -1);
+    assert.equal(compareSemver("1.2.3-beta.2", "1.2.3-beta.1"), 1);
+    assert.equal(compareSemver("1.2.3-beta.11", "1.2.3-beta.2"), 1);
+    assert.equal(compareSemver("1.2.3-rc.1", "1.2.3-beta.11"), 1);
+    assert.equal(compareSemver("1.2.3-beta", "1.2.3-beta.1"), -1);
+    assert.equal(compareSemver("1.2.3+build.2", "1.2.3+build.1"), 0);
   });
 
   it("selects patch for non-feature conventional commits", () => {
@@ -49,6 +73,10 @@ describe("release versioning", () => {
     assert.throws(
       () => assertNotBehind("1.2.2", "1.2.3"),
       /Package version 1\.2\.2 is behind latest tag 1\.2\.3/,
+    );
+    assert.throws(
+      () => assertNotBehind("1.2.3-beta.1", "1.2.3"),
+      /Package version 1\.2\.3-beta\.1 is behind latest tag 1\.2\.3/,
     );
   });
 
