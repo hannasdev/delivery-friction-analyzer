@@ -116,6 +116,12 @@ describe("pull request class classification", () => {
     assert(errors.some(error => error.includes("must include titleIncludes or titleRegex")));
     assert(errors.some(error => error.includes("titleRegex is invalid")));
   });
+
+  it("reports malformed PR class rule collections without throwing", () => {
+    assert.deepEqual(validatePrClassRules({ prClasses: {} }), [
+      "prClasses must be an array when provided",
+    ]);
+  });
 });
 
 describe("comment source classification", () => {

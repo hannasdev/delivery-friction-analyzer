@@ -13,8 +13,13 @@ function ruleLabel(rule, index) {
 export function validatePrClassRules(profile = {}) {
   const errors = [];
   const seenRuleIds = new Set();
+  const rules = profile.prClasses ?? [];
 
-  for (const [index, rule] of (profile.prClasses ?? []).entries()) {
+  if (!Array.isArray(rules)) {
+    return ["prClasses must be an array when provided"];
+  }
+
+  for (const [index, rule] of rules.entries()) {
     const label = ruleLabel(rule, index);
     if (!rule || typeof rule !== "object" || Array.isArray(rule)) {
       errors.push(`prClasses[${index}] must be an object`);
