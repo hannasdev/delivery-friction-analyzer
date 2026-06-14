@@ -157,6 +157,23 @@ function validateExcludedPrClasses(excludedPrClasses = []) {
   }
 }
 
+function configuredPrClasses(repositoryProfile) {
+  return new Set((repositoryProfile.prClasses ?? []).map(rule => rule.class));
+}
+
+function validateExcludedPrClassesAreConfigured(excludedPrClasses = [], repositoryProfile) {
+  if (!excludedPrClasses.length) return;
+
+  const configured = configuredPrClasses(repositoryProfile);
+  const unconfigured = excludedPrClasses.filter(prClass => !configured.has(prClass));
+  if (!unconfigured.length) return;
+
+  const available = configured.size
+    ? ` Configured PR class(es): ${[...configured].sort().join(", ")}.`
+    : " The repository profile does not configure any PR classes.";
+  throw new Error(`exclude-pr-class must name configured PR class(es): ${unconfigured.join(", ")}.${available}`);
+}
+
 async function readProfile(profilePath) {
   try {
     return JSON.parse(await readFile(profilePath, "utf8"));
@@ -377,6 +394,7 @@ export async function runAnalyzeGithub(options, {
     readProfile(options.profilePath),
     validateOutputDirectory(options.outDir),
   ]);
+  validateExcludedPrClassesAreConfigured(options.excludedPrClasses ?? [], repositoryProfile);
   const generatedPaths = artifactPaths(outDir, { includeCsv: csvEnabled });
   const disabledPaths = csvEnabled ? {} : Object.fromEntries(
     Object.entries(artifactPaths(outDir, { includeCsv: true })).filter(([key]) => CSV_ARTIFACT_KEYS.has(key)),

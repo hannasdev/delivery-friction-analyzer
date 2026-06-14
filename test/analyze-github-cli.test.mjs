@@ -566,6 +566,30 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("rejects excluded PR classes that are not configured by the profile", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "unconfigured-filter");
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir,
+          excludedPrClasses: ["dependency"],
+        }, {
+          provider,
+          now: () => "2026-06-09T00:00:00Z",
+        }),
+        /exclude-pr-class must name configured PR class\(es\): dependency\. Configured PR class\(es\): development, release\./,
+      );
+      assert.deepEqual(provider.calls, []);
+      assert.deepEqual(await readdir(outDir), []);
+    });
+  });
+
   it("fails when PR class filtering removes every collected pull request", async () => {
     await withTempDirectory(async directory => {
       const profilePath = await writePrClassProfile(directory);
@@ -576,9 +600,16 @@ describe("GitHub live analyze CLI", () => {
           limit: 1,
           profilePath,
           outDir,
-          excludedPrClasses: ["unknown"],
+          excludedPrClasses: ["development"],
         }, {
-          provider: createProvider(),
+          provider: createProvider({
+            async getPullRequest(input) {
+              this.calls.push(["getPullRequest", input]);
+              return pullRequestDetails({
+                title: "feature: all filtered",
+              });
+            },
+          }),
           now: () => "2026-06-09T00:00:00Z",
         }),
         /exclude-pr-class removed all 1 collected pull request/,
