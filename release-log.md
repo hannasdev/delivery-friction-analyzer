@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-14 — PR Class Report Context
+
+- What changed: Markdown and JSON friction reports now include PR class distribution, PR class evidence in representative bottleneck examples, and caveats when displayed bottleneck examples are concentrated in one PR class.
+- Why it matters: Maintainers can see when release, dependency, development, or repository-specific PR populations are shaping report interpretation without filtering the default analysis.
+- Who is affected: Maintainers and contributors reviewing generated friction reports.
+- Action needed: None.
+- PR: TBD
+
 ### 2026-06-14 — PR Class Evidence
 
 - What changed: Repository profiles can now classify pull requests by title rules, and normalized data, metrics summaries, and `pr-metrics.csv` carry PR class evidence.

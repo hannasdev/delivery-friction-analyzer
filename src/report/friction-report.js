@@ -183,6 +183,22 @@ function formatObservedBoolean(value, observed) {
   return value ? "yes" : "no";
 }
 
+function roundShare(value) {
+  return Math.round(value * 1000) / 1000;
+}
+
+function percentageLabel(share) {
+  return `${Math.round(Number(share ?? 0) * 100)}%`;
+}
+
+function prClassSummary(pr = {}) {
+  return {
+    class: pr.prClass?.class ?? "unknown",
+    classificationSource: pr.prClass?.classificationSource ?? "fallback_rule",
+    ruleId: pr.prClass?.ruleId ?? null,
+  };
+}
+
 function findPullRequest(metricsSummary, number) {
   return (metricsSummary.pullRequests ?? []).find(pr => pr.number === number);
 }
@@ -201,6 +217,7 @@ function formatPr(pr, rankingEntry) {
     title: rankingEntry.title,
     url: pr?.url ?? null,
     value: rankingEntry.value,
+    prClass: prClassSummary(pr),
     additions: pr?.diffAtMerge?.additions ?? null,
     deletions: pr?.diffAtMerge?.deletions ?? null,
     changedFiles: pr?.diffAtMerge?.changedFiles ?? null,
@@ -235,9 +252,56 @@ function formatPr(pr, rankingEntry) {
   };
 }
 
+function summarizePrClasses(metricsSummary) {
+  const totalsByClass = new Map();
+  const pullRequests = metricsSummary.pullRequests ?? [];
+
+  for (const pr of pullRequests) {
+    const prClass = prClassSummary(pr);
+    const current = totalsByClass.get(prClass.class) ?? {
+      class: prClass.class,
+      pullRequests: 0,
+      changedLines: 0,
+      nonGeneratedChangedLines: 0,
+      classificationSources: {},
+    };
+    current.pullRequests += 1;
+    current.changedLines += Number(pr.diffAtMerge?.changedLines ?? 0);
+    current.nonGeneratedChangedLines += Number(pr.files?.nonGeneratedChangedLines ?? 0);
+    current.classificationSources[prClass.classificationSource] =
+      (current.classificationSources[prClass.classificationSource] ?? 0) + 1;
+    totalsByClass.set(prClass.class, current);
+  }
+
+  const totalPullRequests = pullRequests.length;
+  const distribution = [...totalsByClass.values()]
+    .map(entry => ({
+      ...entry,
+      share: totalPullRequests > 0 ? roundShare(entry.pullRequests / totalPullRequests) : 0,
+      classificationSources: sortedEntries(entry.classificationSources),
+    }))
+    .sort((left, right) => {
+      const countDelta = right.pullRequests - left.pullRequests;
+      const lineDelta = right.changedLines - left.changedLines;
+      return countDelta || lineDelta || left.class.localeCompare(right.class);
+    });
+
+  return {
+    totalPullRequests,
+    distribution,
+    note: distribution.length
+      ? "PR classes are repository-profile evidence for interpretation only; they do not change rankings or exclude PRs."
+      : "No PR class evidence was available.",
+  };
+}
+
 function topEvidence(metricsSummary, rankingKey) {
-  return (metricsSummary.rankings?.[rankingKey] ?? [])
-    .filter(entry => entry.value !== null && entry.value > 0)
+  const ranking = metricsSummary.rankings?.[rankingKey] ?? [];
+  const positiveEntries = ranking.filter(entry => Number(entry.value ?? 0) > 0);
+  const unavailableEntries = ranking.filter(entry => entry.value === null || entry.value === undefined);
+  const displayedEntries = positiveEntries.length ? positiveEntries : unavailableEntries;
+
+  return displayedEntries
     .slice(0, 3)
     .map(entry => formatPr(findPullRequest(metricsSummary, entry.number), entry));
 }
@@ -329,11 +393,12 @@ function summarizeCoverage(metricsSummary) {
   };
 }
 
-function summarizeBottlenecks(metricsSummary) {
+function summarizeBottlenecks(metricsSummary, prClasses = summarizePrClasses(metricsSummary)) {
   return BOTTLENECK_DEFINITIONS
     .map((definition, definitionIndex) => {
       const evidence = topEvidence(metricsSummary, definition.rankingKey);
       const dominance = summarizeEvidenceDominance(evidence);
+      const classDominance = summarizeEvidenceClassDominance(evidence, prClasses);
       return {
         definitionIndex,
         rankValue: evidence[0]?.value ?? 0,
@@ -343,6 +408,7 @@ function summarizeBottlenecks(metricsSummary) {
         metricLabel: definition.metricLabel,
         observedData: evidence,
         dominance,
+        classDominance,
         inferredDiagnosis: definition.diagnosis,
         suggestedAction: {
           category: definition.recommendationCategory,
@@ -384,6 +450,87 @@ function summarizeEvidenceDominance(evidence) {
     note: status === "single_pr_dominates"
       ? `PR #${evidence[0].number} contributes ${Math.round(topShare * 100)}% of the displayed signal; inspect raw evidence before generalizing.`
       : "Displayed examples are not dominated by one PR.",
+  };
+}
+
+function summarizeEvidenceClassDominance(evidence, prClasses) {
+  const classDistribution = prClasses?.distribution ?? [];
+  const sampleClasses = classDistribution.filter(entry => entry.pullRequests > 0);
+
+  if (!evidence?.length) {
+    return {
+      status: "not_applicable",
+      class: null,
+      topShare: null,
+      basis: null,
+      note: "No displayed examples were available to evaluate PR class dominance.",
+    };
+  }
+
+  if (sampleClasses.length < 2) {
+    return {
+      status: "not_applicable",
+      class: sampleClasses[0]?.class ?? null,
+      topShare: null,
+      basis: null,
+      note: "Only one PR class appears in the analyzed sample; class dominance is not meaningful.",
+    };
+  }
+
+  const positiveValueTotal = evidence
+    .map(entry => Number(entry.value ?? 0))
+    .filter(value => value > 0)
+    .reduce((sum, value) => sum + value, 0);
+  const basis = positiveValueTotal > 0 ? "score_value" : "displayed_example_count";
+  const totalsByClass = new Map();
+
+  for (const entry of evidence) {
+    const className = entry.prClass?.class ?? "unknown";
+    const current = totalsByClass.get(className) ?? {
+      class: className,
+      value: 0,
+      displayedExamples: 0,
+    };
+    current.displayedExamples += 1;
+    current.value += basis === "score_value" ? Math.max(0, Number(entry.value ?? 0)) : 1;
+    totalsByClass.set(className, current);
+  }
+
+  const totalValue = [...totalsByClass.values()].reduce((sum, entry) => sum + entry.value, 0);
+  if (totalValue === 0) {
+    return {
+      status: "not_applicable",
+      class: null,
+      topShare: null,
+      basis,
+      note: "Displayed examples had no class contribution value to evaluate.",
+    };
+  }
+
+  const [topClass] = [...totalsByClass.values()]
+    .sort((left, right) => {
+      const valueDelta = right.value - left.value;
+      return valueDelta || left.class.localeCompare(right.class);
+    });
+  const rawTopShare = topClass.value / totalValue;
+  const topShare = roundShare(rawTopShare);
+  const samplePullRequests = classDistribution.find(entry => entry.class === topClass.class)?.pullRequests ?? 0;
+  const smallSampleNote = samplePullRequests > 0 && samplePullRequests < 3
+    ? ` The ${topClass.class} class has ${samplePullRequests} PRs in the analyzed sample, so treat this as a small-sample caveat.`
+    : "";
+  const basisLabel = basis === "score_value" ? "displayed score value" : "displayed example count";
+  const status = rawTopShare > 0.5 ? "single_class_dominates" : "distributed";
+
+  return {
+    status,
+    class: topClass.class,
+    topShare,
+    basis,
+    displayedExamples: topClass.displayedExamples,
+    samplePullRequests,
+    note: status === "single_class_dominates"
+      ? `PR class ${topClass.class} contributes ${percentageLabel(topShare)} of the ${basisLabel}; compare this bottleneck against the class distribution before generalizing.${smallSampleNote}`
+      : "Displayed examples are not dominated by one PR class.",
   };
 }
 
@@ -550,7 +697,8 @@ function summarizeSensitivity(metricsSummary, baselineBottlenecks) {
 }
 
 export function generateRepositoryFrictionReport(metricsSummary) {
-  const bottlenecksWithSharedSignalKeys = summarizeBottlenecks(metricsSummary);
+  const prClasses = summarizePrClasses(metricsSummary);
+  const bottlenecksWithSharedSignalKeys = summarizeBottlenecks(metricsSummary, prClasses);
   const sharedSignals = summarizeSharedSignals(bottlenecksWithSharedSignalKeys);
   const bottlenecks = bottlenecksWithSharedSignalKeys.map(({ rankingKey, ...bottleneck }) => bottleneck);
   return {
@@ -570,6 +718,7 @@ export function generateRepositoryFrictionReport(metricsSummary) {
     coverage: summarizeCoverage(metricsSummary),
     commentSources: summarizeCommentSources(metricsSummary),
     surfaces: summarizeSurfaces(metricsSummary),
+    prClasses,
     bottlenecks,
     sharedSignals,
     sensitivity: summarizeSensitivity(metricsSummary, bottlenecks),
@@ -616,6 +765,17 @@ function formatNamedValues(entries) {
   return entries.length
     ? entries.map(entry => `${entry.name}=${entry.value}`).join(", ")
     : "none";
+}
+
+function formatPrClass(prClass = {}) {
+  const className = prClass.class ?? "unknown";
+  const source = prClass.classificationSource ?? "fallback_rule";
+  const rule = prClass.ruleId ? `, rule=${prClass.ruleId}` : "";
+  return `${className} (source=${source}${rule})`;
+}
+
+function formatClassSources(entries) {
+  return entries?.length ? formatNamedValues(entries) : "none";
 }
 
 function formatCoverageEntries(entries) {
@@ -666,11 +826,16 @@ function evidenceCountLabel(value) {
   return value === null || value === undefined ? "unknown" : String(value);
 }
 
+function evidenceScoreLabel(value) {
+  return value === null || value === undefined ? "unknown" : String(value);
+}
+
 function evidenceRows(observedData) {
   return (observedData ?? []).map(evidence => [
       prReference(evidence),
       evidence.title,
-      evidence.value,
+      evidenceScoreLabel(evidence.value),
+      evidence.prClass?.class ?? "unknown",
       evidenceCountLabel(evidence.additions),
       evidenceCountLabel(evidence.deletions),
       evidenceCountLabel(evidence.changedFiles),
@@ -684,6 +849,7 @@ function renderEvidenceTable(observedData) {
       "PR",
       "Title",
       "Score",
+      "Class",
       "Additions",
       "Deletions",
       "Files changed",
@@ -738,6 +904,7 @@ function renderEvidenceDetails(observedData) {
       "Source labels:",
       "",
       renderDetailList([
+        `PR class: ${formatPrClass(evidence.prClass)}`,
         `Workflow source: ${validationEvidence.workflowRunSource ?? "unavailable"}`,
       ]),
     ].join("\n");
@@ -823,6 +990,9 @@ function renderKeyFindings(report) {
   const dominanceCallouts = (report.bottlenecks ?? [])
     .filter(bottleneck => bottleneck.dominance?.status === "single_pr_dominates")
     .map(bottleneck => `${bottleneck.title}: ${bottleneck.dominance.note}`);
+  const classDominanceCallouts = (report.bottlenecks ?? [])
+    .filter(bottleneck => bottleneck.classDominance?.status === "single_class_dominates")
+    .map(bottleneck => `${bottleneck.title}: ${bottleneck.classDominance.note}`);
   const coverageNotes = report.coverage?.notes?.length
     ? report.coverage.notes.join(" ")
     : "No coverage caveats were recorded for the displayed evidence.";
@@ -835,8 +1005,40 @@ function renderKeyFindings(report) {
     dominanceCallouts.length
       ? `Outlier caveat: ${dominanceCallouts.join(" ")}`
       : "Outlier caveat: displayed bottleneck examples are not dominated by a single PR.",
+    classDominanceCallouts.length
+      ? `PR class caveat: ${classDominanceCallouts.join(" ")}`
+      : "PR class caveat: displayed bottleneck examples are not dominated by one PR class.",
     `Coverage caveat: ${coverageNotes}`,
   ]);
+}
+
+function renderPrClassContext(prClasses) {
+  const distribution = prClasses?.distribution ?? [];
+  if (!distribution.length) return "";
+
+  return [
+    "## PR Class Context",
+    "",
+    prClasses.note ?? "PR class evidence is interpretation context only.",
+    "",
+    renderMarkdownTable(
+      ["Class", "PRs", "Changed lines", "Share", "Sources"],
+      distribution.map(entry => [
+        entry.class,
+        entry.pullRequests,
+        entry.changedLines,
+        percentageLabel(entry.share),
+        formatClassSources(entry.classificationSources),
+      ]),
+    ),
+    "",
+  ].join("\n");
+}
+
+function classDominanceCaveat(bottleneck) {
+  return bottleneck.classDominance?.status === "single_class_dominates"
+    ? bottleneck.classDominance.note
+    : null;
 }
 
 function renderSharedSignalInterpretation(sharedSignals) {
@@ -983,6 +1185,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     renderKeyFindings(report),
     "",
+    renderPrClassContext(report.prClasses),
     renderSharedSignalInterpretation(sharedSignals),
     renderSensitivityAnalysis(report.sensitivity),
     "## How Bottlenecks Are Prioritized",
@@ -1013,6 +1216,7 @@ export function renderRepositoryFrictionMarkdown(report) {
       "",
       renderList([
         bottleneck.dominance?.note ?? "Not enough positive examples to evaluate outlier dominance.",
+        classDominanceCaveat(bottleneck),
         sharedNotes.get(bottleneck.id),
       ].filter(Boolean)),
       "",
@@ -1040,6 +1244,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.",
     "- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.",
     "- Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.",
+    "- PR class context is interpretation support only; it does not filter PRs or change bottleneck ranking.",
     "- Full live analysis runs also write a detailed companion methodology artifact: `methodology.md`.",
     "",
     "## Guardrails And Follow-Up",

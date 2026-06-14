@@ -42,7 +42,16 @@ Coverage notes:
 - Top bottlenecks: review-churn, repo-guidance-gap, changed-file-spread.
 - Strongest displayed signal: Review churn (iteration drag).
 - Outlier caveat: Review churn: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Repo guidance gap: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Review surprise: PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing. Fix amplification: PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
+- PR class caveat: displayed bottleneck examples are not dominated by one PR class.
 - Coverage caveat: PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
+
+## PR Class Context
+
+PR classes are repository-profile evidence for interpretation only; they do not change rankings or exclude PRs.
+
+| Class | PRs | Changed lines | Share | Sources |
+| --- | --- | --- | --- | --- |
+| unknown | 3 | 2454 | 100% | fallback\_rule=3 |
 
 ## Shared Signal Interpretation
 
@@ -79,10 +88,10 @@ Recommendation category: pr_readiness_gate
 
 #### Review churn Observed Evidence (iteration drag)
 
-| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | 1168 | 77 | 13 | 1245 |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | 1149 | 58 | 15 | 1207 |
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | unknown | 1168 | 77 | 13 | 1245 |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | unknown | 1149 | 58 | 15 | 1207 |
 
 Evidence details for PR #239:
 
@@ -108,6 +117,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
 
 Evidence details for PR #221:
@@ -134,6 +144,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: unavailable
 
 #### Review churn Interpretation And Recommendation
@@ -154,10 +165,10 @@ Recommendation category: repo_specific_ai_skills
 
 #### Repo guidance gap Observed Evidence (iteration drag)
 
-| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | 1168 | 77 | 13 | 1245 |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | 1149 | 58 | 15 | 1207 |
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | unknown | 1168 | 77 | 13 | 1245 |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | unknown | 1149 | 58 | 15 | 1207 |
 
 Evidence details for PR #239:
 
@@ -183,6 +194,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
 
 Evidence details for PR #221:
@@ -209,6 +221,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: unavailable
 
 #### Repo guidance gap Interpretation And Recommendation
@@ -229,11 +242,11 @@ Recommendation category: smaller_milestones
 
 #### Changed-file spread Observed Evidence (spread score)
 
-| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 17 | 1149 | 58 | 15 | 1207 |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 16 | 1168 | 77 | 13 | 1245 |
-| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 2 | 1 | 1 | 1 | 2 |
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 17 | unknown | 1149 | 58 | 15 | 1207 |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 16 | unknown | 1168 | 77 | 13 | 1245 |
+| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 2 | unknown | 1 | 1 | 1 | 2 |
 
 Evidence details for PR #221:
 
@@ -259,6 +272,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: unavailable
 
 Evidence details for PR #239:
@@ -285,6 +299,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
 
 Evidence details for PR #223:
@@ -311,6 +326,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: unavailable
 
 #### Changed-file spread Interpretation And Recommendation
@@ -331,10 +347,10 @@ Recommendation category: pr_readiness_gate
 
 #### Review surprise Observed Evidence (surface surprise score)
 
-| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 5 | 1149 | 58 | 15 | 1207 |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 4 | 1168 | 77 | 13 | 1245 |
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 5 | unknown | 1149 | 58 | 15 | 1207 |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 4 | unknown | 1168 | 77 | 13 | 1245 |
 
 Evidence details for PR #221:
 
@@ -360,6 +376,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: unavailable
 
 Evidence details for PR #239:
@@ -386,6 +403,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
 
 #### Review surprise Interpretation And Recommendation
@@ -406,10 +424,10 @@ Recommendation category: smaller_milestones
 
 #### Fix amplification Observed Evidence (post-review commits)
 
-| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 5 | 1168 | 77 | 13 | 1245 |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 1 | 1149 | 58 | 15 | 1207 |
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 5 | unknown | 1168 | 77 | 13 | 1245 |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 1 | unknown | 1149 | 58 | 15 | 1207 |
 
 Evidence details for PR #239:
 
@@ -435,6 +453,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
 
 Evidence details for PR #221:
@@ -461,6 +480,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: unavailable
 
 #### Fix amplification Interpretation And Recommendation
@@ -481,9 +501,9 @@ Recommendation category: preflight_scripts
 
 #### Validation gap Observed Evidence (validation gap score)
 
-| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1168 | 77 | 13 | 1245 |
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | unknown | 1168 | 77 | 13 | 1245 |
 
 Evidence details for PR #239:
 
@@ -509,6 +529,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
 
 #### Validation gap Interpretation And Recommendation
@@ -529,9 +550,9 @@ Recommendation category: hooks
 
 #### Local hook gap Observed Evidence (validation gap score)
 
-| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1168 | 77 | 13 | 1245 |
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | unknown | 1168 | 77 | 13 | 1245 |
 
 Evidence details for PR #239:
 
@@ -557,6 +578,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
 
 #### Local hook gap Interpretation And Recommendation
@@ -577,9 +599,9 @@ Recommendation category: test_infrastructure
 
 #### Test infrastructure gap Observed Evidence (validation gap score)
 
-| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1168 | 77 | 13 | 1245 |
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | unknown | 1168 | 77 | 13 | 1245 |
 
 Evidence details for PR #239:
 
@@ -605,6 +627,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
 
 #### Test infrastructure gap Interpretation And Recommendation
@@ -625,11 +648,11 @@ Recommendation category: planning_artifacts
 
 #### Planning gap Observed Evidence (planning gap score)
 
-| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |
-| --- | --- | --- | --- | --- | --- | --- |
-| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 1 | 1149 | 58 | 15 | 1207 |
-| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 1 | 1 | 1 | 1 | 2 |
-| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | 1168 | 77 | 13 | 1245 |
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 1 | unknown | 1149 | 58 | 15 | 1207 |
+| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 1 | unknown | 1 | 1 | 1 | 2 |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | unknown | 1168 | 77 | 13 | 1245 |
 
 Evidence details for PR #221:
 
@@ -655,6 +678,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: unavailable
 
 Evidence details for PR #223:
@@ -681,6 +705,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: unavailable
 
 Evidence details for PR #239:
@@ -707,6 +732,7 @@ Review:
 
 Source labels:
 
+- PR class: unknown (source=fallback\_rule)
 - Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
 
 #### Planning gap Interpretation And Recommendation
@@ -797,6 +823,7 @@ File roles:
 - Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.
 - Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.
 - Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.
+- PR class context is interpretation support only; it does not filter PRs or change bottleneck ranking.
 - Full live analysis runs also write a detailed companion methodology artifact: `methodology.md`.
 
 ## Guardrails And Follow-Up
