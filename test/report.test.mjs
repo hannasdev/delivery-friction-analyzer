@@ -585,6 +585,42 @@ describe("friction report generation", () => {
     );
   });
 
+  it("escapes backslashes before Markdown metacharacters in PR titles", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {},
+      pullRequests: [
+        {
+          number: 7,
+          title: String.raw`fix \*literal\* [link] and ` + "`code`",
+          url: "https://example.test/pull/7",
+          diffAtMerge: { changedLines: 1 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          {
+            number: 7,
+            title: String.raw`fix \*literal\* [link] and ` + "`code`",
+            value: 2,
+          },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assert(
+      markdown.includes(
+        String.raw`| [#7](https://example.test/pull/7) | fix \\\*literal\\\* \[link\] and \`code\` | 2 | unknown | unknown | unknown | 1 |`,
+      ),
+    );
+  });
+
   it("renders methodology with run-specific facts and artifact names", async () => {
     const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
     const report = {

@@ -334,6 +334,7 @@ describe("GitHub source collector", () => {
 
   it("degrades review-thread coverage when GraphQL access is unavailable and redacts diagnostics", async () => {
     const fakeClassicToken = ["ghp", "abcdef1234567890"].join("_");
+    const fakeFineGrainedToken = ["github", "pat", "ABC123", "def456", "GHI789"].join("_");
     const fakeEnvToken = ["super", "secret"].join("");
     const fakeAuthorizationToken = ["very", "secret", "value"].join("");
     const fakeWindowsCredentialPath = String.raw`C:\Users\Hanna\AppData\Roaming\GitHub CLI\hosts.yml`;
@@ -343,7 +344,7 @@ describe("GitHub source collector", () => {
       async getReviewThreads(input) {
         this.calls.push(["getReviewThreads", input]);
         throw new Error(
-          `GraphQL: Resource not accessible by integration ${envTokenLabel}=${fakeEnvToken} ${fakeClassicToken} /Users/hanna/.config/gh/hosts.yml ${fakeWindowsCredentialPath} ${authorizationLabel}: token ${fakeAuthorizationToken}`,
+          `GraphQL: Resource not accessible by integration ${envTokenLabel}=${fakeEnvToken} ${fakeClassicToken} ${fakeFineGrainedToken} /Users/hanna/.config/gh/hosts.yml ${fakeWindowsCredentialPath} ${authorizationLabel}: token ${fakeAuthorizationToken}`,
         );
       },
     });
@@ -362,6 +363,7 @@ describe("GitHub source collector", () => {
     const serialized = JSON.stringify(bundle);
     assert(!serialized.includes(fakeEnvToken));
     assert(!serialized.includes(fakeClassicToken));
+    assert(!serialized.includes(fakeFineGrainedToken));
     assert(!serialized.includes(fakeAuthorizationToken));
     assert(!serialized.includes("/Users/hanna/.config/gh/hosts.yml"));
     assert(!serialized.includes(fakeWindowsCredentialPath));
