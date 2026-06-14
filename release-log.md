@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can trust that report headers, fixtures, and schemas describe the actual analysis selection model.
 - Who is affected: Maintainers and contributors reviewing generated reports, fixtures, or target repository metadata.
 - Action needed: Update consumers that read `analysisWindowDays` to use `analysisPullRequestLimit`.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/23
 
 ### 2026-06-13 — Shared Signal Interpretation
 
