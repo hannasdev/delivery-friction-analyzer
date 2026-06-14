@@ -957,7 +957,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     `Report version: ${report.reportVersion}`,
     `Metric version: ${report.metricVersion}`,
-    `Analysis window: ${report.targetRepository?.analysisWindowDays ?? "unknown"} days`,
+    `Pull requests analyzed: ${report.summary?.pullRequests ?? "unknown"}`,
     "",
     "## Executive Summary",
     "",

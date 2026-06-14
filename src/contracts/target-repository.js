@@ -23,8 +23,8 @@ export function validateTargetRepository(input, { productRepository } = {}) {
     errors.push("defaultBranch must be a non-empty Git ref name.");
   }
 
-  if (!Number.isInteger(input.analysisWindowDays) || input.analysisWindowDays < 1 || input.analysisWindowDays > 365) {
-    errors.push("analysisWindowDays must be an integer between 1 and 365.");
+  if (!Number.isInteger(input.analysisPullRequestLimit) || input.analysisPullRequestLimit < 1 || input.analysisPullRequestLimit > 100) {
+    errors.push("analysisPullRequestLimit must be an integer between 1 and 100.");
   }
 
   if (!["public", "private", "unknown"].includes(input.visibility)) {
@@ -68,7 +68,7 @@ export function normalizeTargetRepository(input, options = {}) {
       fullName: `${input.owner}/${input.name}`,
       defaultBranch: input.defaultBranch,
       visibility: input.visibility,
-      analysisWindowDays: input.analysisWindowDays,
+      analysisPullRequestLimit: input.analysisPullRequestLimit,
       isValidationTarget: input.isValidationTarget ?? false,
     },
   };

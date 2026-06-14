@@ -10,8 +10,6 @@ import {
 export const GITHUB_SOURCE_BUNDLE_VERSION = "github-source-bundle.v1";
 
 const REPOSITORY_SLUG = /^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/;
-const DEFAULT_ANALYSIS_WINDOW_DAYS = 30;
-
 function parseRepositoryInput(input) {
   if (typeof input === "string") {
     const match = input.match(REPOSITORY_SLUG);
@@ -28,9 +26,9 @@ function parseRepositoryInput(input) {
   throw new Error("repository must be an owner/name string or an object with owner and name.");
 }
 
-function requireLimit(limit) {
+function requirePullRequestLimit(limit) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-    throw new Error("limit must be an integer between 1 and 100.");
+    throw new Error("PR sample limit must be an integer between 1 and 100.");
   }
 }
 
@@ -40,13 +38,13 @@ function visibilityOf(repository) {
   return "unknown";
 }
 
-function mapTargetRepository({ owner, name, repositoryMetadata, analysisWindowDays, isValidationTarget }) {
+function mapTargetRepository({ owner, name, repositoryMetadata, analysisPullRequestLimit, isValidationTarget }) {
   const targetRepository = {
     owner,
     name,
     defaultBranch: repositoryMetadata.default_branch ?? repositoryMetadata.defaultBranch ?? "main",
     visibility: visibilityOf(repositoryMetadata),
-    analysisWindowDays,
+    analysisPullRequestLimit,
     isValidationTarget,
   };
   const errors = validateTargetRepository(targetRepository);
@@ -274,19 +272,20 @@ export async function collectGitHubSourceBundle({
   limit,
   provider,
   collectedAt = new Date().toISOString(),
-  analysisWindowDays = DEFAULT_ANALYSIS_WINDOW_DAYS,
+  analysisPullRequestLimit,
   isValidationTarget = false,
 } = {}) {
   if (!provider) {
     throw new Error("provider is required.");
   }
-  requireLimit(limit);
+  const targetPullRequestLimit = analysisPullRequestLimit ?? limit;
+  requirePullRequestLimit(targetPullRequestLimit);
   const targetInput = repository ? parseRepositoryInput(repository) : { owner, name };
   const targetNameErrors = validateTargetRepository({
     ...targetInput,
     defaultBranch: "main",
     visibility: "unknown",
-    analysisWindowDays,
+    analysisPullRequestLimit: targetPullRequestLimit,
     isValidationTarget,
   }).filter(error => !error.includes("defaultBranch") && !error.includes("visibility"));
   if (targetNameErrors.length > 0) {
@@ -297,7 +296,7 @@ export async function collectGitHubSourceBundle({
   const targetRepository = mapTargetRepository({
     ...targetInput,
     repositoryMetadata,
-    analysisWindowDays,
+    analysisPullRequestLimit: targetPullRequestLimit,
     isValidationTarget,
   });
   const repositoryCoverage = coverageEntry({
@@ -314,9 +313,9 @@ export async function collectGitHubSourceBundle({
     run: () => provider.getLanguages(targetInput),
   });
 
-  const inventory = (await provider.listMergedPullRequests({ ...targetInput, limit }))
+  const inventory = (await provider.listMergedPullRequests({ ...targetInput, limit: targetPullRequestLimit }))
     .sort((left, right) => String(right.mergedAt ?? "").localeCompare(String(left.mergedAt ?? "")))
-    .slice(0, limit);
+    .slice(0, targetPullRequestLimit);
   const inventoryCoverage = coverageEntry({
     family: "pull_request_inventory",
     source: "gh pr list --state merged --search \"is:merged sort:merged-desc\"",
@@ -438,7 +437,7 @@ export async function collectGitHubSourceBundle({
     repositoryMetadata: mapRepositoryMetadata(repositoryMetadata),
     selection: {
       strategy: "latest_merged_pull_requests",
-      requestedLimit: limit,
+      requestedLimit: targetPullRequestLimit,
       collectedCount: pullRequests.length,
       source: "gh pr list --state merged --search \"is:merged sort:merged-desc\"",
     },

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-14 — PR Sample Contract Alignment
+
+- What changed: Target repository metadata now records the latest-N pull request sample size, and Markdown reports label the analyzed pull request count instead of a day window.
+- Why it matters: Maintainers can trust that report headers, fixtures, and schemas describe the actual analysis selection model.
+- Who is affected: Maintainers and contributors reviewing generated reports, fixtures, or target repository metadata.
+- Action needed: Update consumers that read `analysisWindowDays` to use `analysisPullRequestLimit`.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/23
+
 ### 2026-06-13 — Shared Signal Interpretation
 
 - What changed: Markdown and JSON friction reports now call out when displayed bottlenecks share the same ranking signal or representative PR evidence while keeping their recommendation categories distinct.

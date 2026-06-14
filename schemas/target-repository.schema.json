@@ -9,7 +9,7 @@
     "name",
     "defaultBranch",
     "visibility",
-    "analysisWindowDays"
+    "analysisPullRequestLimit"
   ],
   "properties": {
     "owner": {
@@ -27,10 +27,10 @@
     "visibility": {
       "enum": ["public", "private", "unknown"]
     },
-    "analysisWindowDays": {
+    "analysisPullRequestLimit": {
       "type": "integer",
       "minimum": 1,
-      "maximum": 365
+      "maximum": 100
     },
     "isValidationTarget": {
       "type": "boolean",

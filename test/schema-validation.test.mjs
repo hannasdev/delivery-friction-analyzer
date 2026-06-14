@@ -148,14 +148,14 @@ describe("normalized entity schema", () => {
     ]);
     const normalized = normalizeFixtureBundle(bundle, { repositoryProfile: profile });
     normalized.targetRepository.owner = "bad owner";
-    normalized.targetRepository.analysisWindowDays = 366;
+    normalized.targetRepository.analysisPullRequestLimit = 101;
 
     const errors = validateSchema(normalized, normalizedSchema, {
       "target-repository.schema.json": targetSchema,
     });
 
     assert(errors.some(error => error.includes("$.targetRepository.owner must match")));
-    assert(errors.some(error => error.includes("$.targetRepository.analysisWindowDays must be <= 365")));
+    assert(errors.some(error => error.includes("$.targetRepository.analysisPullRequestLimit must be <= 100")));
   });
 
   it("accepts schema-valid PR-open diff counts used for diff growth", async () => {
