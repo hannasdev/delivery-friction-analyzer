@@ -1,0 +1,89 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      npm_tag:
+        description: "npm dist-tag to publish with"
+        required: false
+        type: choice
+        default: latest
+        options:
+          - latest
+          - next
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Validate package metadata
+        id: package
+        run: |
+          PACKAGE_NAME="$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).name")"
+          PACKAGE_VERSION="$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")"
+          PACKAGE_PRIVATE="$(node -p "Boolean(JSON.parse(require('fs').readFileSync('package.json', 'utf8')).private)")"
+
+          if [ "$PACKAGE_PRIVATE" = "true" ]; then
+            echo "Package is private and cannot be published." >&2
+            exit 1
+          fi
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v${PACKAGE_VERSION}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match package version ${PACKAGE_VERSION}." >&2
+            exit 1
+          fi
+
+          echo "name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Determine npm dist-tag
+        id: dist_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            NPM_TAG="${{ inputs.npm_tag }}"
+          elif [[ "${{ steps.package.outputs.version }}" == *-* ]]; then
+            NPM_TAG="next"
+          else
+            NPM_TAG="latest"
+          fi
+          echo "tag=$NPM_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Skip already published versions
+        id: published
+        run: |
+          if npm view "${{ steps.package.outputs.name }}@${{ steps.package.outputs.version }}" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "${{ steps.package.outputs.name }}@${{ steps.package.outputs.version }} is already published."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - run: npm pack --dry-run
+        if: steps.published.outputs.published != 'true'
+
+      - name: Publish dry run
+        if: steps.published.outputs.published != 'true' && github.event_name == 'workflow_dispatch'
+        run: npm publish --tag "${{ steps.dist_tag.outputs.tag }}" --dry-run
+
+      - name: Publish package
+        if: steps.published.outputs.published != 'true' && github.event_name != 'workflow_dispatch'
+        run: npm publish --tag "${{ steps.dist_tag.outputs.tag }}"

@@ -40,6 +40,18 @@ npm run analyze:github -- \
   --out reports/mcp-writing
 ```
 
+After installing from npm, the same analyzer is available as a CLI:
+
+```sh
+npx delivery-friction-analyzer \
+  --repo hannasdev/mcp-writing \
+  --limit 30 \
+  --profile path/to/repository-profile.json \
+  --out reports/mcp-writing
+```
+
+The npm CLI still expects a local repository profile JSON. Use the sample profile from this repository as a starting point, then save a copy for the repository you want to analyze.
+
 The command writes:
 
 - `source-bundle.json`
@@ -75,3 +87,13 @@ The existing metrics-summary-only report command remains available for fixture a
 ```sh
 npm run report:fixture
 ```
+
+## Release Automation
+
+This repository publishes the unbundled source package to npm. The package allowlist includes runtime source, schemas, public contract/reference docs, the sample repository profile, the README, and the release log; generated reports, tests, initiative docs, and calibration fixtures are intentionally excluded from the npm artifact.
+
+The CI workflow runs `npm ci`, `npm test`, and `npm pack --dry-run` for pull requests and pushes to `main`.
+
+The release workflow runs on pushes to `main`, skips commits whose subject starts with `Release `, determines the next semantic version from conventional commits since the latest `v*` tag, commits the version bump, tags it, pushes both atomically, and creates a GitHub release. It requires a `RELEASE_DEPLOY_KEY` secret with permission to push tags and release commits.
+
+The publish workflow runs for `v*.*.*` tags and can also be started manually as a dry run. It verifies that the package version matches the tag, skips versions already present on npm, runs tests, performs an npm pack dry run, and publishes the package with `latest` for stable versions or `next` for prerelease versions. Configure npm trusted publishing for this repository before using the tag-triggered publish path.
