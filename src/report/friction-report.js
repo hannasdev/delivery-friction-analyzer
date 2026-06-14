@@ -298,9 +298,15 @@ function summarizePrClasses(metricsSummary) {
     totalPullRequests,
     distribution,
     note: distribution.length
-      ? "PR classes are repository-profile evidence for interpretation only; they do not change rankings or exclude PRs."
+      ? prClassContextNote(metricsSummary.analysisFilter)
       : "No PR class evidence was available.",
   };
+}
+
+function prClassContextNote(analysisFilter) {
+  return analysisFilter?.excludedPrClasses?.length
+    ? "PR class filtering was explicitly applied before metrics and ranking; this distribution describes the filtered sample."
+    : "PR classes are repository-profile evidence for interpretation only; they do not change rankings or exclude PRs.";
 }
 
 function topEvidence(metricsSummary, rankingKey) {

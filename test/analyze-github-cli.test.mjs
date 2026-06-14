@@ -537,9 +537,15 @@ describe("GitHub live analyze CLI", () => {
       assert.deepEqual(metricsSummary.rankings.reviewChurn.map(entry => entry.number), [8]);
       assert.deepEqual(reportJson.analysisFilter, normalized.analysisFilter);
       assert.equal(reportJson.summary.pullRequests, 1);
+      assert.equal(
+        reportJson.prClasses.note,
+        "PR class filtering was explicitly applied before metrics and ranking; this distribution describes the filtered sample.",
+      );
       assert(reportMarkdown.includes("Analysis filter: excluded PR class(es): release."));
       assert(reportMarkdown.includes("Filtered sample: 1 of 2 collected pull request(s)."));
+      assert(reportMarkdown.includes("PR class filtering was explicitly applied before metrics and ranking; this distribution describes the filtered sample."));
       assert(reportMarkdown.includes("PR class filtering was explicitly applied before metrics and ranking"));
+      assert(!reportMarkdown.includes("do not change rankings or exclude PRs"));
       assert(methodology.includes("Analysis filter: Excluded PR class(es): release."));
       assert(methodology.includes("source-bundle.json` preserves the full collected sample"));
       assert(prMetricsCsv.includes("analysis_filter_excluded_pr_classes,analysis_filter_original_pull_requests,analysis_filter_filtered_pull_requests"));
