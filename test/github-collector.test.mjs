@@ -310,6 +310,28 @@ describe("GitHub source collector", () => {
     assert.deepEqual(bundle.pullRequests.map(pr => pr.number), [11, 10]);
   });
 
+  it("reports invalid effective PR sample limits with a clear error", async () => {
+    await assert.rejects(
+      collectGitHubSourceBundle({
+        repository: "example/example-repo",
+        limit: 1,
+        analysisPullRequestLimit: 101,
+        provider: createProvider(),
+        collectedAt: "2026-06-09T00:00:00Z",
+      }),
+      /PR sample limit must be an integer between 1 and 100\./,
+    );
+
+    await assert.rejects(
+      collectGitHubSourceBundle({
+        repository: "example/example-repo",
+        provider: createProvider(),
+        collectedAt: "2026-06-09T00:00:00Z",
+      }),
+      /PR sample limit must be an integer between 1 and 100\./,
+    );
+  });
+
   it("degrades review-thread coverage when GraphQL access is unavailable and redacts diagnostics", async () => {
     const fakeClassicToken = ["ghp", "abcdef1234567890"].join("_");
     const fakeEnvToken = ["super", "secret"].join("");

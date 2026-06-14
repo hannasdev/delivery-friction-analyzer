@@ -26,9 +26,9 @@ function parseRepositoryInput(input) {
   throw new Error("repository must be an owner/name string or an object with owner and name.");
 }
 
-function requireLimit(limit) {
+function requirePullRequestLimit(limit) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-    throw new Error("limit must be an integer between 1 and 100.");
+    throw new Error("PR sample limit must be an integer between 1 and 100.");
   }
 }
 
@@ -279,7 +279,7 @@ export async function collectGitHubSourceBundle({
     throw new Error("provider is required.");
   }
   const targetPullRequestLimit = analysisPullRequestLimit ?? limit;
-  requireLimit(targetPullRequestLimit);
+  requirePullRequestLimit(targetPullRequestLimit);
   const targetInput = repository ? parseRepositoryInput(repository) : { owner, name };
   const targetNameErrors = validateTargetRepository({
     ...targetInput,
