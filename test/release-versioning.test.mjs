@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { describe, it } from "node:test";
 import {
   assertNotBehind,
@@ -49,5 +50,19 @@ describe("release versioning", () => {
       () => assertNotBehind("1.2.2", "1.2.3"),
       /Package version 1\.2\.2 is behind latest tag 1\.2\.3/,
     );
+  });
+
+  it("runs the CLI entrypoint when invoked through a relative path", () => {
+    const result = spawnSync(process.execPath, [
+      "scripts/release-versioning.mjs",
+      "increment",
+    ], {
+      encoding: "utf8",
+      input: "fix: typo\nfeat: add release automation\n",
+    });
+
+    assert.equal(result.status, 0);
+    assert.equal(result.stderr, "");
+    assert.equal(result.stdout, "minor\n");
   });
 });
