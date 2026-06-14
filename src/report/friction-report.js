@@ -591,7 +591,8 @@ function escapeMarkdownText(value) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/[\\`*_\[\]]/g, "\\$&");
+    .replace(/\\/g, "\\\\")
+    .replace(/[`*_\[\]]/g, "\\$&");
 }
 
 function escapeMarkdownTableCell(value) {
