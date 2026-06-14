@@ -134,22 +134,22 @@ Errors should remain actionable and should continue to avoid partial artifacts t
 
 ## Acceptance Criteria
 
-- [ ] Markdown reports clearly label observed evidence, interpretation, recommendation, and confidence/caveats for each bottleneck.
-- [ ] Markdown reports include an executive summary, how-to-read guidance, key findings, evidence quality/coverage, methodology summary, and artifact sensitivity guidance.
-- [ ] Representative PR examples render as scannable tables with key validation, review, changed-line, score, and source fields.
-- [ ] Shared underlying evidence across multiple recommendation categories is either grouped or explicitly labeled so duplicated PR examples are not confusing.
-- [ ] Reports include automatic outlier/sensitivity analysis when displayed examples are dominated by one PR.
-- [ ] Full analysis runs generate curated CSV artifacts by default.
-- [ ] Users can pass `--no-csv` to suppress CSV artifact generation.
-- [ ] CSV exports include `pr-metrics.csv`, `bottleneck-examples.csv`, `comment-sources.csv`, and `collection-coverage.csv` or documented equivalents.
-- [ ] CSV exports include the minimum column groups documented in the proposed solution and represent empty values without inventing unavailable metrics.
-- [ ] CSV exports contain useful evidence fields without raw comments, raw workflow logs, tokens, secret-bearing environment values, or individual ranking outputs.
-- [ ] Full analysis runs generate a detailed `methodology.md` artifact and link or reference it from `friction-report.md`.
-- [ ] CLI success output is concise and action-oriented by default, with the long JSON completion receipt available through `--json`.
-- [ ] `--json` mode emits parseable JSON on stdout only; progress and caveats move to stderr or are suppressed.
-- [ ] CLI error output remains actionable and preserves existing partial-write safety guarantees.
-- [ ] Existing JSON artifacts remain available and deterministic.
-- [ ] Fixture/golden tests cover the revised Markdown structure, CSV outputs, methodology artifact, and quiet/default CLI output.
+- [x] Markdown reports clearly label observed evidence, interpretation, recommendation, and confidence/caveats for each bottleneck.
+- [x] Markdown reports include an executive summary, how-to-read guidance, key findings, evidence quality/coverage, methodology summary, and artifact sensitivity guidance.
+- [x] Representative PR examples render as scannable tables with key validation, review, changed-line, score, and source fields.
+- [x] Shared underlying evidence across multiple recommendation categories is either grouped or explicitly labeled so duplicated PR examples are not confusing.
+- [x] Reports include automatic outlier/sensitivity analysis when displayed examples are dominated by one PR.
+- [x] Full analysis runs generate curated CSV artifacts by default.
+- [x] Users can pass `--no-csv` to suppress CSV artifact generation.
+- [x] CSV exports include `pr-metrics.csv`, `bottleneck-examples.csv`, `comment-sources.csv`, and `collection-coverage.csv` or documented equivalents.
+- [x] CSV exports include the minimum column groups documented in the proposed solution and represent empty values without inventing unavailable metrics.
+- [x] CSV exports contain useful evidence fields without raw comments, raw workflow logs, tokens, secret-bearing environment values, or individual ranking outputs.
+- [x] Full analysis runs generate a detailed `methodology.md` artifact and link or reference it from `friction-report.md`.
+- [x] CLI success output is concise and action-oriented by default, with the long JSON completion receipt available through `--json`.
+- [x] `--json` mode emits parseable JSON on stdout only; progress and caveats move to stderr or are suppressed.
+- [x] CLI error output remains actionable and preserves existing partial-write safety guarantees.
+- [x] Existing JSON artifacts remain available and deterministic.
+- [x] Fixture/golden tests cover the revised Markdown structure, CSV outputs, methodology artifact, and quiet/default CLI output.
 
 ## Risks And Tradeoffs
 
@@ -180,4 +180,4 @@ Errors should remain actionable and should continue to avoid partial artifacts t
 - [x] Should CLI stdout still print the long JSON receipt by default? No. Default output should be concise and progress-oriented; use `--json` for the machine receipt.
 - [x] Should the detailed `methodology.md` be copied from a static repository doc, generated from report metadata, or a hybrid of static explanation plus run-specific facts? Use a hybrid: stable explanatory text with run-specific facts.
 - [x] Should sensitivity analysis exclude only the top dominant PR for the highest bottleneck, or compute per-dominant-bottleneck sensitivity when several categories share the same outlier? Compute one summary per distinct dominant PR among displayed bottlenecks, deduplicating shared outliers.
-- [ ] Before M2 activation, confirm whether the CSV/header contract still fits one reviewable milestone or should be split from methodology/sensitivity work.
+- [x] Before M2 activation, confirm whether the CSV/header contract still fits one reviewable milestone or should be split from methodology/sensitivity work. It fit one reviewable milestone and shipped with default CSV, methodology, and sensitivity coverage.

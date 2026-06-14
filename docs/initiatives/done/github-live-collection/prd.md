@@ -103,18 +103,18 @@ Coverage should be explicit for every API family. For example, review-thread Gra
 
 ## Acceptance Criteria
 
-- [ ] A documented local command can analyze a configured GitHub target repository without requiring a preexisting `friction-metrics.v1` input.
-- [ ] The command supports repository owner/name, PR limit, repository profile path, output directory, and at least one dry-run or metadata-only validation mode.
-- [ ] Live collection fetches repository metadata, languages, PR metadata, files, commits, reviews, GraphQL review threads, status check rollups, and workflow runs when permissions allow.
-- [ ] Live collection emits raw/source-shaped collection data, normalized entities, metrics summary, Markdown report, and JSON report artifacts.
-- [ ] Coverage metadata records attempted API families, source labels, success/partial/unavailable/rate-limited status, and downstream metric impact.
-- [ ] Missing GitHub permissions, missing Actions access, deleted head branches, rate limits, and GraphQL failures degrade the report with diagnostics instead of crashing after partial writes.
-- [ ] PR-open diff growth remains explicitly unavailable unless direct or reconstructed values are implemented with confidence metadata.
-- [ ] The live collector reuses existing normalization, metrics, profile, and report contracts rather than duplicating report logic.
-- [ ] `hannasdev/mcp-writing` can be analyzed over a larger live PR sample, with validation evidence checked against known PR examples such as repeated Dependabot PR template failures and high review-churn feature PRs.
-- [ ] Tests cover successful collection from mocked GitHub responses and meaningful degraded cases.
-- [ ] Generated artifacts are local and user-selected; GitHub tokens and secrets are never written to reports or logs.
-- [ ] Documentation clearly labels source bundles, normalized data, metrics summaries, and reports as potentially sensitive artifacts that may contain private repository names, PR URLs, titles, file paths, and comment metadata.
+- [x] A documented local command can analyze a configured GitHub target repository without requiring a preexisting `friction-metrics.v1` input.
+- [x] The command supports repository owner/name, PR limit, repository profile path, output directory, and at least one dry-run or metadata-only validation mode.
+- [x] Live collection fetches repository metadata, languages, PR metadata, files, commits, reviews, GraphQL review threads, status check rollups, and workflow runs when permissions allow.
+- [x] Live collection emits raw/source-shaped collection data, normalized entities, metrics summary, Markdown report, and JSON report artifacts.
+- [x] Coverage metadata records attempted API families, source labels, success/partial/unavailable/rate-limited status, and downstream metric impact.
+- [x] Missing GitHub permissions, missing Actions access, deleted head branches, rate limits, and GraphQL failures degrade the report with diagnostics instead of crashing after partial writes.
+- [x] PR-open diff growth remains explicitly unavailable unless direct or reconstructed values are implemented with confidence metadata.
+- [x] The live collector reuses existing normalization, metrics, profile, and report contracts rather than duplicating report logic.
+- [x] `hannasdev/mcp-writing` can be analyzed over a larger live PR sample, with validation evidence checked against known PR examples such as repeated Dependabot PR template failures and high review-churn feature PRs.
+- [x] Tests cover successful collection from mocked GitHub responses and meaningful degraded cases.
+- [x] Generated artifacts are local and user-selected; GitHub tokens and secrets are never written to reports or logs.
+- [x] Documentation clearly labels source bundles, normalized data, metrics summaries, and reports as potentially sensitive artifacts that may contain private repository names, PR URLs, titles, file paths, and comment metadata.
 
 ## Risks And Tradeoffs
 
@@ -142,7 +142,7 @@ Coverage should be explicit for every API family. For example, review-thread Gra
 
 - [x] Should the primary command live beside `src/report/generate-report.js` or under a dedicated `src/cli/` entry point? Use `src/cli/analyze-github.js`.
 - [x] Should live collection use `gh` as the first implementation dependency, direct HTTP calls with the GitHub token, or a provider interface that can support both? Use a `gh`-backed adapter first, behind a provider boundary so direct HTTP calls can be added later.
-- [ ] Should output artifacts default inside the product repo, the target repo, or a user-selected external directory?
+- [x] Should output artifacts default inside the product repo, the target repo, or a user-selected external directory? Require a user-selected output directory through `--out`.
 - [x] What is the minimum date-window behavior for MVP: latest N merged PRs only, `--since`, or both? Latest N merged PRs only for the live-collection MVP; date windows are follow-up once latest-N collection is reliable.
-- [ ] Should workflow runs be filtered by PR timeline and observed commit SHAs in M1, or should the MVP first label branch-based lookup as a known approximation?
+- [x] Should workflow runs be filtered by PR timeline and observed commit SHAs in M1, or should the MVP first label branch-based lookup as a known approximation? Use branch-based lookup first and label it with source/coverage caveats.
 - [x] Should fixture refresh become part of the live command, or stay a separate maintainer workflow? M3 should document a manual redacted live-shaped fixture refresh workflow if it adds pinned samples; automated fixture refresh is post-MVP.

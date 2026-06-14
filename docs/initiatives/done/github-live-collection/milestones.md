@@ -25,13 +25,13 @@ Add a reusable GitHub collection layer that can fetch live repository and pull r
 
 ### Acceptance Criteria
 
-- [ ] A collector module can fetch a live source bundle for `owner/name` and `limit`.
-- [ ] The collector uses a `gh`-backed provider boundary rather than calling GitHub directly from normalization, metrics, or report modules.
-- [ ] The source bundle includes repository metadata, languages, PR metadata, files, commits, reviews, review threads, check rollups, workflow runs, and coverage metadata when available.
-- [ ] The collector labels unavailable PR-open diff data instead of inventing values from merge-time diff data.
-- [ ] Missing GraphQL review-thread access, Actions access, or workflow branch history is represented as degraded coverage with diagnostics.
-- [ ] Tests prove successful collection mapping and at least three degraded cases.
-- [ ] Tokens and secret-bearing environment details are not written to generated artifacts or test snapshots.
+- [x] A collector module can fetch a live source bundle for `owner/name` and `limit`.
+- [x] The collector uses a `gh`-backed provider boundary rather than calling GitHub directly from normalization, metrics, or report modules.
+- [x] The source bundle includes repository metadata, languages, PR metadata, files, commits, reviews, review threads, check rollups, workflow runs, and coverage metadata when available.
+- [x] The collector labels unavailable PR-open diff data instead of inventing values from merge-time diff data.
+- [x] Missing GraphQL review-thread access, Actions access, or workflow branch history is represented as degraded coverage with diagnostics.
+- [x] Tests prove successful collection mapping and at least three degraded cases.
+- [x] Tokens and secret-bearing environment details are not written to generated artifacts or test snapshots.
 
 ### Required Validation
 
@@ -48,7 +48,7 @@ Add a reusable GitHub collection layer that can fetch live repository and pull r
 
 Status: Merged.
 
-- [ ] Not started
+- Not started: no
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
@@ -81,13 +81,13 @@ Expose a maintainer-facing local command that runs live collection, normalizatio
 
 ### Acceptance Criteria
 
-- [ ] A user can run one command against `hannasdev/mcp-writing` and get all expected artifacts from live data.
-- [ ] A user can run the command in dry-run or metadata-only mode to validate repository access, profile path, output path, and available API families without writing full report artifacts.
-- [ ] The command fails fast on malformed repository input, missing required options, and unwritable output directories.
-- [ ] Partial GitHub coverage produces a report with coverage caveats when enough PR data exists.
-- [ ] Existing fixture report tests and metrics tests still pass.
-- [ ] Documentation describes the live command, metrics-summary command, required GitHub auth, output artifacts, and coverage caveats.
-- [ ] Documentation describes artifact sensitivity and gives guidance for sharing or redacting live source bundles and reports.
+- [x] A user can run one command against `hannasdev/mcp-writing` and get all expected artifacts from live data.
+- [x] A user can run the command in dry-run or metadata-only mode to validate repository access, profile path, output path, and available API families without writing full report artifacts.
+- [x] The command fails fast on malformed repository input, missing required options, and unwritable output directories.
+- [x] Partial GitHub coverage produces a report with coverage caveats when enough PR data exists.
+- [x] Existing fixture report tests and metrics tests still pass.
+- [x] Documentation describes the live command, metrics-summary command, required GitHub auth, output artifacts, and coverage caveats.
+- [x] Documentation describes artifact sensitivity and gives guidance for sharing or redacting live source bundles and reports.
 
 ### Required Validation
 
@@ -104,7 +104,7 @@ Expose a maintainer-facing local command that runs live collection, normalizatio
 
 ### Status
 
-- [ ] Not started
+- Not started: no
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
@@ -139,13 +139,13 @@ Use larger live samples from `hannasdev/mcp-writing` to calibrate coverage, diag
 
 ### Acceptance Criteria
 
-- [ ] A 30-PR `mcp-writing` live smoke test produces a report whose top examples can be traced to raw collection evidence.
-- [ ] Coverage notes explain unavailable PR-open diff growth and any degraded API families.
-- [ ] Validation bottleneck examples show the workflow-run source and conclusions needed to interpret the score.
-- [ ] Review churn examples show review-thread and comment-source evidence.
-- [ ] Documentation names the MVP's collection limitations and how to inspect generated artifacts.
-- [ ] Documentation includes artifact sensitivity guidance and, if applicable, a manual redacted fixture refresh workflow.
-- [ ] Tests or fixtures protect against regressions in coverage summaries and source labels.
+- [x] A 30-PR `mcp-writing` live smoke test produces a report whose top examples can be traced to raw collection evidence.
+- [x] Coverage notes explain unavailable PR-open diff growth and any degraded API families.
+- [x] Validation bottleneck examples show the workflow-run source and conclusions needed to interpret the score.
+- [x] Review churn examples show review-thread and comment-source evidence.
+- [x] Documentation names the MVP's collection limitations and how to inspect generated artifacts.
+- [x] Documentation includes artifact sensitivity guidance and, if applicable, a manual redacted fixture refresh workflow.
+- [x] Tests or fixtures protect against regressions in coverage summaries and source labels.
 
 ### Required Validation
 
@@ -163,7 +163,7 @@ Use larger live samples from `hannasdev/mcp-writing` to calibrate coverage, diag
 
 Status: Merged in PR #7 on 2026-06-09.
 
-- [ ] Not started
+- Not started: no
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed

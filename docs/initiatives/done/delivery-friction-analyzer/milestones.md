@@ -9,7 +9,7 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 ### Scope
 
 - Inspect GitHub APIs for pull requests, reviews, review comments, commits, check runs, changed files, and timeline events.
-- Define the target repository input contract, including owner/name, analysis window, default branch handling, repository visibility, and how the analyzer distinguishes the product repository from the analyzed repository.
+- Define the target repository input contract, including owner/name, pull request sample size, default branch handling, repository visibility, and how the analyzer distinguishes the product repository from the analyzed repository.
 - Fetch and preserve repository language distribution from `GET /repos/{owner}/{repo}/languages`.
 - Define a configurable repository profile format, including path rules for core product code, product UI, tests, generated docs, release notes, planning docs, marketing site, config, infrastructure, fixtures, generated/vendored artifacts, and unknown files.
 - Determine how to classify review comment source: Copilot, human reviewer, GitHub Actions bot, dependency bot, code scanning, unknown bot.
@@ -31,18 +31,18 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 
 ### Acceptance Criteria
 
-- [ ] The repo contains documented GitHub fields used by the analyzer and their API source.
-- [ ] The repo contains typed or schema-defined normalized entities for PRs, comments, check runs, commits, and changed files.
-- [ ] The target repository input contract is documented and tested separately from the product repository.
-- [ ] Repository language distribution is captured and documented as context.
-- [ ] The repository profile format can classify file roles without hardcoding assumptions from the validation target repository.
-- [ ] The GitHub access and coverage matrix documents auth mode, required scopes, API families, rate-limit behavior, missing data behavior, and degraded report output.
-- [ ] Review comments can be grouped by source.
-- [ ] The repo contains target-repository fixture data for the four target scenarios, or a documented fixture gap plus a minimal synthetic fixture where real target data is unavailable.
-- [ ] Copilot review effort support is documented as available, unavailable, or requiring fallback classification.
-- [ ] Comment-level severity and confidence/visibility state are documented as public API, internal UI partial, inferred, unavailable, or excluded from MVP scoring.
-- [ ] Review-thread resolution/outdated support is documented with the GraphQL fields required.
-- [ ] PR-open diff support is documented as direct, reconstructed, or snapshot-only.
+- [x] The repo contains documented GitHub fields used by the analyzer and their API source.
+- [x] The repo contains typed or schema-defined normalized entities for PRs, comments, check runs, commits, and changed files.
+- [x] The target repository input contract is documented and tested separately from the product repository.
+- [x] Repository language distribution is captured and documented as context.
+- [x] The repository profile format can classify file roles without hardcoding assumptions from the validation target repository.
+- [x] The GitHub access and coverage matrix documents auth mode, required scopes, API families, rate-limit behavior, missing data behavior, and degraded report output.
+- [x] Review comments can be grouped by source.
+- [x] The repo contains target-repository fixture data for the four target scenarios, or a documented fixture gap plus a minimal synthetic fixture where real target data is unavailable.
+- [x] Copilot review effort support is documented as available, unavailable, or requiring fallback classification.
+- [x] Comment-level severity and confidence/visibility state are documented as public API, internal UI partial, inferred, unavailable, or excluded from MVP scoring.
+- [x] Review-thread resolution/outdated support is documented with the GraphQL fields required.
+- [x] PR-open diff support is documented as direct, reconstructed, or snapshot-only.
 
 ### Required Validation
 
@@ -62,7 +62,7 @@ Establish the GitHub data that is available, reliable, and useful enough to supp
 
 ### Status
 
-- [ ] Not started
+- Not started: no
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
@@ -105,14 +105,14 @@ Compute the core raw and derived friction metrics from normalized GitHub data us
 
 ### Acceptance Criteria
 
-- [ ] Metrics are computed deterministically from fixtures.
-- [ ] Generated or low-signal files can be excluded or down-weighted.
-- [ ] Marketing or support-site files can be separated from core product metrics when the repository profile marks them that way.
-- [ ] Comment-source metrics distinguish Copilot, human, bot, scanner, and unknown sources.
-- [ ] Small diffs across many core files can be flagged after excluding generated and non-core files.
-- [ ] Metrics distinguish observed GitHub data from inferred classifications.
-- [ ] Any score-like metric exposes its component inputs and formula version.
-- [ ] Repository-level summaries can rank PRs by the highest friction categories.
+- [x] Metrics are computed deterministically from fixtures.
+- [x] Generated or low-signal files can be excluded or down-weighted.
+- [x] Marketing or support-site files can be separated from core product metrics when the repository profile marks them that way.
+- [x] Comment-source metrics distinguish Copilot, human, bot, scanner, and unknown sources.
+- [x] Small diffs across many core files can be flagged after excluding generated and non-core files.
+- [x] Metrics distinguish observed GitHub data from inferred classifications.
+- [x] Any score-like metric exposes its component inputs and formula version.
+- [x] Repository-level summaries can rank PRs by the highest friction categories.
 
 ### Required Validation
 
@@ -128,7 +128,7 @@ Compute the core raw and derived friction metrics from normalized GitHub data us
 
 ### Status
 
-- [ ] Not started
+- Not started: no
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
@@ -145,7 +145,7 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 
 ### Scope
 
-- Generate a readable report for a configured target repository and time window.
+- Generate a readable report for a configured target repository and pull request sample.
 - Include ranked bottlenecks, metric evidence, representative PR examples, comment-source breakdowns, and recommended interventions.
 - Produce Markdown and JSON report artifacts.
 - Include report coverage metadata for available API families, missing scopes, partial data, rate limits, deleted branches, and PR-open diff reconstruction confidence.
@@ -163,14 +163,14 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 
 ### Acceptance Criteria
 
-- [ ] The report identifies the top friction patterns for fixture data.
-- [ ] Each recommendation includes evidence and representative PR examples.
-- [ ] The report separates Copilot, human, bot, scanner, and unknown comment sources.
-- [ ] The report shows which files/surfaces were counted as core product surfaces versus down-weighted support surfaces.
-- [ ] The report includes a coverage section that labels unavailable or partial GitHub data.
-- [ ] The report has both Markdown and JSON outputs.
-- [ ] Reports avoid individual developer ranking by default.
-- [ ] Reports can be generated locally for a configured target repository without external services beyond GitHub API access.
+- [x] The report identifies the top friction patterns for fixture data.
+- [x] Each recommendation includes evidence and representative PR examples.
+- [x] The report separates Copilot, human, bot, scanner, and unknown comment sources.
+- [x] The report shows which files/surfaces were counted as core product surfaces versus down-weighted support surfaces.
+- [x] The report includes a coverage section that labels unavailable or partial GitHub data.
+- [x] The report has both Markdown and JSON outputs.
+- [x] Reports avoid individual developer ranking by default.
+- [x] Reports can be generated locally for a configured target repository without external services beyond GitHub API access.
 
 ### Required Validation
 
@@ -186,7 +186,7 @@ Generate a useful repository friction report that ranks bottlenecks and maps the
 
 ### Status
 
-- [ ] Not started
+- Not started: no
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
