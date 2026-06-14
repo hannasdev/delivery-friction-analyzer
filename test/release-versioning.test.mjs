@@ -29,6 +29,9 @@ describe("release versioning", () => {
   it("rejects invalid semantic versions", () => {
     assert.throws(() => parseSemver("1.2"), /Invalid semantic version/);
     assert.throws(() => parseSemver("latest"), /Invalid semantic version/);
+    assert.throws(() => parseSemver("01.2.3"), /Invalid semantic version/);
+    assert.throws(() => parseSemver("1.02.3"), /Invalid semantic version/);
+    assert.throws(() => parseSemver("1.2.03"), /Invalid semantic version/);
     assert.throws(() => parseSemver("1.2.3-alpha..1"), /Invalid semantic version/);
     assert.throws(() => parseSemver("1.2.3-alpha.01"), /Invalid semantic version/);
   });

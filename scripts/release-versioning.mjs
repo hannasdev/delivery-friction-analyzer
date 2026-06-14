@@ -7,6 +7,12 @@ export function parseSemver(version) {
     throw new Error(`Invalid semantic version: ${version}`);
   }
 
+  for (const identifier of match.slice(1, 4)) {
+    if (!/^(0|[1-9]\d*)$/.test(identifier)) {
+      throw new Error(`Invalid semantic version: ${version}`);
+    }
+  }
+
   const prerelease = match[4] ? match[4].split(".") : [];
   for (const identifier of prerelease) {
     if (/^\d+$/.test(identifier) && !/^(0|[1-9]\d*)$/.test(identifier)) {
