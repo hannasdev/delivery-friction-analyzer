@@ -1,12 +1,46 @@
 {
   "name": "delivery-friction-analyzer",
   "version": "0.0.0",
+  "description": "Local GitHub pull request analytics for delivery friction reports.",
+  "license": "MIT",
   "type": "module",
-  "private": true,
+  "bin": {
+    "delivery-friction-analyzer": "src/cli/analyze-github.js"
+  },
+  "files": [
+    "src",
+    "schemas",
+    "docs/contracts",
+    "docs/reference",
+    "fixtures/github/mcp-writing/profile.json",
+    "LICENSE",
+    "README.md",
+    "release-log.md"
+  ],
   "scripts": {
     "analyze:github": "node src/cli/analyze-github.js",
     "report:fixture": "node src/report/generate-report.js --metrics-summary fixtures/github/mcp-writing/metrics-summary.golden.json --json-out fixtures/github/mcp-writing/reports/friction-report.golden.json --markdown-out fixtures/github/mcp-writing/reports/friction-report.golden.md",
     "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hannasdev/delivery-friction-analyzer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hannasdev/delivery-friction-analyzer/issues"
+  },
+  "homepage": "https://github.com/hannasdev/delivery-friction-analyzer#readme",
+  "keywords": [
+    "github",
+    "pull-request",
+    "developer-productivity",
+    "delivery-friction",
+    "ci",
+    "code-review",
+    "analytics"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "engines": {
     "node": ">=20"

@@ -1,7 +1,8 @@
-import { constants } from "node:fs";
+#!/usr/bin/env node
+import { constants, realpathSync } from "node:fs";
 import { access, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { collectGitHubSourceBundle } from "../collect/github-source-bundle.js";
 import { createGhCliProvider } from "../collect/gh-provider.js";
 import { computeRepositoryMetrics } from "../metrics/friction.js";
@@ -51,8 +52,8 @@ const CSV_ARTIFACT_KEYS = new Set([
 ]);
 
 export const USAGE = `Usage:
-  node src/cli/analyze-github.js --repo <owner/name> --limit <1-100> --profile <path> --out <directory>
-  node src/cli/analyze-github.js --repo <owner/name> --limit <1-100> --profile <path> --out <directory> --dry-run
+  delivery-friction-analyzer --repo <owner/name> --limit <1-100> --profile <path> --out <directory>
+  delivery-friction-analyzer --repo <owner/name> --limit <1-100> --profile <path> --out <directory> --dry-run
 
 Options:
   --repo <owner/name>       Target GitHub repository to analyze.
@@ -578,7 +579,17 @@ async function main(argv) {
   writeAnalyzeGithubCompletion(result, { json: options.json });
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+function isCliEntrypoint(entryPath) {
+  if (!entryPath) return false;
+
+  try {
+    return realpathSync(entryPath) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return import.meta.url === pathToFileURL(entryPath).href;
+  }
+}
+
+if (isCliEntrypoint(process.argv[1])) {
   main(process.argv.slice(2)).catch(error => {
     process.stderr.write(`${error.message}\n\n${USAGE}`);
     process.exitCode = 1;

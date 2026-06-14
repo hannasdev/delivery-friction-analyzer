@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-14 — NPM Release Automation
+
+- What changed: The package is prepared for public npm distribution with CLI metadata, a tight npm package allowlist, CI package dry-runs, automated conventional-commit versioning, GitHub release creation, and tag-triggered npm publishing.
+- Why it matters: Maintainers can validate the release artifact on every PR and publish versioned CLI releases without manually editing package metadata or uploading ad hoc tarballs.
+- Who is affected: Maintainers preparing releases and users installing the analyzer from npm.
+- Action needed: Configure `RELEASE_DEPLOY_KEY` and npm trusted publishing before the first tag-triggered release.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/28
+
 ### 2026-06-14 — Explicit PR Class Filtering
 
 - What changed: GitHub analysis now accepts `--exclude-pr-class` to recompute normalized data, metrics, reports, methodology, and CSV exports for an explicitly filtered PR class sample while preserving the full collected `source-bundle.json`.

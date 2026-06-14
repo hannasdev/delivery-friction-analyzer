@@ -40,6 +40,18 @@ npm run analyze:github -- \
   --out reports/mcp-writing
 ```
 
+After installing from npm, the same analyzer is available as a CLI:
+
+```sh
+npx delivery-friction-analyzer \
+  --repo hannasdev/mcp-writing \
+  --limit 30 \
+  --profile path/to/repository-profile.json \
+  --out reports/mcp-writing
+```
+
+The npm CLI still expects a local repository profile JSON. Use the sample profile from this repository as a starting point, then save a copy for the repository you want to analyze.
+
 The command writes:
 
 - `source-bundle.json`
@@ -75,3 +87,5 @@ The existing metrics-summary-only report command remains available for fixture a
 ```sh
 npm run report:fixture
 ```
+
+Maintainer release automation is documented in `docs/reference/release-automation.md`.

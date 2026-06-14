@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
-import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
+import { promisify } from "node:util";
 import {
   ANALYZE_GITHUB_ARTIFACTS,
   formatAnalyzeGithubCompletion,
@@ -11,6 +13,8 @@ import {
   writeAnalyzeGithubCompletion,
   writeAnalysisArtifacts,
 } from "../src/cli/analyze-github.js";
+
+const execFileAsync = promisify(execFile);
 
 function repositoryMetadata() {
   return {
@@ -255,6 +259,18 @@ describe("GitHub live analyze CLI", () => {
       excludedPrClasses: [],
       csv: true,
       json: false,
+    });
+  });
+
+  it("runs help output when invoked through an npm-style symlinked bin", async () => {
+    await withTempDirectory(async directory => {
+      const binPath = join(directory, "delivery-friction-analyzer");
+      await symlink(join(process.cwd(), "src/cli/analyze-github.js"), binPath);
+
+      const { stdout } = await execFileAsync(process.execPath, [binPath, "--help"]);
+
+      assert.match(stdout, /Usage:\n  delivery-friction-analyzer --repo <owner\/name>/);
+      assert.match(stdout, /--dry-run/);
     });
   });
 
