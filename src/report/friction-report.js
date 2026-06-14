@@ -521,7 +521,7 @@ function summarizeEvidenceClassDominance(evidence, prClasses) {
     ? ` The ${topClass.class} class has ${samplePullRequests} PRs in the analyzed sample, so treat this as a small-sample caveat.`
     : "";
   const basisLabel = basis === "score_value" ? "displayed score value" : "displayed example count";
-  const status = rawTopShare > 0.5 ? "single_class_dominates" : "distributed";
+  const status = topShare > 0.5 ? "single_class_dominates" : "distributed";
 
   return {
     status,
@@ -824,11 +824,7 @@ function sensitivityPrReference(summary) {
   return summary.excludedPr.url ? rawMarkdownCell(`[${label}](${summary.excludedPr.url})`) : label;
 }
 
-function evidenceCountLabel(value) {
-  return value === null || value === undefined ? "unknown" : String(value);
-}
-
-function evidenceScoreLabel(value) {
+function evidenceValueLabel(value) {
   return value === null || value === undefined ? "unknown" : String(value);
 }
 
@@ -836,12 +832,12 @@ function evidenceRows(observedData) {
   return (observedData ?? []).map(evidence => [
       prReference(evidence),
       evidence.title,
-      evidenceScoreLabel(evidence.value),
+      evidenceValueLabel(evidence.value),
       evidence.prClass?.class ?? "unknown",
-      evidenceCountLabel(evidence.additions),
-      evidenceCountLabel(evidence.deletions),
-      evidenceCountLabel(evidence.changedFiles),
-      evidenceCountLabel(evidence.changedLines),
+      evidenceValueLabel(evidence.additions),
+      evidenceValueLabel(evidence.deletions),
+      evidenceValueLabel(evidence.changedFiles),
+      evidenceValueLabel(evidence.changedLines),
     ]);
 }
 

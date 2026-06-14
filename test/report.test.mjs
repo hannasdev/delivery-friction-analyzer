@@ -317,6 +317,57 @@ describe("friction report generation", () => {
     assert(markdown.includes("| [#1](https://example.test/pull/1) | Release zero one | 0 | release | unknown | unknown | unknown | 10 |"));
   });
 
+  it("keeps class dominance distributed when the rendered share rounds to half", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 2,
+        changedLines: 20,
+        nonGeneratedChangedLines: 20,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "Release barely over half",
+          url: "https://example.test/pull/1",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "Development nearly half",
+          url: "https://example.test/pull/2",
+          prClass: { class: "development", classificationSource: "fallback_rule", ruleId: null },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "Release barely over half", value: 5004 },
+          { number: 2, title: "Development nearly half", value: 4996 },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.classDominance.status, "distributed");
+    assert.equal(reviewChurn.classDominance.topShare, 0.5);
+    assert.equal(reviewChurn.classDominance.note, "Displayed examples are not dominated by one PR class.");
+    assert(!markdown.includes("PR class release contributes 50%"));
+  });
+
   it("matches the class-dominance golden report fixture", async () => {
     const [metricsSummary, goldenJson, goldenMarkdown] = await Promise.all([
       readJson("../fixtures/github/mcp-writing/metrics-summary.class-dominance.json"),
