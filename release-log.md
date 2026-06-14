@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can validate the release artifact on every PR and publish versioned CLI releases without manually editing package metadata or uploading ad hoc tarballs.
 - Who is affected: Maintainers preparing releases and users installing the analyzer from npm.
 - Action needed: Configure `RELEASE_DEPLOY_KEY` and npm trusted publishing before the first tag-triggered release.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/28
 
 ### 2026-06-14 — Explicit PR Class Filtering
 
