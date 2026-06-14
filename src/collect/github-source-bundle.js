@@ -278,7 +278,6 @@ export async function collectGitHubSourceBundle({
   if (!provider) {
     throw new Error("provider is required.");
   }
-  requireLimit(limit);
   const targetPullRequestLimit = analysisPullRequestLimit ?? limit;
   requireLimit(targetPullRequestLimit);
   const targetInput = repository ? parseRepositoryInput(repository) : { owner, name };
@@ -314,9 +313,9 @@ export async function collectGitHubSourceBundle({
     run: () => provider.getLanguages(targetInput),
   });
 
-  const inventory = (await provider.listMergedPullRequests({ ...targetInput, limit }))
+  const inventory = (await provider.listMergedPullRequests({ ...targetInput, limit: targetPullRequestLimit }))
     .sort((left, right) => String(right.mergedAt ?? "").localeCompare(String(left.mergedAt ?? "")))
-    .slice(0, limit);
+    .slice(0, targetPullRequestLimit);
   const inventoryCoverage = coverageEntry({
     family: "pull_request_inventory",
     source: "gh pr list --state merged --search \"is:merged sort:merged-desc\"",
@@ -438,7 +437,7 @@ export async function collectGitHubSourceBundle({
     repositoryMetadata: mapRepositoryMetadata(repositoryMetadata),
     selection: {
       strategy: "latest_merged_pull_requests",
-      requestedLimit: limit,
+      requestedLimit: targetPullRequestLimit,
       collectedCount: pullRequests.length,
       source: "gh pr list --state merged --search \"is:merged sort:merged-desc\"",
     },

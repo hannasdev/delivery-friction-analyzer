@@ -272,6 +272,44 @@ describe("GitHub source collector", () => {
     );
   });
 
+  it("keeps target metadata aligned with the effective PR sample limit", async () => {
+    const provider = createProvider({
+      async listMergedPullRequests(input) {
+        this.calls.push(["listMergedPullRequests", input]);
+        return [
+          { number: 9, mergedAt: "2026-06-01T12:00:00Z" },
+          { number: 11, mergedAt: "2026-06-03T12:00:00Z" },
+          { number: 10, mergedAt: "2026-06-02T12:00:00Z" },
+        ];
+      },
+      async getPullRequest(input) {
+        this.calls.push(["getPullRequest", input]);
+        return pullRequestDetails({
+          number: input.number,
+          title: `PR ${input.number}`,
+          url: `https://github.com/example/example-repo/pull/${input.number}`,
+        });
+      },
+    });
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      analysisPullRequestLimit: 2,
+      provider,
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+
+    assert.equal(bundle.targetRepository.analysisPullRequestLimit, 2);
+    assert.equal(bundle.selection.requestedLimit, 2);
+    assert.equal(bundle.selection.collectedCount, 2);
+    assert.equal(
+      provider.calls.find(([method]) => method === "listMergedPullRequests")[1].limit,
+      2,
+    );
+    assert.deepEqual(bundle.pullRequests.map(pr => pr.number), [11, 10]);
+  });
+
   it("degrades review-thread coverage when GraphQL access is unavailable and redacts diagnostics", async () => {
     const fakeClassicToken = ["ghp", "abcdef1234567890"].join("_");
     const fakeEnvToken = ["super", "secret"].join("");
