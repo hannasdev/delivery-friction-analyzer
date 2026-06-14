@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can segment release, dependency, or repository-specific PR populations downstream without manually parsing PR titles.
 - Who is affected: Maintainers and contributors running or inspecting delivery-friction analysis artifacts.
 - Action needed: Add optional `prClasses` rules to repository profiles when PR populations should be labeled.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/25
 
 ### 2026-06-14 — PR Sample Contract Alignment
 
