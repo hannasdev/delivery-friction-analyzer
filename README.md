@@ -6,11 +6,19 @@ The core idea is to use GitHub data as the first durable signal. Pull request di
 
 ## Product Direction
 
-The MVP should be repo-source-agnostic and GitHub-connected. This repository is the builder repo for the analyzer; it is not expected to provide useful product analytics until it has meaningful PR history.
+Delivery Friction Analyzer is currently a local, GitHub-connected analyzer that produces repository-level friction reports from live pull request data. It is repo-source-agnostic: repository-specific assumptions live in profiles, while generated artifacts preserve source evidence, coverage caveats, and interpretation limits.
 
-The first version should run locally from this project, fetch live GitHub data for a configured target repository, and produce a repository-level friction report. `hannasdev/mcp-writing` is the first validation target and fixture source, not product-specific scope.
+`hannasdev/mcp-writing` remains the first validation target and fixture source, not product-specific scope.
 
-The report should answer:
+The current product wedge is a maintainer workflow:
+
+- collect the latest merged PR sample from a target repository;
+- classify files and PRs through repository profiles;
+- generate Markdown, JSON, methodology, and CSV artifacts;
+- explain review, validation, scope, planning, PR-size, and PR-class friction with traceable evidence;
+- support explicit follow-up filtering when maintainers want to inspect a configured PR population separately.
+
+The report helps answer:
 
 - Where do PRs require the most corrective loops?
 - Which feedback patterns repeat across PRs?
@@ -18,7 +26,7 @@ The report should answer:
 - Which changes create the largest gap between the PR opened state and the merged state?
 - Which changed files are part of the repository's configured product surface versus tests, docs, generated artifacts, release notes, marketing surfaces, or other support surfaces?
 
-The product should eventually combine GitHub delivery friction with token and model usage, but GitHub-only analytics are enough to validate the first product wedge.
+The product should eventually combine GitHub delivery friction with token and model usage, but GitHub-only analytics remain the active validation surface.
 
 ## Local GitHub Analysis
 
