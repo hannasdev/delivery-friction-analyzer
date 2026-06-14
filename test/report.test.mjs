@@ -114,7 +114,7 @@ describe("friction report generation", () => {
       targetRepository: {
         owner: "example",
         name: "target",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       totals: {},
       pullRequests: [
@@ -271,7 +271,7 @@ describe("friction report generation", () => {
       targetRepository: {
         owner: "example",
         name: "target",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       totals: {},
       pullRequests: [
@@ -308,7 +308,7 @@ describe("friction report generation", () => {
       targetRepository: {
         owner: "example",
         name: "target",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       totals: {},
       pullRequests: [
@@ -345,7 +345,7 @@ describe("friction report generation", () => {
       targetRepository: {
         owner: "example",
         name: "target",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       totals: {},
       pullRequests: [
@@ -382,7 +382,7 @@ describe("friction report generation", () => {
       targetRepository: {
         owner: "example",
         name: "target",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       summary: {
         pullRequests: 2,
@@ -470,7 +470,7 @@ describe("friction report generation", () => {
       targetRepository: {
         owner: "example",
         name: "target",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       summary: {
         pullRequests: 1,
@@ -553,7 +553,7 @@ describe("friction report generation", () => {
       targetRepository: {
         owner: "example",
         name: "target",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       totals: {},
       pullRequests: [
@@ -683,7 +683,7 @@ describe("friction report generation", () => {
       targetRepository: {
         owner: "example",
         name: "target",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       totals: {
         pullRequests: 1,
@@ -752,7 +752,7 @@ describe("friction report generation", () => {
       targetRepository: {
         owner: "example",
         name: "target",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       totals: {
         pullRequests: 2,

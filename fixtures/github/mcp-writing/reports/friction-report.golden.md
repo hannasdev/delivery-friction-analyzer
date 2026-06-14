@@ -2,7 +2,7 @@
 
 Report version: friction-report.v1
 Metric version: friction-metrics.v1
-Analysis window: 30 days
+PR sample: 3 pull request(s)
 
 ## Executive Summary
 

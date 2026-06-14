@@ -25,7 +25,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 
 - `reportVersion`: report contract version.
 - `metricVersion`: source metrics contract version.
-- `targetRepository`: analyzed repository identity and analysis window.
+- `targetRepository`: analyzed repository identity; live analysis sample size is latest-N merged pull requests from collection metadata.
 - `summary`: repository totals and top bottleneck identifiers.
 - `coverage`: PR-open diff, workflow-run, and review-thread coverage counts plus caveats.
 - `commentSources`: total and source-grouped review comments for Copilot, human, bot, scanner, author replies, and unknown sources.

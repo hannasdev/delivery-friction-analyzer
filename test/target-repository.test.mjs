@@ -10,7 +10,7 @@ describe("target repository contract", () => {
         name: "mcp-writing",
         defaultBranch: "main",
         visibility: "public",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
         isValidationTarget: true,
       },
       {
@@ -33,7 +33,7 @@ describe("target repository contract", () => {
         name: "delivery-friction-analyzer",
         defaultBranch: "main",
         visibility: "public",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       {
         productRepository: {
@@ -53,7 +53,7 @@ describe("target repository contract", () => {
         name: "Delivery-Friction-Analyzer",
         defaultBranch: "main",
         visibility: "public",
-        analysisWindowDays: 30,
+        analysisPullRequestLimit: 30,
       },
       {
         productRepository: {
@@ -75,7 +75,7 @@ describe("target repository contract", () => {
           name: 42,
           defaultBranch: "main",
           visibility: "public",
-          analysisWindowDays: 30,
+          analysisPullRequestLimit: 30,
         },
         {
           productRepository: {
@@ -90,17 +90,17 @@ describe("target repository contract", () => {
     assert(errors.some(error => error.includes("name must be a GitHub owner/name segment")));
   });
 
-  it("rejects malformed analysis windows and branch names", () => {
+  it("rejects malformed pull request limits and branch names", () => {
     const errors = validateTargetRepository({
       owner: "hannasdev",
       name: "mcp-writing",
       defaultBranch: "main with spaces",
       visibility: "public",
-      analysisWindowDays: 0,
+      analysisPullRequestLimit: 0,
     });
 
     assert(errors.some(error => error.includes("defaultBranch")));
-    assert(errors.some(error => error.includes("analysisWindowDays")));
+    assert(errors.some(error => error.includes("analysisPullRequestLimit")));
   });
 
   it("rejects non-boolean validation target flags", () => {
@@ -109,7 +109,7 @@ describe("target repository contract", () => {
       name: "mcp-writing",
       defaultBranch: "main",
       visibility: "public",
-      analysisWindowDays: 30,
+      analysisPullRequestLimit: 30,
       isValidationTarget: "false",
     });
 

@@ -2,18 +2,18 @@
 
 The product repository is where the analyzer runs. The target repository is the repository being analyzed. They must be modeled separately so the analyzer does not accidentally treat its own repository history as validation data.
 
-## Input
+## Input And Selection
 
-The local analyzer accepts:
+The local analyzer accepts a target repository and a pull request sample size. Target repository identity and sample selection are separate concepts:
 
 - `owner`: GitHub owner or organization.
 - `name`: GitHub repository name.
 - `defaultBranch`: expected default branch for merge-base and branch lookup context.
 - `visibility`: `public`, `private`, or `unknown`.
-- `analysisWindowDays`: rolling analysis window from 1 to 365 days.
+- PR sample size: latest merged pull request count from 1 to 100, supplied by the live CLI as `--limit`.
 - `isValidationTarget`: optional flag for fixture-source repositories such as `hannasdev/mcp-writing`.
 
-Schema: `schemas/target-repository.schema.json`.
+Schema: `schemas/target-repository.schema.json`. Live analysis selection is latest-N merged pull requests, not a rolling day window.
 
 ## Product Repository Separation
 

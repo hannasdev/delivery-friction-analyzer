@@ -5,7 +5,7 @@
     "name": "mcp-writing",
     "defaultBranch": "main",
     "visibility": "public",
-    "analysisWindowDays": 30,
+    "analysisPullRequestLimit": 30,
     "isValidationTarget": true
   },
   "totals": {
