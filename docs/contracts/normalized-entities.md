@@ -8,7 +8,8 @@ Milestone 1 defines the first normalized fixture shape. It is intentionally limi
 
 - `TargetRepository`: owner/name/default branch/visibility/window for the repository being analyzed.
 - `RepositoryLanguageDistribution`: byte counts from `GET /repos/{owner}/{repo}/languages`, stored as context only.
-- `PullRequest`: source IDs, author login when known, URL, state, lifecycle timestamps, final diff shape, PR-open diff source confidence, optional PR-open additions/deletions/changed-file counts when direct or reconstructed data is available, files, reviews, review decision summary, review threads, comments, checks, and workflow-run coverage.
+- `PullRequest`: source IDs, author login when known, URL, state, PR class evidence, lifecycle timestamps, final diff shape, PR-open diff source confidence, optional PR-open additions/deletions/changed-file counts when direct or reconstructed data is available, files, reviews, review decision summary, review threads, comments, checks, and workflow-run coverage.
+- `PrClassSummary`: profile-driven PR class, classification source, and winning rule ID. Unmatched PRs use `class: "unknown"`, `classificationSource: "fallback_rule"`, and `ruleId: null`.
 - `Commit`: commit OID, authored timestamp, committed timestamp when present, and message headline.
 - `ChangedFile`: path, additions, deletions, change type, category, role, functional surface, generated flag, and classification source.
 - `Review`: review attempt with author source, submitted timestamp, commit OID, generated comment count when known, and failed-attempt marker.

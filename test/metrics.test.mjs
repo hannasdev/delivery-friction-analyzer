@@ -19,6 +19,11 @@ function buildSyntheticPr(overrides = {}) {
     title: "feat: synthetic metrics fixture",
     url: "https://example.test/pr/1",
     state: "MERGED",
+    prClass: {
+      class: "unknown",
+      classificationSource: "fallback_rule",
+      ruleId: null,
+    },
     lifecycle: {
       createdAt: "2026-06-01T00:00:00Z",
       mergedAt: "2026-06-01T06:00:00Z",
@@ -123,6 +128,11 @@ describe("friction metric formulas", () => {
     const metrics = computePullRequestMetrics(buildSyntheticPr());
 
     assert.equal(metrics.metricVersion, FRICTION_METRICS_VERSION);
+    assert.deepEqual(metrics.prClass, {
+      class: "unknown",
+      classificationSource: "fallback_rule",
+      ruleId: null,
+    });
     assert.equal(metrics.files.nonGeneratedFiles, 4);
     assert.equal(metrics.files.coreFiles, 3);
     assert.equal(metrics.files.lowSignalFiles, 2);
@@ -233,6 +243,39 @@ describe("friction metric formulas", () => {
     });
     assert.equal(metrics.review.threads.totalCount, 0);
     assert.equal(metrics.components.iterationDrag.inputs.reviewThreads, 0);
+  });
+
+  it("carries normalized PR class evidence without changing ranking formulas", () => {
+    const releasePr = buildSyntheticPr({
+      number: 10,
+      title: "Release 2026.06.14",
+      prClass: {
+        class: "release",
+        classificationSource: "repository_profile",
+        ruleId: "release-title",
+      },
+    });
+    const developmentPr = buildSyntheticPr({
+      number: 11,
+      title: "feat: implementation",
+    });
+
+    const metrics = computePullRequestMetrics(releasePr);
+    const repositoryMetrics = computeRepositoryMetrics({
+      targetRepository: { owner: "example", name: "repo" },
+      pullRequests: [releasePr, developmentPr],
+    });
+
+    assert.deepEqual(metrics.prClass, {
+      class: "release",
+      classificationSource: "repository_profile",
+      ruleId: "release-title",
+    });
+    assert.deepEqual(repositoryMetrics.pullRequests.map(pr => [pr.number, pr.prClass.class]), [
+      [10, "release"],
+      [11, "unknown"],
+    ]);
+    assert.deepEqual(repositoryMetrics.rankings.validationGap.map(entry => entry.number), [10, 11]);
   });
 
   it("proves planning gap score is live for repository-profile planning docs", () => {

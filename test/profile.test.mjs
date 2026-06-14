@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { classifyFilePath } from "../src/profile/file-role.js";
+import { assertValidPrClassRules, classifyPullRequest, validatePrClassRules } from "../src/profile/pr-class.js";
 import { classifyCommentSource } from "../src/github/comment-source.js";
 
 describe("repository profile classification", () => {
@@ -60,6 +61,76 @@ describe("repository profile classification", () => {
     assert.doesNotThrow(() => classifyFilePath("src/app.js", profile));
     assert.equal(classifyFilePath("src/app.js", profile).classificationSource, "fallback_rule");
     assert.equal(classifyFilePath("docs/readme.md", profile).role, "planning_docs");
+  });
+});
+
+describe("pull request class classification", () => {
+  it("classifies pull requests through first-match title rules", () => {
+    const profile = {
+      prClasses: [
+        {
+          id: "release-with-train",
+          class: "release_train",
+          match: { titleIncludes: "Release", titleRegex: "^Release \\d{4}" },
+        },
+        {
+          id: "release-generic",
+          class: "release",
+          match: { titleIncludes: "Release" },
+        },
+      ],
+    };
+
+    assert.deepEqual(classifyPullRequest({ title: "Release 2026.06.14" }, profile), {
+      class: "release_train",
+      classificationSource: "repository_profile",
+      ruleId: "release-with-train",
+    });
+  });
+
+  it("uses unknown fallback class when no PR class rule matches", () => {
+    const profile = {
+      prClasses: [
+        { id: "release-title", class: "release", match: { titleRegex: "^Release\\b" } },
+      ],
+    };
+
+    assert.deepEqual(classifyPullRequest({ title: "feat: add search" }, profile), {
+      class: "unknown",
+      classificationSource: "fallback_rule",
+      ruleId: null,
+    });
+  });
+
+  it("validates PR class rule shape before normalization uses it", () => {
+    const errors = validatePrClassRules({
+      prClasses: [
+        { id: "duplicate", class: "release", match: { titleIncludes: "Release" } },
+        { id: "duplicate", class: "release train", match: {} },
+        { id: "bad-regex", class: "release", match: { titleRegex: "[" } },
+      ],
+    });
+
+    assert(errors.some(error => error.includes("duplicated")));
+    assert(errors.some(error => error.includes("lower-kebab-case or lower_snake_case")));
+    assert(errors.some(error => error.includes("must include titleIncludes or titleRegex")));
+    assert(errors.some(error => error.includes("titleRegex is invalid")));
+  });
+
+  it("reports malformed PR class rule collections without throwing", () => {
+    assert.deepEqual(validatePrClassRules({ prClasses: {} }), [
+      "prClasses must be an array when provided",
+    ]);
+  });
+
+  it("rejects explicit null PR class rule collections", () => {
+    assert.deepEqual(validatePrClassRules({ prClasses: null }), [
+      "prClasses must be an array when provided",
+    ]);
+    assert.throws(
+      () => assertValidPrClassRules({ prClasses: null }),
+      /invalid PR class profile rules: prClasses must be an array when provided/,
+    );
   });
 });
 

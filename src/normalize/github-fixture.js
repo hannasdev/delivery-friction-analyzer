@@ -1,5 +1,6 @@
 import { classifyCommentSource, groupByCommentSource } from "../github/comment-source.js";
 import { classifyFilePath } from "../profile/file-role.js";
+import { assertValidPrClassRules, classifyPullRequest } from "../profile/pr-class.js";
 
 function minDate(values) {
   return values.filter(Boolean).sort()[0] ?? null;
@@ -100,6 +101,9 @@ function normalizeCommit(commit) {
 }
 
 export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
+  const profile = repositoryProfile ?? {};
+  assertValidPrClassRules(profile);
+
   const pullRequests = (bundle.pullRequests ?? []).map(pr => {
     const reviewDates = (pr.reviews ?? []).map(review => review.submittedAt);
     const threadComments = flattenThreadComments(pr.reviewThreads);
@@ -109,6 +113,7 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
       url: pr.url,
       state: pr.state,
       authorLogin: pr.author?.login ?? null,
+      prClass: classifyPullRequest(pr, profile),
       lifecycle: {
         createdAt: pr.createdAt,
         mergedAt: pr.mergedAt ?? null,
@@ -124,7 +129,7 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
       },
       prOpenDiff: pr.prOpenDiff ?? { source: "unavailable", confidence: "unavailable" },
       files: (pr.files ?? []).map(file => ({
-        ...classifyFilePath(file.path, repositoryProfile),
+        ...classifyFilePath(file.path, profile),
         additions: file.additions,
         deletions: file.deletions,
         changeType: file.changeType,

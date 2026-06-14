@@ -128,6 +128,11 @@
       "title": "docs: accept architecture snapshot milestone",
       "url": "https://github.com/hannasdev/mcp-writing/pull/223",
       "state": "MERGED",
+      "prClass": {
+        "class": "unknown",
+        "classificationSource": "fallback_rule",
+        "ruleId": null
+      },
       "coverage": {
         "prOpenDiff": {
           "source": "unavailable",
@@ -372,6 +377,11 @@
       "title": "feat: resolve scene vocabulary variants",
       "url": "https://github.com/hannasdev/mcp-writing/pull/239",
       "state": "MERGED",
+      "prClass": {
+        "class": "unknown",
+        "classificationSource": "fallback_rule",
+        "ruleId": null
+      },
       "coverage": {
         "prOpenDiff": {
           "source": "unavailable",
@@ -637,6 +647,11 @@
       "title": "feat(backup): apply project restores transactionally",
       "url": "https://github.com/hannasdev/mcp-writing/pull/221",
       "state": "MERGED",
+      "prClass": {
+        "class": "unknown",
+        "classificationSource": "fallback_rule",
+        "ruleId": null
+      },
       "coverage": {
         "prOpenDiff": {
           "source": "unavailable",

@@ -694,6 +694,9 @@ describe("friction report generation", () => {
       "pr_number",
       "title",
       "url",
+      "pr_class",
+      "pr_classification_source",
+      "pr_class_rule_id",
       "changed_lines",
       "non_generated_changed_lines",
       "review_comments",
@@ -707,7 +710,7 @@ describe("friction report generation", () => {
       "cancelled_workflow_runs",
       "post_review_commits",
     ].join(",")));
-    assert(csvArtifacts.prMetricsCsv.includes("239,feat: resolve scene vocabulary variants,https://github.com/hannasdev/mcp-writing/pull/239,1245"));
+    assert(csvArtifacts.prMetricsCsv.includes("239,feat: resolve scene vocabulary variants,https://github.com/hannasdev/mcp-writing/pull/239,unknown,fallback_rule,,1245"));
     assert(csvArtifacts.bottleneckExamplesCsv.includes("review-churn,Review churn,pr_readiness_gate,239"));
     assert(csvArtifacts.bottleneckExamplesCsv.includes(",rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed,graphql:repository.pullRequest.reviewThreads,"));
     assert(csvArtifacts.commentSourcesCsv.includes("copilot,15,true,false,0.5"));
@@ -897,10 +900,10 @@ describe("friction report generation", () => {
     assert(markdown.includes("- Human approved: no"));
     assert(markdown.includes("- Human changes requested: no"));
     assert(csvArtifacts.prMetricsCsv.includes(
-      "1,unavailable coverage,https://example.test/pull/1,10,10,0,,unavailable,,,,0,,,,unavailable,unavailable,unavailable",
+      "1,unavailable coverage,https://example.test/pull/1,unknown,fallback_rule,,10,10,0,,unavailable,,,,0,,,,unavailable,unavailable,unavailable",
     ));
     assert(csvArtifacts.prMetricsCsv.includes(
-      "2,observed zero coverage,https://example.test/pull/2,10,10,0,0,none,0,false,false,0,0,0,0,graphql:repository.pullRequest.reviewThreads,rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed",
+      "2,observed zero coverage,https://example.test/pull/2,unknown,fallback_rule,,10,10,0,0,none,0,false,false,0,0,0,0,graphql:repository.pullRequest.reviewThreads,rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed",
     ));
     assert(csvArtifacts.bottleneckExamplesCsv.includes(
       "review-churn,Review churn,pr_readiness_gate,1,unavailable coverage,https://example.test/pull/1,1,10,0,,,",
@@ -995,7 +998,7 @@ describe("friction report generation", () => {
       },
     });
 
-    assert(csvArtifacts.prMetricsCsv.includes("7,\"' =IMPORTXML(\"\"https://example.test\"\")\",'+https://example.test/pull/7,-1"));
+    assert(csvArtifacts.prMetricsCsv.includes("7,\"' =IMPORTXML(\"\"https://example.test\"\")\",'+https://example.test/pull/7,unknown,fallback_rule,,-1"));
     assert(csvArtifacts.commentSourcesCsv.includes("'@scanner,1,false,false,1"));
     assert(csvArtifacts.collectionCoverageCsv.includes("'\tgraphql,'-looks like formula,partial evidence"));
   });

@@ -4,6 +4,13 @@
     "owner": "hannasdev",
     "name": "mcp-writing"
   },
+  "prClasses": [
+    {
+      "id": "release-title",
+      "class": "release",
+      "match": { "titleRegex": "^Release\\b" }
+    }
+  ],
   "rules": [
     {
       "id": "generated-tool-docs",

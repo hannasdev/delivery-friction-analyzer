@@ -1,3 +1,5 @@
+import { PR_CLASS_FALLBACK } from "../profile/pr-class.js";
+
 export const FRICTION_METRICS_VERSION = "friction-metrics.v1";
 export const FRICTION_METRIC_CONSTANTS = Object.freeze({
   lowSignalRoleWeight: 0.25,
@@ -320,6 +322,7 @@ export function computePullRequestMetrics(pr) {
     title: pr.title,
     url: pr.url,
     state: pr.state,
+    prClass: pr.prClass ?? { ...PR_CLASS_FALLBACK },
     coverage: {
       prOpenDiff: {
         source: pr.prOpenDiff?.source ?? "unavailable",

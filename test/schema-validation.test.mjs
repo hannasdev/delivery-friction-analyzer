@@ -79,11 +79,17 @@ function validateSchema(value, schema, schemas, path = "$") {
       errors.push(`${path} must match ${schema.pattern}`);
     }
   }
+  if (typeof value === "string" && schema.minLength !== undefined && value.length < schema.minLength) {
+    errors.push(`${path} must have length >= ${schema.minLength}`);
+  }
   const shouldValidateObjectShape = (schema.type === "object" || schema.required || schema.properties || schema.additionalProperties)
     && value
     && typeof value === "object"
     && !Array.isArray(value);
   if (shouldValidateObjectShape) {
+    if (schema.minProperties !== undefined && Object.keys(value).length < schema.minProperties) {
+      errors.push(`${path} must have at least ${schema.minProperties} propert${schema.minProperties === 1 ? "y" : "ies"}`);
+    }
     for (const key of schema.required ?? []) {
       if (!(key in value)) errors.push(`${path}.${key} is required`);
     }
@@ -105,6 +111,54 @@ function validateSchema(value, schema, schemas, path = "$") {
   }
   return errors;
 }
+
+describe("repository profile schema", () => {
+  it("validates profiles with omitted or configured PR class rules", async () => {
+    const schema = await readJson("../schemas/repository-profile.schema.json");
+    const baseProfile = {
+      schemaVersion: "repository-profile.v1",
+      repository: { owner: "example", name: "repo" },
+      rules: [],
+    };
+    const classedProfile = {
+      ...baseProfile,
+      prClasses: [
+        {
+          id: "release-title",
+          class: "release",
+          match: { titleRegex: "^Release\\b" },
+        },
+      ],
+    };
+
+    assert.deepEqual(validateSchema(baseProfile, schema, {}), []);
+    assert.deepEqual(validateSchema(classedProfile, schema, {}), []);
+  });
+
+  it("rejects malformed PR class rule fields", async () => {
+    const schema = await readJson("../schemas/repository-profile.schema.json");
+    const profile = {
+      schemaVersion: "repository-profile.v1",
+      repository: { owner: "example", name: "repo" },
+      rules: [],
+      prClasses: [
+        {
+          id: "",
+          class: "Release PR",
+          match: {},
+          unsupported: true,
+        },
+      ],
+    };
+
+    const errors = validateSchema(profile, schema, {});
+
+    assert(errors.some(error => error.includes("$.prClasses[0].id must have length >= 1")));
+    assert(errors.some(error => error.includes("$.prClasses[0].class must match")));
+    assert(errors.some(error => error.includes("$.prClasses[0].match must have at least 1 property")));
+    assert(errors.some(error => error.includes("$.prClasses[0].unsupported is not allowed")));
+  });
+});
 
 describe("normalized entity schema", () => {
   it("validates normalized fixture output against the schema", async () => {
@@ -137,6 +191,23 @@ describe("normalized entity schema", () => {
     });
 
     assert(errors.some(error => error.includes("$.pullRequests[0].commits is required")));
+  });
+
+  it("rejects normalized pull requests missing PR class evidence", async () => {
+    const [bundle, profile, normalizedSchema, targetSchema] = await Promise.all([
+      readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),
+      readJson("../fixtures/github/mcp-writing/profile.json"),
+      readJson("../schemas/normalized-entities.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const normalized = normalizeFixtureBundle(bundle, { repositoryProfile: profile });
+    delete normalized.pullRequests[0].prClass;
+
+    const errors = validateSchema(normalized, normalizedSchema, {
+      "target-repository.schema.json": targetSchema,
+    });
+
+    assert(errors.some(error => error.includes("$.pullRequests[0].prClass is required")));
   });
 
   it("enforces referenced schema maximum and pattern constraints", async () => {
