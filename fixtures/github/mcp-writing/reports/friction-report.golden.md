@@ -42,7 +42,7 @@ Coverage notes:
 - Top bottlenecks: review-churn, repo-guidance-gap, changed-file-spread.
 - Strongest displayed signal: Review churn (iteration drag).
 - Outlier caveat: Review churn: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Repo guidance gap: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Review surprise: PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing. Fix amplification: PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
-- PR class caveat: displayed bottleneck examples are not dominated by one PR class.
+- PR class caveat: only one PR class appears in the analyzed sample, so class dominance comparison is not meaningful.
 - Coverage caveat: PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
 
 ## PR Class Context

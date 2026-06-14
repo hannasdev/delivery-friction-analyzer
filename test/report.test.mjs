@@ -420,6 +420,60 @@ describe("friction report generation", () => {
     assert(!markdown.includes("PR class release contributes 50%"));
   });
 
+  it("does not describe one-class samples as distributed class dominance", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 2,
+        changedLines: 20,
+        nonGeneratedChangedLines: 20,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "Release one",
+          url: "https://example.test/pull/1",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "Release two",
+          url: "https://example.test/pull/2",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "Release one", value: 5 },
+          { number: 2, title: "Release two", value: 4 },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.classDominance.status, "not_applicable");
+    assert.equal(
+      reviewChurn.classDominance.note,
+      "Only one PR class appears in the analyzed sample; class dominance is not meaningful.",
+    );
+    assert(markdown.includes("PR class caveat: only one PR class appears in the analyzed sample, so class dominance comparison is not meaningful."));
+    assert(!markdown.includes("PR class caveat: displayed bottleneck examples are not dominated by one PR class."));
+  });
+
   it("matches the class-dominance golden report fixture", async () => {
     const [metricsSummary, goldenJson, goldenMarkdown] = await Promise.all([
       readJson("../fixtures/github/mcp-writing/metrics-summary.class-dominance.json"),

@@ -119,7 +119,7 @@ Make class distribution and class-driven dominance visible in the Markdown and J
 - [x] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M3: Explicit Class Filtering

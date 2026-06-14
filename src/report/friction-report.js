@@ -1013,9 +1013,19 @@ function renderKeyFindings(report) {
       : "Outlier caveat: displayed bottleneck examples are not dominated by a single PR.",
     classDominanceCallouts.length
       ? `PR class caveat: ${classDominanceCallouts.join(" ")}`
-      : "PR class caveat: displayed bottleneck examples are not dominated by one PR class.",
+      : classDominanceFallback(report.prClasses),
     `Coverage caveat: ${coverageNotes}`,
   ]);
+}
+
+function classDominanceFallback(prClasses) {
+  const sampleClasses = (prClasses?.distribution ?? []).filter(entry => entry.pullRequests > 0);
+  if (!sampleClasses.length) {
+    return "PR class caveat: PR class context was not available for the analyzed sample.";
+  }
+  return sampleClasses.length < 2
+    ? "PR class caveat: only one PR class appears in the analyzed sample, so class dominance comparison is not meaningful."
+    : "PR class caveat: displayed bottleneck examples are not dominated by one PR class.";
 }
 
 function renderPrClassContext(prClasses) {
