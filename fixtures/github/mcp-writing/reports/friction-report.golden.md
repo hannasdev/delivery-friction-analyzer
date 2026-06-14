@@ -2,7 +2,7 @@
 
 Report version: friction-report.v1
 Metric version: friction-metrics.v1
-PR sample: 3 pull request(s)
+Pull requests analyzed: 3
 
 ## Executive Summary
 

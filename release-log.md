@@ -4,7 +4,7 @@
 
 ### 2026-06-14 — PR Sample Contract Alignment
 
-- What changed: Target repository metadata now records the latest-N pull request sample size, and Markdown reports label the sample as pull requests instead of a day window.
+- What changed: Target repository metadata now records the latest-N pull request sample size, and Markdown reports label the analyzed pull request count instead of a day window.
 - Why it matters: Maintainers can trust that report headers, fixtures, and schemas describe the actual analysis selection model.
 - Who is affected: Maintainers and contributors reviewing generated reports, fixtures, or target repository metadata.
 - Action needed: Update consumers that read `analysisWindowDays` to use `analysisPullRequestLimit`.

@@ -957,7 +957,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     `Report version: ${report.reportVersion}`,
     `Metric version: ${report.metricVersion}`,
-    `PR sample: ${report.summary?.pullRequests ?? "unknown"} pull request(s)`,
+    `Pull requests analyzed: ${report.summary?.pullRequests ?? "unknown"}`,
     "",
     "## Executive Summary",
     "",

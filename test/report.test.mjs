@@ -39,6 +39,8 @@ describe("friction report generation", () => {
 
     assert.deepEqual(report, goldenJson);
     assert.equal(markdown, goldenMarkdown);
+    assert(markdown.includes("Pull requests analyzed: 3"));
+    assert(!markdown.includes("PR sample:"));
   });
 
   it("keeps observed evidence, diagnosis, and action separate", async () => {
