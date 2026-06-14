@@ -2,13 +2,13 @@
 
 ## Status
 
-Status: Active for M3 implementation.
+Status: Implemented; final initiative completion deferred until PR merge.
 
-- State: Active
+- State: Review
 - Owner: Hanna
 - Created: 2026-06-12
 - Activated: 2026-06-14
-- Active milestone: M3: Explicit Class Filtering
+- Current milestone: M3: Explicit Class Filtering (implemented; awaiting PR review and merge)
 - Related issue:
   - [#16: Release PRs are a different population and skew the ranking](https://github.com/hannasdev/delivery-friction-analyzer/issues/16)
 - Related docs:

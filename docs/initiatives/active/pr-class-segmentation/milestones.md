@@ -175,6 +175,8 @@ Allow users to run an explicitly filtered analysis when they want to inspect dev
 
 ### Status
 
+Status: Implemented; final initiative completion deferred until PR merge.
+
 - [x] Active
 - [x] Implemented
 - [ ] Conformance reviewed
