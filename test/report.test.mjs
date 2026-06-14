@@ -110,6 +110,385 @@ describe("friction report generation", () => {
     assert(markdown.includes("| [#239](https://github.com/hannasdev/mcp-writing/pull/239) |"));
   });
 
+  it("reports PR class distribution and class-dominance caveats", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 3,
+        changedLines: 700,
+        nonGeneratedChangedLines: 700,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "Release 2026.06.14",
+          url: "https://example.test/pull/1",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 500 },
+          files: { nonGeneratedChangedLines: 500 },
+        },
+        {
+          number: 2,
+          title: "Release follow-up",
+          url: "https://example.test/pull/2",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 100 },
+          files: { nonGeneratedChangedLines: 100 },
+        },
+        {
+          number: 3,
+          title: "feature work",
+          url: "https://example.test/pull/3",
+          prClass: { class: "development", classificationSource: "fallback_rule", ruleId: null },
+          diffAtMerge: { changedLines: 100 },
+          files: { nonGeneratedChangedLines: 100 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "Release 2026.06.14", value: 10 },
+          { number: 2, title: "Release follow-up", value: 8 },
+          { number: 3, title: "feature work", value: 2 },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.deepEqual(report.prClasses.distribution.map(entry => ({
+      class: entry.class,
+      pullRequests: entry.pullRequests,
+      changedLines: entry.changedLines,
+      share: entry.share,
+    })), [
+      { class: "release", pullRequests: 2, changedLines: 600, share: 0.667 },
+      { class: "development", pullRequests: 1, changedLines: 100, share: 0.333 },
+    ]);
+    assert.equal(reviewChurn.classDominance.status, "single_class_dominates");
+    assert.equal(reviewChurn.classDominance.class, "release");
+    assert.equal(reviewChurn.classDominance.topShare, 0.9);
+    assert.equal(reviewChurn.classDominance.basis, "score_value");
+    assert(reviewChurn.classDominance.note.includes("small-sample caveat"));
+    assert.deepEqual(reviewChurn.observedData.map(entry => entry.prClass.class), [
+      "release",
+      "release",
+      "development",
+    ]);
+    assert(markdown.includes("## PR Class Context"));
+    assert(markdown.includes("| release | 2 | 600 | 67% | repository\\_profile=2 |"));
+    assert(markdown.includes("| development | 1 | 100 | 33% | fallback\\_rule=1 |"));
+    assert(markdown.includes("PR class caveat: Review churn: PR class release contributes 90%"));
+    assert(markdown.includes("| [#1](https://example.test/pull/1) | Release 2026.06.14 | 10 | release | unknown | unknown | unknown | 500 |"));
+    assert(markdown.includes("- PR class: release (source=repository\\_profile, rule=release-title)"));
+  });
+
+  it("falls back to displayed example count when displayed ranking scores are unavailable", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 3,
+        changedLines: 30,
+        nonGeneratedChangedLines: 30,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "Release unavailable one",
+          url: "https://example.test/pull/1",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "Release unavailable two",
+          url: "https://example.test/pull/2",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 3,
+          title: "Development unavailable",
+          url: "https://example.test/pull/3",
+          prClass: { class: "development", classificationSource: "fallback_rule", ruleId: null },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "Release unavailable one", value: null },
+          { number: 2, title: "Release unavailable two", value: null },
+          { number: 3, title: "Development unavailable", value: null },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.classDominance.status, "single_class_dominates");
+    assert.equal(reviewChurn.classDominance.class, "release");
+    assert.equal(reviewChurn.classDominance.topShare, 0.667);
+    assert.equal(reviewChurn.classDominance.basis, "displayed_example_count");
+    assert.equal(reviewChurn.classDominance.displayedExamples, 2);
+    assert(markdown.includes("PR class release contributes 67% of the displayed example count"));
+    assert(markdown.includes("| [#1](https://example.test/pull/1) | Release unavailable one | unknown | release | unknown | unknown | unknown | 10 |"));
+  });
+
+  it("falls back to displayed example count when displayed ranking scores are zero", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 3,
+        changedLines: 30,
+        nonGeneratedChangedLines: 30,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "Release zero one",
+          url: "https://example.test/pull/1",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "Release zero two",
+          url: "https://example.test/pull/2",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 3,
+          title: "Development zero",
+          url: "https://example.test/pull/3",
+          prClass: { class: "development", classificationSource: "fallback_rule", ruleId: null },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "Release zero one", value: 0 },
+          { number: 2, title: "Release zero two", value: 0 },
+          { number: 3, title: "Development zero", value: 0 },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.classDominance.status, "single_class_dominates");
+    assert.equal(reviewChurn.classDominance.class, "release");
+    assert.equal(reviewChurn.classDominance.topShare, 0.667);
+    assert.equal(reviewChurn.classDominance.basis, "displayed_example_count");
+    assert.equal(reviewChurn.classDominance.displayedExamples, 2);
+    assert(markdown.includes("PR class release contributes 67% of the displayed example count"));
+    assert(markdown.includes("| [#1](https://example.test/pull/1) | Release zero one | 0 | release | unknown | unknown | unknown | 10 |"));
+  });
+
+  it("keeps class dominance distributed when the rendered share rounds to half", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 2,
+        changedLines: 20,
+        nonGeneratedChangedLines: 20,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "Release barely over half",
+          url: "https://example.test/pull/1",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "Development nearly half",
+          url: "https://example.test/pull/2",
+          prClass: { class: "development", classificationSource: "fallback_rule", ruleId: null },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "Release barely over half", value: 5004 },
+          { number: 2, title: "Development nearly half", value: 4996 },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.classDominance.status, "distributed");
+    assert.equal(reviewChurn.classDominance.topShare, 0.5);
+    assert.equal(reviewChurn.classDominance.note, "Displayed examples are not dominated by one PR class.");
+    assert(!markdown.includes("PR class release contributes 50%"));
+  });
+
+  it("does not render dominant class shares just over half as 50 percent", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 2,
+        changedLines: 20,
+        nonGeneratedChangedLines: 20,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "Release just over half",
+          url: "https://example.test/pull/1",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "Development just under half",
+          url: "https://example.test/pull/2",
+          prClass: { class: "development", classificationSource: "fallback_rule", ruleId: null },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "Release just over half", value: 501 },
+          { number: 2, title: "Development just under half", value: 499 },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.classDominance.status, "single_class_dominates");
+    assert.equal(reviewChurn.classDominance.topShare, 0.501);
+    assert(reviewChurn.classDominance.note.includes("PR class release contributes 50.1%"));
+    assert(markdown.includes("PR class release contributes 50.1%"));
+    assert(!markdown.includes("PR class release contributes 50%"));
+  });
+
+  it("does not describe one-class samples as distributed class dominance", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 2,
+        changedLines: 20,
+        nonGeneratedChangedLines: 20,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "Release one",
+          url: "https://example.test/pull/1",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+        {
+          number: 2,
+          title: "Release two",
+          url: "https://example.test/pull/2",
+          prClass: { class: "release", classificationSource: "repository_profile", ruleId: "release-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: { nonGeneratedChangedLines: 10 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [
+          { number: 1, title: "Release one", value: 5 },
+          { number: 2, title: "Release two", value: 4 },
+        ],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+
+    assert.equal(reviewChurn.classDominance.status, "not_applicable");
+    assert.equal(
+      reviewChurn.classDominance.note,
+      "Only one PR class appears in the analyzed sample; class dominance is not meaningful.",
+    );
+    assert(markdown.includes("PR class caveat: only one PR class appears in the analyzed sample, so class dominance comparison is not meaningful."));
+    assert(!markdown.includes("PR class caveat: displayed bottleneck examples are not dominated by one PR class."));
+  });
+
+  it("matches the class-dominance golden report fixture", async () => {
+    const [metricsSummary, goldenJson, goldenMarkdown] = await Promise.all([
+      readJson("../fixtures/github/mcp-writing/metrics-summary.class-dominance.json"),
+      readJson("../fixtures/github/mcp-writing/reports/friction-report.class-dominance.golden.json"),
+      readText("../fixtures/github/mcp-writing/reports/friction-report.class-dominance.golden.md"),
+    ]);
+
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assert.deepEqual(report, goldenJson);
+    assert.equal(markdown, goldenMarkdown);
+    assert(markdown.includes("PR class caveat: Review churn: PR class release contributes 90%"));
+  });
+
   it("counts bot comments even when a bot source is outside displayed source samples", () => {
     const report = generateRepositoryFrictionReport({
       metricVersion: "friction-metrics.v1",
@@ -175,10 +554,12 @@ describe("friction report generation", () => {
     assert(markdown.includes("- Review churn, Repo guidance gap share the review churn ranking signal"));
     assert(markdown.includes("Recommendation categories remain distinct: PR readiness gates, Repo-specific AI skills."));
     assert(markdown.includes("- Bottlenecks are ordered by their strongest displayed representative score"));
-    assert(markdown.includes("| PR | Title | Score | Additions | Deletions | Files changed | Changed lines |"));
+    assert(markdown.includes("## PR Class Context"));
+    assert(markdown.includes("| unknown | 3 | 2454 | 100% | fallback\\_rule=3 |"));
+    assert(markdown.includes("| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |"));
     assert(
       markdown.includes(
-        "| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | 1168 | 77 | 13 | 1245 |",
+        "| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | unknown | 1168 | 77 | 13 | 1245 |",
       ),
     );
     assert(markdown.includes("Evidence details for PR #239:"));
@@ -189,6 +570,7 @@ describe("friction report generation", () => {
     assert(markdown.includes("- Review decision: none (source: reviews)"));
     assert(markdown.includes("- Human reviewers: 0"));
     assert(markdown.includes("- Comment sources: author\\_reply=15, copilot=15"));
+    assert(markdown.includes("- PR class: unknown (source=fallback\\_rule)"));
     assert(markdown.includes("- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\\_request"));
     assert(markdown.includes("#### Review churn Interpretation And Recommendation"));
     assert(markdown.includes("| Inferred diagnosis | Review loops are concentrated in a small set of PRs. |"));
@@ -532,7 +914,7 @@ describe("friction report generation", () => {
       followUp: [],
     });
 
-    assert(markdown.includes("| #7 | legacy evidence shape | 2 | unknown | unknown | unknown | 1 |"));
+    assert(markdown.includes("| #7 | legacy evidence shape | 2 | unknown | unknown | unknown | unknown | 1 |"));
     assert(markdown.includes("Recommendation category: unspecified"));
     assert(!markdown.includes("Recommendation category: undefined"));
     assert(markdown.includes("- Workflow coverage: unavailable"));
@@ -580,7 +962,7 @@ describe("friction report generation", () => {
 
     assert(
       markdown.includes(
-        "| [#7](https://example.test/pull/7) | fix \\*markdown\\* \\[link\\](https://example.test) \\`code\\` | 2 | unknown | unknown | unknown | 1 |",
+        "| [#7](https://example.test/pull/7) | fix \\*markdown\\* \\[link\\](https://example.test) \\`code\\` | 2 | unknown | unknown | unknown | unknown | 1 |",
       ),
     );
   });
@@ -616,7 +998,7 @@ describe("friction report generation", () => {
 
     assert(
       markdown.includes(
-        String.raw`| [#7](https://example.test/pull/7) | fix \\\*literal\\\* \[link\] and \`code\` | 2 | unknown | unknown | unknown | 1 |`,
+        String.raw`| [#7](https://example.test/pull/7) | fix \\\*literal\\\* \[link\] and \`code\` | 2 | unknown | unknown | unknown | unknown | 1 |`,
       ),
     );
   });

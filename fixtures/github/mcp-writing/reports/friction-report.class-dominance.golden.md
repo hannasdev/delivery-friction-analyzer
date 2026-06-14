@@ -1,0 +1,357 @@
+# Repository Friction Report: example/target
+
+Report version: friction-report.v1
+Metric version: friction-metrics.v1
+Pull requests analyzed: 3
+
+## Executive Summary
+
+| Metric | Value |
+| --- | --- |
+| Pull requests analyzed | 3 |
+| Changed lines | 700 |
+| Non-generated changed lines | 700 |
+| Review comments | 0 |
+| Review threads | 0 |
+| Failed checks | 0 |
+| Cancelled workflow runs | 0 |
+| Top bottlenecks | review-churn, repo-guidance-gap |
+
+## How To Read This Report
+
+- Observed evidence is measured from GitHub data and repository-profile classifications.
+- Interpretation is the analyzer's explanation of what the observed evidence suggests.
+- Recommendation is a workflow intervention to consider; the report does not modify repositories.
+- Confidence and caveats call out outliers, missing coverage, and evidence-quality limits before you act.
+
+## Evidence Quality And Coverage
+
+| Evidence area | Observed coverage |
+| --- | --- |
+| PR-open diff | unavailable: 3 |
+| Workflow runs | unavailable: 3 |
+| Review thread sources | unavailable: 3 |
+
+Coverage notes:
+
+- PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.
+- Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
+
+## Key Findings
+
+- Top bottlenecks: review-churn, repo-guidance-gap.
+- Strongest displayed signal: Review churn (iteration drag).
+- Outlier caveat: displayed bottleneck examples are not dominated by a single PR.
+- PR class caveat: Review churn: PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat. Repo guidance gap: PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat.
+- Coverage caveat: PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
+
+## PR Class Context
+
+PR classes are repository-profile evidence for interpretation only; they do not change rankings or exclude PRs.
+
+| Class | PRs | Changed lines | Share | Sources |
+| --- | --- | --- | --- | --- |
+| release | 2 | 600 | 67% | repository\_profile=2 |
+| development | 1 | 100 | 33% | fallback\_rule=1 |
+
+## Shared Signal Interpretation
+
+Shared-signal groups are report interpretation only; they do not change scores, ranking, or recommendation categories.
+
+- Review churn, Repo guidance gap share the review churn ranking signal; treat them as related interpretations, not separate independent findings. Recommendation categories remain distinct: PR readiness gates, Repo-specific AI skills.
+- Review churn, Repo guidance gap display the same representative PR evidence (#1, #2, #3); keep recommendation actions distinct while reading the shared evidence as one underlying signal. Recommendation categories remain distinct: PR readiness gates, Repo-specific AI skills.
+
+
+## How Bottlenecks Are Prioritized
+
+- Bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score.
+- Each score comes from one metric family, such as review-loop drag, validation failures, changed-file spread, planning signals, review surprise, or post-review commits.
+- PR size columns show final/current additions, deletions, changed files, and changed lines so readers can compare size against the detected friction signals.
+- PR size is context for interpretation; it only affects ordering when the bottleneck metric itself is about changed-file spread.
+- Coverage caveats and outlier dominance should be considered before treating the first bottleneck as the most important repository problem.
+
+## Ranked Bottlenecks
+
+### Review churn
+
+Recommendation category: pr_readiness_gate
+
+#### Review churn Observed Evidence (iteration drag)
+
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#1](https://example.test/pull/1) | Release 2026.06.14 | 10 | release | unknown | unknown | unknown | 500 |
+| [#2](https://example.test/pull/2) | Release follow-up | 8 | release | unknown | unknown | unknown | 100 |
+| [#3](https://example.test/pull/3) | feature work | 2 | development | unknown | unknown | unknown | 100 |
+
+Evidence details for PR #1:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: unavailable
+- Threads: 0
+- Resolved threads: 0
+- Outdated threads: 0
+- Review decision: unavailable (source: unavailable)
+- Human reviewers: unavailable
+- Human approved: unavailable
+- Human changes requested: unavailable
+- Comment sources: none
+
+Source labels:
+
+- PR class: release (source=repository\_profile, rule=release-title)
+- Workflow source: unavailable
+
+Evidence details for PR #2:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: unavailable
+- Threads: 0
+- Resolved threads: 0
+- Outdated threads: 0
+- Review decision: unavailable (source: unavailable)
+- Human reviewers: unavailable
+- Human approved: unavailable
+- Human changes requested: unavailable
+- Comment sources: none
+
+Source labels:
+
+- PR class: release (source=repository\_profile, rule=release-title)
+- Workflow source: unavailable
+
+Evidence details for PR #3:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: unavailable
+- Threads: 0
+- Resolved threads: 0
+- Outdated threads: 0
+- Review decision: unavailable (source: unavailable)
+- Human reviewers: unavailable
+- Human approved: unavailable
+- Human changes requested: unavailable
+- Comment sources: none
+
+Source labels:
+
+- PR class: development (source=fallback\_rule)
+- Workflow source: unavailable
+
+#### Review churn Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Review loops are concentrated in a small set of PRs. |
+| Suggested action | Add or tighten a PR readiness gate for changes that attract repeated review rounds. |
+
+#### Review churn Confidence And Caveats
+
+- Displayed examples are not dominated by one PR.
+- PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat.
+- Shares the same representative PR evidence as Repo guidance gap.
+
+### Repo guidance gap
+
+Recommendation category: repo_specific_ai_skills
+
+#### Repo guidance gap Observed Evidence (iteration drag)
+
+| PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [#1](https://example.test/pull/1) | Release 2026.06.14 | 10 | release | unknown | unknown | unknown | 500 |
+| [#2](https://example.test/pull/2) | Release follow-up | 8 | release | unknown | unknown | unknown | 100 |
+| [#3](https://example.test/pull/3) | feature work | 2 | development | unknown | unknown | unknown | 100 |
+
+Evidence details for PR #1:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: unavailable
+- Threads: 0
+- Resolved threads: 0
+- Outdated threads: 0
+- Review decision: unavailable (source: unavailable)
+- Human reviewers: unavailable
+- Human approved: unavailable
+- Human changes requested: unavailable
+- Comment sources: none
+
+Source labels:
+
+- PR class: release (source=repository\_profile, rule=release-title)
+- Workflow source: unavailable
+
+Evidence details for PR #2:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: unavailable
+- Threads: 0
+- Resolved threads: 0
+- Outdated threads: 0
+- Review decision: unavailable (source: unavailable)
+- Human reviewers: unavailable
+- Human approved: unavailable
+- Human changes requested: unavailable
+- Comment sources: none
+
+Source labels:
+
+- PR class: release (source=repository\_profile, rule=release-title)
+- Workflow source: unavailable
+
+Evidence details for PR #3:
+
+Validation:
+
+- Workflow coverage: unavailable
+- Workflow conclusions: none
+- Failed checks: 0
+- Failed workflows: 0
+- Cancelled workflows: 0
+
+Review:
+
+- Review thread source: unavailable
+- Threads: 0
+- Resolved threads: 0
+- Outdated threads: 0
+- Review decision: unavailable (source: unavailable)
+- Human reviewers: unavailable
+- Human approved: unavailable
+- Human changes requested: unavailable
+- Comment sources: none
+
+Source labels:
+
+- PR class: development (source=fallback\_rule)
+- Workflow source: unavailable
+
+#### Repo guidance gap Interpretation And Recommendation
+
+| Field | Value |
+| --- | --- |
+| Inferred diagnosis | Repeated review loops suggest some repository expectations are not yet available at implementation time. |
+| Suggested action | Add repo-specific AI skills or instructions for repeated review themes before opening the next PR. |
+
+#### Repo guidance gap Confidence And Caveats
+
+- Displayed examples are not dominated by one PR.
+- PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat.
+- Shares the same representative PR evidence as Review churn.
+
+## Recommendation Categories
+
+| Category | Triggered bottlenecks | Meaning |
+| --- | --- | --- |
+| Hooks | 0 | Local hooks for repeated formatting, lint, typecheck, snapshot, or generated-output churn. |
+| Preflight scripts | 0 | Local commands that catch CI or workflow failures before pushing. |
+| Repo-specific AI skills | 1 | Repository guidance for repeated review themes around architecture, tests, docs, or unsafe APIs. |
+| PR readiness gates | 1 | Review-before-review checks for scope, tests, descriptions, and evidence. |
+| Smaller milestones | 0 | Smaller delivery slices for broad, unstable, or cross-surface changes. |
+| Planning artifacts | 0 | Durable product or architecture notes when requirement or scope signals dominate. |
+| Test infrastructure | 0 | Validation infrastructure when recurring failures or missing coverage create delivery loops. |
+
+## Comment Sources
+
+| Metric | Value |
+| --- | --- |
+| Total comments | 0 |
+| Bot/scanner comments | 0 |
+| Human reviewer comments | 0 |
+| Author replies | 0 |
+| Dominant source | none (0) |
+
+By source:
+
+None
+
+## Core And Support Surfaces
+
+| Metric | Value |
+| --- | --- |
+| Core changed lines | 0 |
+| Low-signal changed lines | 0 |
+| Low-signal files | 0 |
+| Weighted changed lines | 0 |
+| Small-diff wide-spread PRs | 0 |
+
+Functional surfaces:
+
+None
+
+File roles:
+
+None
+
+## Methodology Summary
+
+- Pull requests are selected upstream by the collection or fixture workflow; this renderer explains the resulting metrics summary.
+- File roles and functional surfaces come from repository-profile classification, not from language names alone.
+- Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.
+- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.
+- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.
+- Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.
+- PR class context is interpretation support only; it does not filter PRs or change bottleneck ranking.
+- Full live analysis runs also write a detailed companion methodology artifact: `methodology.md`.
+
+## Guardrails And Follow-Up
+
+| Guardrail | Value |
+| --- | --- |
+| Avoids individual ranking | true |
+| Separates observed, inferred, and suggested fields | true |
+| Uses composite score | false |
+
+Follow-up:
+
+- Inspect recommendations against real PR history before turning them into automated repository changes.
+- Collect PR-open snapshots in a future GitHub App flow when diff-growth coverage matters.
+
+Artifact sensitivity:
+
+Generated artifacts may include repository names, PR URLs, titles, file paths, and comment metadata. Treat them as local/private unless intentionally shared.

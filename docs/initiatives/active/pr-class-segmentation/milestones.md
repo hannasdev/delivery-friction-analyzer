@@ -26,13 +26,13 @@ Add first-class PR class evidence to profiles, normalized PRs, metrics, and CSV 
 
 ### Acceptance Criteria
 
-- [ ] Profiles can define optional PR class rules and still validate when the field is omitted.
-- [ ] Rule matching is deterministic and records the winning rule ID.
-- [ ] PRs without matching rules receive a documented fallback class.
-- [ ] Normalized and metrics outputs include PR class evidence.
-- [ ] `pr-metrics.csv` includes PR class evidence.
-- [ ] Tests cover matching, fallback, schema validation, and CSV output.
-- [ ] Existing fixture outputs remain deterministic after golden updates.
+- [x] Profiles can define optional PR class rules and still validate when the field is omitted.
+- [x] Rule matching is deterministic and records the winning rule ID.
+- [x] PRs without matching rules receive a documented fallback class.
+- [x] Normalized and metrics outputs include PR class evidence.
+- [x] `pr-metrics.csv` includes PR class evidence.
+- [x] Tests cover matching, fallback, schema validation, and CSV output.
+- [x] Existing fixture outputs remain deterministic after golden updates.
 
 ### Required Validation
 
@@ -60,6 +60,11 @@ Add first-class PR class evidence to profiles, normalized PRs, metrics, and CSV 
 ### Status
 
 - [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged in PR #25 on 2026-06-14
 
 ## M2: Report Class Context And Dominance
 
@@ -84,11 +89,11 @@ Make class distribution and class-driven dominance visible in the Markdown and J
 
 ### Acceptance Criteria
 
-- [ ] Reports show class distribution for the analyzed sample.
-- [ ] Bottleneck evidence includes PR class where it helps interpretation.
-- [ ] Reports warn when one PR class contributes more than 50% of displayed bottleneck example score value or, when needed, displayed example count.
-- [ ] Class dominance language is caveated for small sample sizes.
-- [ ] Golden report tests cover class distribution and dominance notes.
+- [x] Reports show class distribution for the analyzed sample.
+- [x] Bottleneck evidence includes PR class where it helps interpretation.
+- [x] Reports warn when one PR class contributes more than 50% of displayed bottleneck example score value or, when needed, displayed example count.
+- [x] Class dominance language is caveated for small sample sizes.
+- [x] Golden report tests cover class distribution and dominance notes.
 
 ### Required Validation
 
@@ -110,7 +115,12 @@ Make class distribution and class-driven dominance visible in the Markdown and J
 
 ### Status
 
-- [ ] Not started
+- [x] Active
+- [x] Implemented
+- [ ] Conformance reviewed
+- [ ] Adversarially reviewed
+- [x] PR opened
+- [ ] Merged
 
 ## M3: Explicit Class Filtering
 

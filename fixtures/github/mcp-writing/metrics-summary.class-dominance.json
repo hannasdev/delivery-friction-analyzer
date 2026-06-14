@@ -1,0 +1,86 @@
+{
+  "metricVersion": "friction-metrics.v1",
+  "targetRepository": {
+    "owner": "example",
+    "name": "target",
+    "analysisPullRequestLimit": 30
+  },
+  "totals": {
+    "pullRequests": 3,
+    "changedLines": 700,
+    "nonGeneratedChangedLines": 700,
+    "reviewComments": 0,
+    "reviewThreads": 0,
+    "failedChecks": 0,
+    "cancelledWorkflowRuns": 0
+  },
+  "pullRequests": [
+    {
+      "number": 1,
+      "title": "Release 2026.06.14",
+      "url": "https://example.test/pull/1",
+      "prClass": {
+        "class": "release",
+        "classificationSource": "repository_profile",
+        "ruleId": "release-title"
+      },
+      "diffAtMerge": {
+        "changedLines": 500
+      },
+      "files": {
+        "nonGeneratedChangedLines": 500
+      }
+    },
+    {
+      "number": 2,
+      "title": "Release follow-up",
+      "url": "https://example.test/pull/2",
+      "prClass": {
+        "class": "release",
+        "classificationSource": "repository_profile",
+        "ruleId": "release-title"
+      },
+      "diffAtMerge": {
+        "changedLines": 100
+      },
+      "files": {
+        "nonGeneratedChangedLines": 100
+      }
+    },
+    {
+      "number": 3,
+      "title": "feature work",
+      "url": "https://example.test/pull/3",
+      "prClass": {
+        "class": "development",
+        "classificationSource": "fallback_rule",
+        "ruleId": null
+      },
+      "diffAtMerge": {
+        "changedLines": 100
+      },
+      "files": {
+        "nonGeneratedChangedLines": 100
+      }
+    }
+  ],
+  "rankings": {
+    "reviewChurn": [
+      {
+        "number": 1,
+        "title": "Release 2026.06.14",
+        "value": 10
+      },
+      {
+        "number": 2,
+        "title": "Release follow-up",
+        "value": 8
+      },
+      {
+        "number": 3,
+        "title": "feature work",
+        "value": 2
+      }
+    ]
+  }
+}

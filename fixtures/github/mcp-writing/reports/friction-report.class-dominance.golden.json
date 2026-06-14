@@ -1,0 +1,497 @@
+{
+  "reportVersion": "friction-report.v1",
+  "metricVersion": "friction-metrics.v1",
+  "targetRepository": {
+    "owner": "example",
+    "name": "target",
+    "analysisPullRequestLimit": 30
+  },
+  "summary": {
+    "pullRequests": 3,
+    "changedLines": 700,
+    "nonGeneratedChangedLines": 700,
+    "reviewComments": 0,
+    "reviewThreads": 0,
+    "failedChecks": 0,
+    "cancelledWorkflowRuns": 0,
+    "topBottleneckIds": [
+      "review-churn",
+      "repo-guidance-gap"
+    ]
+  },
+  "coverage": {
+    "prOpenDiff": {
+      "unavailable": 3
+    },
+    "workflowRuns": {
+      "unavailable": 3
+    },
+    "reviewThreads": {
+      "unavailable": 3
+    },
+    "notes": [
+      "PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.",
+      "Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing."
+    ]
+  },
+  "commentSources": {
+    "totalComments": 0,
+    "bySource": [],
+    "botComments": 0,
+    "humanComments": 0,
+    "authorReplies": 0,
+    "dominantSource": {
+      "name": "none",
+      "value": 0
+    }
+  },
+  "surfaces": {
+    "coreChangedLines": 0,
+    "lowSignalChangedLines": 0,
+    "lowSignalFiles": 0,
+    "weightedChangedLines": 0,
+    "smallDiffWideSpreadCount": 0,
+    "byFunctionalSurface": [],
+    "byRole": []
+  },
+  "prClasses": {
+    "totalPullRequests": 3,
+    "distribution": [
+      {
+        "class": "release",
+        "pullRequests": 2,
+        "changedLines": 600,
+        "nonGeneratedChangedLines": 600,
+        "classificationSources": [
+          {
+            "name": "repository_profile",
+            "value": 2
+          }
+        ],
+        "share": 0.667
+      },
+      {
+        "class": "development",
+        "pullRequests": 1,
+        "changedLines": 100,
+        "nonGeneratedChangedLines": 100,
+        "classificationSources": [
+          {
+            "name": "fallback_rule",
+            "value": 1
+          }
+        ],
+        "share": 0.333
+      }
+    ],
+    "note": "PR classes are repository-profile evidence for interpretation only; they do not change rankings or exclude PRs."
+  },
+  "bottlenecks": [
+    {
+      "id": "review-churn",
+      "title": "Review churn",
+      "metricLabel": "iteration drag",
+      "observedData": [
+        {
+          "number": 1,
+          "title": "Release 2026.06.14",
+          "url": "https://example.test/pull/1",
+          "value": 10,
+          "prClass": {
+            "class": "release",
+            "classificationSource": "repository_profile",
+            "ruleId": "release-title"
+          },
+          "additions": null,
+          "deletions": null,
+          "changedFiles": null,
+          "changedLines": 500,
+          "reviewThreads": null,
+          "functionalSurfaces": null,
+          "coreChangedLines": null,
+          "lowSignalFiles": null,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "unavailable",
+            "reviewThreads": 0,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "reviewDecision": "unavailable",
+            "humanReviewerCount": 0,
+            "humanApproved": false,
+            "humanChangesRequested": false,
+            "reviewDecisionSource": "unavailable",
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
+        },
+        {
+          "number": 2,
+          "title": "Release follow-up",
+          "url": "https://example.test/pull/2",
+          "value": 8,
+          "prClass": {
+            "class": "release",
+            "classificationSource": "repository_profile",
+            "ruleId": "release-title"
+          },
+          "additions": null,
+          "deletions": null,
+          "changedFiles": null,
+          "changedLines": 100,
+          "reviewThreads": null,
+          "functionalSurfaces": null,
+          "coreChangedLines": null,
+          "lowSignalFiles": null,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "unavailable",
+            "reviewThreads": 0,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "reviewDecision": "unavailable",
+            "humanReviewerCount": 0,
+            "humanApproved": false,
+            "humanChangesRequested": false,
+            "reviewDecisionSource": "unavailable",
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
+        },
+        {
+          "number": 3,
+          "title": "feature work",
+          "url": "https://example.test/pull/3",
+          "value": 2,
+          "prClass": {
+            "class": "development",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
+          "additions": null,
+          "deletions": null,
+          "changedFiles": null,
+          "changedLines": 100,
+          "reviewThreads": null,
+          "functionalSurfaces": null,
+          "coreChangedLines": null,
+          "lowSignalFiles": null,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "unavailable",
+            "reviewThreads": 0,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "reviewDecision": "unavailable",
+            "humanReviewerCount": 0,
+            "humanApproved": false,
+            "humanChangesRequested": false,
+            "reviewDecisionSource": "unavailable",
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
+        }
+      ],
+      "dominance": {
+        "status": "distributed",
+        "topPrNumber": 1,
+        "topShare": 0.5,
+        "note": "Displayed examples are not dominated by one PR."
+      },
+      "classDominance": {
+        "status": "single_class_dominates",
+        "class": "release",
+        "topShare": 0.9,
+        "basis": "score_value",
+        "displayedExamples": 2,
+        "samplePullRequests": 2,
+        "note": "PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat."
+      },
+      "inferredDiagnosis": "Review loops are concentrated in a small set of PRs.",
+      "suggestedAction": {
+        "category": "pr_readiness_gate",
+        "action": "Add or tighten a PR readiness gate for changes that attract repeated review rounds."
+      }
+    },
+    {
+      "id": "repo-guidance-gap",
+      "title": "Repo guidance gap",
+      "metricLabel": "iteration drag",
+      "observedData": [
+        {
+          "number": 1,
+          "title": "Release 2026.06.14",
+          "url": "https://example.test/pull/1",
+          "value": 10,
+          "prClass": {
+            "class": "release",
+            "classificationSource": "repository_profile",
+            "ruleId": "release-title"
+          },
+          "additions": null,
+          "deletions": null,
+          "changedFiles": null,
+          "changedLines": 500,
+          "reviewThreads": null,
+          "functionalSurfaces": null,
+          "coreChangedLines": null,
+          "lowSignalFiles": null,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "unavailable",
+            "reviewThreads": 0,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "reviewDecision": "unavailable",
+            "humanReviewerCount": 0,
+            "humanApproved": false,
+            "humanChangesRequested": false,
+            "reviewDecisionSource": "unavailable",
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
+        },
+        {
+          "number": 2,
+          "title": "Release follow-up",
+          "url": "https://example.test/pull/2",
+          "value": 8,
+          "prClass": {
+            "class": "release",
+            "classificationSource": "repository_profile",
+            "ruleId": "release-title"
+          },
+          "additions": null,
+          "deletions": null,
+          "changedFiles": null,
+          "changedLines": 100,
+          "reviewThreads": null,
+          "functionalSurfaces": null,
+          "coreChangedLines": null,
+          "lowSignalFiles": null,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "unavailable",
+            "reviewThreads": 0,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "reviewDecision": "unavailable",
+            "humanReviewerCount": 0,
+            "humanApproved": false,
+            "humanChangesRequested": false,
+            "reviewDecisionSource": "unavailable",
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
+        },
+        {
+          "number": 3,
+          "title": "feature work",
+          "url": "https://example.test/pull/3",
+          "value": 2,
+          "prClass": {
+            "class": "development",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
+          "additions": null,
+          "deletions": null,
+          "changedFiles": null,
+          "changedLines": 100,
+          "reviewThreads": null,
+          "functionalSurfaces": null,
+          "coreChangedLines": null,
+          "lowSignalFiles": null,
+          "validationEvidence": {
+            "workflowRunSource": "unavailable",
+            "workflowRunCoverage": "unavailable",
+            "workflowRunConclusions": [],
+            "failedCheckRuns": 0,
+            "failedWorkflowRuns": 0,
+            "cancelledWorkflowRuns": 0
+          },
+          "reviewEvidence": {
+            "reviewThreadSource": "unavailable",
+            "reviewThreads": 0,
+            "resolvedThreads": 0,
+            "outdatedThreads": 0,
+            "reviewDecision": "unavailable",
+            "humanReviewerCount": 0,
+            "humanApproved": false,
+            "humanChangesRequested": false,
+            "reviewDecisionSource": "unavailable",
+            "commentSources": [],
+            "botComments": 0,
+            "humanReviewerComments": 0,
+            "authorReplies": 0
+          }
+        }
+      ],
+      "dominance": {
+        "status": "distributed",
+        "topPrNumber": 1,
+        "topShare": 0.5,
+        "note": "Displayed examples are not dominated by one PR."
+      },
+      "classDominance": {
+        "status": "single_class_dominates",
+        "class": "release",
+        "topShare": 0.9,
+        "basis": "score_value",
+        "displayedExamples": 2,
+        "samplePullRequests": 2,
+        "note": "PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat."
+      },
+      "inferredDiagnosis": "Repeated review loops suggest some repository expectations are not yet available at implementation time.",
+      "suggestedAction": {
+        "category": "repo_specific_ai_skills",
+        "action": "Add repo-specific AI skills or instructions for repeated review themes before opening the next PR."
+      }
+    }
+  ],
+  "sharedSignals": {
+    "groups": [
+      {
+        "type": "ranking_key",
+        "key": "reviewChurn",
+        "bottlenecks": [
+          {
+            "id": "review-churn",
+            "title": "Review churn",
+            "recommendationCategory": "pr_readiness_gate"
+          },
+          {
+            "id": "repo-guidance-gap",
+            "title": "Repo guidance gap",
+            "recommendationCategory": "repo_specific_ai_skills"
+          }
+        ],
+        "note": "Review churn, Repo guidance gap share the review churn ranking signal; treat them as related interpretations, not separate independent findings."
+      },
+      {
+        "type": "representative_evidence",
+        "prNumbers": [
+          1,
+          2,
+          3
+        ],
+        "bottlenecks": [
+          {
+            "id": "review-churn",
+            "title": "Review churn",
+            "recommendationCategory": "pr_readiness_gate"
+          },
+          {
+            "id": "repo-guidance-gap",
+            "title": "Repo guidance gap",
+            "recommendationCategory": "repo_specific_ai_skills"
+          }
+        ],
+        "note": "Review churn, Repo guidance gap display the same representative PR evidence (#1, #2, #3); keep recommendation actions distinct while reading the shared evidence as one underlying signal."
+      }
+    ],
+    "note": "Shared-signal groups are report interpretation only; they do not change scores, ranking, or recommendation categories."
+  },
+  "sensitivity": {
+    "summaries": [],
+    "note": "No displayed bottleneck examples were dominated by one PR."
+  },
+  "recommendationCategories": [
+    {
+      "id": "hooks",
+      "label": "Hooks",
+      "description": "Local hooks for repeated formatting, lint, typecheck, snapshot, or generated-output churn.",
+      "triggeredBottlenecks": 0
+    },
+    {
+      "id": "preflight_scripts",
+      "label": "Preflight scripts",
+      "description": "Local commands that catch CI or workflow failures before pushing.",
+      "triggeredBottlenecks": 0
+    },
+    {
+      "id": "repo_specific_ai_skills",
+      "label": "Repo-specific AI skills",
+      "description": "Repository guidance for repeated review themes around architecture, tests, docs, or unsafe APIs.",
+      "triggeredBottlenecks": 1
+    },
+    {
+      "id": "pr_readiness_gate",
+      "label": "PR readiness gates",
+      "description": "Review-before-review checks for scope, tests, descriptions, and evidence.",
+      "triggeredBottlenecks": 1
+    },
+    {
+      "id": "smaller_milestones",
+      "label": "Smaller milestones",
+      "description": "Smaller delivery slices for broad, unstable, or cross-surface changes.",
+      "triggeredBottlenecks": 0
+    },
+    {
+      "id": "planning_artifacts",
+      "label": "Planning artifacts",
+      "description": "Durable product or architecture notes when requirement or scope signals dominate.",
+      "triggeredBottlenecks": 0
+    },
+    {
+      "id": "test_infrastructure",
+      "label": "Test infrastructure",
+      "description": "Validation infrastructure when recurring failures or missing coverage create delivery loops.",
+      "triggeredBottlenecks": 0
+    }
+  ],
+  "guardrails": {
+    "avoidsIndividualRanking": true,
+    "separatesObservedInferredAndSuggested": true,
+    "usesCompositeScore": false
+  },
+  "followUp": [
+    "Inspect recommendations against real PR history before turning them into automated repository changes.",
+    "Collect PR-open snapshots in a future GitHub App flow when diff-growth coverage matters."
+  ]
+}

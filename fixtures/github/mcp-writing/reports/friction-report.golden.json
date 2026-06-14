@@ -148,6 +148,25 @@
       }
     ]
   },
+  "prClasses": {
+    "totalPullRequests": 3,
+    "distribution": [
+      {
+        "class": "unknown",
+        "pullRequests": 3,
+        "changedLines": 2454,
+        "nonGeneratedChangedLines": 2433,
+        "classificationSources": [
+          {
+            "name": "fallback_rule",
+            "value": 3
+          }
+        ],
+        "share": 1
+      }
+    ],
+    "note": "PR classes are repository-profile evidence for interpretation only; they do not change rankings or exclude PRs."
+  },
   "bottlenecks": [
     {
       "id": "review-churn",
@@ -159,6 +178,11 @@
           "title": "feat: resolve scene vocabulary variants",
           "url": "https://github.com/hannasdev/mcp-writing/pull/239",
           "value": 20,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1168,
           "deletions": 77,
           "changedFiles": 13,
@@ -214,6 +238,11 @@
           "title": "feat(backup): apply project restores transactionally",
           "url": "https://github.com/hannasdev/mcp-writing/pull/221",
           "value": 12,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1149,
           "deletions": 58,
           "changedFiles": 15,
@@ -252,6 +281,13 @@
         "topPrNumber": 239,
         "topShare": 0.625,
         "note": "PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing."
+      },
+      "classDominance": {
+        "status": "not_applicable",
+        "class": "unknown",
+        "topShare": null,
+        "basis": null,
+        "note": "Only one PR class appears in the analyzed sample; class dominance is not meaningful."
       },
       "inferredDiagnosis": "Review loops are concentrated in a small set of PRs.",
       "suggestedAction": {
@@ -269,6 +305,11 @@
           "title": "feat: resolve scene vocabulary variants",
           "url": "https://github.com/hannasdev/mcp-writing/pull/239",
           "value": 20,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1168,
           "deletions": 77,
           "changedFiles": 13,
@@ -324,6 +365,11 @@
           "title": "feat(backup): apply project restores transactionally",
           "url": "https://github.com/hannasdev/mcp-writing/pull/221",
           "value": 12,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1149,
           "deletions": 58,
           "changedFiles": 15,
@@ -363,6 +409,13 @@
         "topShare": 0.625,
         "note": "PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing."
       },
+      "classDominance": {
+        "status": "not_applicable",
+        "class": "unknown",
+        "topShare": null,
+        "basis": null,
+        "note": "Only one PR class appears in the analyzed sample; class dominance is not meaningful."
+      },
       "inferredDiagnosis": "Repeated review loops suggest some repository expectations are not yet available at implementation time.",
       "suggestedAction": {
         "category": "repo_specific_ai_skills",
@@ -379,6 +432,11 @@
           "title": "feat(backup): apply project restores transactionally",
           "url": "https://github.com/hannasdev/mcp-writing/pull/221",
           "value": 17,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1149,
           "deletions": 58,
           "changedFiles": 15,
@@ -416,6 +474,11 @@
           "title": "feat: resolve scene vocabulary variants",
           "url": "https://github.com/hannasdev/mcp-writing/pull/239",
           "value": 16,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1168,
           "deletions": 77,
           "changedFiles": 13,
@@ -471,6 +534,11 @@
           "title": "docs: accept architecture snapshot milestone",
           "url": "https://github.com/hannasdev/mcp-writing/pull/223",
           "value": 2,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1,
           "deletions": 1,
           "changedFiles": 1,
@@ -510,6 +578,13 @@
         "topShare": 0.486,
         "note": "Displayed examples are not dominated by one PR."
       },
+      "classDominance": {
+        "status": "not_applicable",
+        "class": "unknown",
+        "topShare": null,
+        "basis": null,
+        "note": "Only one PR class appears in the analyzed sample; class dominance is not meaningful."
+      },
       "inferredDiagnosis": "Broad file and surface spread can hide review and validation risk.",
       "suggestedAction": {
         "category": "smaller_milestones",
@@ -526,6 +601,11 @@
           "title": "feat(backup): apply project restores transactionally",
           "url": "https://github.com/hannasdev/mcp-writing/pull/221",
           "value": 5,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1149,
           "deletions": 58,
           "changedFiles": 15,
@@ -563,6 +643,11 @@
           "title": "feat: resolve scene vocabulary variants",
           "url": "https://github.com/hannasdev/mcp-writing/pull/239",
           "value": 4,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1168,
           "deletions": 77,
           "changedFiles": 13,
@@ -620,6 +705,13 @@
         "topShare": 0.556,
         "note": "PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing."
       },
+      "classDominance": {
+        "status": "not_applicable",
+        "class": "unknown",
+        "topShare": null,
+        "basis": null,
+        "note": "Only one PR class appears in the analyzed sample; class dominance is not meaningful."
+      },
       "inferredDiagnosis": "Changes spanning several functional surfaces are more likely to surprise reviewers.",
       "suggestedAction": {
         "category": "pr_readiness_gate",
@@ -636,6 +728,11 @@
           "title": "feat: resolve scene vocabulary variants",
           "url": "https://github.com/hannasdev/mcp-writing/pull/239",
           "value": 5,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1168,
           "deletions": 77,
           "changedFiles": 13,
@@ -691,6 +788,11 @@
           "title": "feat(backup): apply project restores transactionally",
           "url": "https://github.com/hannasdev/mcp-writing/pull/221",
           "value": 1,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1149,
           "deletions": 58,
           "changedFiles": 15,
@@ -730,6 +832,13 @@
         "topShare": 0.833,
         "note": "PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing."
       },
+      "classDominance": {
+        "status": "not_applicable",
+        "class": "unknown",
+        "topShare": null,
+        "basis": null,
+        "note": "Only one PR class appears in the analyzed sample; class dominance is not meaningful."
+      },
       "inferredDiagnosis": "Post-review commits show where initial PR shape did not stay stable.",
       "suggestedAction": {
         "category": "smaller_milestones",
@@ -746,6 +855,11 @@
           "title": "feat: resolve scene vocabulary variants",
           "url": "https://github.com/hannasdev/mcp-writing/pull/239",
           "value": 1,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1168,
           "deletions": 77,
           "changedFiles": 13,
@@ -802,6 +916,13 @@
         "topPrNumber": 239,
         "topShare": null,
         "note": "Not enough positive examples to evaluate outlier dominance."
+      },
+      "classDominance": {
+        "status": "not_applicable",
+        "class": "unknown",
+        "topShare": null,
+        "basis": null,
+        "note": "Only one PR class appears in the analyzed sample; class dominance is not meaningful."
       },
       "inferredDiagnosis": "Validation friction appears where checks, workflows, or cancellations add corrective loops.",
       "suggestedAction": {
@@ -819,6 +940,11 @@
           "title": "feat: resolve scene vocabulary variants",
           "url": "https://github.com/hannasdev/mcp-writing/pull/239",
           "value": 1,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1168,
           "deletions": 77,
           "changedFiles": 13,
@@ -875,6 +1001,13 @@
         "topPrNumber": 239,
         "topShare": null,
         "note": "Not enough positive examples to evaluate outlier dominance."
+      },
+      "classDominance": {
+        "status": "not_applicable",
+        "class": "unknown",
+        "topShare": null,
+        "basis": null,
+        "note": "Only one PR class appears in the analyzed sample; class dominance is not meaningful."
       },
       "inferredDiagnosis": "Validation signals point to checks that may be cheaper to catch before a branch reaches CI.",
       "suggestedAction": {
@@ -892,6 +1025,11 @@
           "title": "feat: resolve scene vocabulary variants",
           "url": "https://github.com/hannasdev/mcp-writing/pull/239",
           "value": 1,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1168,
           "deletions": 77,
           "changedFiles": 13,
@@ -949,6 +1087,13 @@
         "topShare": null,
         "note": "Not enough positive examples to evaluate outlier dominance."
       },
+      "classDominance": {
+        "status": "not_applicable",
+        "class": "unknown",
+        "topShare": null,
+        "basis": null,
+        "note": "Only one PR class appears in the analyzed sample; class dominance is not meaningful."
+      },
       "inferredDiagnosis": "Validation friction may indicate a missing or inconvenient local safety net.",
       "suggestedAction": {
         "category": "test_infrastructure",
@@ -965,6 +1110,11 @@
           "title": "feat(backup): apply project restores transactionally",
           "url": "https://github.com/hannasdev/mcp-writing/pull/221",
           "value": 1,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1149,
           "deletions": 58,
           "changedFiles": 15,
@@ -1002,6 +1152,11 @@
           "title": "docs: accept architecture snapshot milestone",
           "url": "https://github.com/hannasdev/mcp-writing/pull/223",
           "value": 1,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1,
           "deletions": 1,
           "changedFiles": 1,
@@ -1039,6 +1194,11 @@
           "title": "feat: resolve scene vocabulary variants",
           "url": "https://github.com/hannasdev/mcp-writing/pull/239",
           "value": 1,
+          "prClass": {
+            "class": "unknown",
+            "classificationSource": "fallback_rule",
+            "ruleId": null
+          },
           "additions": 1168,
           "deletions": 77,
           "changedFiles": 13,
@@ -1095,6 +1255,13 @@
         "topPrNumber": 221,
         "topShare": 0.333,
         "note": "Displayed examples are not dominated by one PR."
+      },
+      "classDominance": {
+        "status": "not_applicable",
+        "class": "unknown",
+        "topShare": null,
+        "basis": null,
+        "note": "Only one PR class appears in the analyzed sample; class dominance is not meaningful."
       },
       "inferredDiagnosis": "Planning-related changes show up in the same PRs as delivery friction.",
       "suggestedAction": {
