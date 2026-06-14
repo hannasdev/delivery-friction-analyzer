@@ -26,6 +26,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `reportVersion`: report contract version.
 - `metricVersion`: source metrics contract version.
 - `targetRepository`: analyzed repository identity; live analysis sample size is encoded as `targetRepository.analysisPullRequestLimit` from collection metadata.
+- `analysisFilter`: optional metadata for explicit filters applied before metrics computation, including excluded PR classes and before/after PR counts.
 - `summary`: repository totals and top bottleneck identifiers.
 - `coverage`: PR-open diff, workflow-run, and review-thread coverage counts plus caveats.
 - `commentSources`: total and source-grouped review comments for Copilot, human, bot, scanner, author replies, and unknown sources.
@@ -50,6 +51,7 @@ Bottlenecks are ordered by their strongest observed representative metric value,
 The Markdown renderer presents the same report data for human review:
 
 - executive summary totals in a table;
+- explicit analysis filter labels when downstream artifacts were generated from a filtered PR class sample;
 - a short "How To Read This Report" guide that distinguishes observed evidence, interpretation, recommendations, and caveats;
 - evidence-quality and coverage tables before detailed recommendations;
 - key findings that highlight top bottlenecks, strongest displayed signal, outlier caveats, PR class caveats, and coverage caveats;
@@ -106,6 +108,8 @@ Full live analysis writes `methodology.md` as a hybrid artifact: stable explanat
 - generated artifact names and artifact-sensitivity guidance.
 
 The methodology artifact should stay aligned with this contract and the Markdown methodology summary, but it may be more detailed than the main report.
+
+When PR class filtering is applied, `source-bundle.json` remains the full collected sample, while `normalized.json`, `metrics-summary.json`, `friction-report.json`, `friction-report.md`, `methodology.md`, and CSV exports describe the filtered sample. The methodology and CLI completion output must name the excluded PR classes and show the filtered PR count. If filtering excludes every collected PR, the analysis must fail without writing complete-looking empty reports.
 
 ## CSV Evidence Exports
 

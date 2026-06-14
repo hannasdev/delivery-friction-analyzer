@@ -2,13 +2,13 @@
 
 ## Status
 
-Status: Active for M2 implementation.
+Status: Active for M3 implementation.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-12
 - Activated: 2026-06-14
-- Active milestone: M2: Report Class Context And Dominance
+- Active milestone: M3: Explicit Class Filtering
 - Related issue:
   - [#16: Release PRs are a different population and skew the ranking](https://github.com/hannasdev/delivery-friction-analyzer/issues/16)
 - Related docs:

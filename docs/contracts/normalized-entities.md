@@ -7,6 +7,7 @@ Milestone 1 defines the first normalized fixture shape. It is intentionally limi
 ## Entities
 
 - `TargetRepository`: owner/name/default branch/visibility/window for the repository being analyzed.
+- `AnalysisFilter`: optional metadata for downstream analysis filters applied after collection and normalization. When present, it records excluded PR classes, the original collected PR count, and the filtered PR count.
 - `RepositoryLanguageDistribution`: byte counts from `GET /repos/{owner}/{repo}/languages`, stored as context only.
 - `PullRequest`: source IDs, author login when known, URL, state, PR class evidence, lifecycle timestamps, final diff shape, PR-open diff source confidence, optional PR-open additions/deletions/changed-file counts when direct or reconstructed data is available, files, reviews, review decision summary, review threads, comments, checks, and workflow-run coverage.
 - `PrClassSummary`: profile-driven PR class, classification source, and winning rule ID. Unmatched PRs use `class: "unknown"`, `classificationSource: "fallback_rule"`, and `ruleId: null`.
@@ -22,6 +23,16 @@ Milestone 1 defines the first normalized fixture shape. It is intentionally limi
 ## Source Labels
 
 Normalized data must preserve whether a value came from a public API, GraphQL thread query, repository profile rule, fallback rule, internal UI partial, or unavailable coverage. Later metric and report stages should use those source labels before making confidence claims.
+
+## Analysis Filters
+
+`source-bundle.json` remains the full collected sample. When a local analysis excludes one or more PR classes, `normalized.json` contains the filtered PR set and an `analysisFilter` object:
+
+- `excludedPrClasses`: class names explicitly excluded by the user;
+- `originalPullRequests`: collected PR count before filtering;
+- `filteredPullRequests`: PR count after filtering.
+
+Filtering must be explicit and must fail rather than writing complete-looking empty artifacts when every collected PR is excluded.
 
 ## PR-Open Diff Counts
 

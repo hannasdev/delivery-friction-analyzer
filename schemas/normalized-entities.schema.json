@@ -8,6 +8,22 @@
   "properties": {
     "schemaVersion": { "const": "normalized-fixture.v1" },
     "targetRepository": { "$ref": "target-repository.schema.json" },
+    "analysisFilter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["excludedPrClasses", "originalPullRequests", "filteredPullRequests"],
+      "properties": {
+        "excludedPrClasses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+          }
+        },
+        "originalPullRequests": { "type": "integer", "minimum": 1 },
+        "filteredPullRequests": { "type": "integer", "minimum": 1 }
+      }
+    },
     "languageDistribution": {
       "type": "object",
       "additionalProperties": false,

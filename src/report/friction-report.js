@@ -715,6 +715,7 @@ export function generateRepositoryFrictionReport(metricsSummary) {
     reportVersion: FRICTION_REPORT_VERSION,
     metricVersion: metricsSummary.metricVersion,
     targetRepository: metricsSummary.targetRepository,
+    ...(metricsSummary.analysisFilter ? { analysisFilter: metricsSummary.analysisFilter } : {}),
     summary: {
       pullRequests: metricsSummary.totals?.pullRequests ?? 0,
       changedLines: metricsSummary.totals?.changedLines ?? 0,
@@ -1171,6 +1172,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     : "unknown repository";
   const sharedSignals = report.sharedSignals ?? summarizeSharedSignals(report.bottlenecks);
   const sharedNotes = sharedEvidenceNotes(report.bottlenecks);
+  const analysisFilterLines = analysisFilterMarkdownLines(report.analysisFilter);
   const lines = [
     `# Repository Friction Report: ${repository}`,
     "",
@@ -1178,6 +1180,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     `Metric version: ${report.metricVersion}`,
     `Pull requests analyzed: ${report.summary?.pullRequests ?? "unknown"}`,
     "",
+    ...analysisFilterLines,
     "## Executive Summary",
     "",
     renderSummaryTable(report.summary),
@@ -1260,7 +1263,9 @@ export function renderRepositoryFrictionMarkdown(report) {
     "- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.",
     "- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.",
     "- Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.",
-    "- PR class context is interpretation support only; it does not filter PRs or change bottleneck ranking.",
+    report.analysisFilter?.excludedPrClasses?.length
+      ? "- PR class filtering was explicitly applied before metrics and ranking; PR class context still supports interpretation of the filtered sample."
+      : "- PR class context is interpretation support only; it does not filter PRs or change bottleneck ranking.",
     "- Full live analysis runs also write a detailed companion methodology artifact: `methodology.md`.",
     "",
     "## Guardrails And Follow-Up",
@@ -1278,4 +1283,13 @@ export function renderRepositoryFrictionMarkdown(report) {
   );
 
   return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function analysisFilterMarkdownLines(analysisFilter) {
+  if (!analysisFilter?.excludedPrClasses?.length) return [];
+  return [
+    `Analysis filter: excluded PR class(es): ${analysisFilter.excludedPrClasses.join(", ")}.`,
+    `Filtered sample: ${analysisFilter.filteredPullRequests} of ${analysisFilter.originalPullRequests} collected pull request(s).`,
+    "",
+  ];
 }

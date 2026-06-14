@@ -32,6 +32,31 @@ function renderCsv(headers, rows) {
   ].join("\n")}\n`;
 }
 
+function analysisFilterCsvMetadata(analysisFilter) {
+  if (!analysisFilter?.excludedPrClasses?.length) return { headers: [], row: {} };
+  return {
+    headers: [
+      "analysis_filter_excluded_pr_classes",
+      "analysis_filter_original_pull_requests",
+      "analysis_filter_filtered_pull_requests",
+    ],
+    row: {
+      analysis_filter_excluded_pr_classes: analysisFilter.excludedPrClasses.join(";"),
+      analysis_filter_original_pull_requests: analysisFilter.originalPullRequests,
+      analysis_filter_filtered_pull_requests: analysisFilter.filteredPullRequests,
+    },
+  };
+}
+
+function renderEvidenceCsv(headers, rows, analysisFilter) {
+  const metadata = analysisFilterCsvMetadata(analysisFilter);
+  if (!metadata.headers.length) return renderCsv(headers, rows);
+  return renderCsv(
+    [...headers, ...metadata.headers],
+    rows.map(row => ({ ...row, ...metadata.row })),
+  );
+}
+
 function rankingValueMaps(metricsSummary) {
   return Object.fromEntries(
     SCORE_COLUMNS.map(([, rankingKey]) => [
@@ -74,7 +99,7 @@ function unavailableUnlessObserved(value, observed) {
   return observed ? value : null;
 }
 
-function prMetricsCsv(metricsSummary) {
+function prMetricsCsv(metricsSummary, analysisFilter) {
   const scoreMaps = rankingValueMaps(metricsSummary);
   const headers = [
     "pr_number",
@@ -132,10 +157,10 @@ function prMetricsCsv(metricsSummary) {
     }
     return row;
   });
-  return renderCsv(headers, rows);
+  return renderEvidenceCsv(headers, rows, analysisFilter);
 }
 
-function bottleneckExamplesCsv(report) {
+function bottleneckExamplesCsv(report, analysisFilter) {
   const headers = [
     "bottleneck_id",
     "bottleneck_title",
@@ -189,10 +214,10 @@ function bottleneckExamplesCsv(report) {
       });
     }
   }
-  return renderCsv(headers, rows);
+  return renderEvidenceCsv(headers, rows, analysisFilter);
 }
 
-function commentSourcesCsv(report) {
+function commentSourcesCsv(report, analysisFilter) {
   const totalComments = Number(report.commentSources?.totalComments ?? 0);
   const headers = [
     "source_name",
@@ -208,10 +233,10 @@ function commentSourcesCsv(report) {
     is_human_or_author: HUMAN_OR_AUTHOR_SOURCES.has(entry.name),
     share_of_all_comments: totalComments > 0 ? Math.round((entry.value / totalComments) * 10000) / 10000 : 0,
   }));
-  return renderCsv(headers, rows);
+  return renderEvidenceCsv(headers, rows, analysisFilter);
 }
 
-function collectionCoverageCsv(collectionCoverage) {
+function collectionCoverageCsv(collectionCoverage, analysisFilter) {
   const headers = [
     "api_family",
     "status",
@@ -230,15 +255,16 @@ function collectionCoverageCsv(collectionCoverage) {
       diagnostics: (family.diagnostics ?? []).join(" | "),
       downstream_impact: family.downstreamImpact,
     }));
-  return renderCsv(headers, rows);
+  return renderEvidenceCsv(headers, rows, analysisFilter);
 }
 
 export function generateEvidenceCsvArtifacts({ metricsSummary, report, collectionCoverage }) {
+  const analysisFilter = report?.analysisFilter ?? metricsSummary?.analysisFilter;
   return {
-    prMetricsCsv: prMetricsCsv(metricsSummary),
-    bottleneckExamplesCsv: bottleneckExamplesCsv(report),
-    commentSourcesCsv: commentSourcesCsv(report),
-    collectionCoverageCsv: collectionCoverageCsv(collectionCoverage),
+    prMetricsCsv: prMetricsCsv(metricsSummary, analysisFilter),
+    bottleneckExamplesCsv: bottleneckExamplesCsv(report, analysisFilter),
+    commentSourcesCsv: commentSourcesCsv(report, analysisFilter),
+    collectionCoverageCsv: collectionCoverageCsv(collectionCoverage, analysisFilter),
   };
 }
 
@@ -284,6 +310,18 @@ function formatArtifactList(artifactFileNames, csvEnabled) {
   return entries.map(([label, fileName]) => `- ${label}: \`${fileName}\``).join("\n");
 }
 
+function formatAnalysisFilter(report) {
+  const analysisFilter = report.analysisFilter;
+  if (!analysisFilter?.excludedPrClasses?.length) {
+    return "No PR class filter was applied; downstream artifacts use the full collected sample.";
+  }
+  return [
+    `Excluded PR class(es): ${analysisFilter.excludedPrClasses.join(", ")}.`,
+    `Filtered sample: ${analysisFilter.filteredPullRequests} of ${analysisFilter.originalPullRequests} collected pull request(s).`,
+    "`source-bundle.json` preserves the full collected sample; normalized, metrics, report, methodology, and CSV artifacts use the filtered sample.",
+  ].join(" ");
+}
+
 function formatSensitivitySummaries(report) {
   const summaries = report.sensitivity?.summaries ?? [];
   if (!summaries.length) return "- No displayed bottleneck examples were dominated by one PR.";
@@ -318,6 +356,7 @@ export function renderRepositoryFrictionMethodology({
     `Requested pull requests: ${selection.requestedLimit ?? "unknown"}`,
     `Collected pull requests: ${selection.collectedCount ?? report.summary?.pullRequests ?? "unknown"}`,
     `Collection coverage: ${collectionCoverage?.status ?? "unknown"}`,
+    `Analysis filter: ${formatAnalysisFilter(report)}`,
     "",
     "## What This Analysis Uses",
     "",
@@ -326,6 +365,9 @@ export function renderRepositoryFrictionMethodology({
     "## Pull Request Selection",
     "",
     "Pull requests are selected by the collection step before report rendering. The default live path samples the latest merged pull requests up to the requested limit. Coverage gaps are preserved as explicit unavailable or partial values instead of being inferred from unrelated fields.",
+    report.analysisFilter?.excludedPrClasses?.length
+      ? "PR class filtering is applied after collection and normalization, before metrics computation, so downstream totals, rankings, reports, methodology, and CSVs describe the filtered sample while the source bundle remains auditable."
+      : "No PR class filtering was applied for this run.",
     "",
     "## Profile Classification",
     "",

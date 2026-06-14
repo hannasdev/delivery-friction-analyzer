@@ -45,7 +45,7 @@ The command writes:
 - `comment-sources.csv`
 - `collection-coverage.csv`
 
-Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. Use `--no-csv` when you want the Markdown, JSON, source, normalized, metrics, and methodology artifacts without spreadsheet-friendly CSV exports.
+Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. Use `--no-csv` when you want the Markdown, JSON, source, normalized, metrics, and methodology artifacts without spreadsheet-friendly CSV exports. Use `--exclude-pr-class <class>` to explicitly remove a configured PR class from downstream normalized, metrics, report, methodology, and CSV artifacts; `source-bundle.json` still preserves the full collected sample for auditability.
 
 Successful runs print a concise completion message with `friction-report.md` first, followed by the key supporting artifacts and collection coverage status. Use `--json` when automation needs the full machine-readable completion receipt on stdout.
 

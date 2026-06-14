@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-14 — Explicit PR Class Filtering
+
+- What changed: GitHub analysis now accepts `--exclude-pr-class` to recompute normalized data, metrics, reports, methodology, and CSV exports for an explicitly filtered PR class sample while preserving the full collected `source-bundle.json`.
+- Why it matters: Maintainers can inspect development-oriented reports separately from release, dependency, or repository-specific PR populations without losing auditability of the collected sample.
+- Who is affected: Maintainers and contributors running `npm run analyze:github`.
+- Action needed: Use `--exclude-pr-class <class>` when a class should be excluded from downstream analysis artifacts.
+- PR: TBD
+
 ### 2026-06-14 — PR Class Report Context
 
 - What changed: Markdown and JSON friction reports now include PR class distribution, PR class evidence in representative bottleneck examples, and caveats when displayed bottleneck examples are concentrated in one PR class.
