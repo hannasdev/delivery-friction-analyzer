@@ -58,7 +58,7 @@ Known MVP interpretation limits:
 - PR-open diff growth is unavailable unless an open-time snapshot or reconstruction exists; the local historical collector does not infer it from merge-time diff data.
 - Workflow runs are collected from branch-based pull-request Actions history, which can be unavailable or partial for deleted, renamed, reused, or inaccessible branches.
 - Review-thread counts depend on GraphQL review-thread coverage; unavailable thread access is reported instead of silently treated as zero review churn.
-- A single dependency, bot, or unusually broad feature PR can dominate validation or review findings. Treat dominance notes as a prompt to inspect the raw PR evidence before generalizing.
+- A single PR or PR class, such as release, dependency, bot-driven, or unusually broad feature work, can dominate validation or review findings. Treat PR and class dominance notes as prompts to inspect the raw evidence before generalizing; use `--exclude-pr-class` only when you intentionally want a filtered follow-up view.
 
 Generated artifacts may contain repository names, PR URLs, PR titles, file paths, comment metadata, curated CSV evidence, and coverage diagnostics. Treat source bundles, normalized data, metrics summaries, reports, methodology, and CSV exports as local/private unless you intentionally review and share them.
 
