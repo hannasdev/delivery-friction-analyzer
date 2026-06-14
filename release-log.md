@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can see when release, dependency, development, or repository-specific PR populations are shaping report interpretation without filtering the default analysis.
 - Who is affected: Maintainers and contributors reviewing generated friction reports.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/26
 
 ### 2026-06-14 — PR Class Evidence
 
