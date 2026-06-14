@@ -1,3 +1,5 @@
+import { PR_CLASS_FALLBACK } from "../profile/pr-class.js";
+
 export const FRICTION_METRICS_VERSION = "friction-metrics.v1";
 export const FRICTION_METRIC_CONSTANTS = Object.freeze({
   lowSignalRoleWeight: 0.25,
@@ -44,12 +46,6 @@ const CHECK_FAILURE_CONCLUSIONS = new Set([
   "cancelled",
   "canceled",
 ]);
-
-const PR_CLASS_FALLBACK = Object.freeze({
-  class: "unknown",
-  classificationSource: "fallback_rule",
-  ruleId: null,
-});
 
 function linesOf(file = {}) {
   return Number(file.additions ?? 0) + Number(file.deletions ?? 0);

@@ -87,6 +87,19 @@ describe("mcp-writing compact fixture normalization", () => {
     });
   });
 
+  it("treats a null repository profile as omitted", async () => {
+    const bundle = await readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json");
+
+    const normalized = normalizeFixtureBundle(bundle, { repositoryProfile: null });
+
+    assert.deepEqual(normalized.pullRequests[0].prClass, {
+      class: "unknown",
+      classificationSource: "fallback_rule",
+      ruleId: null,
+    });
+    assert.equal(normalized.pullRequests[0].files[0].classificationSource, "fallback_rule");
+  });
+
   it("keeps review attempts separate from review comments", async () => {
     const [bundle, profile] = await Promise.all([
       readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),
