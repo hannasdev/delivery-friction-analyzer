@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-14 — PR Class Evidence
+
+- What changed: Repository profiles can now classify pull requests by title rules, and normalized data, metrics summaries, and `pr-metrics.csv` carry PR class evidence.
+- Why it matters: Maintainers can segment release, dependency, or repository-specific PR populations downstream without manually parsing PR titles.
+- Who is affected: Maintainers and contributors running or inspecting delivery-friction analysis artifacts.
+- Action needed: Add optional `prClasses` rules to repository profiles when PR populations should be labeled.
+- PR: TBD
+
 ### 2026-06-14 — PR Sample Contract Alignment
 
 - What changed: Target repository metadata now records the latest-N pull request sample size, and Markdown reports label the analyzed pull request count instead of a day window.
