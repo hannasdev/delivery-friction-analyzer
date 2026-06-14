@@ -302,8 +302,8 @@ describe("GitHub live analyze CLI", () => {
       assert(reportMarkdown.includes("pr_open_diff: unavailable"));
       assert(methodology.includes("# Methodology: example/example-repo"));
       assert(methodology.includes("- PR metrics CSV: `pr-metrics.csv`"));
-      assert(prMetricsCsv.includes("pr_number,title,url,changed_lines"));
-      assert(prMetricsCsv.includes("7,feat: live analyze,https://github.com/example/example-repo/pull/7,25"));
+      assert(prMetricsCsv.includes("pr_number,title,url,pr_class,pr_classification_source,pr_class_rule_id,changed_lines"));
+      assert(prMetricsCsv.includes("7,feat: live analyze,https://github.com/example/example-repo/pull/7,unknown,fallback_rule,,25"));
 
       const completion = formatAnalyzeGithubCompletion(result);
       assert(completion.startsWith(`Markdown report: ${join(outDir, "friction-report.md")}\n`));

@@ -59,7 +59,7 @@ Add first-class PR class evidence to profiles, normalized PRs, metrics, and CSV 
 
 ### Status
 
-- [ ] Not started
+- [x] Active
 
 ## M2: Report Class Context And Dominance
 

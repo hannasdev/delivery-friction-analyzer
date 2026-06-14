@@ -110,7 +110,7 @@ CSV exports are supporting evidence trails, not replacements for JSON artifacts.
 
 Minimum CSV column groups:
 
-- `pr-metrics.csv`: PR number, title, URL, changed lines, non-generated changed lines, review comments, review threads, review decision, human reviewer count, human approval / changes-requested booleans, failed checks, failed workflow runs, cancelled workflow runs, post-review commits, review-thread source, workflow-run source/coverage, and main ranking scores.
+- `pr-metrics.csv`: PR number, title, URL, PR class, PR class source/rule evidence, changed lines, non-generated changed lines, review comments, review threads, review decision, human reviewer count, human approval / changes-requested booleans, failed checks, failed workflow runs, cancelled workflow runs, post-review commits, review-thread source, workflow-run source/coverage, and main ranking scores.
 - `bottleneck-examples.csv`: bottleneck identity, recommendation category, PR identity, score/value, changed lines, validation counts, review counts, comment-source counts, workflow/review source and coverage labels, dominance, and source labels.
 - `comment-sources.csv`: source name, total comments, bot/scanner classification, human/author classification, and share of all comments.
 - `collection-coverage.csv`: API family, status, attempts, source label, diagnostics, and downstream impact.

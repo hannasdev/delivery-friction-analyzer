@@ -45,6 +45,12 @@ const CHECK_FAILURE_CONCLUSIONS = new Set([
   "canceled",
 ]);
 
+const PR_CLASS_FALLBACK = Object.freeze({
+  class: "unknown",
+  classificationSource: "fallback_rule",
+  ruleId: null,
+});
+
 function linesOf(file = {}) {
   return Number(file.additions ?? 0) + Number(file.deletions ?? 0);
 }
@@ -320,6 +326,7 @@ export function computePullRequestMetrics(pr) {
     title: pr.title,
     url: pr.url,
     state: pr.state,
+    prClass: pr.prClass ?? { ...PR_CLASS_FALLBACK },
     coverage: {
       prOpenDiff: {
         source: pr.prOpenDiff?.source ?? "unavailable",

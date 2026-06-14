@@ -37,6 +37,11 @@ describe("mcp-writing compact fixture normalization", () => {
 
     assert.equal(normalized.targetRepository.owner, "hannasdev");
     assert.equal(pr239.authorLogin, "hannasdev");
+    assert.deepEqual(pr239.prClass, {
+      class: "unknown",
+      classificationSource: "fallback_rule",
+      ruleId: null,
+    });
     assert.equal(pr239.lifecycle.firstCommitAt, "2026-06-07T13:31:13Z");
     assert.equal(pr239.commits.length, 7);
     assert.deepEqual(pr239.commits[0], {
@@ -63,6 +68,23 @@ describe("mcp-writing compact fixture normalization", () => {
 
     const releaseLog = pr221.files.find(file => file.path === "release-log.md");
     assert.equal(releaseLog.role, "release_notes");
+  });
+
+  it("normalizes release PR class evidence from profile title rules", async () => {
+    const [bundle, profile] = await Promise.all([
+      readJson("../fixtures/github/mcp-writing/fixture-bundle.compact.json"),
+      readJson("../fixtures/github/mcp-writing/profile.json"),
+    ]);
+    const releaseBundle = structuredClone(bundle);
+    releaseBundle.pullRequests[0].title = "Release 2026.06.14";
+
+    const normalized = normalizeFixtureBundle(releaseBundle, { repositoryProfile: profile });
+
+    assert.deepEqual(normalized.pullRequests[0].prClass, {
+      class: "release",
+      classificationSource: "repository_profile",
+      ruleId: "release-title",
+    });
   });
 
   it("keeps review attempts separate from review comments", async () => {

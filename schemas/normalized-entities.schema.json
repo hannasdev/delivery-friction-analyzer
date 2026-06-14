@@ -29,6 +29,7 @@
           "number",
           "title",
           "authorLogin",
+          "prClass",
           "url",
           "state",
           "lifecycle",
@@ -47,6 +48,19 @@
           "number": { "type": "integer" },
           "title": { "type": "string" },
           "authorLogin": { "type": ["string", "null"] },
+          "prClass": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["class", "classificationSource", "ruleId"],
+            "properties": {
+              "class": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+              },
+              "classificationSource": { "enum": ["repository_profile", "fallback_rule"] },
+              "ruleId": { "type": ["string", "null"] }
+            }
+          },
           "url": { "type": "string" },
           "state": { "enum": ["OPEN", "CLOSED", "MERGED"] },
           "lifecycle": {

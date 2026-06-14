@@ -8,7 +8,7 @@ Milestone 2 introduces `friction-metrics.v1`, a deterministic metrics summary co
 - `targetRepository`: normalized target repository input.
 - `totals`: repository-level counts for pull requests, changed lines, non-generated changed lines, review comments, review threads, failed checks, and cancelled workflow runs.
 - `rankings`: PR rankings by review churn, changed-file spread, validation gap, planning gap, review surprise, and fix amplification.
-- `pullRequests`: per-PR metrics with diff, file spread, review comments, review-thread churn, review decision evidence, CI, lifecycle, iteration, coverage, and transparent component metrics.
+- `pullRequests`: per-PR metrics with PR class evidence, diff, file spread, review comments, review-thread churn, review decision evidence, CI, lifecycle, iteration, coverage, and transparent component metrics.
 
 ## Component Metrics
 
@@ -30,6 +30,7 @@ Observed GitHub data remains separate from inferred or configured classification
 
 - file paths and changed lines come from normalized GitHub payloads;
 - file categories, roles, functional surfaces, and generated flags come from repository profile or fallback rules;
+- PR class, PR class source, and PR class rule ID come from repository profile rules or fallback rules;
 - `files.classificationSources` counts the classification source used by each changed file;
 - PR-open diff growth and workflow-run metrics carry coverage status when source data is unavailable;
 - review decision evidence carries the normalized review-event source label so clean human approval can be distinguished from unavailable review evidence and from observed absence of human review.

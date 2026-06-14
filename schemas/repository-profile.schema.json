@@ -62,6 +62,31 @@
           "notes": { "type": "string" }
         }
       }
+    },
+    "prClasses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "class", "match"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "class": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+          },
+          "match": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "titleIncludes": { "type": "string", "minLength": 1 },
+              "titleRegex": { "type": "string", "minLength": 1 }
+            },
+            "minProperties": 1
+          },
+          "notes": { "type": "string" }
+        }
+      }
     }
   }
 }
