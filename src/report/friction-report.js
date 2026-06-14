@@ -191,6 +191,14 @@ function percentageLabel(share) {
   return `${Math.round(Number(share ?? 0) * 100)}%`;
 }
 
+function classDominancePercentageLabel(share) {
+  const value = Number(share ?? 0);
+  const roundedWholePercent = Math.round(value * 100);
+  return value > 0.5 && roundedWholePercent <= 50
+    ? `${(value * 100).toFixed(1)}%`
+    : `${roundedWholePercent}%`;
+}
+
 function prClassSummary(pr = {}) {
   return {
     class: pr.prClass?.class ?? "unknown",
@@ -531,7 +539,7 @@ function summarizeEvidenceClassDominance(evidence, prClasses) {
     displayedExamples: topClass.displayedExamples,
     samplePullRequests,
     note: status === "single_class_dominates"
-      ? `PR class ${topClass.class} contributes ${percentageLabel(topShare)} of the ${basisLabel}; compare this bottleneck against the class distribution before generalizing.${smallSampleNote}`
+      ? `PR class ${topClass.class} contributes ${classDominancePercentageLabel(topShare)} of the ${basisLabel}; compare this bottleneck against the class distribution before generalizing.${smallSampleNote}`
       : "Displayed examples are not dominated by one PR class.",
   };
 }
