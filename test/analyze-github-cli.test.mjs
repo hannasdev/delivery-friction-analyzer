@@ -191,6 +191,43 @@ async function writeProfile(directory) {
   return profilePath;
 }
 
+async function writePrClassProfile(directory) {
+  const profilePath = join(directory, "profile-with-pr-classes.json");
+  await writeFile(profilePath, JSON.stringify({
+    schemaVersion: "repository-profile.v1",
+    repository: { owner: "example", name: "example-repo" },
+    prClasses: [
+      {
+        id: "release-title",
+        class: "release",
+        match: { titleIncludes: "Release" },
+      },
+      {
+        id: "development-title",
+        class: "development",
+        match: { titleIncludes: "feature" },
+      },
+    ],
+    rules: [
+      {
+        id: "runtime",
+        match: { prefix: "src/" },
+        category: "code",
+        role: "core_product_code",
+        functionalSurface: "runtime",
+      },
+      {
+        id: "tests",
+        match: { prefix: "test/" },
+        category: "tests",
+        role: "tests",
+        functionalSurface: "test_suite",
+      },
+    ],
+  }), "utf8");
+  return profilePath;
+}
+
 async function readJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
 }
@@ -215,6 +252,7 @@ describe("GitHub live analyze CLI", () => {
       outDir: "reports/live",
       dryRun: true,
       isValidationTarget: true,
+      excludedPrClasses: [],
       csv: true,
       json: false,
     });
@@ -248,6 +286,42 @@ describe("GitHub live analyze CLI", () => {
     ]).csv, false);
   });
 
+  it("parses repeated and comma-separated PR class exclusions", () => {
+    assert.deepEqual(parseAnalyzeGithubArgs([
+      "--repo",
+      "example/example-repo",
+      "--limit",
+      "10",
+      "--profile",
+      "profile.json",
+      "--out",
+      "reports/live",
+      "--exclude-pr-class",
+      "release,dependency",
+      "--exclude-pr-class",
+      "release",
+    ]).excludedPrClasses, ["release", "dependency"]);
+  });
+
+  it("rejects malformed PR class exclusion identifiers with matching guidance", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir: join(directory, "out"),
+          excludedPrClasses: ["Release PR"],
+        }, { provider }),
+        /exclude-pr-class must be a lowercase PR class identifier using letters, digits, "-" or "_" separators: Release PR/,
+      );
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
   it("runs live collection through reports and writes expected artifacts", async () => {
     await withTempDirectory(async directory => {
       const profilePath = await writeProfile(directory);
@@ -272,7 +346,18 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(result.targetRepository.isValidationTarget, true);
       assert.deepEqual((await readdir(outDir)).sort(), Object.values(ANALYZE_GITHUB_ARTIFACTS).sort());
 
-      const [sourceBundle, normalized, metricsSummary, reportJson, reportMarkdown, methodology, prMetricsCsv] = await Promise.all([
+      const [
+        sourceBundle,
+        normalized,
+        metricsSummary,
+        reportJson,
+        reportMarkdown,
+        methodology,
+        prMetricsCsv,
+        bottleneckExamplesCsv,
+        commentSourcesCsv,
+        collectionCoverageCsv,
+      ] = await Promise.all([
         readJson(join(outDir, "source-bundle.json")),
         readJson(join(outDir, "normalized.json")),
         readJson(join(outDir, "metrics-summary.json")),
@@ -280,6 +365,9 @@ describe("GitHub live analyze CLI", () => {
         readFile(join(outDir, "friction-report.md"), "utf8"),
         readFile(join(outDir, "methodology.md"), "utf8"),
         readFile(join(outDir, "pr-metrics.csv"), "utf8"),
+        readFile(join(outDir, "bottleneck-examples.csv"), "utf8"),
+        readFile(join(outDir, "comment-sources.csv"), "utf8"),
+        readFile(join(outDir, "collection-coverage.csv"), "utf8"),
       ]);
 
       assert.equal(sourceBundle.schemaVersion, "github-source-bundle.v1");
@@ -304,6 +392,9 @@ describe("GitHub live analyze CLI", () => {
       assert(methodology.includes("- PR metrics CSV: `pr-metrics.csv`"));
       assert(prMetricsCsv.includes("pr_number,title,url,pr_class,pr_classification_source,pr_class_rule_id,changed_lines"));
       assert(prMetricsCsv.includes("7,feat: live analyze,https://github.com/example/example-repo/pull/7,unknown,fallback_rule,,25"));
+      for (const csvArtifact of [prMetricsCsv, bottleneckExamplesCsv, commentSourcesCsv, collectionCoverageCsv]) {
+        assert(!csvArtifact.includes("analysis_filter_excluded_pr_classes"));
+      }
 
       const completion = formatAnalyzeGithubCompletion(result);
       assert(completion.startsWith(`Markdown report: ${join(outDir, "friction-report.md")}\n`));
@@ -375,6 +466,200 @@ describe("GitHub live analyze CLI", () => {
       assert(reportMarkdown.includes("- Review decision: approved (source: reviews)"));
       assert(reportMarkdown.includes("- Human approved: yes"));
       assert(prMetricsCsv.includes(",0,approved,1,true,false,"));
+    });
+  });
+
+  it("filters excluded PR classes after collection and labels downstream artifacts", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "filtered-out");
+      const releasePr = pullRequestDetails({
+        number: 7,
+        title: "Release 2026.06.14",
+        url: "https://github.com/example/example-repo/pull/7",
+        additions: 100,
+        deletions: 20,
+        changedFiles: 2,
+      });
+      const developmentPr = pullRequestDetails({
+        number: 8,
+        title: "feature: filtered analysis",
+        url: "https://github.com/example/example-repo/pull/8",
+        additions: 10,
+        deletions: 5,
+        changedFiles: 2,
+      });
+      const prsByNumber = new Map([
+        [7, releasePr],
+        [8, developmentPr],
+      ]);
+      const provider = createProvider({
+        async listMergedPullRequests(input) {
+          this.calls.push(["listMergedPullRequests", input]);
+          return [
+            { number: 7, mergedAt: "2026-06-02T12:00:00Z" },
+            { number: 8, mergedAt: "2026-06-01T12:00:00Z" },
+          ];
+        },
+        async getPullRequest(input) {
+          this.calls.push(["getPullRequest", input]);
+          return prsByNumber.get(input.number);
+        },
+      });
+
+      const result = await runAnalyzeGithub({
+        repository: "example/example-repo",
+        limit: 2,
+        profilePath,
+        outDir,
+        excludedPrClasses: ["release"],
+      }, {
+        provider,
+        now: () => "2026-06-09T00:00:00Z",
+      });
+
+      const [
+        sourceBundle,
+        normalized,
+        metricsSummary,
+        reportJson,
+        reportMarkdown,
+        methodology,
+        prMetricsCsv,
+        bottleneckExamplesCsv,
+        commentSourcesCsv,
+        collectionCoverageCsv,
+      ] = await Promise.all([
+        readJson(join(outDir, "source-bundle.json")),
+        readJson(join(outDir, "normalized.json")),
+        readJson(join(outDir, "metrics-summary.json")),
+        readJson(join(outDir, "friction-report.json")),
+        readFile(join(outDir, "friction-report.md"), "utf8"),
+        readFile(join(outDir, "methodology.md"), "utf8"),
+        readFile(join(outDir, "pr-metrics.csv"), "utf8"),
+        readFile(join(outDir, "bottleneck-examples.csv"), "utf8"),
+        readFile(join(outDir, "comment-sources.csv"), "utf8"),
+        readFile(join(outDir, "collection-coverage.csv"), "utf8"),
+      ]);
+
+      assert.equal(sourceBundle.pullRequests.length, 2);
+      assert.deepEqual(sourceBundle.pullRequests.map(pr => pr.number), [7, 8]);
+      assert.deepEqual(normalized.analysisFilter, {
+        excludedPrClasses: ["release"],
+        originalPullRequests: 2,
+        filteredPullRequests: 1,
+      });
+      assert.deepEqual(normalized.pullRequests.map(pr => pr.number), [8]);
+      assert.deepEqual(metricsSummary.analysisFilter, normalized.analysisFilter);
+      assert.equal(metricsSummary.totals.pullRequests, 1);
+      assert.equal(metricsSummary.totals.changedLines, 15);
+      assert.deepEqual(metricsSummary.rankings.reviewChurn.map(entry => entry.number), [8]);
+      assert.deepEqual(reportJson.analysisFilter, normalized.analysisFilter);
+      assert.equal(reportJson.summary.pullRequests, 1);
+      assert.equal(
+        reportJson.prClasses.note,
+        "PR class filtering was explicitly applied before metrics and ranking; this distribution describes the filtered sample.",
+      );
+      assert(reportMarkdown.includes("Analysis filter: excluded PR class(es): release."));
+      assert(reportMarkdown.includes("Filtered sample: 1 of 2 collected pull request(s)."));
+      assert(reportMarkdown.includes("PR class filtering was explicitly applied before metrics and ranking; this distribution describes the filtered sample."));
+      assert(reportMarkdown.includes("PR class filtering was explicitly applied before metrics and ranking"));
+      assert(!reportMarkdown.includes("do not change rankings or exclude PRs"));
+      assert(methodology.includes("Analysis filter: Excluded PR class(es): release."));
+      assert(methodology.includes("source-bundle.json` preserves the full collected sample"));
+      assert(prMetricsCsv.includes("analysis_filter_excluded_pr_classes,analysis_filter_original_pull_requests,analysis_filter_filtered_pull_requests"));
+      assert(bottleneckExamplesCsv.includes("analysis_filter_excluded_pr_classes,analysis_filter_original_pull_requests,analysis_filter_filtered_pull_requests"));
+      assert(commentSourcesCsv.includes("analysis_filter_excluded_pr_classes,analysis_filter_original_pull_requests,analysis_filter_filtered_pull_requests"));
+      assert(collectionCoverageCsv.includes("analysis_filter_excluded_pr_classes,analysis_filter_original_pull_requests,analysis_filter_filtered_pull_requests"));
+      assert(prMetricsCsv.includes("release,2,1"));
+      assert(bottleneckExamplesCsv.includes("release,2,1"));
+      assert(commentSourcesCsv.includes("release,2,1"));
+      assert(collectionCoverageCsv.includes("release,2,1"));
+      assert(prMetricsCsv.includes("8,feature: filtered analysis"));
+      assert(!prMetricsCsv.includes("7,Release 2026.06.14"));
+      assert.deepEqual(result.analysisFilter, normalized.analysisFilter);
+
+      const completion = formatAnalyzeGithubCompletion(result);
+      assert(completion.includes("Analysis filter: excluded PR class(es): release."));
+      assert(completion.includes("Filtered sample: 1 of 2 collected pull request(s)."));
+    });
+  });
+
+  it("rejects excluded PR classes that are not configured by the profile", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "unconfigured-filter");
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir,
+          excludedPrClasses: ["dependency"],
+        }, {
+          provider,
+          now: () => "2026-06-09T00:00:00Z",
+        }),
+        /exclude-pr-class must name configured PR class\(es\): dependency\. Configured PR class\(es\): development, release\./,
+      );
+      assert.deepEqual(provider.calls, []);
+      assert.deepEqual(await readdir(outDir), []);
+    });
+  });
+
+  it("reports a clear error when a filtered run collects no pull requests", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "filtered-empty-sample");
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir,
+          excludedPrClasses: ["release"],
+        }, {
+          provider: createProvider({
+            async listMergedPullRequests(input) {
+              this.calls.push(["listMergedPullRequests", input]);
+              return [];
+            },
+          }),
+          now: () => "2026-06-09T00:00:00Z",
+        }),
+        /exclude-pr-class cannot filter because no merged pull requests were collected\./,
+      );
+      assert.deepEqual(await readdir(outDir), []);
+    });
+  });
+
+  it("fails when PR class filtering removes every collected pull request", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "all-filtered-out");
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir,
+          excludedPrClasses: ["development"],
+        }, {
+          provider: createProvider({
+            async getPullRequest(input) {
+              this.calls.push(["getPullRequest", input]);
+              return pullRequestDetails({
+                title: "feature: all filtered",
+              });
+            },
+          }),
+          now: () => "2026-06-09T00:00:00Z",
+        }),
+        /exclude-pr-class removed all 1 collected pull request/,
+      );
+      assert.deepEqual(await readdir(outDir), []);
     });
   });
 

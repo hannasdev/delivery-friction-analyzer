@@ -24,6 +24,7 @@ const ALLOWED_OPTIONS = new Set([
   "metadata-only",
   "validation-target",
   "no-csv",
+  "exclude-pr-class",
   "json",
 ]);
 
@@ -61,6 +62,7 @@ Options:
   --dry-run                 Validate inputs and sample GitHub coverage without writing artifacts.
   --metadata-only           Alias for --dry-run.
   --validation-target       Mark the target repository as a validation target in output metadata.
+  --exclude-pr-class <cls>  Exclude a PR class from normalized, metrics, report, methodology, and CSV artifacts. Repeat or comma-separate values.
   --no-csv                  Suppress curated CSV evidence exports.
   --json                    Print the machine-readable completion receipt to stdout.
 `;
@@ -96,7 +98,11 @@ export function parseAnalyzeGithubArgs(argv) {
     if (!value || value.startsWith("--")) {
       throw new Error(`Missing value for ${arg}`);
     }
-    options[key] = value;
+    if (key === "exclude-pr-class") {
+      options[key] = [...(options[key] ?? []), value];
+    } else {
+      options[key] = value;
+    }
     index += 1;
   }
 
@@ -107,9 +113,17 @@ export function parseAnalyzeGithubArgs(argv) {
     outDir: options.out,
     dryRun: Boolean(options["dry-run"] || options["metadata-only"]),
     isValidationTarget: Boolean(options["validation-target"]),
+    excludedPrClasses: normalizeExcludedPrClasses(options["exclude-pr-class"] ?? []),
     csv: !options["no-csv"],
     json: Boolean(options.json),
   };
+}
+
+function normalizeExcludedPrClasses(values) {
+  return [...new Set(values
+    .flatMap(value => String(value).split(","))
+    .map(value => value.trim())
+    .filter(Boolean))];
 }
 
 function requireOptions(options) {
@@ -133,6 +147,31 @@ function validateLimit(limit) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
     throw new Error("limit must be an integer between 1 and 100.");
   }
+}
+
+function validateExcludedPrClasses(excludedPrClasses = []) {
+  for (const prClass of excludedPrClasses) {
+    if (!/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/.test(prClass)) {
+      throw new Error(`exclude-pr-class must be a lowercase PR class identifier using letters, digits, "-" or "_" separators: ${prClass}`);
+    }
+  }
+}
+
+function configuredPrClasses(repositoryProfile) {
+  return new Set((repositoryProfile.prClasses ?? []).map(rule => rule.class));
+}
+
+function validateExcludedPrClassesAreConfigured(excludedPrClasses = [], repositoryProfile) {
+  if (!excludedPrClasses.length) return;
+
+  const configured = configuredPrClasses(repositoryProfile);
+  const unconfigured = excludedPrClasses.filter(prClass => !configured.has(prClass));
+  if (!unconfigured.length) return;
+
+  const available = configured.size
+    ? ` Configured PR class(es): ${[...configured].sort().join(", ")}.`
+    : " The repository profile does not configure any PR classes.";
+  throw new Error(`exclude-pr-class must name configured PR class(es): ${unconfigured.join(", ")}.${available}`);
 }
 
 async function readProfile(profilePath) {
@@ -302,11 +341,12 @@ function attachCollectionCoverage(report, sourceBundle) {
   };
 }
 
-function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv }) {
+function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv, analysisFilter }) {
   return {
     ok: true,
     dryRun,
     csvArtifactsEnabled: Boolean(csv),
+    analysisFilter: analysisFilter ?? null,
     requestedLimit,
     sampledLimit,
     outputDirectory: outDir,
@@ -319,6 +359,28 @@ function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report,
   };
 }
 
+function applyPrClassFilter(normalized, excludedPrClasses = []) {
+  if (!excludedPrClasses.length) return normalized;
+  const excluded = new Set(excludedPrClasses);
+  const originalPullRequests = normalized.pullRequests ?? [];
+  if (!originalPullRequests.length) {
+    throw new Error("exclude-pr-class cannot filter because no merged pull requests were collected.");
+  }
+  const filteredPullRequests = originalPullRequests.filter(pr => !excluded.has(pr.prClass?.class ?? "unknown"));
+  if (!filteredPullRequests.length) {
+    throw new Error(`exclude-pr-class removed all ${originalPullRequests.length} collected pull request(s); choose a less restrictive filter.`);
+  }
+  return {
+    ...normalized,
+    analysisFilter: {
+      excludedPrClasses,
+      originalPullRequests: originalPullRequests.length,
+      filteredPullRequests: filteredPullRequests.length,
+    },
+    pullRequests: filteredPullRequests,
+  };
+}
+
 export async function runAnalyzeGithub(options, {
   provider = createGhCliProvider(),
   now = () => new Date().toISOString(),
@@ -327,6 +389,7 @@ export async function runAnalyzeGithub(options, {
   requireOptions(options);
   validateRepositorySlug(options.repository);
   validateLimit(options.limit);
+  validateExcludedPrClasses(options.excludedPrClasses);
   const csvEnabled = options.csv !== false;
 
   onProgress?.("Validating profile and output directory.");
@@ -334,6 +397,7 @@ export async function runAnalyzeGithub(options, {
     readProfile(options.profilePath),
     validateOutputDirectory(options.outDir),
   ]);
+  validateExcludedPrClassesAreConfigured(options.excludedPrClasses ?? [], repositoryProfile);
   const generatedPaths = artifactPaths(outDir, { includeCsv: csvEnabled });
   const disabledPaths = csvEnabled ? {} : Object.fromEntries(
     Object.entries(artifactPaths(outDir, { includeCsv: true })).filter(([key]) => CSV_ARTIFACT_KEYS.has(key)),
@@ -363,11 +427,15 @@ export async function runAnalyzeGithub(options, {
       requestedLimit: options.limit,
       sampledLimit: collectionLimit,
       csv: false,
+      analysisFilter: null,
     });
   }
 
   onProgress?.("Normalizing source bundle and computing metrics.");
-  const normalized = normalizeFixtureBundle(sourceBundle, { repositoryProfile });
+  const normalized = applyPrClassFilter(
+    normalizeFixtureBundle(sourceBundle, { repositoryProfile }),
+    options.excludedPrClasses ?? [],
+  );
   const metrics = computeRepositoryMetrics(normalized);
   const report = attachCollectionCoverage(generateRepositoryFrictionReport(metrics), sourceBundle);
   const markdown = `${renderRepositoryFrictionMarkdown(report)}${collectionCoverageMarkdown(sourceBundle)}`;
@@ -407,6 +475,7 @@ export async function runAnalyzeGithub(options, {
     requestedLimit: options.limit,
     sampledLimit: collectionLimit,
     csv: csvEnabled,
+    analysisFilter: normalized.analysisFilter ?? null,
   });
 }
 
@@ -467,6 +536,13 @@ export function formatAnalyzeGithubCompletion(result) {
     } else {
       lines.push("CSV evidence: disabled by --no-csv.");
     }
+  }
+
+  if (result.analysisFilter?.excludedPrClasses?.length) {
+    lines.push(
+      `Analysis filter: excluded PR class(es): ${result.analysisFilter.excludedPrClasses.join(", ")}.`,
+      `Filtered sample: ${result.analysisFilter.filteredPullRequests} of ${result.analysisFilter.originalPullRequests} collected pull request(s).`,
+    );
   }
 
   lines.push(`Collection coverage: ${result.collectionCoverage?.status ?? "unknown"}.`);

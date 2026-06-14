@@ -117,10 +117,10 @@ Make class distribution and class-driven dominance visible in the Markdown and J
 
 - [x] Active
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged in PR #26 on 2026-06-14
 
 ## M3: Explicit Class Filtering
 
@@ -175,4 +175,11 @@ Allow users to run an explicitly filtered analysis when they want to inspect dev
 
 ### Status
 
-- [ ] Not started
+Status: Implemented; final initiative completion deferred until PR merge.
+
+- [x] Active
+- [x] Implemented
+- [ ] Conformance reviewed
+- [ ] Adversarially reviewed
+- [ ] PR opened
+- [ ] Merged

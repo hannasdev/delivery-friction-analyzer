@@ -6,11 +6,19 @@ The core idea is to use GitHub data as the first durable signal. Pull request di
 
 ## Product Direction
 
-The MVP should be repo-source-agnostic and GitHub-connected. This repository is the builder repo for the analyzer; it is not expected to provide useful product analytics until it has meaningful PR history.
+Delivery Friction Analyzer is currently a local, GitHub-connected analyzer that produces repository-level friction reports from live pull request data. It is repo-source-agnostic: repository-specific assumptions live in profiles, while generated artifacts preserve source evidence, coverage caveats, and interpretation limits.
 
-The first version should run locally from this project, fetch live GitHub data for a configured target repository, and produce a repository-level friction report. `hannasdev/mcp-writing` is the first validation target and fixture source, not product-specific scope.
+`hannasdev/mcp-writing` remains the first validation target and fixture source, not product-specific scope.
 
-The report should answer:
+The current product wedge is a maintainer workflow:
+
+- collect the latest merged PR sample from a target repository;
+- classify files and PRs through repository profiles;
+- generate Markdown, JSON, methodology, and CSV artifacts;
+- explain review, validation, scope, planning, PR-size, and PR-class friction with traceable evidence;
+- support explicit follow-up filtering when maintainers want to inspect a configured PR population separately.
+
+The report helps answer:
 
 - Where do PRs require the most corrective loops?
 - Which feedback patterns repeat across PRs?
@@ -18,7 +26,7 @@ The report should answer:
 - Which changes create the largest gap between the PR opened state and the merged state?
 - Which changed files are part of the repository's configured product surface versus tests, docs, generated artifacts, release notes, marketing surfaces, or other support surfaces?
 
-The product should eventually combine GitHub delivery friction with token and model usage, but GitHub-only analytics are enough to validate the first product wedge.
+The product should eventually combine GitHub delivery friction with token and model usage, but GitHub-only analytics remain the active validation surface.
 
 ## Local GitHub Analysis
 
@@ -45,7 +53,7 @@ The command writes:
 - `comment-sources.csv`
 - `collection-coverage.csv`
 
-Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. Use `--no-csv` when you want the Markdown, JSON, source, normalized, metrics, and methodology artifacts without spreadsheet-friendly CSV exports.
+Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. Use `--no-csv` when you want the Markdown, JSON, source, normalized, metrics, and methodology artifacts without spreadsheet-friendly CSV exports. Use `--exclude-pr-class <class>` to explicitly remove a configured PR class from downstream normalized, metrics, report, methodology, and CSV artifacts; `source-bundle.json` still preserves the full collected sample for auditability.
 
 Successful runs print a concise completion message with `friction-report.md` first, followed by the key supporting artifacts and collection coverage status. Use `--json` when automation needs the full machine-readable completion receipt on stdout.
 
@@ -58,7 +66,7 @@ Known MVP interpretation limits:
 - PR-open diff growth is unavailable unless an open-time snapshot or reconstruction exists; the local historical collector does not infer it from merge-time diff data.
 - Workflow runs are collected from branch-based pull-request Actions history, which can be unavailable or partial for deleted, renamed, reused, or inaccessible branches.
 - Review-thread counts depend on GraphQL review-thread coverage; unavailable thread access is reported instead of silently treated as zero review churn.
-- A single dependency, bot, or unusually broad feature PR can dominate validation or review findings. Treat dominance notes as a prompt to inspect the raw PR evidence before generalizing.
+- A single PR or PR class, such as release, dependency, bot-driven, or unusually broad feature work, can dominate validation or review findings. Treat PR and class dominance notes as prompts to inspect the raw evidence before generalizing; use `--exclude-pr-class` only when you intentionally want a filtered follow-up view.
 
 Generated artifacts may contain repository names, PR URLs, PR titles, file paths, comment metadata, curated CSV evidence, and coverage diagnostics. Treat source bundles, normalized data, metrics summaries, reports, methodology, and CSV exports as local/private unless you intentionally review and share them.
 

@@ -6,6 +6,7 @@ Milestone 2 introduces `friction-metrics.v1`, a deterministic metrics summary co
 
 - `metricVersion`: formula version for every repository and PR summary.
 - `targetRepository`: normalized target repository input.
+- `analysisFilter`: optional metadata for explicit analysis filters, such as excluded PR classes and before/after PR counts.
 - `totals`: repository-level counts for pull requests, changed lines, non-generated changed lines, review comments, review threads, failed checks, and cancelled workflow runs.
 - `rankings`: PR rankings by review churn, changed-file spread, validation gap, planning gap, review surprise, and fix amplification.
 - `pullRequests`: per-PR metrics with PR class evidence, diff, file spread, review comments, review-thread churn, review decision evidence, CI, lifecycle, iteration, coverage, and transparent component metrics.
@@ -36,6 +37,8 @@ Observed GitHub data remains separate from inferred or configured classification
 - review decision evidence carries the normalized review-event source label so clean human approval can be distinguished from unavailable review evidence and from observed absence of human review.
 
 Generated or low-signal roles are not hidden. They are counted separately, excluded from core file metrics, and down-weighted in `weightedChangedLines`.
+
+When an explicit PR class filter is applied, metrics are computed from the filtered normalized PR set. Rankings, totals, and CSV evidence should describe that filtered sample, while `analysisFilter` records the excluded classes and the original collected count for auditability.
 
 ## Formula Constants
 

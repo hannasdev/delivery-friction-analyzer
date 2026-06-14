@@ -399,6 +399,7 @@ export function computeRepositoryMetrics(normalizedBundle) {
   return {
     metricVersion: FRICTION_METRICS_VERSION,
     targetRepository: normalizedBundle.targetRepository,
+    ...(normalizedBundle.analysisFilter ? { analysisFilter: normalizedBundle.analysisFilter } : {}),
     totals,
     rankings: {
       reviewChurn: rankBy(pullRequests, "iterationDrag"),
