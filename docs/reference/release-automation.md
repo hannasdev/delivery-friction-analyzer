@@ -10,6 +10,7 @@ The npm package allowlist includes:
 - JSON schemas in `schemas`;
 - public contract and reference docs in `docs/contracts` and `docs/reference`;
 - the sample repository profile at `fixtures/github/mcp-writing/profile.json`;
+- `LICENSE`;
 - `README.md`;
 - `release-log.md`.
 
