@@ -13,7 +13,16 @@ function ruleLabel(rule, index) {
 export function validatePrClassRules(profile = {}) {
   const errors = [];
   const seenRuleIds = new Set();
-  const rules = profile.prClasses ?? [];
+
+  if (!profile || typeof profile !== "object" || Array.isArray(profile)) {
+    return [];
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(profile, "prClasses")) {
+    return [];
+  }
+
+  const rules = profile.prClasses;
 
   if (!Array.isArray(rules)) {
     return ["prClasses must be an array when provided"];
@@ -83,7 +92,8 @@ function ruleMatches(title, match = {}) {
 
 export function classifyPullRequest(pr, profile = {}) {
   const title = String(pr?.title ?? "");
-  for (const rule of profile.prClasses ?? []) {
+  const rules = Array.isArray(profile?.prClasses) ? profile.prClasses : [];
+  for (const rule of rules) {
     if (ruleMatches(title, rule.match)) {
       return {
         class: rule.class,

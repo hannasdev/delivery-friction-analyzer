@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { classifyFilePath } from "../src/profile/file-role.js";
-import { classifyPullRequest, validatePrClassRules } from "../src/profile/pr-class.js";
+import { assertValidPrClassRules, classifyPullRequest, validatePrClassRules } from "../src/profile/pr-class.js";
 import { classifyCommentSource } from "../src/github/comment-source.js";
 
 describe("repository profile classification", () => {
@@ -121,6 +121,16 @@ describe("pull request class classification", () => {
     assert.deepEqual(validatePrClassRules({ prClasses: {} }), [
       "prClasses must be an array when provided",
     ]);
+  });
+
+  it("rejects explicit null PR class rule collections", () => {
+    assert.deepEqual(validatePrClassRules({ prClasses: null }), [
+      "prClasses must be an array when provided",
+    ]);
+    assert.throws(
+      () => assertValidPrClassRules({ prClasses: null }),
+      /invalid PR class profile rules: prClasses must be an array when provided/,
+    );
   });
 });
 
