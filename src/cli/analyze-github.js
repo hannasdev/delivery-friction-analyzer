@@ -152,7 +152,7 @@ function validateLimit(limit) {
 function validateExcludedPrClasses(excludedPrClasses = []) {
   for (const prClass of excludedPrClasses) {
     if (!/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/.test(prClass)) {
-      throw new Error(`exclude-pr-class must be a lower-kebab-case or lower_snake_case PR class: ${prClass}`);
+      throw new Error(`exclude-pr-class must be a lowercase PR class identifier using letters, digits, "-" or "_" separators: ${prClass}`);
     }
   }
 }
@@ -363,6 +363,9 @@ function applyPrClassFilter(normalized, excludedPrClasses = []) {
   if (!excludedPrClasses.length) return normalized;
   const excluded = new Set(excludedPrClasses);
   const originalPullRequests = normalized.pullRequests ?? [];
+  if (!originalPullRequests.length) {
+    throw new Error("exclude-pr-class cannot filter because no merged pull requests were collected.");
+  }
   const filteredPullRequests = originalPullRequests.filter(pr => !excluded.has(pr.prClass?.class ?? "unknown"));
   if (!filteredPullRequests.length) {
     throw new Error(`exclude-pr-class removed all ${originalPullRequests.length} collected pull request(s); choose a less restrictive filter.`);

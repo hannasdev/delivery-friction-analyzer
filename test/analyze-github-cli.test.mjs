@@ -303,6 +303,25 @@ describe("GitHub live analyze CLI", () => {
     ]).excludedPrClasses, ["release", "dependency"]);
   });
 
+  it("rejects malformed PR class exclusion identifiers with matching guidance", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir: join(directory, "out"),
+          excludedPrClasses: ["Release PR"],
+        }, { provider }),
+        /exclude-pr-class must be a lowercase PR class identifier using letters, digits, "-" or "_" separators: Release PR/,
+      );
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
   it("runs live collection through reports and writes expected artifacts", async () => {
     await withTempDirectory(async directory => {
       const profilePath = await writeProfile(directory);
@@ -586,6 +605,32 @@ describe("GitHub live analyze CLI", () => {
         /exclude-pr-class must name configured PR class\(es\): dependency\. Configured PR class\(es\): development, release\./,
       );
       assert.deepEqual(provider.calls, []);
+      assert.deepEqual(await readdir(outDir), []);
+    });
+  });
+
+  it("reports a clear error when a filtered run collects no pull requests", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "filtered-empty-sample");
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir,
+          excludedPrClasses: ["release"],
+        }, {
+          provider: createProvider({
+            async listMergedPullRequests(input) {
+              this.calls.push(["listMergedPullRequests", input]);
+              return [];
+            },
+          }),
+          now: () => "2026-06-09T00:00:00Z",
+        }),
+        /exclude-pr-class cannot filter because no merged pull requests were collected\./,
+      );
       assert.deepEqual(await readdir(outDir), []);
     });
   });
