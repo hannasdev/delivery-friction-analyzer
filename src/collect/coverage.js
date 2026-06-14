@@ -11,7 +11,7 @@ const TOKEN_PATTERNS = [
   /\bghu_[A-Za-z0-9_]+\b/g,
   /\bghs_[A-Za-z0-9_]+\b/g,
   /\bghr_[A-Za-z0-9_]+\b/g,
-  /\bgithub_pat_[A-Za-z0-9_]+(?:_[A-Za-z0-9_]+)*\b/g,
+  /\bgithub_pat_[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*\b/g,
   /\b(GITHUB_TOKEN|GH_TOKEN|GH_ENTERPRISE_TOKEN)=\S+/gi,
   /\b(authorization:\s*)(bearer|token)\s+\S+/gi,
   /\b(token\s+)[A-Za-z0-9_./+=-]{16,}\b/gi,
