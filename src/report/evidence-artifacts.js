@@ -375,7 +375,7 @@ export function renderRepositoryFrictionMethodology({
     "",
     "## Scores And Rankings",
     "",
-    "The report ranks bottlenecks by transparent component metrics from `friction-metrics.v1`: review churn, changed-file spread, validation gap, planning gap, review surprise, and fix amplification. These are not an opaque composite score, and they are not individual contributor or reviewer rankings.",
+    "The report ranks bottlenecks by transparent component metrics from `friction-metrics.v1`: review churn, change scope (the internal changed-file-spread signal: core files plus directories plus functional surfaces touched), validation gap, planning gap, review surprise, and fix amplification. These are not an opaque composite score, and they are not individual contributor or reviewer rankings.",
     "",
     "## Coverage And Limitations",
     "",

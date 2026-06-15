@@ -26,6 +26,16 @@ async function readText(path) {
   return readFile(new URL(path, import.meta.url), "utf8");
 }
 
+function assertOrderedSections(markdown, sectionNames) {
+  let previousIndex = -1;
+  for (const sectionName of sectionNames) {
+    const index = markdown.indexOf(sectionName);
+    assert.notEqual(index, -1, `expected ${sectionName} to be rendered`);
+    assert(index > previousIndex, `expected ${sectionName} to render after the previous checked section`);
+    previousIndex = index;
+  }
+}
+
 describe("friction report generation", () => {
   it("generates deterministic JSON and Markdown reports from fixture metrics", async () => {
     const [metricsSummary, goldenJson, goldenMarkdown] = await Promise.all([
@@ -41,6 +51,29 @@ describe("friction report generation", () => {
     assert.equal(markdown, goldenMarkdown);
     assert(markdown.includes("Pull requests analyzed: 3"));
     assert(!markdown.includes("PR sample:"));
+  });
+
+  it("renders a first-glance opening before detailed bottlenecks", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assertOrderedSections(markdown, [
+      "## Executive Summary",
+      "## Focus Snapshot",
+      "## Recommendation Category Snapshot",
+      "## How To Read This Report",
+      "## Evidence Quality And Coverage",
+      "## Key Findings",
+      "## How Bottlenecks Are Prioritized",
+      "## Ranked Bottlenecks",
+      "## Recommendation Categories",
+    ]);
+    assert(markdown.includes("| Focus first | Review churn, Repo guidance gap, Change scope |"));
+    assert(markdown.includes("| Action categories | Hooks (1), Preflight scripts (1), Repo-specific AI skills (1), PR readiness gates (2), Smaller milestones (2), Planning artifacts (1), Test infrastructure (1) |"));
+    assert(markdown.includes("| Evidence reviewed | 3 PRs, 2454 changed lines, 2433 non-generated changed lines, 30 review comments, 25 review threads, 0 failed checks, 1 cancelled workflow run |"));
+    assert(markdown.includes("| Confidence caveats | 2 coverage caveats, 4 outlier caveats. Read the evidence and caveat sections before generalizing. |"));
+    assert(markdown.includes("Change scope is the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched. It is not a line-count metric."));
   });
 
   it("keeps observed evidence, diagnosis, and action separate", async () => {
@@ -189,6 +222,159 @@ describe("friction report generation", () => {
     assert(markdown.includes("PR class caveat: Review churn: PR class release contributes 90%"));
     assert(markdown.includes("| [#1](https://example.test/pull/1) | Release 2026.06.14 | 10 | release | unknown | unknown | unknown | 500 |"));
     assert(markdown.includes("- PR class: release (source=repository\\_profile, rule=release-title)"));
+  });
+
+  it("keeps filtered empty-state caveats visible before ranked bottlenecks", () => {
+    const markdown = renderRepositoryFrictionMarkdown({
+      reportVersion: "friction-report.v1",
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      analysisFilter: {
+        excludedPrClasses: ["release"],
+        originalPullRequests: 5,
+        filteredPullRequests: 2,
+      },
+      summary: {
+        pullRequests: 2,
+        changedLines: 0,
+        nonGeneratedChangedLines: 0,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+        topBottleneckIds: [],
+      },
+      coverage: {
+        prOpenDiff: { unavailable: 2 },
+        workflowRuns: { unavailable: 2 },
+        reviewThreads: { unavailable: 2 },
+        notes: ["Workflow-run coverage is unavailable for this filtered sample."],
+      },
+      prClasses: {
+        totalPullRequests: 0,
+        distribution: [],
+        note: "No PR class evidence was available.",
+      },
+      bottlenecks: [],
+      recommendationCategories: [
+        {
+          id: "hooks",
+          label: "Hooks",
+          triggeredBottlenecks: 0,
+          description: "Local hooks for repeated formatting, lint, typecheck, snapshot, or generated-output churn.",
+        },
+      ],
+      commentSources: {
+        totalComments: 0,
+        botComments: 0,
+        humanComments: 0,
+        authorReplies: 0,
+        bySource: [],
+      },
+      surfaces: {
+        coreChangedLines: 0,
+        lowSignalChangedLines: 0,
+        lowSignalFiles: 0,
+        weightedChangedLines: 0,
+        smallDiffWideSpreadCount: 0,
+        byFunctionalSurface: [],
+        byRole: [],
+      },
+      guardrails: {
+        avoidsIndividualRanking: true,
+        separatesObservedInferredAndSuggested: true,
+        usesCompositeScore: false,
+      },
+      followUp: [],
+    });
+
+    assertOrderedSections(markdown, [
+      "Analysis filter: excluded PR class(es): release.",
+      "## Focus Snapshot",
+      "## Recommendation Category Snapshot",
+      "## Key Findings",
+      "## Ranked Bottlenecks",
+    ]);
+    assert(markdown.includes("| Analysis filter | excluded PR class(es): release; filtered sample 2 of 5 collected PRs |"));
+    assert(markdown.includes("| Focus first | No detailed bottleneck evidence was available. |"));
+    assert(markdown.includes("| Action categories | none |"));
+    assert(markdown.includes("| Confidence caveats | 1 coverage caveat. Read the evidence and caveat sections before generalizing. |"));
+    assert(markdown.includes("No recommendation categories were triggered by the displayed bottleneck evidence."));
+    assert(markdown.includes("- PR class caveat: PR class context was not available for the analyzed sample."));
+    assert(markdown.includes("- Coverage caveat: Workflow-run coverage is unavailable for this filtered sample."));
+  });
+
+  it("renders no-caveat focus states without placeholder count syntax", () => {
+    const markdown = renderRepositoryFrictionMarkdown({
+      reportVersion: "friction-report.v1",
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      summary: {
+        pullRequests: 1,
+        changedLines: 1,
+        nonGeneratedChangedLines: 1,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+        topBottleneckIds: [],
+      },
+      coverage: {
+        prOpenDiff: { observed: 1 },
+        workflowRuns: { observed: 1 },
+        reviewThreads: { "graphql:repository.pullRequest.reviewThreads": 1 },
+        notes: [],
+      },
+      prClasses: {
+        totalPullRequests: 1,
+        distribution: [
+          {
+            class: "development",
+            pullRequests: 1,
+            changedLines: 1,
+            share: 1,
+            classificationSources: [{ name: "fallback_rule", value: 1 }],
+          },
+        ],
+        note: "PR class evidence is interpretation context only.",
+      },
+      bottlenecks: [],
+      recommendationCategories: [],
+      commentSources: {
+        totalComments: 0,
+        botComments: 0,
+        humanComments: 0,
+        authorReplies: 0,
+        bySource: [],
+      },
+      surfaces: {
+        coreChangedLines: 1,
+        lowSignalChangedLines: 0,
+        lowSignalFiles: 0,
+        weightedChangedLines: 1,
+        smallDiffWideSpreadCount: 0,
+        byFunctionalSurface: [],
+        byRole: [],
+      },
+      guardrails: {
+        avoidsIndividualRanking: true,
+        separatesObservedInferredAndSuggested: true,
+        usesCompositeScore: false,
+      },
+      followUp: [],
+    });
+
+    assert(markdown.includes("| Evidence reviewed | 1 PR, 1 changed line, 1 non-generated changed line, 0 review comments, 0 review threads, 0 failed checks, 0 cancelled workflow runs |"));
+    assert(markdown.includes("| Confidence caveats | No early confidence caveats were recorded for the displayed evidence. |"));
+    assert(!markdown.includes("caveat(s)"));
   });
 
   it("falls back to displayed example count when displayed ranking scores are unavailable", () => {

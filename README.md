@@ -2,7 +2,7 @@
 
 Delivery Friction Analyzer is a product concept for measuring where AI-assisted software delivery still wastes time: review loops, CI churn, scope drift, missing validation, and repeated corrective work after a pull request opens.
 
-The core idea is to use GitHub data as the first durable signal. Pull request diffs, review comments by source, check runs, commits, changed-file spread, file roles, and merge timelines can reveal which repositories, modules, and workflow stages create the most back-and-forth before work becomes mergeable.
+The core idea is to use GitHub data as the first durable signal. Pull request diffs, review comments by source, check runs, commits, change scope, file roles, and merge timelines can reveal which repositories, modules, and workflow stages create the most back-and-forth before work becomes mergeable.
 
 ## Product Direction
 

@@ -424,7 +424,7 @@
     },
     {
       "id": "changed-file-spread",
-      "title": "Changed-file spread",
+      "title": "Change scope",
       "metricLabel": "spread score",
       "observedData": [
         {
@@ -1351,7 +1351,7 @@
         "bottlenecks": [
           {
             "id": "changed-file-spread",
-            "title": "Changed-file spread",
+            "title": "Change scope",
             "recommendationCategory": "smaller_milestones"
           },
           {
@@ -1360,7 +1360,7 @@
             "recommendationCategory": "planning_artifacts"
           }
         ],
-        "note": "Changed-file spread, Planning gap display the same representative PR evidence (#221, #223, #239); keep recommendation actions distinct while reading the shared evidence as one underlying signal."
+        "note": "Change scope, Planning gap display the same representative PR evidence (#221, #223, #239); keep recommendation actions distinct while reading the shared evidence as one underlying signal."
       },
       {
         "type": "representative_evidence",
@@ -1427,7 +1427,7 @@
           },
           {
             "id": "changed-file-spread",
-            "title": "Changed-file spread"
+            "title": "Change scope"
           }
         ]
       },
@@ -1469,7 +1469,7 @@
         "replacementTopBottlenecks": [
           {
             "id": "changed-file-spread",
-            "title": "Changed-file spread"
+            "title": "Change scope"
           },
           {
             "id": "review-churn",

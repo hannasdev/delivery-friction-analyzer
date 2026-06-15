@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-15 — First-Glance Report Opening
+
+- What changed: Friction reports now open with a focus snapshot, early recommendation-category summary, reviewed-evidence counts, and confidence caveats before detailed bottleneck evidence.
+- Why it matters: Maintainers can see what deserves attention, why the report is confident or caveated, and which action themes apply without reading through the full ranked bottleneck details first.
+- Who is affected: Maintainers and contributors reviewing generated friction reports.
+- Action needed: None.
+- PR: TBD
+
 ### 2026-06-14 — NPM Release Automation
 
 - What changed: The package is prepared for public npm distribution with CLI metadata, a tight npm package allowlist, CI package dry-runs, automated conventional-commit versioning, GitHub release creation, and tag-triggered npm publishing.

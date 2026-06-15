@@ -15,7 +15,25 @@ Pull requests analyzed: 3
 | Review threads | 0 |
 | Failed checks | 0 |
 | Cancelled workflow runs | 0 |
-| Top bottlenecks | review-churn, repo-guidance-gap |
+| Top findings | Review churn, Repo guidance gap |
+| Triggered recommendation categories | Repo-specific AI skills (1), PR readiness gates (1) |
+| Analysis filter | none |
+
+## Focus Snapshot
+
+| Question | Answer |
+| --- | --- |
+| Focus first | Review churn, Repo guidance gap |
+| Action categories | Repo-specific AI skills (1), PR readiness gates (1) |
+| Evidence reviewed | 3 PRs, 700 changed lines, 700 non-generated changed lines, 0 review comments, 0 review threads, 0 failed checks, 0 cancelled workflow runs |
+| Confidence caveats | 2 coverage caveats, 2 PR class caveats. Read the evidence and caveat sections before generalizing. |
+
+## Recommendation Category Snapshot
+
+| Category | Triggered bottlenecks |
+| --- | --- |
+| Repo-specific AI skills | 1 |
+| PR readiness gates | 1 |
 
 ## How To Read This Report
 
@@ -39,7 +57,7 @@ Coverage notes:
 
 ## Key Findings
 
-- Top bottlenecks: review-churn, repo-guidance-gap.
+- Top bottlenecks: Review churn, Repo guidance gap.
 - Strongest displayed signal: Review churn (iteration drag).
 - Outlier caveat: displayed bottleneck examples are not dominated by a single PR.
 - PR class caveat: Review churn: PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat. Repo guidance gap: PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat.
@@ -65,9 +83,10 @@ Shared-signal groups are report interpretation only; they do not change scores, 
 ## How Bottlenecks Are Prioritized
 
 - Bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score.
-- Each score comes from one metric family, such as review-loop drag, validation failures, changed-file spread, planning signals, review surprise, or post-review commits.
+- Each score comes from one metric family, such as review-loop drag, validation failures, change scope, planning signals, review surprise, or post-review commits.
+- Change scope is the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched. It is not a line-count metric.
 - PR size columns show final/current additions, deletions, changed files, and changed lines so readers can compare size against the detected friction signals.
-- PR size is context for interpretation; it only affects ordering when the bottleneck metric itself is about changed-file spread.
+- PR size is context for interpretation; it only affects ordering when the bottleneck metric itself is about change scope.
 - Coverage caveats and outlier dominance should be considered before treating the first bottleneck as the most important repository problem.
 
 ## Ranked Bottlenecks
