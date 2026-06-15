@@ -17,7 +17,7 @@ The analyzer runs locally with your GitHub credentials. Generated artifacts pres
 - GitHub CLI (`gh`) installed and authenticated with access to the target repository.
 - A repository profile JSON for the repository you want to analyze.
 
-For public repositories, ordinary read access is usually enough. Private repositories need a `gh` token with repository, pull request, Actions, and checks access for the richest report. Missing or partial API coverage is recorded in the generated methodology and coverage artifacts instead of being treated as complete data.
+For public repositories, ordinary read access is usually enough. Private repositories need a `gh` token with enough read access for the requested API families. With a classic PAT, that usually means the `repo` scope. With a fine-grained token or GitHub App, grant read permissions for repository metadata and contents, pull requests, Actions, and checks where available. Missing or partial API coverage is recorded in the generated methodology and coverage artifacts instead of being treated as complete data.
 
 ## Quickstart
 
