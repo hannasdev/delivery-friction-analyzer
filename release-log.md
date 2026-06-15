@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can draft narrative summaries from existing analyzer outputs while keeping deterministic reports authoritative and avoiding extra artifact surface area.
 - Who is affected: Maintainers and contributors using generated friction reports as input for narrative summaries.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/31
 
 ### 2026-06-15 — First-Glance Report Opening
 
