@@ -54,7 +54,7 @@ const RECOMMENDATION_CATEGORY_LABELS = new Map(
 
 const RANKING_SIGNAL_LABELS = new Map([
   ["reviewChurn", "review churn"],
-  ["changedFileSpread", "changed-file spread"],
+  ["changedFileSpread", "change scope"],
   ["validationGap", "validation gap"],
   ["planningGap", "planning gap"],
   ["reviewSurprise", "review surprise"],
@@ -74,7 +74,7 @@ const BOTTLENECK_DEFINITIONS = [
   {
     id: "changed-file-spread",
     rankingKey: "changedFileSpread",
-    title: "Changed-file spread",
+    title: "Change scope",
     metricLabel: "spread score",
     recommendationCategory: "smaller_milestones",
     action: "Break broad changes into smaller milestones when core files, directories, or surfaces spread out.",
@@ -950,6 +950,30 @@ function renderRecommendationCategories(categories) {
   );
 }
 
+function triggeredRecommendationCategories(categories) {
+  return (categories ?? []).filter(category => Number(category.triggeredBottlenecks ?? 0) > 0);
+}
+
+function renderRecommendationCategorySnapshot(categories) {
+  const triggered = triggeredRecommendationCategories(categories);
+  if (!triggered.length) {
+    return "No recommendation categories were triggered by the displayed bottleneck evidence.";
+  }
+
+  return renderMarkdownTable(
+    ["Category", "Triggered bottlenecks"],
+    triggered.map(category => [
+      category.label,
+      category.triggeredBottlenecks,
+    ]),
+  );
+}
+
+function formatCount(value, singular, plural = `${singular}s`) {
+  const count = Number(value ?? 0);
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 function renderInterpretationAndRecommendation(bottleneck) {
   return renderMarkdownTable(
     ["Field", "Value"],
@@ -963,14 +987,38 @@ function renderInterpretationAndRecommendation(bottleneck) {
 function renderPriorityExplanation() {
   return renderList([
     "Bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score.",
-    "Each score comes from one metric family, such as review-loop drag, validation failures, changed-file spread, planning signals, review surprise, or post-review commits.",
+    "Each score comes from one metric family, such as review-loop drag, validation failures, change scope, planning signals, review surprise, or post-review commits.",
+    "Change scope is the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched. It is not a line-count metric.",
     "PR size columns show final/current additions, deletions, changed files, and changed lines so readers can compare size against the detected friction signals.",
-    "PR size is context for interpretation; it only affects ordering when the bottleneck metric itself is about changed-file spread.",
+    "PR size columns are context for interpreting displayed examples; bottleneck ordering uses each metric family's representative score and stable tie-breaks, not the PR size columns.",
     "Coverage caveats and outlier dominance should be considered before treating the first bottleneck as the most important repository problem.",
   ]);
 }
 
-function renderSummaryTable(summary) {
+function topBottleneckLabels(report) {
+  const bottlenecksById = new Map((report.bottlenecks ?? []).map(bottleneck => [bottleneck.id, bottleneck]));
+  const ids = report.summary?.topBottleneckIds ?? [];
+  const labels = ids
+    .map(id => bottlenecksById.get(id)?.title ?? id)
+    .filter(Boolean);
+  return labels.length ? labels.join(", ") : "none";
+}
+
+function triggeredCategoryLabels(report) {
+  const categories = triggeredRecommendationCategories(report.recommendationCategories);
+  return categories.length
+    ? categories.map(category => `${category.label} (${category.triggeredBottlenecks})`).join(", ")
+    : "none";
+}
+
+function formatAnalysisFilterStatus(report) {
+  const filter = report.analysisFilter;
+  if (!filter?.excludedPrClasses?.length) return "none";
+  return `excluded PR class(es): ${filter.excludedPrClasses.join(", ")}; filtered sample ${filter.filteredPullRequests} of ${formatCount(filter.originalPullRequests, "collected PR")}`;
+}
+
+function renderSummaryTable(report) {
+  const summary = report.summary ?? {};
   return renderMarkdownTable(
     ["Metric", "Value"],
     [
@@ -981,7 +1029,9 @@ function renderSummaryTable(summary) {
       ["Review threads", summary.reviewThreads],
       ["Failed checks", summary.failedChecks ?? 0],
       ["Cancelled workflow runs", summary.cancelledWorkflowRuns ?? 0],
-      ["Top bottlenecks", (summary.topBottleneckIds ?? []).join(", ") || "none"],
+      ["Top findings", topBottleneckLabels(report)],
+      ["Triggered recommendation categories", triggeredCategoryLabels(report)],
+      ["Analysis filter", formatAnalysisFilterStatus(report)],
     ],
   );
 }
@@ -998,7 +1048,7 @@ function renderCoverageSummary(coverage) {
 }
 
 function renderKeyFindings(report) {
-  const topBottlenecks = (report.summary.topBottleneckIds ?? []).join(", ") || "none";
+  const topBottlenecks = topBottleneckLabels(report);
   const strongest = report.bottlenecks?.[0];
   const dominanceCallouts = (report.bottlenecks ?? [])
     .filter(bottleneck => bottleneck.dominance?.status === "single_pr_dominates")
@@ -1023,6 +1073,50 @@ function renderKeyFindings(report) {
       : classDominanceFallback(report.prClasses),
     `Coverage caveat: ${coverageNotes}`,
   ]);
+}
+
+function summarizeFocusCaveats(report) {
+  const caveats = [];
+  const coverageNotes = report.coverage?.notes ?? [];
+  const dominantPrs = (report.bottlenecks ?? [])
+    .filter(bottleneck => bottleneck.dominance?.status === "single_pr_dominates");
+  const dominantClasses = (report.bottlenecks ?? [])
+    .filter(bottleneck => bottleneck.classDominance?.status === "single_class_dominates");
+
+  if (coverageNotes.length) caveats.push(formatCount(coverageNotes.length, "coverage caveat"));
+  if (dominantPrs.length) caveats.push(formatCount(dominantPrs.length, "outlier caveat"));
+  if (dominantClasses.length) caveats.push(formatCount(dominantClasses.length, "PR class caveat"));
+  if (!caveats.length) return "No early confidence caveats were recorded for the displayed evidence.";
+
+  return `${caveats.join(", ")}. Read the evidence and caveat sections before generalizing.`;
+}
+
+function renderFocusSnapshot(report) {
+  const summary = report.summary ?? {};
+  const categories = triggeredCategoryLabels(report);
+  const evidenceReviewed = [
+    formatCount(summary.pullRequests, "PR"),
+    formatCount(summary.changedLines, "changed line"),
+    formatCount(summary.nonGeneratedChangedLines, "non-generated changed line"),
+    formatCount(summary.reviewComments, "review comment"),
+    formatCount(summary.reviewThreads, "review thread"),
+    formatCount(summary.failedChecks, "failed check"),
+    formatCount(summary.cancelledWorkflowRuns, "cancelled workflow run"),
+  ].join(", ");
+  const firstInspection = (report.bottlenecks ?? [])
+    .slice(0, 3)
+    .map(bottleneck => bottleneck.title)
+    .join(", ") || "No detailed bottleneck evidence was available.";
+
+  return renderMarkdownTable(
+    ["Question", "Answer"],
+    [
+      ["Focus first", firstInspection],
+      ["Action categories", categories],
+      ["Evidence reviewed", evidenceReviewed],
+      ["Confidence caveats", summarizeFocusCaveats(report)],
+    ],
+  );
 }
 
 function classDominanceFallback(prClasses) {
@@ -1189,7 +1283,15 @@ export function renderRepositoryFrictionMarkdown(report) {
     ...analysisFilterLines,
     "## Executive Summary",
     "",
-    renderSummaryTable(report.summary),
+    renderSummaryTable(report),
+    "",
+    "## Focus Snapshot",
+    "",
+    renderFocusSnapshot(report),
+    "",
+    "## Recommendation Category Snapshot",
+    "",
+    renderRecommendationCategorySnapshot(report.recommendationCategories ?? []),
     "",
     "## How To Read This Report",
     "",

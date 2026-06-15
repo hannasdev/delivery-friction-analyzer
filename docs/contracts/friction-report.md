@@ -32,7 +32,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `commentSources`: total and source-grouped review comments for Copilot, human, bot, scanner, author replies, and unknown sources.
 - `surfaces`: core, low-signal, generated, support-surface, role, and functional-surface breakdowns.
 - `prClasses`: PR class distribution for the analyzed sample, including PR counts, changed lines, share of PRs, and classification source counts by class.
-- `bottlenecks`: ranked friction patterns with observed data, inferred diagnosis, and suggested action kept as separate fields.
+- `bottlenecks`: ranked friction patterns with observed data, inferred diagnosis, and suggested action kept as separate fields. `bottlenecks[].title` is a reader-facing display label and may change for clarity while stable IDs such as `changed-file-spread` remain unchanged.
 - `bottlenecks[].observedData[]`: representative PR examples with PR identity, score/value, PR class evidence, final/current additions, deletions, changed-file count, and changed-line count.
 - `bottlenecks[].observedData[].validationEvidence`: workflow-run source label, workflow-run coverage, workflow-run conclusions, failed check-run count, failed workflow-run count, and cancelled workflow-run count for representative PR examples.
 - `bottlenecks[].observedData[].reviewEvidence`: review-thread source label, thread counts, resolution/outdated counts, review decision label/source, human reviewer count, human approval / changes-requested booleans, comment-source breakdown, bot comment count, human reviewer comment count, and author reply count for representative PR examples.
@@ -44,21 +44,23 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `guardrails`: machine-readable checks that the report avoids individual ranking, separates evidence from inference, and does not use an opaque composite score.
 - `followUp`: non-automated future work suggested by the report.
 
-Bottlenecks are ordered by their strongest observed representative metric value, with stable category order used only to break ties. Final/current PR size fields are context for comparing size against friction signals; they only affect ordering for metric families that explicitly measure changed-file spread.
+Bottlenecks are ordered by their strongest observed representative metric value, with stable category order used only to break ties. Final/current PR size fields are context for comparing displayed examples against friction signals; they are not separate ordering inputs. The internal `changedFileSpread` / `changed-file-spread` signal remains the stable contract name for the metric that sums core files touched, directories touched, and functional surfaces touched. It is not a changed-line-count metric.
 
 ## Markdown Output
 
 The Markdown renderer presents the same report data for human review:
 
-- executive summary totals in a table;
 - explicit analysis filter labels when downstream artifacts were generated from a filtered PR class sample;
+- executive summary totals plus top findings, triggered recommendation categories, and filter status in a table;
+- a top-of-report focus snapshot that names focus areas, action categories, evidence reviewed, and confidence caveats before detailed bottlenecks;
+- a compact recommendation-category snapshot before detailed bottlenecks, with the full category reference retained later in the report;
 - a short "How To Read This Report" guide that distinguishes observed evidence, interpretation, recommendations, and caveats;
 - evidence-quality and coverage tables before detailed recommendations;
 - key findings that highlight top bottlenecks, strongest displayed signal, outlier caveats, PR class caveats, and coverage caveats;
 - a PR class context table that shows analyzed PR counts, changed lines, sample share, and classification sources by class;
 - a top-level shared-signal interpretation callout when multiple displayed bottlenecks share a ranking key or representative PR evidence;
 - outlier and sensitivity analysis when displayed examples are dominated by one PR;
-- a prioritization explanation that describes strongest-signal ordering and how PR size is used as context;
+- a prioritization explanation that describes strongest-signal ordering and how PR size is used as context, using reader-facing change-scope language while mapping back to the internal changed-file-spread signal when needed;
 - ranked bottlenecks with representative PR examples rendered as compact PR-size tables;
 - validation, review, and source-label evidence for each representative PR example rendered as plain Markdown detail lists;
 - separately labeled inferred diagnosis, suggested action, and confidence/caveat blocks for each bottleneck;

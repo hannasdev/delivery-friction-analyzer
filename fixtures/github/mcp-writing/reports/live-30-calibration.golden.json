@@ -137,7 +137,7 @@
     },
     {
       "id": "changed-file-spread",
-      "title": "Changed-file spread",
+      "title": "Change scope",
       "dominance": {
         "status": "distributed",
         "topPrNumber": 212,

@@ -15,7 +15,30 @@ Pull requests analyzed: 3
 | Review threads | 25 |
 | Failed checks | 0 |
 | Cancelled workflow runs | 1 |
-| Top bottlenecks | review-churn, repo-guidance-gap, changed-file-spread |
+| Top findings | Review churn, Repo guidance gap, Change scope |
+| Triggered recommendation categories | Hooks (1), Preflight scripts (1), Repo-specific AI skills (1), PR readiness gates (2), Smaller milestones (2), Planning artifacts (1), Test infrastructure (1) |
+| Analysis filter | none |
+
+## Focus Snapshot
+
+| Question | Answer |
+| --- | --- |
+| Focus first | Review churn, Repo guidance gap, Change scope |
+| Action categories | Hooks (1), Preflight scripts (1), Repo-specific AI skills (1), PR readiness gates (2), Smaller milestones (2), Planning artifacts (1), Test infrastructure (1) |
+| Evidence reviewed | 3 PRs, 2454 changed lines, 2433 non-generated changed lines, 30 review comments, 25 review threads, 0 failed checks, 1 cancelled workflow run |
+| Confidence caveats | 2 coverage caveats, 4 outlier caveats. Read the evidence and caveat sections before generalizing. |
+
+## Recommendation Category Snapshot
+
+| Category | Triggered bottlenecks |
+| --- | --- |
+| Hooks | 1 |
+| Preflight scripts | 1 |
+| Repo-specific AI skills | 1 |
+| PR readiness gates | 2 |
+| Smaller milestones | 2 |
+| Planning artifacts | 1 |
+| Test infrastructure | 1 |
 
 ## How To Read This Report
 
@@ -39,7 +62,7 @@ Coverage notes:
 
 ## Key Findings
 
-- Top bottlenecks: review-churn, repo-guidance-gap, changed-file-spread.
+- Top bottlenecks: Review churn, Repo guidance gap, Change scope.
 - Strongest displayed signal: Review churn (iteration drag).
 - Outlier caveat: Review churn: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Repo guidance gap: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Review surprise: PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing. Fix amplification: PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
 - PR class caveat: only one PR class appears in the analyzed sample, so class dominance comparison is not meaningful.
@@ -60,7 +83,7 @@ Shared-signal groups are report interpretation only; they do not change scores, 
 - Review churn, Repo guidance gap share the review churn ranking signal; treat them as related interpretations, not separate independent findings. Recommendation categories remain distinct: PR readiness gates, Repo-specific AI skills.
 - Validation gap, Local hook gap, Test infrastructure gap share the validation gap ranking signal; treat them as related interpretations, not separate independent findings. Recommendation categories remain distinct: Preflight scripts, Hooks, Test infrastructure.
 - Review churn, Repo guidance gap, Review surprise, Fix amplification display the same representative PR evidence (#221, #239); keep recommendation actions distinct while reading the shared evidence as one underlying signal. Recommendation categories remain distinct: PR readiness gates, Repo-specific AI skills, Smaller milestones.
-- Changed-file spread, Planning gap display the same representative PR evidence (#221, #223, #239); keep recommendation actions distinct while reading the shared evidence as one underlying signal. Recommendation categories remain distinct: Smaller milestones, Planning artifacts.
+- Change scope, Planning gap display the same representative PR evidence (#221, #223, #239); keep recommendation actions distinct while reading the shared evidence as one underlying signal. Recommendation categories remain distinct: Smaller milestones, Planning artifacts.
 - Validation gap, Local hook gap, Test infrastructure gap display the same representative PR evidence (#239); keep recommendation actions distinct while reading the shared evidence as one underlying signal. Recommendation categories remain distinct: Preflight scripts, Hooks, Test infrastructure.
 
 ## Outlier And Sensitivity Analysis
@@ -75,9 +98,10 @@ Sensitivity summaries are robustness context only. They do not remove PRs from t
 ## How Bottlenecks Are Prioritized
 
 - Bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score.
-- Each score comes from one metric family, such as review-loop drag, validation failures, changed-file spread, planning signals, review surprise, or post-review commits.
+- Each score comes from one metric family, such as review-loop drag, validation failures, change scope, planning signals, review surprise, or post-review commits.
+- Change scope is the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched. It is not a line-count metric.
 - PR size columns show final/current additions, deletions, changed files, and changed lines so readers can compare size against the detected friction signals.
-- PR size is context for interpretation; it only affects ordering when the bottleneck metric itself is about changed-file spread.
+- PR size columns are context for interpreting displayed examples; bottleneck ordering uses each metric family's representative score and stable tie-breaks, not the PR size columns.
 - Coverage caveats and outlier dominance should be considered before treating the first bottleneck as the most important repository problem.
 
 ## Ranked Bottlenecks
@@ -236,11 +260,11 @@ Source labels:
 - PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing.
 - Shares the same representative PR evidence as Review churn, Review surprise, Fix amplification.
 
-### Changed-file spread
+### Change scope
 
 Recommendation category: smaller_milestones
 
-#### Changed-file spread Observed Evidence (spread score)
+#### Change scope Observed Evidence (spread score)
 
 | PR | Title | Score | Class | Additions | Deletions | Files changed | Changed lines |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -329,14 +353,14 @@ Source labels:
 - PR class: unknown (source=fallback\_rule)
 - Workflow source: unavailable
 
-#### Changed-file spread Interpretation And Recommendation
+#### Change scope Interpretation And Recommendation
 
 | Field | Value |
 | --- | --- |
 | Inferred diagnosis | Broad file and surface spread can hide review and validation risk. |
 | Suggested action | Break broad changes into smaller milestones when core files, directories, or surfaces spread out. |
 
-#### Changed-file spread Confidence And Caveats
+#### Change scope Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
 - Shares the same representative PR evidence as Planning gap.
@@ -745,7 +769,7 @@ Source labels:
 #### Planning gap Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
-- Shares the same representative PR evidence as Changed-file spread.
+- Shares the same representative PR evidence as Change scope.
 
 ## Recommendation Categories
 
