@@ -101,7 +101,7 @@ Sensitivity summaries are robustness context only. They do not remove PRs from t
 - Each score comes from one metric family, such as review-loop drag, validation failures, change scope, planning signals, review surprise, or post-review commits.
 - Change scope is the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched. It is not a line-count metric.
 - PR size columns show final/current additions, deletions, changed files, and changed lines so readers can compare size against the detected friction signals.
-- PR size is context for interpretation; it only affects ordering when the bottleneck metric itself is about change scope.
+- PR size columns are context for interpreting displayed examples; bottleneck ordering uses each metric family's representative score and stable tie-breaks, not the PR size columns.
 - Coverage caveats and outlier dominance should be considered before treating the first bottleneck as the most important repository problem.
 
 ## Ranked Bottlenecks

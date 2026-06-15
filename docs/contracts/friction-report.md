@@ -44,7 +44,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `guardrails`: machine-readable checks that the report avoids individual ranking, separates evidence from inference, and does not use an opaque composite score.
 - `followUp`: non-automated future work suggested by the report.
 
-Bottlenecks are ordered by their strongest observed representative metric value, with stable category order used only to break ties. Final/current PR size fields are context for comparing size against friction signals; they only affect ordering for metric families that explicitly measure change scope. The internal `changedFileSpread` / `changed-file-spread` signal remains the stable contract name for the metric that sums core files touched, directories touched, and functional surfaces touched. It is not a changed-line-count metric.
+Bottlenecks are ordered by their strongest observed representative metric value, with stable category order used only to break ties. Final/current PR size fields are context for comparing displayed examples against friction signals; they are not separate ordering inputs. The internal `changedFileSpread` / `changed-file-spread` signal remains the stable contract name for the metric that sums core files touched, directories touched, and functional surfaces touched. It is not a changed-line-count metric.
 
 ## Markdown Output
 
