@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can trust `review_decision`, `human_approved`, and `human_reviewer_count` for zero-thread PRs instead of seeing approved PRs reported as having no human review.
 - Who is affected: Maintainers and contributors running or inspecting live GitHub analysis outputs.
 - Action needed: Re-run affected reports to refresh the corrected review decision evidence.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/32
 
 ### 2026-06-15 — Optional Narrative Drafting Guidance
 
