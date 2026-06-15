@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can see what deserves attention, why the report is confident or caveated, and which action themes apply without reading through the full ranked bottleneck details first.
 - Who is affected: Maintainers and contributors reviewing generated friction reports.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/30
 
 ### 2026-06-14 — NPM Release Automation
 
