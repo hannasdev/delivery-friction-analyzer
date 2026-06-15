@@ -50,6 +50,7 @@ The model-ready path should be decision/documentation-only first. If a later mod
 | Treat any model-generated narrative as optional downstream use. | The analyzer's trust model depends on deterministic local artifacts. | Make the analyzer call a model or replace Markdown with generated prose. |
 | Split model-context decision/docs from artifact production. | Docs-only and new-artifact paths touch different contracts, command behavior, and tests. | Keep both paths in one milestone and decide during implementation. |
 | Evaluate existing JSON and CSV artifacts before adding `report-context.json`. | Avoid expanding artifact surface if current artifacts are enough. | Add a new artifact immediately. |
+| M2 accepts `friction-report.json` plus curated CSV exports as sufficient for guarded downstream narrative drafting. | The existing JSON carries report identity, summary, coverage, PR class context, ranked bottlenecks, recommendation categories, guardrails, and follow-up, while CSV exports provide per-PR and source-level evidence without adding another artifact contract. | Add `report-context.json` now, or require users to interpret raw CSVs without JSON/source-of-truth guardrails. |
 
 ## Contracts And Boundaries
 
@@ -135,7 +136,7 @@ M1 activation should account for the active PR class segmentation dependency. If
 
 - [ ] Is there a concrete downstream consumer that requires focus snapshot data as a structured `friction-report.v1` field instead of the preferred Markdown-only derivation?
 - [ ] Does implementation evidence justify moving the full recommendation category table near the top, or should it keep the preferred compact top summary plus later full table?
-- [ ] Does M2 show that `report-context.json` is materially different enough from `friction-report.json` plus CSVs to justify activating M3?
+- [x] Does M2 show that `report-context.json` is materially different enough from `friction-report.json` plus CSVs to justify activating M3? No. Existing `friction-report.json` plus curated CSV exports are sufficient for the guarded downstream narrative workflow, so M3 remains deferred unless a concrete consumer needs a smaller single-file context or machine-readable prompt package.
 - [ ] If M3 is activated, should the model context artifact be default, opt-in, or limited to specific commands?
 - [ ] If M3 is activated, should `src/report/generate-report.js` remain JSON/Markdown-only or support the new artifact explicitly?
 - [ ] Has the PR class segmentation report contract landed on the base branch, or does the implementation packet need an explicit rebase/dependency note?
