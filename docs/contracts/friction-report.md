@@ -128,6 +128,29 @@ Minimum CSV column groups:
 
 Empty CSV cells mean unavailable or not applicable. Numeric zero should be used only for observed or computed zero counts. Count columns that depend on optional GitHub coverage should keep source or coverage labels nearby so spreadsheet readers can tell unavailable evidence apart from observed zeroes. CSVs must not include raw comment bodies, raw workflow logs, tokens, secret-bearing environment details, or individual contributor/reviewer rankings.
 
+## Optional Downstream Narrative Drafting
+
+The existing `friction-report.json` artifact plus the curated CSV exports are sufficient context for an optional local workflow where a separate model drafts a narrative summary. M2 does not justify a new `report-context.json`, CLI flag, fixture output, or artifact write path.
+
+Use `friction-report.json` as the structured source of truth for report identity, summary totals, coverage, PR class context, ranked bottlenecks, shared signals, sensitivity, recommendation categories, guardrails, and follow-up. Use `friction-report.md` as the human-readable source-of-truth report. Use CSV exports as supporting evidence trails when a draft needs per-PR or source-level detail:
+
+- `pr-metrics.csv` for analyzed PR rows, class labels, review/validation counts, and ranking scores.
+- `bottleneck-examples.csv` for representative examples tied to bottleneck identity, recommendation category, evidence sources, dominance, and score/value.
+- `comment-sources.csv` for source-grouped comment totals and classification flags.
+- `collection-coverage.csv` for API-family coverage, attempts, source labels, diagnostics, and downstream impact.
+
+A guarded narrative-drafting workflow should:
+
+1. Run full live analysis with CSV exports enabled unless the user intentionally does not want spreadsheet-friendly evidence files.
+2. Review `friction-report.md` first to understand the deterministic report and caveats.
+3. Provide the model `friction-report.json` plus only the CSV rows or excerpts needed for the requested narrative.
+4. Instruct the model to treat deterministic artifacts as authoritative, preserve coverage/outlier/class/filter caveats, distinguish observed evidence from inferred diagnosis and suggested action, avoid inventing missing data, and avoid ranking individuals.
+5. Review the generated narrative against `friction-report.md`, `friction-report.json`, and the CSV evidence before sharing it.
+
+Model-generated prose is a draft convenience, not a replacement for the deterministic Markdown, JSON, methodology, or CSV artifacts. The artifact sensitivity guidance applies to any prompt, model context, draft, or copied excerpt derived from these files.
+
+A future model-ready context artifact should be reconsidered only if a concrete consumer needs a smaller single-file context, machine-readable prompt packaging, or fields that cannot be represented clearly by `friction-report.json` plus curated CSV evidence without forcing raw CSV interpretation.
+
 ## Guardrails
 
 Reports present repository-level patterns, representative PR examples, and file surface evidence. They must keep observed data, inferred diagnosis, and suggested action distinct, and they must not rank contributors or reviewers.

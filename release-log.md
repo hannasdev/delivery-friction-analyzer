@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-15 — Optional Narrative Drafting Guidance
+
+- What changed: The README and friction report contract now document how to use `friction-report.json` with curated CSV evidence as sufficient context for optional downstream narrative drafting, without adding a separate model-ready artifact.
+- Why it matters: Maintainers can draft narrative summaries from existing analyzer outputs while keeping deterministic reports authoritative and avoiding extra artifact surface area.
+- Who is affected: Maintainers and contributors using generated friction reports as input for narrative summaries.
+- Action needed: None.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/31
+
 ### 2026-06-15 — First-Glance Report Opening
 
 - What changed: Friction reports now open with a focus snapshot, early recommendation-category summary, reviewed-evidence counts, and confidence caveats before detailed bottleneck evidence.

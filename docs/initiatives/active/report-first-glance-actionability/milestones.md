@@ -76,9 +76,9 @@ Make the top of `friction-report.md` immediately communicate what the reader sho
 - [x] Active
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged
 
 ## M2: Model-Ready Context Decision And Documentation
 
@@ -143,7 +143,7 @@ Resolve whether existing analyzer artifacts are sufficient input for users who w
 
 ### Status
 
-- [ ] Not started
+- [x] Active
 - [ ] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed

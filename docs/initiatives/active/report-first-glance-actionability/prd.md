@@ -2,13 +2,13 @@
 
 ## Status
 
-Status: Active; M1 implemented and awaiting PR review.
+Status: Active; M1 merged and M2 active.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-15
 - Activated: 2026-06-15
-- Current milestone: M1: Action-Oriented Report Opening (implemented; awaiting PR review)
+- Current milestone: M2: Model-Ready Context Decision And Documentation (active)
 - Related docs:
   - [Milestones](milestones.md)
   - [Architecture Notes](architecture.md)
@@ -168,5 +168,5 @@ The implementation should first decide whether existing `friction-report.json` a
 - [x] What exact wording should replace "changed-file spread" in each Markdown prose context? Use "Change scope" with an explicit explanation that it sums core files touched, directories touched, and functional surfaces touched; it is not a line-count metric.
 - [ ] Should implementation keep the preferred default of deriving the focus snapshot in Markdown only, or is a `friction-report.v1` field needed for downstream consumers?
 - [ ] Should the top focus snapshot combine ranked bottlenecks with category counts, coverage caveats, and outlier/class dominance as proposed, or should it narrow to ranked bottlenecks only?
-- [ ] Are existing `friction-report.json` plus CSV exports sufficient as model input, or is a smaller model-ready `report-context.json` artifact needed?
+- [x] Are existing `friction-report.json` plus CSV exports sufficient as model input, or is a smaller model-ready `report-context.json` artifact needed? Existing `friction-report.json` plus curated CSV exports are sufficient for a guarded downstream narrative workflow; no smaller model-ready artifact is needed unless a concrete consumer later requires a single-file context or machine-readable prompt package.
 - [ ] If a model-ready artifact is justified by M2, should the separate artifact-producing milestone generate it by full live analysis only, or also by `src/report/generate-report.js` for fixture and advanced workflows?

@@ -73,6 +73,14 @@ Read `friction-report.md` first, then inspect `methodology.md`, the CSV exports,
 
 Ranked bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score. PR size columns show final/current additions, deletions, changed files, and changed lines so maintainers can compare size against review, validation, and planning signals.
 
+### Optional narrative drafting
+
+The generated artifacts are also enough context for an optional local workflow where a separate model drafts a narrative report. Use `friction-report.json` as the structured source of truth, `friction-report.md` as the human-readable source of truth, and the curated CSV exports only as supporting evidence when the draft needs per-PR detail.
+
+When using a model this way, keep the deterministic artifacts authoritative: preserve coverage, outlier, PR-class, and analysis-filter caveats; distinguish observed evidence from inferred diagnosis and suggested action; do not invent missing data; and do not rank individuals. Review any generated prose against the Markdown, JSON, and CSV evidence before sharing it.
+
+No separate model-ready context artifact is required for this workflow. Reconsider a new artifact only if a concrete consumer needs a smaller single-file context, machine-readable prompt packaging, or fields that cannot be represented clearly by `friction-report.json` plus curated CSV evidence.
+
 Known MVP interpretation limits:
 
 - PR-open diff growth is unavailable unless an open-time snapshot or reconstruction exists; the local historical collector does not infer it from merge-time diff data.
