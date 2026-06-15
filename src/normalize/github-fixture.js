@@ -22,6 +22,15 @@ function flattenThreadComments(reviewThreads = {}) {
   ));
 }
 
+function classifyReviewEventSource(author, { pullRequestAuthorLogin } = {}) {
+  const source = classifyCommentSource(author, { pullRequestAuthorLogin });
+  const login = String(author?.login ?? "").trim();
+  if (source !== "unknown" || !login) {
+    return source;
+  }
+  return "human_reviewer";
+}
+
 function normalizeReview(review, { pullRequestAuthorLogin } = {}) {
   const author = review.author ?? {};
   return {
@@ -29,7 +38,7 @@ function normalizeReview(review, { pullRequestAuthorLogin } = {}) {
     submittedAt: review.submittedAt,
     state: review.state,
     commitOid: review.commitOid ?? review.commit?.oid ?? null,
-    source: classifyCommentSource(author, { pullRequestAuthorLogin }),
+    source: classifyReviewEventSource(author, { pullRequestAuthorLogin }),
     generatedCommentCount: review.generatedCommentCount ?? null,
     failedAttempt: Boolean(review.failedAttempt),
   };
@@ -77,7 +86,7 @@ function summarizeReviewDecision(pr) {
   }
 
   const humanReviews = pr.reviews.filter(review => (
-    classifyCommentSource(review.author, { pullRequestAuthorLogin: pr.author?.login }) === "human_reviewer"
+    classifyReviewEventSource(review.author, { pullRequestAuthorLogin: pr.author?.login }) === "human_reviewer"
   ));
   const humanReviewerKeys = new Set(humanReviews.map(reviewAuthorKey).filter(Boolean));
   const states = new Set(humanReviews.map(reviewState));

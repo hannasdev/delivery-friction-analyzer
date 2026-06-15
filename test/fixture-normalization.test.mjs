@@ -184,6 +184,18 @@ describe("mcp-writing compact fixture normalization", () => {
           },
         ],
       },
+      {
+        ...decisionBundle.pullRequests[0],
+        number: 306,
+        reviews: [
+          {
+            id: "bare-login-approved",
+            author: { login: "reviewer" },
+            submittedAt: "2026-06-01T10:00:00Z",
+            state: "APPROVED",
+          },
+        ],
+      },
     ];
     delete decisionBundle.pullRequests[2].reviews;
 
@@ -193,6 +205,7 @@ describe("mcp-writing compact fixture normalization", () => {
     const unavailable = normalized.pullRequests.find(pr => pr.number === 303);
     const conflictingUntimed = normalized.pullRequests.find(pr => pr.number === 304);
     const commented = normalized.pullRequests.find(pr => pr.number === 305);
+    const bareLoginApproved = normalized.pullRequests.find(pr => pr.number === 306);
 
     assert.deepEqual(approved.reviewDecision, {
       state: "approved",
@@ -229,6 +242,14 @@ describe("mcp-writing compact fixture normalization", () => {
       humanReviewerCount: 1,
       source: "reviews",
     });
+    assert.deepEqual(bareLoginApproved.reviewDecision, {
+      state: "approved",
+      humanApproved: true,
+      humanChangesRequested: false,
+      humanReviewerCount: 1,
+      source: "reviews",
+    });
+    assert.equal(bareLoginApproved.reviews[0].source, "human_reviewer");
   });
 
   it("normalizes missing check-run names to null", async () => {

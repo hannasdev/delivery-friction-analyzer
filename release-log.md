@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-15 — Review Decision Author Detection
+
+- What changed: Review decision evidence now recognizes human approvals from live `gh pr view` review events that include only an author login.
+- Why it matters: Maintainers can trust `review_decision`, `human_approved`, and `human_reviewer_count` for zero-thread PRs instead of seeing approved PRs reported as having no human review.
+- Who is affected: Maintainers and contributors running or inspecting live GitHub analysis outputs.
+- Action needed: Re-run affected reports to refresh the corrected review decision evidence.
+- PR: TBD
+
 ### 2026-06-15 — Optional Narrative Drafting Guidance
 
 - What changed: The README and friction report contract now document how to use `friction-report.json` with curated CSV evidence as sufficient context for optional downstream narrative drafting, without adding a separate model-ready artifact.
