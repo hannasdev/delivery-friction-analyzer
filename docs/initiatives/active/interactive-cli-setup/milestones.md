@@ -62,7 +62,7 @@ Users can run a guided analysis setup from the terminal for options the CLI alre
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M2: Workflow Profile Contract

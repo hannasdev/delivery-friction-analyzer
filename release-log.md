@@ -8,7 +8,7 @@
 - Why it matters: First-time maintainers can complete a guided local analysis without memorizing every required flag, while scripts and CI keep deterministic flag-based behavior.
 - Who is affected: Maintainers and contributors running local GitHub analysis from a terminal.
 - Action needed: Use `--interactive` for guided local setup; keep explicit flags for automation.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/34
 
 ### 2026-06-15 — Review Decision Author Detection
 
