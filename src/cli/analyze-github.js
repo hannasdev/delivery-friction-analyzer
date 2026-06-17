@@ -383,7 +383,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
       });
     }
 
-    if (resolved.csv !== false) {
+    if (!resolved.dryRun && resolved.csv !== false) {
       resolved.csv = await askUntilValid(adapter, {
         id: "csv",
         type: "confirm",
