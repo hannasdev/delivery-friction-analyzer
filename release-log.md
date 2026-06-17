@@ -8,7 +8,7 @@
 - Why it matters: Future interactive setup and report milestones can rely on a documented profile contract without inferring workflow assumptions from GitHub history or changing scoring.
 - Who is affected: Maintainers authoring or validating repository profiles.
 - Action needed: Add `workflow` context only when you want to record repository workflow assumptions; existing profiles remain valid without it.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/35
 
 ### 2026-06-17 — Opt-In Interactive CLI Setup
 

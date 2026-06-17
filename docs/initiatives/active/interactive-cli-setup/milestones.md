@@ -121,7 +121,7 @@ Repository workflow context has an additive, validated profile contract before i
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M3: Workflow Profile Wizard
