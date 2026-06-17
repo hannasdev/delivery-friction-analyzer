@@ -44,6 +44,14 @@ npx delivery-friction-analyzer \
 
 Open `reports/mcp-writing/friction-report.md` first. It is the main human-readable report. Use the JSON and CSV files when you want to audit a finding, compare PRs, or build follow-up analysis.
 
+For a guided first run in a local terminal, use the opt-in interactive flow:
+
+```sh
+npm run analyze:github -- --interactive
+```
+
+Interactive mode asks for the same run choices supported by flags, including repository, PR limit, profile path, output directory, dry-run mode, CSV exports, JSON completion output, and configured PR class exclusions. Scripted and CI usage should keep passing explicit flags; missing required flags without `--interactive` fail deterministically instead of waiting for input.
+
 ## Repository Profiles
 
 Every run needs a repository profile. Profiles keep repository-specific assumptions out of the analyzer code by describing how paths and pull request titles should be classified.
@@ -83,6 +91,8 @@ Use `--no-csv` when you want the Markdown, JSON, source, normalized, metrics, an
 Use `--exclude-pr-class <class>` to remove a configured PR class from downstream normalized, metrics, report, methodology, and CSV artifacts. `source-bundle.json` still preserves the full collected sample for auditability.
 
 Use `--json` when automation needs the full machine-readable completion receipt on stdout.
+
+Use `--interactive` only in a terminal when you want prompts. When combined with `--json`, prompts and progress stay off stdout so the final completion receipt remains parseable JSON.
 
 ## How To Read A Report
 

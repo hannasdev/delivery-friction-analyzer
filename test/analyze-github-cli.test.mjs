@@ -7,9 +7,11 @@ import { describe, it } from "node:test";
 import { promisify } from "node:util";
 import {
   ANALYZE_GITHUB_ARTIFACTS,
+  collectInteractiveAnalyzeGithubOptions,
   formatAnalyzeGithubCompletion,
   parseAnalyzeGithubArgs,
   runAnalyzeGithub,
+  runAnalyzeGithubCli,
   writeAnalyzeGithubCompletion,
   writeAnalysisArtifacts,
 } from "../src/cli/analyze-github.js";
@@ -236,6 +238,21 @@ async function readJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
 }
 
+function createScriptedPromptAdapter(answers, prompts = []) {
+  const scriptedAnswers = new Map(Object.entries(answers).map(([id, value]) => [
+    id,
+    Array.isArray(value) ? [...value] : [value],
+  ]));
+  return async prompt => {
+    prompts.push(prompt);
+    const values = scriptedAnswers.get(prompt.id) ?? [""];
+    if (values.length > 1) {
+      return values.shift();
+    }
+    return values[0] ?? "";
+  };
+}
+
 describe("GitHub live analyze CLI", () => {
   it("parses supported command line options", () => {
     assert.deepEqual(parseAnalyzeGithubArgs([
@@ -249,6 +266,7 @@ describe("GitHub live analyze CLI", () => {
       "reports/live",
       "--metadata-only",
       "--validation-target",
+      "--interactive",
     ]), {
       repository: "example/example-repo",
       limit: 30,
@@ -259,6 +277,7 @@ describe("GitHub live analyze CLI", () => {
       excludedPrClasses: [],
       csv: true,
       json: false,
+      interactive: true,
     });
   });
 
@@ -286,6 +305,217 @@ describe("GitHub live analyze CLI", () => {
       "reports/live",
       "--json",
     ]).json, true);
+  });
+
+  it("collects interactive answers and maps them to analyze options", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "interactive-out");
+      const prompts = [];
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "2",
+          profilePath,
+          outDir,
+          dryRun: "no",
+          csv: "no",
+          json: "yes",
+          excludedPrClasses: "release",
+        }, prompts),
+      });
+
+      assert.deepEqual(options, {
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 2,
+        profilePath,
+        outDir,
+        dryRun: false,
+        excludedPrClasses: ["release"],
+        csv: false,
+        json: true,
+      });
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "repository",
+        "limit",
+        "profilePath",
+        "outDir",
+        "dryRun",
+        "csv",
+        "json",
+        "excludedPrClasses",
+      ]);
+    });
+  });
+
+  it("re-prompts invalid interactive answers until valid", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "interactive-retry-out");
+      const blockedOutPath = join(directory, "blocked-output-path");
+      await writeFile(blockedOutPath, "not a directory\n", "utf8");
+      const prompts = [];
+      let errorOutput = "";
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        output: { write: chunk => { errorOutput += chunk; } },
+        promptAdapter: createScriptedPromptAdapter({
+          repository: ["not-a-repo", "example/example-repo"],
+          limit: ["0", "2"],
+          profilePath: [join(directory, "missing-profile.json"), profilePath],
+          outDir: [blockedOutPath, outDir],
+          dryRun: ["maybe", "yes"],
+          json: "no",
+          excludedPrClasses: ["Release PR", "dependency", "release"],
+        }, prompts),
+      });
+
+      assert.deepEqual(options, {
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 2,
+        profilePath,
+        outDir,
+        dryRun: true,
+        excludedPrClasses: ["release"],
+        csv: true,
+        json: false,
+      });
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "repository",
+        "repository",
+        "limit",
+        "limit",
+        "profilePath",
+        "profilePath",
+        "outDir",
+        "outDir",
+        "dryRun",
+        "dryRun",
+        "json",
+        "excludedPrClasses",
+        "excludedPrClasses",
+        "excludedPrClasses",
+      ]);
+      assert.match(errorOutput, /repo must use owner\/name/);
+      assert.match(errorOutput, /limit must be an integer between 1 and 100/);
+      assert.match(errorOutput, /profile could not be read/);
+      assert.match(errorOutput, /out must be a directory path, not a file/);
+      assert.match(errorOutput, /Answer yes or no/);
+      assert.match(errorOutput, /exclude-pr-class must be a lowercase PR class identifier/);
+      assert.match(errorOutput, /exclude-pr-class must name configured PR class\(es\): dependency/);
+    });
+  });
+
+  it("respects explicitly provided interactive boolean options", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "explicit-boolean-out");
+      const prompts = [];
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 2,
+        profilePath,
+        outDir,
+        dryRun: false,
+        csv: true,
+        json: false,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({}, prompts),
+      });
+
+      assert.deepEqual(options, {
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 2,
+        profilePath,
+        outDir,
+        dryRun: false,
+        excludedPrClasses: [],
+        csv: true,
+        json: false,
+      });
+      assert.deepEqual(prompts, []);
+    });
+  });
+
+  it("rejects malformed interactive profile PR class rules with a validation error", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "malformed-pr-classes.json");
+      await writeFile(profilePath, JSON.stringify({
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        prClasses: {},
+        rules: [],
+      }), "utf8");
+
+      await assert.rejects(
+        collectInteractiveAnalyzeGithubOptions({
+          interactive: true,
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir: join(directory, "interactive-invalid-profile-out"),
+          dryRun: true,
+          excludedPrClasses: [],
+          csv: false,
+          json: true,
+        }, {
+          isInteractiveTerminal: true,
+          promptAdapter: createScriptedPromptAdapter({}),
+        }),
+        /profile is invalid: invalid PR class profile rules: prClasses must be an array when provided/,
+      );
+    });
+  });
+
+  it("does not prompt or wait when required options are missing without --interactive", async () => {
+    const provider = createProvider();
+    let prompted = false;
+
+    await assert.rejects(
+      runAnalyzeGithubCli([], {
+        provider,
+        promptAdapter: async () => {
+          prompted = true;
+          return "";
+        },
+        isInteractiveTerminal: true,
+      }),
+      /Missing required option\(s\): --repo, --limit, --profile, --out/,
+    );
+
+    assert.equal(prompted, false);
+    assert.deepEqual(provider.calls, []);
+  });
+
+  it("rejects --interactive in non-TTY contexts before provider calls", async () => {
+    const provider = createProvider();
+
+    await assert.rejects(
+      runAnalyzeGithubCli(["--interactive"], {
+        provider,
+        isInteractiveTerminal: false,
+        promptAdapter: createScriptedPromptAdapter({}),
+      }),
+      /interactive mode requires a terminal/,
+    );
+
+    assert.deepEqual(provider.calls, []);
   });
 
   it("parses --no-csv as a CSV export opt-out", () => {
@@ -705,6 +935,48 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(parsed.artifactPaths.reportMarkdown, join(outDir, "friction-report.md"));
       assert(!output.includes("Analysis complete"));
       assert(!output.includes("Validating profile"));
+    });
+  });
+
+  it("keeps --json --interactive stdout machine-readable while prompts and progress use injected channels", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "interactive-json-out");
+      let stdout = "";
+      let stderr = "";
+      const prompts = [];
+
+      await runAnalyzeGithubCli(["--interactive", "--json"], {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "1",
+          profilePath,
+          outDir,
+          dryRun: "yes",
+        }, prompts),
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write: chunk => { stderr += chunk; } },
+      });
+
+      const parsed = JSON.parse(stdout);
+      assert.equal(parsed.ok, true);
+      assert.equal(parsed.dryRun, true);
+      assert.equal(parsed.csvArtifactsEnabled, false);
+      assert.equal(parsed.targetRepository.owner, "example");
+      assert(!stdout.includes("Target GitHub repository"));
+      assert(!stdout.includes("Validating profile"));
+      assert(stderr.includes("Validating profile and output directory."));
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "repository",
+        "limit",
+        "profilePath",
+        "outDir",
+        "dryRun",
+      ]);
+      assert.deepEqual(await readdir(outDir), []);
     });
   });
 
