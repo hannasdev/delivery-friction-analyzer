@@ -87,6 +87,22 @@
           "notes": { "type": "string" }
         }
       }
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "primaryMergeMethod": {
+          "enum": ["merge_commit", "squash_merge", "rebase_merge", "mixed", "unknown"]
+        },
+        "releaseStrategy": {
+          "enum": ["release_prs", "direct_tags", "release_branches", "mixed", "unknown"]
+        },
+        "branchStrategy": {
+          "enum": ["trunk_based", "main_plus_release_branches", "long_lived_development_branches", "mixed", "unknown"]
+        }
+      },
+      "minProperties": 1
     }
   }
 }

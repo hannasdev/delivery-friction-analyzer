@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-17 — Workflow Profile Contract
+
+- What changed: Repository profiles can now declare optional workflow context for merge method, release strategy, and branch strategy using validated stable identifiers.
+- Why it matters: Future interactive setup and report milestones can rely on a documented profile contract without inferring workflow assumptions from GitHub history or changing scoring.
+- Who is affected: Maintainers authoring or validating repository profiles.
+- Action needed: Add `workflow` context only when you want to record repository workflow assumptions; existing profiles remain valid without it.
+- PR: TBD
+
 ### 2026-06-17 — Opt-In Interactive CLI Setup
 
 - What changed: GitHub analysis now supports `--interactive` to prompt for existing run options such as repository, PR limit, profile path, output directory, dry-run mode, CSV exports, JSON completion output, and configured PR class exclusions.

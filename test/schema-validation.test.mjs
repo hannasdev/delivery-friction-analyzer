@@ -113,7 +113,7 @@ function validateSchema(value, schema, schemas, path = "$") {
 }
 
 describe("repository profile schema", () => {
-  it("validates profiles with omitted or configured PR class rules", async () => {
+  it("validates profiles with omitted or configured PR class and workflow rules", async () => {
     const schema = await readJson("../schemas/repository-profile.schema.json");
     const baseProfile = {
       schemaVersion: "repository-profile.v1",
@@ -130,9 +130,18 @@ describe("repository profile schema", () => {
         },
       ],
     };
+    const workflowProfile = {
+      ...baseProfile,
+      workflow: {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "release_prs",
+        branchStrategy: "main_plus_release_branches",
+      },
+    };
 
     assert.deepEqual(validateSchema(baseProfile, schema, {}), []);
     assert.deepEqual(validateSchema(classedProfile, schema, {}), []);
+    assert.deepEqual(validateSchema(workflowProfile, schema, {}), []);
   });
 
   it("rejects malformed PR class rule fields", async () => {
@@ -157,6 +166,44 @@ describe("repository profile schema", () => {
     assert(errors.some(error => error.includes("$.prClasses[0].class must match")));
     assert(errors.some(error => error.includes("$.prClasses[0].match must have at least 1 property")));
     assert(errors.some(error => error.includes("$.prClasses[0].unsupported is not allowed")));
+  });
+
+  it("rejects malformed workflow context fields", async () => {
+    const schema = await readJson("../schemas/repository-profile.schema.json");
+    const emptyErrors = validateSchema({
+      schemaVersion: "repository-profile.v1",
+      repository: { owner: "example", name: "repo" },
+      rules: [],
+      workflow: {},
+    }, schema, {});
+    const profile = {
+      schemaVersion: "repository-profile.v1",
+      repository: { owner: "example", name: "repo" },
+      rules: [],
+      workflow: {
+        primaryMergeMethod: "squash merges",
+        releaseStrategy: "release-pull-requests",
+        branchStrategy: "main",
+        observedFrom: "github",
+      },
+    };
+
+    const errors = validateSchema(profile, schema, {});
+
+    assert(emptyErrors.some(error => error.includes("$.workflow must have at least 1 property")));
+    assert(errors.some(error => error.includes("$.workflow.primaryMergeMethod must be one of")));
+    assert(errors.some(error => error.includes("$.workflow.releaseStrategy must be one of")));
+    assert(errors.some(error => error.includes("$.workflow.branchStrategy must be one of")));
+    assert(errors.some(error => error.includes("$.workflow.observedFrom is not allowed")));
+  });
+
+  it("keeps existing fixture profiles valid without workflow context", async () => {
+    const [schema, fixtureProfile] = await Promise.all([
+      readJson("../schemas/repository-profile.schema.json"),
+      readJson("../fixtures/github/mcp-writing/profile.json"),
+    ]);
+
+    assert.deepEqual(validateSchema(fixtureProfile, schema, {}), []);
   });
 });
 

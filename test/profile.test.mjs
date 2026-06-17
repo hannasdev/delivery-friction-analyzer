@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { classifyFilePath } from "../src/profile/file-role.js";
 import { assertValidPrClassRules, classifyPullRequest, validatePrClassRules } from "../src/profile/pr-class.js";
+import { assertValidWorkflowContext, validateWorkflowContext } from "../src/profile/workflow.js";
 import { classifyCommentSource } from "../src/github/comment-source.js";
 
 describe("repository profile classification", () => {
@@ -130,6 +131,44 @@ describe("pull request class classification", () => {
     assert.throws(
       () => assertValidPrClassRules({ prClasses: null }),
       /invalid PR class profile rules: prClasses must be an array when provided/,
+    );
+  });
+});
+
+describe("workflow context validation", () => {
+  it("accepts omitted and valid workflow context", () => {
+    assert.deepEqual(validateWorkflowContext({}), []);
+    assert.deepEqual(validateWorkflowContext({
+      workflow: {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "release_prs",
+        branchStrategy: "main_plus_release_branches",
+      },
+    }), []);
+  });
+
+  it("rejects malformed workflow context values", () => {
+    assert.deepEqual(
+      validateWorkflowContext({ workflow: {} }),
+      ["workflow must include at least one field when provided"],
+    );
+
+    const errors = validateWorkflowContext({
+      workflow: {
+        primaryMergeMethod: "squash merges",
+        releaseStrategy: "release-pull-requests",
+        branchStrategy: "main",
+        observedFrom: "github",
+      },
+    });
+
+    assert(errors.some(error => error.includes("workflow.primaryMergeMethod must be one of")));
+    assert(errors.some(error => error.includes("workflow.releaseStrategy must be one of")));
+    assert(errors.some(error => error.includes("workflow.branchStrategy must be one of")));
+    assert(errors.some(error => error.includes("workflow.observedFrom is not supported")));
+    assert.throws(
+      () => assertValidWorkflowContext({ workflow: { primaryMergeMethod: "squash merges" } }),
+      /invalid workflow profile context: workflow.primaryMergeMethod must be one of/,
     );
   });
 });

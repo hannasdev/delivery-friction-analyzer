@@ -63,7 +63,7 @@ Users can run a guided analysis setup from the terminal for options the CLI alre
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged
 
 ## M2: Workflow Profile Contract
 
@@ -89,10 +89,10 @@ Repository workflow context has an additive, validated profile contract before i
 
 ### Acceptance Criteria
 
-- [ ] Profile/schema validation accepts omitted workflow context and valid documented workflow fields.
-- [ ] Profile/schema validation rejects invalid merge-method, release-strategy, and branch-strategy values.
-- [ ] Repository profile docs describe workflow fields as configured context and state that they do not affect scoring.
-- [ ] Existing fixture profiles remain valid without workflow fields.
+- [x] Profile/schema validation accepts omitted workflow context and valid documented workflow fields.
+- [x] Profile/schema validation rejects invalid merge-method, release-strategy, and branch-strategy values.
+- [x] Repository profile docs describe workflow fields as configured context and state that they do not affect scoring.
+- [x] Existing fixture profiles remain valid without workflow fields.
 
 ### Required Validation
 
@@ -117,7 +117,12 @@ Repository workflow context has an additive, validated profile contract before i
 
 ### Status
 
-- [ ] Not started
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [ ] PR opened
+- [ ] Merged
 
 ## M3: Workflow Profile Wizard
 
