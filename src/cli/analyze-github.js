@@ -2,6 +2,7 @@
 import { constants, realpathSync } from "node:fs";
 import { access, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { createInterface } from "node:readline/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { collectGitHubSourceBundle } from "../collect/github-source-bundle.js";
 import { createGhCliProvider } from "../collect/gh-provider.js";
@@ -15,6 +16,7 @@ import {
   generateRepositoryFrictionReport,
   renderRepositoryFrictionMarkdown,
 } from "../report/friction-report.js";
+import { assertValidPrClassRules } from "../profile/pr-class.js";
 
 const ALLOWED_OPTIONS = new Set([
   "repo",
@@ -27,6 +29,7 @@ const ALLOWED_OPTIONS = new Set([
   "no-csv",
   "exclude-pr-class",
   "json",
+  "interactive",
 ]);
 
 const REPOSITORY_SLUG = /^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/;
@@ -66,6 +69,7 @@ Options:
   --exclude-pr-class <cls>  Exclude a PR class from normalized, metrics, report, methodology, and CSV artifacts. Repeat or comma-separate values.
   --no-csv                  Suppress curated CSV evidence exports.
   --json                    Print the machine-readable completion receipt to stdout.
+  --interactive             Prompt for missing run options in a terminal.
 `;
 
 export function parseAnalyzeGithubArgs(argv) {
@@ -90,6 +94,7 @@ export function parseAnalyzeGithubArgs(argv) {
       || key === "validation-target"
       || key === "no-csv"
       || key === "json"
+      || key === "interactive"
     ) {
       options[key] = true;
       continue;
@@ -117,6 +122,7 @@ export function parseAnalyzeGithubArgs(argv) {
     excludedPrClasses: normalizeExcludedPrClasses(options["exclude-pr-class"] ?? []),
     csv: !options["no-csv"],
     json: Boolean(options.json),
+    interactive: Boolean(options.interactive),
   };
 }
 
@@ -159,7 +165,8 @@ function validateExcludedPrClasses(excludedPrClasses = []) {
 }
 
 function configuredPrClasses(repositoryProfile) {
-  return new Set((repositoryProfile.prClasses ?? []).map(rule => rule.class));
+  const rules = Array.isArray(repositoryProfile?.prClasses) ? repositoryProfile.prClasses : [];
+  return new Set(rules.map(rule => rule.class));
 }
 
 function validateExcludedPrClassesAreConfigured(excludedPrClasses = [], repositoryProfile) {
@@ -176,13 +183,257 @@ function validateExcludedPrClassesAreConfigured(excludedPrClasses = [], reposito
 }
 
 async function readProfile(profilePath) {
+  let profile;
   try {
-    return JSON.parse(await readFile(profilePath, "utf8"));
+    profile = JSON.parse(await readFile(profilePath, "utf8"));
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new Error(`profile must be valid JSON: ${error.message}`);
     }
     throw new Error(`profile could not be read: ${error.message}`);
+  }
+  try {
+    assertValidPrClassRules(profile);
+  } catch (error) {
+    throw new Error(`profile is invalid: ${error.message}`);
+  }
+  return profile;
+}
+
+function configuredPrClassList(repositoryProfile) {
+  return [...configuredPrClasses(repositoryProfile)].sort();
+}
+
+function defaultOutDirForRepository(repository) {
+  const [, name] = String(repository ?? "").split("/");
+  return join("reports", name || "analysis");
+}
+
+function formatInteractivePrompt(prompt) {
+  const suffix = prompt.defaultValue === undefined
+    ? ""
+    : Array.isArray(prompt.defaultValue)
+      ? (prompt.defaultValue.length ? ` [${prompt.defaultValue.join(",")}]` : "")
+      : ` [${prompt.defaultValue}]`;
+  if (prompt.type === "confirm") {
+    return `${prompt.message}${prompt.defaultValue ? " [Y/n]" : " [y/N]"} `;
+  }
+  if (prompt.type === "multi-select" && prompt.choices?.length) {
+    return `${prompt.message} (${prompt.choices.join(",")})${suffix}: `;
+  }
+  return `${prompt.message}${suffix}: `;
+}
+
+function createTerminalPromptAdapter({ input, output }) {
+  const readline = createInterface({ input, output, terminal: true });
+  return {
+    async ask(prompt) {
+      return readline.question(formatInteractivePrompt(prompt));
+    },
+    writeError(message) {
+      output.write(`${message}\n`);
+    },
+    close() {
+      readline.close();
+    },
+  };
+}
+
+async function callPromptAdapter(promptAdapter, prompt) {
+  if (typeof promptAdapter === "function") {
+    return promptAdapter(prompt);
+  }
+  return promptAdapter.ask(prompt);
+}
+
+async function askUntilValid(promptAdapter, prompt, { normalize, validate, output }) {
+  for (;;) {
+    const raw = await callPromptAdapter(promptAdapter, prompt);
+    try {
+      const value = normalize(raw, prompt);
+      await validate(value);
+      return value;
+    } catch (error) {
+      const message = error?.message ?? String(error);
+      if (typeof promptAdapter.writeError === "function") {
+        promptAdapter.writeError(message);
+      } else if (output?.write) {
+        output.write(`${message}\n`);
+      }
+    }
+  }
+}
+
+function normalizeTextAnswer(raw, prompt) {
+  const value = String(raw ?? "").trim();
+  if (value) return value;
+  if (prompt.defaultValue !== undefined) return prompt.defaultValue;
+  return value;
+}
+
+function normalizeIntegerAnswer(raw, prompt) {
+  const value = normalizeTextAnswer(raw, prompt);
+  return Number(value);
+}
+
+function normalizeConfirmAnswer(raw, prompt) {
+  const value = String(raw ?? "").trim().toLowerCase();
+  if (!value && prompt.defaultValue !== undefined) return Boolean(prompt.defaultValue);
+  if (["y", "yes", "true", "1"].includes(value)) return true;
+  if (["n", "no", "false", "0"].includes(value)) return false;
+  throw new Error("Answer yes or no.");
+}
+
+function normalizeMultiSelectAnswer(raw, prompt) {
+  const value = String(raw ?? "").trim();
+  if (!value) return prompt.defaultValue ?? [];
+  return normalizeExcludedPrClasses([value]);
+}
+
+async function promptProfilePath(promptAdapter, output, prompt) {
+  let profile = null;
+  const profilePath = await askUntilValid(promptAdapter, prompt, {
+    output,
+    normalize: normalizeTextAnswer,
+    async validate(value) {
+      profile = await readProfile(value);
+    },
+  });
+  return { profilePath, profile };
+}
+
+export async function collectInteractiveAnalyzeGithubOptions(options, {
+  promptAdapter = null,
+  input = process.stdin,
+  output = process.stderr,
+  isInteractiveTerminal = Boolean(input?.isTTY),
+} = {}) {
+  if (!isInteractiveTerminal) {
+    throw new Error("interactive mode requires a terminal. Re-run with --repo <owner/name> --limit <1-100> --profile <path> --out <directory>, or provide a TTY for prompts.");
+  }
+
+  const adapter = promptAdapter ?? createTerminalPromptAdapter({ input, output });
+  const ownsAdapter = !promptAdapter;
+  const resolved = { ...options };
+  let repositoryProfile = null;
+
+  try {
+    if (!resolved.repository) {
+      resolved.repository = await askUntilValid(adapter, {
+        id: "repository",
+        type: "text",
+        message: "Target GitHub repository",
+      }, {
+        output,
+        normalize: normalizeTextAnswer,
+        validate: validateRepositorySlug,
+      });
+    }
+
+    if (resolved.limit === undefined) {
+      resolved.limit = await askUntilValid(adapter, {
+        id: "limit",
+        type: "integer",
+        message: "Latest merged pull request count",
+        defaultValue: 30,
+      }, {
+        output,
+        normalize: normalizeIntegerAnswer,
+        validate: validateLimit,
+      });
+    }
+
+    if (!resolved.profilePath) {
+      const prompted = await promptProfilePath(adapter, output, {
+        id: "profilePath",
+        type: "path",
+        message: "Repository profile path",
+      });
+      resolved.profilePath = prompted.profilePath;
+      repositoryProfile = prompted.profile;
+    } else {
+      repositoryProfile = await readProfile(resolved.profilePath);
+    }
+
+    if (!resolved.outDir) {
+      resolved.outDir = await askUntilValid(adapter, {
+        id: "outDir",
+        type: "path",
+        message: "Output directory",
+        defaultValue: defaultOutDirForRepository(resolved.repository),
+      }, {
+        output,
+        normalize: normalizeTextAnswer,
+        validate(value) {
+          if (!value) throw new Error("Output directory is required.");
+        },
+      });
+    }
+
+    if (!resolved.dryRun) {
+      resolved.dryRun = await askUntilValid(adapter, {
+        id: "dryRun",
+        type: "confirm",
+        message: "Run metadata-only dry run",
+        defaultValue: false,
+      }, {
+        output,
+        normalize: normalizeConfirmAnswer,
+        validate() {},
+      });
+    }
+
+    if (resolved.csv !== false) {
+      resolved.csv = await askUntilValid(adapter, {
+        id: "csv",
+        type: "confirm",
+        message: "Write CSV evidence files",
+        defaultValue: true,
+      }, {
+        output,
+        normalize: normalizeConfirmAnswer,
+        validate() {},
+      });
+    }
+
+    if (!resolved.json) {
+      resolved.json = await askUntilValid(adapter, {
+        id: "json",
+        type: "confirm",
+        message: "Print completion as JSON",
+        defaultValue: false,
+      }, {
+        output,
+        normalize: normalizeConfirmAnswer,
+        validate() {},
+      });
+    }
+
+    if (!resolved.excludedPrClasses?.length) {
+      const availablePrClasses = configuredPrClassList(repositoryProfile);
+      if (availablePrClasses.length) {
+        resolved.excludedPrClasses = await askUntilValid(adapter, {
+          id: "excludedPrClasses",
+          type: "multi-select",
+          message: "Exclude PR classes (comma-separated, blank for none)",
+          choices: availablePrClasses,
+          defaultValue: [],
+        }, {
+          output,
+          normalize: normalizeMultiSelectAnswer,
+          validate(value) {
+            validateExcludedPrClasses(value);
+            validateExcludedPrClassesAreConfigured(value, repositoryProfile);
+          },
+        });
+      }
+    }
+
+    return resolved;
+  } finally {
+    if (ownsAdapter && typeof adapter.close === "function") {
+      adapter.close();
+    }
   }
 }
 
@@ -480,8 +731,8 @@ export async function runAnalyzeGithub(options, {
   });
 }
 
-function writeProgress(message) {
-  process.stderr.write(`${message}\n`);
+function writeProgress(message, stderr = process.stderr) {
+  stderr.write(`${message}\n`);
 }
 
 function coverageLine(family) {
@@ -568,15 +819,42 @@ export function writeAnalyzeGithubCompletion(result, { json = false, stdout = pr
   stdout.write(formatAnalyzeGithubCompletion(result));
 }
 
-async function main(argv) {
+export async function runAnalyzeGithubCli(argv, {
+  provider,
+  now,
+  stdin = process.stdin,
+  stdout = process.stdout,
+  stderr = process.stderr,
+  promptAdapter = null,
+  isInteractiveTerminal = Boolean(stdin?.isTTY),
+} = {}) {
   const options = parseAnalyzeGithubArgs(argv);
   if (options.help) {
-    process.stdout.write(USAGE);
-    return;
+    stdout.write(USAGE);
+    return null;
   }
 
-  const result = await runAnalyzeGithub(options, { onProgress: writeProgress });
-  writeAnalyzeGithubCompletion(result, { json: options.json });
+  const resolvedOptions = options.interactive
+    ? await collectInteractiveAnalyzeGithubOptions(options, {
+      promptAdapter,
+      input: stdin,
+      output: stderr,
+      isInteractiveTerminal,
+    })
+    : options;
+  const runOptions = {
+    onProgress: message => writeProgress(message, stderr),
+  };
+  if (provider !== undefined) runOptions.provider = provider;
+  if (now !== undefined) runOptions.now = now;
+
+  const result = await runAnalyzeGithub(resolvedOptions, runOptions);
+  writeAnalyzeGithubCompletion(result, { json: resolvedOptions.json, stdout });
+  return result;
+}
+
+async function main(argv) {
+  await runAnalyzeGithubCli(argv);
 }
 
 function isCliEntrypoint(entryPath) {

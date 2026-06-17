@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-17 — Opt-In Interactive CLI Setup
+
+- What changed: GitHub analysis now supports `--interactive` to prompt for existing run options such as repository, PR limit, profile path, output directory, dry-run mode, CSV exports, JSON completion output, and configured PR class exclusions.
+- Why it matters: First-time maintainers can complete a guided local analysis without memorizing every required flag, while scripts and CI keep deterministic flag-based behavior.
+- Who is affected: Maintainers and contributors running local GitHub analysis from a terminal.
+- Action needed: Use `--interactive` for guided local setup; keep explicit flags for automation.
+- PR: TBD
+
 ### 2026-06-15 — Review Decision Author Detection
 
 - What changed: Review decision evidence now recognizes human approvals from live `gh pr view` review events that include only an author login.
