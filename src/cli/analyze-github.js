@@ -302,6 +302,18 @@ async function promptProfilePath(promptAdapter, output, prompt) {
   return { profilePath, profile };
 }
 
+function hasOwnOption(options, key) {
+  return Object.prototype.hasOwnProperty.call(options, key);
+}
+
+function shouldPromptInteractiveOption(options, key) {
+  const promptDefaults = options.interactivePromptDefaults ?? {};
+  if (hasOwnOption(promptDefaults, key)) {
+    return Boolean(promptDefaults[key]);
+  }
+  return !hasOwnOption(options, key);
+}
+
 export async function collectInteractiveAnalyzeGithubOptions(options, {
   promptAdapter = null,
   input = process.stdin,
@@ -315,6 +327,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
   const adapter = promptAdapter ?? createTerminalPromptAdapter({ input, output });
   const ownsAdapter = !promptAdapter;
   const resolved = { ...options };
+  delete resolved.interactivePromptDefaults;
   let repositoryProfile = null;
 
   try {
@@ -364,13 +377,14 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
       }, {
         output,
         normalize: normalizeTextAnswer,
-        validate(value) {
+        async validate(value) {
           if (!value) throw new Error("Output directory is required.");
+          await validateOutputDirectory(value);
         },
       });
     }
 
-    if (!resolved.dryRun) {
+    if (shouldPromptInteractiveOption(options, "dryRun")) {
       resolved.dryRun = await askUntilValid(adapter, {
         id: "dryRun",
         type: "confirm",
@@ -382,8 +396,9 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         validate() {},
       });
     }
+    if (resolved.dryRun === undefined) resolved.dryRun = false;
 
-    if (!resolved.dryRun && resolved.csv !== false) {
+    if (!resolved.dryRun && shouldPromptInteractiveOption(options, "csv")) {
       resolved.csv = await askUntilValid(adapter, {
         id: "csv",
         type: "confirm",
@@ -395,8 +410,9 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         validate() {},
       });
     }
+    if (resolved.csv === undefined) resolved.csv = true;
 
-    if (!resolved.json) {
+    if (shouldPromptInteractiveOption(options, "json")) {
       resolved.json = await askUntilValid(adapter, {
         id: "json",
         type: "confirm",
@@ -408,6 +424,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         validate() {},
       });
     }
+    if (resolved.json === undefined) resolved.json = false;
 
     if (!resolved.excludedPrClasses?.length) {
       const availablePrClasses = configuredPrClassList(repositoryProfile);
@@ -835,7 +852,14 @@ export async function runAnalyzeGithubCli(argv, {
   }
 
   const resolvedOptions = options.interactive
-    ? await collectInteractiveAnalyzeGithubOptions(options, {
+    ? await collectInteractiveAnalyzeGithubOptions({
+      ...options,
+      interactivePromptDefaults: {
+        dryRun: !options.dryRun,
+        csv: options.csv !== false,
+        json: !options.json,
+      },
+    }, {
       promptAdapter,
       input: stdin,
       output: stderr,

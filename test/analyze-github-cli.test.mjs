@@ -316,8 +316,6 @@ describe("GitHub live analyze CLI", () => {
       const options = await collectInteractiveAnalyzeGithubOptions({
         interactive: true,
         excludedPrClasses: [],
-        csv: true,
-        json: false,
       }, {
         isInteractiveTerminal: true,
         promptAdapter: createScriptedPromptAdapter({
@@ -360,14 +358,14 @@ describe("GitHub live analyze CLI", () => {
     await withTempDirectory(async directory => {
       const profilePath = await writePrClassProfile(directory);
       const outDir = join(directory, "interactive-retry-out");
+      const blockedOutPath = join(directory, "blocked-output-path");
+      await writeFile(blockedOutPath, "not a directory\n", "utf8");
       const prompts = [];
       let errorOutput = "";
 
       const options = await collectInteractiveAnalyzeGithubOptions({
         interactive: true,
         excludedPrClasses: [],
-        csv: true,
-        json: false,
       }, {
         isInteractiveTerminal: true,
         output: { write: chunk => { errorOutput += chunk; } },
@@ -375,7 +373,7 @@ describe("GitHub live analyze CLI", () => {
           repository: ["not-a-repo", "example/example-repo"],
           limit: ["0", "2"],
           profilePath: [join(directory, "missing-profile.json"), profilePath],
-          outDir,
+          outDir: [blockedOutPath, outDir],
           dryRun: ["maybe", "yes"],
           json: "no",
           excludedPrClasses: ["Release PR", "dependency", "release"],
@@ -401,6 +399,7 @@ describe("GitHub live analyze CLI", () => {
         "profilePath",
         "profilePath",
         "outDir",
+        "outDir",
         "dryRun",
         "dryRun",
         "json",
@@ -411,9 +410,46 @@ describe("GitHub live analyze CLI", () => {
       assert.match(errorOutput, /repo must use owner\/name/);
       assert.match(errorOutput, /limit must be an integer between 1 and 100/);
       assert.match(errorOutput, /profile could not be read/);
+      assert.match(errorOutput, /out must be a directory path, not a file/);
       assert.match(errorOutput, /Answer yes or no/);
       assert.match(errorOutput, /exclude-pr-class must be a lowercase PR class identifier/);
       assert.match(errorOutput, /exclude-pr-class must name configured PR class\(es\): dependency/);
+    });
+  });
+
+  it("respects explicitly provided interactive boolean options", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "explicit-boolean-out");
+      const prompts = [];
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 2,
+        profilePath,
+        outDir,
+        dryRun: false,
+        csv: true,
+        json: false,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({}, prompts),
+      });
+
+      assert.deepEqual(options, {
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 2,
+        profilePath,
+        outDir,
+        dryRun: false,
+        excludedPrClasses: [],
+        csv: true,
+        json: false,
+      });
+      assert.deepEqual(prompts, []);
     });
   });
 
