@@ -1,6 +1,7 @@
 import { classifyCommentSource, groupByCommentSource } from "../github/comment-source.js";
 import { classifyFilePath } from "../profile/file-role.js";
 import { assertValidPrClassRules, classifyPullRequest } from "../profile/pr-class.js";
+import { assertValidWorkflowContext } from "../profile/workflow.js";
 
 function minDate(values) {
   return values.filter(Boolean).sort()[0] ?? null;
@@ -112,6 +113,7 @@ function normalizeCommit(commit) {
 export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
   const profile = repositoryProfile ?? {};
   assertValidPrClassRules(profile);
+  assertValidWorkflowContext(profile);
 
   const pullRequests = (bundle.pullRequests ?? []).map(pr => {
     const reviewDates = (pr.reviews ?? []).map(review => review.submittedAt);

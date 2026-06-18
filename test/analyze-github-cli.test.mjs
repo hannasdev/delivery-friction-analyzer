@@ -483,6 +483,36 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("rejects malformed interactive workflow context with a validation error", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "malformed-workflow.json");
+      await writeFile(profilePath, JSON.stringify({
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        workflow: {},
+        rules: [],
+      }), "utf8");
+
+      await assert.rejects(
+        collectInteractiveAnalyzeGithubOptions({
+          interactive: true,
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir: join(directory, "interactive-invalid-workflow-out"),
+          dryRun: true,
+          excludedPrClasses: [],
+          csv: false,
+          json: true,
+        }, {
+          isInteractiveTerminal: true,
+          promptAdapter: createScriptedPromptAdapter({}),
+        }),
+        /profile is invalid: invalid workflow profile context: workflow must include at least one field when provided/,
+      );
+    });
+  });
+
   it("does not prompt or wait when required options are missing without --interactive", async () => {
     const provider = createProvider();
     let prompted = false;

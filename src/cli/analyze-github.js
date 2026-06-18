@@ -17,6 +17,7 @@ import {
   renderRepositoryFrictionMarkdown,
 } from "../report/friction-report.js";
 import { assertValidPrClassRules } from "../profile/pr-class.js";
+import { assertValidWorkflowContext } from "../profile/workflow.js";
 
 const ALLOWED_OPTIONS = new Set([
   "repo",
@@ -194,6 +195,7 @@ async function readProfile(profilePath) {
   }
   try {
     assertValidPrClassRules(profile);
+    assertValidWorkflowContext(profile);
   } catch (error) {
     throw new Error(`profile is invalid: ${error.message}`);
   }
