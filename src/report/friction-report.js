@@ -770,7 +770,8 @@ function summarizeSensitivity(metricsSummary, baselineBottlenecks) {
   };
 }
 
-export function generateRepositoryFrictionReport(metricsSummary, { workflowContext } = {}) {
+export function generateRepositoryFrictionReport(metricsSummary, options = {}) {
+  const { workflowContext } = options ?? {};
   const prClasses = summarizePrClasses(metricsSummary);
   const bottlenecksWithSharedSignalKeys = summarizeBottlenecks(metricsSummary, prClasses);
   const sharedSignals = summarizeSharedSignals(bottlenecksWithSharedSignalKeys);

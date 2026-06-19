@@ -75,6 +75,15 @@ describe("friction report generation", () => {
     assert(!methodology.includes("Configured workflow context"));
   });
 
+  it("accepts null report options as omitted options", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+
+    assert.deepEqual(
+      generateRepositoryFrictionReport(metricsSummary, null),
+      generateRepositoryFrictionReport(metricsSummary),
+    );
+  });
+
   it("surfaces configured workflow context separately from observed evidence", async () => {
     const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
     const report = generateRepositoryFrictionReport(metricsSummary, {
