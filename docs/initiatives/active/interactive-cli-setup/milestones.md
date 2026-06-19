@@ -189,7 +189,7 @@ Interactive setup can create or update validated repository workflow profile fie
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M4: Workflow Context Surfacing

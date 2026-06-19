@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can capture reusable workflow assumptions during guided setup without hand-editing profile JSON or risking silent rewrites of existing profiles.
 - Who is affected: Maintainers running `--interactive` for first-time repository setup or profile updates.
 - Action needed: Review the generated or updated profile path printed in completion output before reusing it in automation.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/36
 
 ### 2026-06-17 — Workflow Profile Contract
 
