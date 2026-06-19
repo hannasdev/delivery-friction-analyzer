@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { chmod, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import fsPromises, { chmod, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, it } from "node:test";
+import { describe, it, mock } from "node:test";
 import { promisify } from "node:util";
 import {
   ANALYZE_GITHUB_ARTIFACTS,
@@ -197,6 +198,12 @@ async function writeProfile(directory) {
   return profilePath;
 }
 
+async function writeCanonicalProfile(directory, name, profile) {
+  const profilePath = join(directory, name);
+  await writeFile(profilePath, `${JSON.stringify(profile, null, 2)}\n`, "utf8");
+  return profilePath;
+}
+
 async function writePrClassProfile(directory) {
   const profilePath = join(directory, "profile-with-pr-classes.json");
   await writeFile(profilePath, JSON.stringify({
@@ -322,6 +329,7 @@ describe("GitHub live analyze CLI", () => {
           repository: "example/example-repo",
           limit: "2",
           profilePath,
+          configureWorkflow: "no",
           outDir,
           dryRun: "no",
           csv: "no",
@@ -345,6 +353,7 @@ describe("GitHub live analyze CLI", () => {
         "repository",
         "limit",
         "profilePath",
+        "configureWorkflow",
         "outDir",
         "dryRun",
         "csv",
@@ -372,7 +381,8 @@ describe("GitHub live analyze CLI", () => {
         promptAdapter: createScriptedPromptAdapter({
           repository: ["not-a-repo", "example/example-repo"],
           limit: ["0", "2"],
-          profilePath: [join(directory, "missing-profile.json"), profilePath],
+          profilePath,
+          configureWorkflow: "no",
           outDir: [blockedOutPath, outDir],
           dryRun: ["maybe", "yes"],
           json: "no",
@@ -397,7 +407,7 @@ describe("GitHub live analyze CLI", () => {
         "limit",
         "limit",
         "profilePath",
-        "profilePath",
+        "configureWorkflow",
         "outDir",
         "outDir",
         "dryRun",
@@ -409,11 +419,548 @@ describe("GitHub live analyze CLI", () => {
       ]);
       assert.match(errorOutput, /repo must use owner\/name/);
       assert.match(errorOutput, /limit must be an integer between 1 and 100/);
-      assert.match(errorOutput, /profile could not be read/);
       assert.match(errorOutput, /out must be a directory path, not a file/);
       assert.match(errorOutput, /Answer yes or no/);
       assert.match(errorOutput, /exclude-pr-class must be a lowercase PR class identifier/);
       assert.match(errorOutput, /exclude-pr-class must name configured PR class\(es\): dependency/);
+    });
+  });
+
+  it("rejects directory-style interactive profile paths before creation", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "profile.json");
+      const outDir = join(directory, "directory-style-profile-out");
+      const prompts = [];
+      let errorOutput = "";
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        output: { write: chunk => { errorOutput += chunk; } },
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "1",
+          profilePath: [`${join(directory, "missing-profile")}/`, profilePath],
+          createProfile: "yes",
+          primaryMergeMethod: "squash_merge",
+          releaseStrategy: "direct_tags",
+          branchStrategy: "trunk_based",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+        }, prompts),
+      });
+
+      assert.equal(options.profilePath, profilePath);
+      assert.equal(options.savedProfilePath, profilePath);
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "repository",
+        "limit",
+        "profilePath",
+        "profilePath",
+        "createProfile",
+        "primaryMergeMethod",
+        "releaseStrategy",
+        "branchStrategy",
+        "outDir",
+        "dryRun",
+        "json",
+      ]);
+      assert.match(errorOutput, /profile path must be a JSON file path/);
+    });
+  });
+
+  it("rejects broken symlink interactive profile paths before creation", async () => {
+    await withTempDirectory(async directory => {
+      const brokenProfilePath = join(directory, "broken-profile.json");
+      const profilePath = join(directory, "profile.json");
+      const outDir = join(directory, "broken-symlink-profile-out");
+      const prompts = [];
+      let errorOutput = "";
+      await symlink(join(directory, "missing-target.json"), brokenProfilePath);
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        output: { write: chunk => { errorOutput += chunk; } },
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "1",
+          profilePath: [brokenProfilePath, profilePath],
+          createProfile: "yes",
+          primaryMergeMethod: "squash_merge",
+          releaseStrategy: "direct_tags",
+          branchStrategy: "trunk_based",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+        }, prompts),
+      });
+
+      assert.equal(options.profilePath, profilePath);
+      assert.equal(options.savedProfilePath, profilePath);
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "repository",
+        "limit",
+        "profilePath",
+        "profilePath",
+        "createProfile",
+        "primaryMergeMethod",
+        "releaseStrategy",
+        "branchStrategy",
+        "outDir",
+        "dryRun",
+        "json",
+      ]);
+      assert.match(errorOutput, /profile could not be read/);
+    });
+  });
+
+  it("creates an interactive workflow profile with a release title rule", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "generated-profile.json");
+      const outDir = join(directory, "generated-profile-out");
+      const prompts = [];
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "1",
+          profilePath,
+          createProfile: "yes",
+          primaryMergeMethod: "squash_merge",
+          releaseStrategy: "release_prs",
+          branchStrategy: "main_plus_release_branches",
+          releasePrTitleIncludes: "Release",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+          excludedPrClasses: "",
+        }, prompts),
+      });
+
+      assert.equal(options.profilePath, profilePath);
+      assert.equal(options.savedProfilePath, profilePath);
+      assert.equal(options.dryRun, true);
+      assert.deepEqual(options.excludedPrClasses, []);
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "repository",
+        "limit",
+        "profilePath",
+        "createProfile",
+        "primaryMergeMethod",
+        "releaseStrategy",
+        "branchStrategy",
+        "releasePrTitleIncludes",
+        "outDir",
+        "dryRun",
+        "json",
+        "excludedPrClasses",
+      ]);
+
+      const profile = await readJson(profilePath);
+      assert.deepEqual(profile.repository, { owner: "example", name: "example-repo" });
+      assert.deepEqual(profile.workflow, {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "release_prs",
+        branchStrategy: "main_plus_release_branches",
+      });
+      assert.deepEqual(profile.prClasses, [
+        {
+          id: "release-title",
+          class: "release",
+          match: { titleIncludes: "Release" },
+          notes: "Generated by interactive setup from the configured release PR title convention.",
+        },
+      ]);
+      assert.deepEqual(profile.rules, []);
+    });
+  });
+
+  it("writes a generated copy when a missing profile appears before creation", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "new-stale-profile.json");
+      const generatedPath = join(directory, "new-stale-profile.generated.json");
+      const concurrentProfile = {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        rules: [],
+      };
+      let concurrentWriteDone = false;
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir: join(directory, "new-stale-profile-out"),
+        dryRun: true,
+        csv: false,
+        json: false,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: async prompt => {
+          if (prompt.id === "branchStrategy" && !concurrentWriteDone) {
+            concurrentWriteDone = true;
+            await writeCanonicalProfile(directory, "new-stale-profile.json", concurrentProfile);
+          }
+          return {
+            createProfile: "yes",
+            primaryMergeMethod: "squash_merge",
+            releaseStrategy: "direct_tags",
+            branchStrategy: "trunk_based",
+          }[prompt.id] ?? "";
+        },
+      });
+
+      assert.equal(options.profilePath, generatedPath);
+      assert.equal(options.savedProfilePath, generatedPath);
+      assert.deepEqual(await readJson(profilePath), concurrentProfile);
+      assert.deepEqual((await readJson(generatedPath)).workflow, {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "direct_tags",
+        branchStrategy: "trunk_based",
+      });
+    });
+  });
+
+  it("writes a generated copy when a missing profile becomes a directory before creation", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "directory-profile.json");
+      const generatedPath = join(directory, "directory-profile.generated.json");
+      let concurrentDirectoryDone = false;
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir: join(directory, "directory-profile-out"),
+        dryRun: true,
+        csv: false,
+        json: false,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: async prompt => {
+          if (prompt.id === "branchStrategy" && !concurrentDirectoryDone) {
+            concurrentDirectoryDone = true;
+            await mkdir(profilePath);
+          }
+          return {
+            createProfile: "yes",
+            primaryMergeMethod: "squash_merge",
+            releaseStrategy: "direct_tags",
+            branchStrategy: "trunk_based",
+          }[prompt.id] ?? "";
+        },
+      });
+
+      assert.equal(options.profilePath, generatedPath);
+      assert.equal(options.savedProfilePath, generatedPath);
+      assert.equal((await lstat(profilePath)).isDirectory(), true);
+      assert.deepEqual((await readJson(generatedPath)).workflow, {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "direct_tags",
+        branchStrategy: "trunk_based",
+      });
+    });
+  });
+
+  it("writes a generated profile copy instead of rewriting non-canonical profile formatting", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "profile-with-pr-classes.json");
+      await writeFile(profilePath, JSON.stringify({
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        prClasses: [
+          {
+            id: "release-regex",
+            class: "release",
+            match: { titleRegex: "^Release v\\d+" },
+            notes: "Curated regex release rule.",
+          },
+          {
+            id: "release-title",
+            class: "release",
+            match: { titleIncludes: "Ship" },
+          },
+        ],
+        rules: [],
+      }), "utf8");
+      const originalProfileText = await readFile(profilePath, "utf8");
+      const existingGeneratedPath = join(directory, "profile-with-pr-classes.generated.json");
+      const generatedPath = join(directory, "profile-with-pr-classes.generated-2.json");
+      await writeFile(existingGeneratedPath, "existing generated profile\n", "utf8");
+      const outDir = join(directory, "generated-copy-out");
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "1",
+          profilePath,
+          configureWorkflow: "yes",
+          primaryMergeMethod: "rebase_merge",
+          releaseStrategy: "release_prs",
+          branchStrategy: "mixed",
+          releasePrTitleIncludes: "Release",
+          addReleasePrClass: "yes",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+          excludedPrClasses: "",
+        }),
+      });
+
+      assert.equal(options.profilePath, generatedPath);
+      assert.equal(options.savedProfilePath, generatedPath);
+      assert.equal(await readFile(profilePath, "utf8"), originalProfileText);
+      assert.equal(await readFile(existingGeneratedPath, "utf8"), "existing generated profile\n");
+
+      const profile = await readJson(generatedPath);
+      assert.deepEqual(profile.workflow, {
+        primaryMergeMethod: "rebase_merge",
+        releaseStrategy: "release_prs",
+        branchStrategy: "mixed",
+      });
+      assert.deepEqual(profile.prClasses[0], {
+        id: "release-regex",
+        class: "release",
+        match: { titleRegex: "^Release v\\d+" },
+        notes: "Curated regex release rule.",
+      });
+      assert.equal(profile.prClasses[1].match.titleIncludes, "Ship");
+      assert.equal(profile.prClasses[2].id, "release-title-2");
+      assert.deepEqual(profile.prClasses[2].match, { titleIncludes: "Release" });
+    });
+  });
+
+  it("updates an explicitly provided canonical profile JSON with confirmed workflow fields", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeCanonicalProfile(directory, "canonical-profile.json", {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        rules: [],
+      });
+      const outDir = join(directory, "canonical-profile-out");
+      const prompts = [];
+
+      const result = await runAnalyzeGithubCli([
+        "--interactive",
+        "--repo",
+        "example/example-repo",
+        "--limit",
+        "1",
+        "--profile",
+        profilePath,
+        "--out",
+        outDir,
+        "--dry-run",
+        "--no-csv",
+        "--json",
+      ], {
+        provider: createProvider(),
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          configureWorkflow: "yes",
+          primaryMergeMethod: "merge_commit",
+          releaseStrategy: "direct_tags",
+          branchStrategy: "trunk_based",
+        }, prompts),
+        stdout: { write() {} },
+        stderr: { write() {} },
+      });
+
+      assert.equal(result.savedProfilePath, profilePath);
+      assert.deepEqual((await readJson(profilePath)).workflow, {
+        primaryMergeMethod: "merge_commit",
+        releaseStrategy: "direct_tags",
+        branchStrategy: "trunk_based",
+      });
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "configureWorkflow",
+        "primaryMergeMethod",
+        "releaseStrategy",
+        "branchStrategy",
+      ]);
+    });
+  });
+
+  it("retries canonical profile rewrites when Windows refuses destination overwrite", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeCanonicalProfile(directory, "windows-profile.json", {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        rules: [],
+      });
+      const outDir = join(directory, "windows-profile-out");
+      const originalRename = fsPromises.rename.bind(fsPromises);
+      let profileRenameAttempts = 0;
+      const renameMock = mock.method(fsPromises, "rename", async (oldPath, newPath) => {
+        if (newPath === profilePath) {
+          profileRenameAttempts += 1;
+          if (profileRenameAttempts === 1) {
+            throw Object.assign(new Error("destination exists"), { code: "EPERM" });
+          }
+        }
+        return originalRename(oldPath, newPath);
+      });
+      syncBuiltinESMExports();
+
+      try {
+        const result = await runAnalyzeGithubCli([
+          "--interactive",
+          "--repo",
+          "example/example-repo",
+          "--limit",
+          "1",
+          "--profile",
+          profilePath,
+          "--out",
+          outDir,
+          "--dry-run",
+          "--no-csv",
+          "--json",
+        ], {
+          provider: createProvider(),
+          isInteractiveTerminal: true,
+          promptAdapter: createScriptedPromptAdapter({
+            configureWorkflow: "yes",
+            primaryMergeMethod: "merge_commit",
+            releaseStrategy: "direct_tags",
+            branchStrategy: "trunk_based",
+          }),
+          stdout: { write() {} },
+          stderr: { write() {} },
+        });
+
+        assert.equal(result.savedProfilePath, profilePath);
+        assert.equal(profileRenameAttempts, 2);
+        assert.deepEqual((await readJson(profilePath)).workflow, {
+          primaryMergeMethod: "merge_commit",
+          releaseStrategy: "direct_tags",
+          branchStrategy: "trunk_based",
+        });
+      } finally {
+        renameMock.mock.restore();
+        syncBuiltinESMExports();
+      }
+    });
+  });
+
+  it("writes a generated copy when a canonical profile changes before rewrite", async () => {
+    await withTempDirectory(async directory => {
+      const originalProfile = {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        rules: [],
+      };
+      const staleProfile = {
+        ...originalProfile,
+        rules: [
+          {
+            id: "runtime",
+            match: { prefix: "src/" },
+            category: "code",
+            role: "core_product_code",
+            functionalSurface: "runtime",
+          },
+        ],
+      };
+      const profilePath = await writeCanonicalProfile(directory, "stale-profile.json", originalProfile);
+      const generatedPath = join(directory, "stale-profile.generated.json");
+      let staleWriteDone = false;
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir: join(directory, "stale-profile-out"),
+        dryRun: true,
+        csv: false,
+        json: false,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: async prompt => {
+          if (prompt.id === "branchStrategy" && !staleWriteDone) {
+            staleWriteDone = true;
+            await writeCanonicalProfile(directory, "stale-profile.json", staleProfile);
+          }
+          return {
+            configureWorkflow: "yes",
+            primaryMergeMethod: "merge_commit",
+            releaseStrategy: "direct_tags",
+            branchStrategy: "trunk_based",
+          }[prompt.id] ?? "";
+        },
+      });
+
+      assert.equal(options.profilePath, generatedPath);
+      assert.equal(options.savedProfilePath, generatedPath);
+      assert.deepEqual(await readJson(profilePath), staleProfile);
+      assert.deepEqual((await readJson(generatedPath)).workflow, {
+        primaryMergeMethod: "merge_commit",
+        releaseStrategy: "direct_tags",
+        branchStrategy: "trunk_based",
+      });
+    });
+  });
+
+  it("writes a generated profile copy for symlinked canonical profiles", async () => {
+    await withTempDirectory(async directory => {
+      const targetPath = await writeCanonicalProfile(directory, "target-profile.json", {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        rules: [],
+      });
+      const profilePath = join(directory, "linked-profile.json");
+      const generatedPath = join(directory, "linked-profile.generated.json");
+      await symlink(targetPath, profilePath);
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir: join(directory, "symlink-profile-out"),
+        dryRun: true,
+        csv: false,
+        json: false,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          configureWorkflow: "yes",
+          primaryMergeMethod: "squash_merge",
+          releaseStrategy: "direct_tags",
+          branchStrategy: "trunk_based",
+        }),
+      });
+
+      assert.equal(options.profilePath, generatedPath);
+      assert.equal(options.savedProfilePath, generatedPath);
+      assert.equal((await lstat(profilePath)).isSymbolicLink(), true);
+      assert.equal((await readJson(targetPath)).workflow, undefined);
+      assert.deepEqual((await readJson(generatedPath)).workflow, {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "direct_tags",
+        branchStrategy: "trunk_based",
+      });
     });
   });
 
@@ -435,7 +982,7 @@ describe("GitHub live analyze CLI", () => {
         excludedPrClasses: [],
       }, {
         isInteractiveTerminal: true,
-        promptAdapter: createScriptedPromptAdapter({}, prompts),
+        promptAdapter: createScriptedPromptAdapter({ configureWorkflow: "no" }, prompts),
       });
 
       assert.deepEqual(options, {
@@ -449,7 +996,7 @@ describe("GitHub live analyze CLI", () => {
         csv: true,
         json: false,
       });
-      assert.deepEqual(prompts, []);
+      assert.deepEqual(prompts.map(prompt => prompt.id), ["configureWorkflow"]);
     });
   });
 
@@ -1003,10 +1550,90 @@ describe("GitHub live analyze CLI", () => {
         "repository",
         "limit",
         "profilePath",
+        "configureWorkflow",
         "outDir",
         "dryRun",
       ]);
       assert.deepEqual(await readdir(outDir), []);
+    });
+  });
+
+  it("prints generated profile paths in interactive completion output", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "interactive-generated-profile.json");
+      const outDir = join(directory, "interactive-generated-profile-out");
+      let stdout = "";
+
+      await runAnalyzeGithubCli(["--interactive"], {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "1",
+          profilePath,
+          createProfile: "yes",
+          primaryMergeMethod: "squash_merge",
+          releaseStrategy: "release_prs",
+          branchStrategy: "main_plus_release_branches",
+          releasePrTitleIncludes: "Release",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+          excludedPrClasses: "",
+        }),
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write() {} },
+      });
+
+      assert(stdout.includes(`Repository profile saved: ${profilePath}.`));
+      assert.deepEqual((await readJson(profilePath)).workflow, {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "release_prs",
+        branchStrategy: "main_plus_release_branches",
+      });
+    });
+  });
+
+  it("prints a saved profile path when later interactive analysis fails", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "interactive-failure-profile.json");
+      const outDir = join(directory, "interactive-failure-out");
+      let stderr = "";
+
+      await assert.rejects(
+        runAnalyzeGithubCli(["--interactive"], {
+          provider: createProvider({
+            async getRepository() {
+              throw new Error("mock provider failure");
+            },
+          }),
+          isInteractiveTerminal: true,
+          promptAdapter: createScriptedPromptAdapter({
+            repository: "example/example-repo",
+            limit: "1",
+            profilePath,
+            createProfile: "yes",
+            primaryMergeMethod: "squash_merge",
+            releaseStrategy: "direct_tags",
+            branchStrategy: "trunk_based",
+            outDir,
+            dryRun: "no",
+            csv: "no",
+            json: "no",
+          }),
+          stdout: { write() {} },
+          stderr: { write: chunk => { stderr += chunk; } },
+        }),
+        /mock provider failure/,
+      );
+
+      assert(stderr.includes(`Repository profile saved before failure: ${profilePath}.`));
+      assert.deepEqual((await readJson(profilePath)).workflow, {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "direct_tags",
+        branchStrategy: "trunk_based",
+      });
     });
   });
 

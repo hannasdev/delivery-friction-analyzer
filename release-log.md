@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-18 — Workflow Profile Wizard
+
+- What changed: Interactive setup can now create repository profiles or generated profile copies with confirmed workflow context and release PR title rules.
+- Why it matters: Maintainers can capture reusable workflow assumptions during guided setup without hand-editing profile JSON or risking silent rewrites of existing profiles.
+- Who is affected: Maintainers running `--interactive` for first-time repository setup or profile updates.
+- Action needed: Review the generated or updated profile path printed in completion output before reusing it in automation.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/36
+
 ### 2026-06-17 — Workflow Profile Contract
 
 - What changed: Repository profiles can now declare optional workflow context for merge method, release strategy, and branch strategy using validated stable identifiers.

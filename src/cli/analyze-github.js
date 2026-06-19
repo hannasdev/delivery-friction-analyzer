@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { constants, realpathSync } from "node:fs";
-import { access, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { access, lstat, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -17,7 +17,12 @@ import {
   renderRepositoryFrictionMarkdown,
 } from "../report/friction-report.js";
 import { assertValidPrClassRules } from "../profile/pr-class.js";
-import { assertValidWorkflowContext } from "../profile/workflow.js";
+import {
+  WORKFLOW_BRANCH_STRATEGIES,
+  WORKFLOW_PRIMARY_MERGE_METHODS,
+  WORKFLOW_RELEASE_STRATEGIES,
+  assertValidWorkflowContext,
+} from "../profile/workflow.js";
 
 const ALLOWED_OPTIONS = new Set([
   "repo",
@@ -183,25 +188,6 @@ function validateExcludedPrClassesAreConfigured(excludedPrClasses = [], reposito
   throw new Error(`exclude-pr-class must name configured PR class(es): ${unconfigured.join(", ")}.${available}`);
 }
 
-async function readProfile(profilePath) {
-  let profile;
-  try {
-    profile = JSON.parse(await readFile(profilePath, "utf8"));
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      throw new Error(`profile must be valid JSON: ${error.message}`);
-    }
-    throw new Error(`profile could not be read: ${error.message}`);
-  }
-  try {
-    assertValidPrClassRules(profile);
-    assertValidWorkflowContext(profile);
-  } catch (error) {
-    throw new Error(`profile is invalid: ${error.message}`);
-  }
-  return profile;
-}
-
 function configuredPrClassList(repositoryProfile) {
   return [...configuredPrClasses(repositoryProfile)].sort();
 }
@@ -221,6 +207,9 @@ function formatInteractivePrompt(prompt) {
     return `${prompt.message}${prompt.defaultValue ? " [Y/n]" : " [y/N]"} `;
   }
   if (prompt.type === "multi-select" && prompt.choices?.length) {
+    return `${prompt.message} (${prompt.choices.join(",")})${suffix}: `;
+  }
+  if (prompt.type === "select" && prompt.choices?.length) {
     return `${prompt.message} (${prompt.choices.join(",")})${suffix}: `;
   }
   return `${prompt.message}${suffix}: `;
@@ -286,22 +275,418 @@ function normalizeConfirmAnswer(raw, prompt) {
   throw new Error("Answer yes or no.");
 }
 
+function normalizeChoiceAnswer(raw, prompt) {
+  const value = normalizeTextAnswer(raw, prompt);
+  if (prompt.choices?.includes(value)) return value;
+  throw new Error(`${prompt.id} must be one of: ${prompt.choices.join(", ")}`);
+}
+
 function normalizeMultiSelectAnswer(raw, prompt) {
   const value = String(raw ?? "").trim();
   if (!value) return prompt.defaultValue ?? [];
   return normalizeExcludedPrClasses([value]);
 }
 
+function validateProfile(profile) {
+  assertValidPrClassRules(profile);
+  assertValidWorkflowContext(profile);
+}
+
+function parseProfileJson(text) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`profile must be valid JSON: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+function hasTrailingPathSeparator(profilePath) {
+  return /[/\\]$/.test(profilePath);
+}
+
+async function inspectProfilePath(profilePath) {
+  if (hasTrailingPathSeparator(profilePath)) {
+    throw new Error("profile path must be a JSON file path, not a directory or special file.");
+  }
+  let profileLinkStat;
+  try {
+    profileLinkStat = await lstat(profilePath);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return { exists: false, profile: null, text: null, isSymbolicLink: false };
+    }
+    throw error;
+  }
+  const isSymbolicLink = profileLinkStat.isSymbolicLink();
+  const profileStat = isSymbolicLink ? await stat(profilePath) : profileLinkStat;
+  if (!profileStat.isFile()) {
+    throw new Error("profile path must be a JSON file path, not a directory or special file.");
+  }
+  const text = await readFile(profilePath, "utf8");
+  const profile = parseProfileJson(text);
+  validateProfile(profile);
+  return { exists: true, profile, text, isSymbolicLink };
+}
+
+async function readProfile(profilePath) {
+  let inspected;
+  try {
+    inspected = await inspectProfilePath(profilePath);
+  } catch (error) {
+    if (error.message?.startsWith("profile must be valid JSON")) {
+      throw error;
+    }
+    if (error.message?.startsWith("invalid ")) {
+      throw new Error(`profile is invalid: ${error.message}`);
+    }
+    throw new Error(`profile could not be read: ${error.message}`);
+  }
+  if (!inspected.exists) {
+    throw new Error("profile could not be read: no such file or directory");
+  }
+  return inspected.profile;
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function repositoryProfileFromSlug(repository) {
+  const match = REPOSITORY_SLUG.exec(repository);
+  if (!match) {
+    throw new Error("repo must use owner/name with GitHub-safe owner and name segments.");
+  }
+  return {
+    schemaVersion: "repository-profile.v1",
+    repository: {
+      owner: match[1],
+      name: match[2],
+    },
+    rules: [],
+  };
+}
+
+function formatProfile(profile) {
+  return `${JSON.stringify(profile, null, 2)}\n`;
+}
+
+function generatedProfilePath(profilePath, index = 1) {
+  const suffix = index === 1 ? ".generated.json" : `.generated-${index}.json`;
+  return /\.json$/i.test(profilePath)
+    ? profilePath.replace(/\.json$/i, suffix)
+    : `${profilePath}${suffix}`;
+}
+
+async function writeProfileFile(profilePath, profile) {
+  await mkdir(dirname(profilePath), { recursive: true });
+  await writeFile(profilePath, formatProfile(profile), { encoding: "utf8", flag: "wx" });
+}
+
+function shouldWriteGeneratedProfileAfterCreateFailure(error) {
+  return ["EEXIST", "EISDIR", "ELOOP"].includes(error.code);
+}
+
+function shouldRetryProfileReplaceAfterRenameFailure(error) {
+  return ["EEXIST", "EPERM"].includes(error.code);
+}
+
+async function replaceProfileFile(profilePath, profile, originalText) {
+  const tempPath = `${profilePath}.${process.pid}.${Date.now()}.tmp`;
+  let shouldCleanupTemp = true;
+  try {
+    await writeFile(tempPath, formatProfile(profile), { encoding: "utf8", flag: "wx" });
+    try {
+      await rename(tempPath, profilePath);
+      shouldCleanupTemp = false;
+      return true;
+    } catch (error) {
+      if (!shouldRetryProfileReplaceAfterRenameFailure(error)) {
+        throw error;
+      }
+      if (!await profileStillMatchesOriginal(profilePath, originalText)) {
+        return false;
+      }
+      await rm(profilePath, { force: true });
+      await rename(tempPath, profilePath);
+      shouldCleanupTemp = false;
+      return true;
+    }
+  } finally {
+    if (shouldCleanupTemp) {
+      await rm(tempPath, { force: true });
+    }
+  }
+}
+
+async function profileStillMatchesOriginal(profilePath, originalText) {
+  try {
+    const profileLinkStat = await lstat(profilePath);
+    if (profileLinkStat.isSymbolicLink() || !profileLinkStat.isFile()) return false;
+    return await readFile(profilePath, "utf8") === originalText;
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
+async function writeGeneratedProfileFile(profilePath, profile) {
+  for (let index = 1; ; index += 1) {
+    const writePath = generatedProfilePath(profilePath, index);
+    try {
+      await mkdir(dirname(writePath), { recursive: true });
+      await writeFile(writePath, formatProfile(profile), { encoding: "utf8", flag: "wx" });
+      return writePath;
+    } catch (error) {
+      if (error.code === "EEXIST") continue;
+      throw error;
+    }
+  }
+}
+
+async function writeInteractiveProfile(profilePath, profile, {
+  exists,
+  originalProfile,
+  originalText,
+  originalIsSymbolicLink,
+}) {
+  const canRewriteExisting = exists
+    && !originalIsSymbolicLink
+    && originalText === formatProfile(originalProfile);
+  if (exists && !canRewriteExisting) {
+    return writeGeneratedProfileFile(profilePath, profile);
+  }
+  if (!exists) {
+    try {
+      await writeProfileFile(profilePath, profile);
+      return profilePath;
+    } catch (error) {
+      if (shouldWriteGeneratedProfileAfterCreateFailure(error)) {
+        return writeGeneratedProfileFile(profilePath, profile);
+      }
+      throw error;
+    }
+  }
+  if (!await profileStillMatchesOriginal(profilePath, originalText)) {
+    return writeGeneratedProfileFile(profilePath, profile);
+  }
+  if (!await replaceProfileFile(profilePath, profile, originalText)) {
+    return writeGeneratedProfileFile(profilePath, profile);
+  }
+  return profilePath;
+}
+
+function releaseClassRuleIndexes(profile) {
+  if (!Array.isArray(profile.prClasses)) return [];
+  return profile.prClasses
+    .map((rule, index) => rule.class === "release" ? index : -1)
+    .filter(index => index >= 0);
+}
+
+function updateableReleaseClassRuleIndex(profile) {
+  const releaseIndexes = releaseClassRuleIndexes(profile);
+  if (releaseIndexes.length !== 1) return -1;
+  const rule = profile.prClasses[releaseIndexes[0]];
+  const match = rule.match ?? {};
+  const hasTitleIncludes = typeof match.titleIncludes === "string" && match.titleIncludes.length > 0;
+  const hasTitleRegex = typeof match.titleRegex === "string" && match.titleRegex.length > 0;
+  return hasTitleIncludes && !hasTitleRegex ? releaseIndexes[0] : -1;
+}
+
+function defaultReleaseTitleIncludes(profile) {
+  const index = updateableReleaseClassRuleIndex(profile);
+  const existingIncludes = index >= 0 ? profile.prClasses[index]?.match?.titleIncludes : null;
+  return typeof existingIncludes === "string" && existingIncludes.length ? existingIncludes : "Release";
+}
+
+function nextPrClassRuleId(profile, baseId) {
+  const existingIds = new Set((profile.prClasses ?? []).map(rule => rule.id));
+  if (!existingIds.has(baseId)) return baseId;
+  for (let index = 2; ; index += 1) {
+    const candidate = `${baseId}-${index}`;
+    if (!existingIds.has(candidate)) return candidate;
+  }
+}
+
+function releasePrClassRule(profile, titleIncludes, existingRule = null) {
+  return {
+    id: existingRule?.id ?? nextPrClassRuleId(profile, "release-title"),
+    class: "release",
+    match: { ...(existingRule?.match ?? {}), titleIncludes },
+    notes: existingRule?.notes ?? "Generated by interactive setup from the configured release PR title convention.",
+  };
+}
+
+async function promptWorkflowField(promptAdapter, output, { id, message, choices, defaultValue }) {
+  return askUntilValid(promptAdapter, {
+    id,
+    type: "select",
+    message,
+    choices,
+    defaultValue,
+  }, {
+    output,
+    normalize: normalizeChoiceAnswer,
+    validate() {},
+  });
+}
+
+async function promptWorkflowProfileUpdate(promptAdapter, output, profile, { isNewProfile }) {
+  const updated = cloneJson(profile);
+  updated.workflow = {
+    primaryMergeMethod: await promptWorkflowField(promptAdapter, output, {
+      id: "primaryMergeMethod",
+      message: "Primary merge method",
+      choices: WORKFLOW_PRIMARY_MERGE_METHODS,
+      defaultValue: updated.workflow?.primaryMergeMethod ?? "unknown",
+    }),
+    releaseStrategy: await promptWorkflowField(promptAdapter, output, {
+      id: "releaseStrategy",
+      message: "Release strategy",
+      choices: WORKFLOW_RELEASE_STRATEGIES,
+      defaultValue: updated.workflow?.releaseStrategy ?? "unknown",
+    }),
+    branchStrategy: await promptWorkflowField(promptAdapter, output, {
+      id: "branchStrategy",
+      message: "Branch strategy",
+      choices: WORKFLOW_BRANCH_STRATEGIES,
+      defaultValue: updated.workflow?.branchStrategy ?? "unknown",
+    }),
+  };
+
+  if (updated.workflow.releaseStrategy === "release_prs") {
+    const suggestedReleaseTitle = defaultReleaseTitleIncludes(updated);
+    const titleIncludes = await askUntilValid(promptAdapter, {
+      id: "releasePrTitleIncludes",
+      type: "text",
+      message: `Release PR title includes (blank to skip PR class rule; suggested: ${suggestedReleaseTitle})`,
+    }, {
+      output,
+      normalize: normalizeTextAnswer,
+      validate() {},
+    });
+
+    if (titleIncludes) {
+      updated.prClasses = Array.isArray(updated.prClasses) ? [...updated.prClasses] : [];
+      const updateableReleaseIndex = updateableReleaseClassRuleIndex(updated);
+      if (updateableReleaseIndex >= 0) {
+        const shouldUpdateReleaseRule = await askUntilValid(promptAdapter, {
+          id: "updateReleasePrClass",
+          type: "confirm",
+          message: "Update existing title-based release PR class rule",
+          defaultValue: false,
+        }, {
+          output,
+          normalize: normalizeConfirmAnswer,
+          validate() {},
+        });
+        if (shouldUpdateReleaseRule) {
+          updated.prClasses[updateableReleaseIndex] = releasePrClassRule(
+            updated,
+            titleIncludes,
+            updated.prClasses[updateableReleaseIndex],
+          );
+        }
+      } else {
+        const shouldAddReleaseRule = isNewProfile
+          ? true
+          : await askUntilValid(promptAdapter, {
+            id: "addReleasePrClass",
+            type: "confirm",
+            message: "Add release PR class rule from title convention",
+            defaultValue: true,
+          }, {
+            output,
+            normalize: normalizeConfirmAnswer,
+            validate() {},
+          });
+        if (shouldAddReleaseRule) {
+          updated.prClasses.push(releasePrClassRule(updated, titleIncludes));
+        }
+      }
+    }
+  }
+
+  validateProfile(updated);
+  return updated;
+}
+
+async function maybeConfigureInteractiveProfile(promptAdapter, output, profileState, repository) {
+  const isNewProfile = !profileState.exists;
+  const originalProfile = profileState.profile;
+  let profile = isNewProfile ? repositoryProfileFromSlug(repository) : cloneJson(originalProfile);
+
+  if (isNewProfile) {
+    const shouldCreateProfile = await askUntilValid(promptAdapter, {
+      id: "createProfile",
+      type: "confirm",
+      message: "Create repository profile at this path",
+      defaultValue: true,
+    }, {
+      output,
+      normalize: normalizeConfirmAnswer,
+      validate() {},
+    });
+    if (!shouldCreateProfile) {
+      throw new Error("Repository profile is required.");
+    }
+  } else {
+    const shouldConfigureWorkflow = await askUntilValid(promptAdapter, {
+      id: "configureWorkflow",
+      type: "confirm",
+      message: "Configure repository workflow profile fields",
+      defaultValue: false,
+    }, {
+      output,
+      normalize: normalizeConfirmAnswer,
+      validate() {},
+    });
+    if (!shouldConfigureWorkflow) {
+      return {
+        profile,
+        profilePath: profileState.profilePath,
+        savedProfilePath: null,
+      };
+    }
+  }
+
+  profile = await promptWorkflowProfileUpdate(promptAdapter, output, profile, { isNewProfile });
+  const savedProfilePath = await writeInteractiveProfile(profileState.profilePath, profile, {
+    exists: profileState.exists,
+    originalProfile,
+    originalText: profileState.text,
+    originalIsSymbolicLink: profileState.isSymbolicLink,
+  });
+  return {
+    profile,
+    profilePath: savedProfilePath,
+    savedProfilePath,
+  };
+}
+
 async function promptProfilePath(promptAdapter, output, prompt) {
-  let profile = null;
+  let profileState = null;
   const profilePath = await askUntilValid(promptAdapter, prompt, {
     output,
     normalize: normalizeTextAnswer,
     async validate(value) {
-      profile = await readProfile(value);
+      if (!value) throw new Error("Repository profile path is required.");
+      try {
+        profileState = await inspectProfilePath(value);
+      } catch (error) {
+        if (error.message?.startsWith("profile must be valid JSON")) {
+          throw error;
+        }
+        if (error.message?.startsWith("invalid ")) {
+          throw new Error(`profile is invalid: ${error.message}`);
+        }
+        throw new Error(`profile could not be read: ${error.message}`);
+      }
     },
   });
-  return { profilePath, profile };
+  return { profilePath, ...profileState };
 }
 
 function hasOwnOption(options, key) {
@@ -321,6 +706,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
   input = process.stdin,
   output = process.stderr,
   isInteractiveTerminal = Boolean(input?.isTTY),
+  onSavedProfilePath = null,
 } = {}) {
   if (!isInteractiveTerminal) {
     throw new Error("interactive mode requires a terminal. Re-run with --repo <owner/name> --limit <1-100> --profile <path> --out <directory>, or provide a TTY for prompts.");
@@ -331,6 +717,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
   const resolved = { ...options };
   delete resolved.interactivePromptDefaults;
   let repositoryProfile = null;
+  let profileState = null;
 
   try {
     if (!resolved.repository) {
@@ -364,11 +751,34 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         type: "path",
         message: "Repository profile path",
       });
-      resolved.profilePath = prompted.profilePath;
-      repositoryProfile = prompted.profile;
+      profileState = prompted;
     } else {
-      repositoryProfile = await readProfile(resolved.profilePath);
+      try {
+        profileState = {
+          profilePath: resolved.profilePath,
+          ...await inspectProfilePath(resolved.profilePath),
+        };
+      } catch (error) {
+        if (error.message?.startsWith("profile must be valid JSON")) {
+          throw error;
+        }
+        if (error.message?.startsWith("invalid ")) {
+          throw new Error(`profile is invalid: ${error.message}`);
+        }
+        throw new Error(`profile could not be read: ${error.message}`);
+      }
     }
+    resolved.profilePath = profileState.profilePath;
+
+    const profileUpdate = await maybeConfigureInteractiveProfile(adapter, output, profileState, resolved.repository);
+    resolved.profilePath = profileUpdate.profilePath;
+    if (profileUpdate.savedProfilePath) {
+      resolved.savedProfilePath = profileUpdate.savedProfilePath;
+      if (typeof onSavedProfilePath === "function") {
+        onSavedProfilePath(profileUpdate.savedProfilePath);
+      }
+    }
+    repositoryProfile = profileUpdate.profile;
 
     if (!resolved.outDir) {
       resolved.outDir = await askUntilValid(adapter, {
@@ -612,8 +1022,8 @@ function attachCollectionCoverage(report, sourceBundle) {
   };
 }
 
-function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv, analysisFilter }) {
-  return {
+function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv, analysisFilter, savedProfilePath }) {
+  const summary = {
     ok: true,
     dryRun,
     csvArtifactsEnabled: Boolean(csv),
@@ -628,6 +1038,10 @@ function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report,
     totals: metrics?.totals ?? null,
     topBottleneckIds: report?.summary?.topBottleneckIds ?? null,
   };
+  if (savedProfilePath) {
+    summary.savedProfilePath = savedProfilePath;
+  }
+  return summary;
 }
 
 function applyPrClassFilter(normalized, excludedPrClasses = []) {
@@ -699,6 +1113,7 @@ export async function runAnalyzeGithub(options, {
       sampledLimit: collectionLimit,
       csv: false,
       analysisFilter: null,
+      savedProfilePath: options.savedProfilePath,
     });
   }
 
@@ -747,6 +1162,7 @@ export async function runAnalyzeGithub(options, {
     sampledLimit: collectionLimit,
     csv: csvEnabled,
     analysisFilter: normalized.analysisFilter ?? null,
+    savedProfilePath: options.savedProfilePath,
   });
 }
 
@@ -816,6 +1232,10 @@ export function formatAnalyzeGithubCompletion(result) {
     );
   }
 
+  if (result.savedProfilePath) {
+    lines.push(`Repository profile saved: ${result.savedProfilePath}.`);
+  }
+
   lines.push(`Collection coverage: ${result.collectionCoverage?.status ?? "unknown"}.`);
 
   const caveats = coverageCaveats(result.collectionCoverage);
@@ -847,36 +1267,50 @@ export async function runAnalyzeGithubCli(argv, {
   promptAdapter = null,
   isInteractiveTerminal = Boolean(stdin?.isTTY),
 } = {}) {
-  const options = parseAnalyzeGithubArgs(argv);
-  if (options.help) {
-    stdout.write(USAGE);
-    return null;
+  let savedProfilePath = null;
+  try {
+    const options = parseAnalyzeGithubArgs(argv);
+    if (options.help) {
+      stdout.write(USAGE);
+      return null;
+    }
+
+    const resolvedOptions = options.interactive
+      ? await collectInteractiveAnalyzeGithubOptions({
+        ...options,
+        interactivePromptDefaults: {
+          dryRun: !options.dryRun,
+          csv: options.csv !== false,
+          json: !options.json,
+        },
+      }, {
+        promptAdapter,
+        input: stdin,
+        output: stderr,
+        isInteractiveTerminal,
+        onSavedProfilePath(path) {
+          savedProfilePath = path;
+        },
+      })
+      : options;
+    if (resolvedOptions.savedProfilePath) {
+      savedProfilePath = resolvedOptions.savedProfilePath;
+    }
+    const runOptions = {
+      onProgress: message => writeProgress(message, stderr),
+    };
+    if (provider !== undefined) runOptions.provider = provider;
+    if (now !== undefined) runOptions.now = now;
+
+    const result = await runAnalyzeGithub(resolvedOptions, runOptions);
+    writeAnalyzeGithubCompletion(result, { json: resolvedOptions.json, stdout });
+    return result;
+  } catch (error) {
+    if (savedProfilePath) {
+      stderr.write(`Repository profile saved before failure: ${savedProfilePath}.\n`);
+    }
+    throw error;
   }
-
-  const resolvedOptions = options.interactive
-    ? await collectInteractiveAnalyzeGithubOptions({
-      ...options,
-      interactivePromptDefaults: {
-        dryRun: !options.dryRun,
-        csv: options.csv !== false,
-        json: !options.json,
-      },
-    }, {
-      promptAdapter,
-      input: stdin,
-      output: stderr,
-      isInteractiveTerminal,
-    })
-    : options;
-  const runOptions = {
-    onProgress: message => writeProgress(message, stderr),
-  };
-  if (provider !== undefined) runOptions.provider = provider;
-  if (now !== undefined) runOptions.now = now;
-
-  const result = await runAnalyzeGithub(resolvedOptions, runOptions);
-  writeAnalyzeGithubCompletion(result, { json: resolvedOptions.json, stdout });
-  return result;
 }
 
 async function main(argv) {

@@ -2,13 +2,13 @@
 
 ## Status
 
-Status: Active; M1 merged; M2 PR opened for review.
+Status: Active; M1 and M2 merged; M3 PR opened for review.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-15
 - Activated: 2026-06-15
-- Current milestone: M2: Workflow Profile Contract (PR opened for review)
+- Current milestone: M3: Workflow Profile Wizard (PR opened for review)
 - Related issue:
   - None yet.
 - Related docs:
