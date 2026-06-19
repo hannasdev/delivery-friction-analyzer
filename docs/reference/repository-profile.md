@@ -37,7 +37,7 @@ This keeps validation-target details in profile data rather than hardcoded produ
 
 ## Pull Request Classes
 
-`prClasses` is optional. Rules are evaluated in order and the first matching rule wins. M1 supports title-only matchers:
+`prClasses` is optional. Rules are evaluated in order and the first matching rule wins. The current profile contract supports title-only matchers:
 
 - `titleIncludes`: literal substring match against the PR title.
 - `titleRegex`: JavaScript regular expression matched against the PR title.
@@ -52,9 +52,86 @@ If both matchers are present on one rule, both must match. If no rule matches, t
 }
 ```
 
+In reports, `unknown` means no configured `prClasses` rule matched that PR title. It is the transparent no-matching-rule fallback, not a collection failure and not an inferred repository taxonomy.
+
 Class identifiers are validated as lower-kebab-case or lower_snake_case strings. Profile validation rejects duplicate PR class rule IDs, empty match objects, invalid class identifiers, and invalid title regexes.
 
-Interactive setup can add a release PR class rule from a confirmed title convention using the current title-only matcher shape. Branch strategy answers stay in `workflow` context only; they do not create branch-based PR class matching.
+PR class evidence is interpretive and profile-driven. It helps reports show class distributions, dominance notes, and explicit `--exclude-pr-class` filtering when you request filtering, but configured PR class rules do not change default scoring, ranking formulas, collection, or CSV export shape by themselves.
+
+Interactive setup can add a release PR class rule from a confirmed title convention using the current title-only matcher shape. Branch strategy answers stay in `workflow` context only; they do not create branch-based PR class matching. Branch-based class matching is deferred until a future matcher contract supports branch fields explicitly.
+
+### Copyable PR Class Examples
+
+Add one `prClasses` array to the top level of a profile, next to `repository` and `rules`. Keep the rules ordered from most specific to broadest because the first match wins.
+
+Release PRs with titles such as `Release 2026.06.19`:
+
+```json
+{
+  "prClasses": [
+    {
+      "id": "release-title",
+      "class": "release",
+      "match": { "titleRegex": "^Release\\b" }
+    }
+  ]
+}
+```
+
+Dependency PRs with Dependabot-style titles and common dependency prefixes:
+
+```json
+{
+  "prClasses": [
+    {
+      "id": "dependency-title",
+      "class": "dependency",
+      "match": { "titleRegex": "^(?:deps!?|(?:build|chore|fix)\\(deps\\)!?):|^Bump\\b" }
+    }
+  ]
+}
+```
+
+Conventional Commit-style PR titles. Dependency-scoped rules come first so `chore(deps): ...` and `fix(deps): ...` do not fall through to maintenance or fix classes:
+
+```json
+{
+  "prClasses": [
+    {
+      "id": "conventional-dependency",
+      "class": "dependency",
+      "match": { "titleRegex": "^(?:deps!?|(?:build|chore|fix)\\(deps\\)!?):|^Bump\\b" }
+    },
+    {
+      "id": "conventional-feature",
+      "class": "feature",
+      "match": { "titleRegex": "^feat(?:\\([^)]+\\))?!?:" }
+    },
+    {
+      "id": "conventional-fix",
+      "class": "fix",
+      "match": { "titleRegex": "^fix(?:\\((?!deps\\))[^)]+\\))?!?:" }
+    },
+    {
+      "id": "conventional-docs",
+      "class": "docs",
+      "match": { "titleRegex": "^docs(?:\\([^)]+\\))?!?:" }
+    },
+    {
+      "id": "conventional-test",
+      "class": "test",
+      "match": { "titleRegex": "^test(?:\\([^)]+\\))?!?:" }
+    },
+    {
+      "id": "conventional-maintenance",
+      "class": "maintenance",
+      "match": { "titleRegex": "^(refactor|perf|style|build|ci)(?:\\([^)]+\\))?!?:|^chore(?:\\((?!deps\\))[^)]+\\))?!?:" }
+    }
+  ]
+}
+```
+
+These examples are starting points, not a universal PR taxonomy. Adjust class names and title patterns to match the repository's own conventions.
 
 ## Workflow Context
 

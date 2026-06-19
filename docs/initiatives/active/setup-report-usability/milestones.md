@@ -50,7 +50,7 @@ Users can understand how to create a repository profile, why PR class values may
 
 ### Status
 
-- [ ] Not started
+- [x] Active
 - [ ] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
