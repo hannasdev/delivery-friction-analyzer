@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can see merge, release, and branch assumptions beside report evidence without mistaking them for observed GitHub data or scoring inputs.
 - Who is affected: Maintainers and contributors reviewing generated reports or authoring repository profiles with `workflow` context.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/37
 
 ### 2026-06-18 — Workflow Profile Wizard
 
