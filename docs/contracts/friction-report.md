@@ -27,6 +27,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `metricVersion`: source metrics contract version.
 - `targetRepository`: analyzed repository identity; live analysis sample size is encoded as `targetRepository.analysisPullRequestLimit` from collection metadata.
 - `analysisFilter`: optional metadata for explicit filters applied before metrics computation, including excluded PR classes and before/after PR counts.
+- `configuredWorkflow`: optional user-configured workflow context from the repository profile. It is not observed GitHub evidence and does not change scoring, ranking, CSV exports, or PR class matching.
 - `summary`: repository totals and top bottleneck identifiers.
 - `coverage`: PR-open diff, workflow-run, and review-thread coverage counts plus caveats.
 - `commentSources`: total and source-grouped review comments for Copilot, human, bot, scanner, author replies, and unknown sources.
@@ -55,6 +56,7 @@ The Markdown renderer presents the same report data for human review:
 - a top-of-report focus snapshot that names focus areas, action categories, evidence reviewed, and confidence caveats before detailed bottlenecks;
 - a compact recommendation-category snapshot before detailed bottlenecks, with the full category reference retained later in the report;
 - a short "How To Read This Report" guide that distinguishes observed evidence, interpretation, recommendations, and caveats;
+- a configured workflow context section only when repository profile workflow fields are present, labeled as user-configured profile context rather than observed GitHub evidence;
 - evidence-quality and coverage tables before detailed recommendations;
 - key findings that highlight top bottlenecks, strongest displayed signal, outlier caveats, PR class caveats, and coverage caveats;
 - a PR class context table that shows analyzed PR counts, changed lines, sample share, and classification sources by class;
@@ -104,6 +106,7 @@ Full live analysis writes `methodology.md` as a hybrid artifact: stable explanat
 
 - target repository and report/metric versions;
 - profile path when available;
+- configured workflow context when supplied by the repository profile, labeled as user-configured context rather than observed GitHub evidence;
 - requested and collected PR counts;
 - collection coverage status and API-family diagnostics;
 - scoring, ranking, dominance, sensitivity, and limitation explanations;

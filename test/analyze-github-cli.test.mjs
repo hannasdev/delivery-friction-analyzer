@@ -198,6 +198,36 @@ async function writeProfile(directory) {
   return profilePath;
 }
 
+async function writeWorkflowProfile(directory) {
+  const profilePath = join(directory, "profile-with-workflow.json");
+  await writeFile(profilePath, JSON.stringify({
+    schemaVersion: "repository-profile.v1",
+    repository: { owner: "example", name: "example-repo" },
+    workflow: {
+      primaryMergeMethod: "squash_merge",
+      releaseStrategy: "release_prs",
+      branchStrategy: "main_plus_release_branches",
+    },
+    rules: [
+      {
+        id: "runtime",
+        match: { prefix: "src/" },
+        category: "code",
+        role: "core_product_code",
+        functionalSurface: "runtime",
+      },
+      {
+        id: "tests",
+        match: { prefix: "test/" },
+        category: "tests",
+        role: "tests",
+        functionalSurface: "test_suite",
+      },
+    ],
+  }), "utf8");
+  return profilePath;
+}
+
 async function writeCanonicalProfile(directory, name, profile) {
   const profilePath = join(directory, name);
   await writeFile(profilePath, `${JSON.stringify(profile, null, 2)}\n`, "utf8");
@@ -1197,6 +1227,7 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(normalized.schemaVersion, "normalized-fixture.v1");
       assert.equal(metricsSummary.metricVersion, "friction-metrics.v1");
       assert.equal(reportJson.reportVersion, "friction-report.v1");
+      assert.equal(reportJson.configuredWorkflow, undefined);
       assert.equal(reportJson.collectionCoverage.status, "partial");
       assert.equal(result.csvArtifactsEnabled, true);
       assert.equal(result.artifactPaths.methodology, join(outDir, "methodology.md"));
@@ -1211,8 +1242,10 @@ describe("GitHub live analyze CLI", () => {
       assert(reportMarkdown.includes("`methodology.md`"));
       assert(reportMarkdown.includes("## Collection Coverage"));
       assert(reportMarkdown.includes("pr_open_diff: unavailable"));
+      assert(!reportMarkdown.includes("## Configured Workflow Context"));
       assert(methodology.includes("# Methodology: example/example-repo"));
       assert(methodology.includes("- PR metrics CSV: `pr-metrics.csv`"));
+      assert(!methodology.includes("## Configured Workflow Context"));
       assert(prMetricsCsv.includes("pr_number,title,url,pr_class,pr_classification_source,pr_class_rule_id,changed_lines"));
       assert(prMetricsCsv.includes("7,feat: live analyze,https://github.com/example/example-repo/pull/7,unknown,fallback_rule,,25"));
       for (const csvArtifact of [prMetricsCsv, bottleneckExamplesCsv, commentSourcesCsv, collectionCoverageCsv]) {
@@ -1231,6 +1264,64 @@ describe("GitHub live analyze CLI", () => {
       assert(completion.includes("pr_open_diff"));
       assert(!completion.includes("- repository_metadata: status=available"));
       assert(completion.includes("Top bottlenecks:"));
+    });
+  });
+
+  it("surfaces configured workflow context in live report artifacts without changing metrics or CSV", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeWorkflowProfile(directory);
+      const outDir = join(directory, "workflow-context-out");
+
+      await runAnalyzeGithub({
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir,
+      }, {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+      });
+
+      const [
+        normalized,
+        metricsSummary,
+        reportJson,
+        reportMarkdown,
+        methodology,
+        prMetricsCsv,
+      ] = await Promise.all([
+        readJson(join(outDir, "normalized.json")),
+        readJson(join(outDir, "metrics-summary.json")),
+        readJson(join(outDir, "friction-report.json")),
+        readFile(join(outDir, "friction-report.md"), "utf8"),
+        readFile(join(outDir, "methodology.md"), "utf8"),
+        readFile(join(outDir, "pr-metrics.csv"), "utf8"),
+      ]);
+
+      assert.deepEqual(reportJson.configuredWorkflow, {
+        source: "repository_profile",
+        note: "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.",
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "release_prs",
+        branchStrategy: "main_plus_release_branches",
+      });
+      assert.equal(metricsSummary.totals.pullRequests, 1);
+      assert.equal(metricsSummary.totals.changedLines, 25);
+      assert.equal(metricsSummary.configuredWorkflow, undefined);
+      assert.equal(normalized.workflow, undefined);
+      assert.equal(normalized.pullRequests[0].prClass.class, "unknown");
+      assert(reportMarkdown.includes("## Configured Workflow Context"));
+      assert(reportMarkdown.includes("| Primary merge method | Squash merge |"));
+      assert(reportMarkdown.includes("| Release strategy | Release PRs |"));
+      assert(reportMarkdown.includes("| Branch strategy | Main plus release branches |"));
+      assert(reportMarkdown.includes("not observed GitHub evidence"));
+      assert(methodology.includes("## Configured Workflow Context"));
+      assert(methodology.includes("- Primary merge method: Squash merge"));
+      assert(methodology.includes("does not change scores, rankings, CSV exports, or PR class matching"));
+      assert(prMetricsCsv.startsWith("pr_number,title,url,pr_class,pr_classification_source,pr_class_rule_id,changed_lines"));
+      assert(!prMetricsCsv.includes("squash_merge"));
+      assert(!prMetricsCsv.includes("release_prs"));
+      assert(!prMetricsCsv.includes("main_plus_release_branches"));
     });
   });
 

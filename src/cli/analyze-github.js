@@ -1123,7 +1123,10 @@ export async function runAnalyzeGithub(options, {
     options.excludedPrClasses ?? [],
   );
   const metrics = computeRepositoryMetrics(normalized);
-  const report = attachCollectionCoverage(generateRepositoryFrictionReport(metrics), sourceBundle);
+  const report = attachCollectionCoverage(
+    generateRepositoryFrictionReport(metrics, { workflowContext: repositoryProfile.workflow }),
+    sourceBundle,
+  );
   const markdown = `${renderRepositoryFrictionMarkdown(report)}${collectionCoverageMarkdown(sourceBundle)}`;
   const methodology = renderRepositoryFrictionMethodology({
     report,

@@ -152,12 +152,12 @@ Interactive setup can create or update validated repository workflow profile fie
 
 ### Acceptance Criteria
 
-- [ ] Interactive setup can write a new profile or update an existing profile with confirmed workflow fields.
-- [ ] Release PR title conventions can produce valid profile PR class rules using the current supported matcher shape.
-- [ ] Existing profile rules are preserved unless the user explicitly confirms an update.
-- [ ] Existing profile formatting is preserved when deterministic; otherwise a generated profile is written and named in completion output.
-- [ ] Generated or updated profile paths are printed in completion output.
-- [ ] Existing analysis behavior remains unchanged when workflow fields are omitted.
+- [x] Interactive setup can write a new profile or update an existing profile with confirmed workflow fields.
+- [x] Release PR title conventions can produce valid profile PR class rules using the current supported matcher shape.
+- [x] Existing profile rules are preserved unless the user explicitly confirms an update.
+- [x] Existing profile formatting is preserved when deterministic; otherwise a generated profile is written and named in completion output.
+- [x] Generated or updated profile paths are printed in completion output.
+- [x] Existing analysis behavior remains unchanged when workflow fields are omitted.
 
 ### Required Validation
 
@@ -190,7 +190,7 @@ Interactive setup can create or update validated repository workflow profile fie
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged
 
 ## M4: Workflow Context Surfacing
 
@@ -245,7 +245,7 @@ Generated methodology and report metadata can label configured workflow context 
 
 ### Status
 
-- [ ] Not started
+- [x] Active
 
 ## M5: Contributor Source Configuration
 
