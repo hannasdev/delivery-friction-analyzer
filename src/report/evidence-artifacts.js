@@ -1,4 +1,5 @@
 import {
+  CONFIGURED_WORKFLOW_NOTE,
   configuredWorkflowEntries,
   hasConfiguredWorkflowContext,
 } from "./friction-report.js";
@@ -348,7 +349,7 @@ function formatConfiguredWorkflowContext(report) {
   return [
     "## Configured Workflow Context",
     "",
-    configuredWorkflow.note ?? "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.",
+    configuredWorkflow.note ?? CONFIGURED_WORKFLOW_NOTE,
     "",
     ...configuredWorkflowEntries(configuredWorkflow)
       .map(entry => `- ${entry.label}: ${entry.valueLabel}`),

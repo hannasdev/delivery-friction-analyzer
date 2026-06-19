@@ -81,7 +81,7 @@ const WORKFLOW_CONTEXT_VALUE_LABELS = new Map([
   ["unknown", "Unknown"],
 ]);
 
-const CONFIGURED_WORKFLOW_NOTE = "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.";
+export const CONFIGURED_WORKFLOW_NOTE = "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.";
 
 const BOTTLENECK_DEFINITIONS = [
   {
