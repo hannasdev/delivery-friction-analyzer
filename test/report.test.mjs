@@ -53,6 +53,70 @@ describe("friction report generation", () => {
     assert(!markdown.includes("PR sample:"));
   });
 
+  it("omits workflow context sections when no workflow profile context is configured", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle: {
+        selection: { requestedLimit: 30, collectedCount: 3 },
+        coverage: { status: "available", apiFamilies: [] },
+      },
+      profilePath: "fixtures/github/mcp-writing/profile.json",
+      artifactFileNames: {},
+      csvEnabled: false,
+    });
+
+    assert.equal(report.configuredWorkflow, undefined);
+    assert(!markdown.includes("## Configured Workflow Context"));
+    assert(!markdown.includes("Configured workflow context"));
+    assert(!methodology.includes("## Configured Workflow Context"));
+    assert(!methodology.includes("Configured workflow context"));
+  });
+
+  it("surfaces configured workflow context separately from observed evidence", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary, {
+      workflowContext: {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "release_prs",
+        branchStrategy: "main_plus_release_branches",
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle: {
+        selection: { requestedLimit: 30, collectedCount: 3 },
+        coverage: { status: "available", apiFamilies: [] },
+      },
+      profilePath: "fixtures/github/mcp-writing/profile.json",
+      artifactFileNames: {},
+      csvEnabled: false,
+    });
+
+    assert.deepEqual(report.configuredWorkflow, {
+      source: "repository_profile",
+      note: "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.",
+      primaryMergeMethod: "squash_merge",
+      releaseStrategy: "release_prs",
+      branchStrategy: "main_plus_release_branches",
+    });
+    assert(markdown.includes("## Configured Workflow Context"));
+    assert(markdown.includes("not observed GitHub evidence"));
+    assert(markdown.includes("does not change scores, rankings, CSV exports, or PR class matching"));
+    assert(markdown.includes("| Primary merge method | Squash merge |"));
+    assert(markdown.includes("| Release strategy | Release PRs |"));
+    assert(markdown.includes("| Branch strategy | Main plus release branches |"));
+    assert(markdown.includes("## Evidence Quality And Coverage"));
+    assert(methodology.includes("## Configured Workflow Context"));
+    assert(methodology.includes("- Primary merge method: Squash merge"));
+    assert(methodology.includes("- Release strategy: Release PRs"));
+    assert(methodology.includes("- Branch strategy: Main plus release branches"));
+    assert(methodology.includes("not observed GitHub evidence"));
+  });
+
   it("renders a first-glance opening before detailed bottlenecks", async () => {
     const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
     const report = generateRepositoryFrictionReport(metricsSummary);

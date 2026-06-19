@@ -58,7 +58,7 @@ Interactive setup can add a release PR class rule from a confirmed title convent
 
 ## Workflow Context
 
-`workflow` is optional user-configured context. It records repository workflow assumptions that later setup and report milestones can rely on, but the analyzer does not infer these values from GitHub and does not change scoring, rankings, collection, PR class matching, or report wording.
+`workflow` is optional user-configured context. It records repository workflow assumptions that reports can surface as configured profile context, but the analyzer does not infer these values from GitHub and does not change scoring, rankings, collection, CSV exports, or PR class matching.
 
 When provided, `workflow` must include at least one supported field.
 

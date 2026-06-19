@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-19 — Workflow Context Surfacing
+
+- What changed: Friction reports and methodology now show configured repository workflow context from the profile when it is present.
+- Why it matters: Maintainers can see merge, release, and branch assumptions beside report evidence without mistaking them for observed GitHub data or scoring inputs.
+- Who is affected: Maintainers and contributors reviewing generated reports or authoring repository profiles with `workflow` context.
+- Action needed: None.
+- PR: TBD
+
 ### 2026-06-18 — Workflow Profile Wizard
 
 - What changed: Interactive setup can now create repository profiles or generated profile copies with confirmed workflow context and release PR title rules.

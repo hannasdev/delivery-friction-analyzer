@@ -61,6 +61,28 @@ const RANKING_SIGNAL_LABELS = new Map([
   ["fixAmplification", "fix amplification"],
 ]);
 
+const WORKFLOW_CONTEXT_FIELDS = [
+  ["primaryMergeMethod", "Primary merge method"],
+  ["releaseStrategy", "Release strategy"],
+  ["branchStrategy", "Branch strategy"],
+];
+
+const WORKFLOW_CONTEXT_VALUE_LABELS = new Map([
+  ["merge_commit", "Merge commit"],
+  ["squash_merge", "Squash merge"],
+  ["rebase_merge", "Rebase merge"],
+  ["release_prs", "Release PRs"],
+  ["direct_tags", "Direct tags"],
+  ["release_branches", "Release branches"],
+  ["trunk_based", "Trunk-based"],
+  ["main_plus_release_branches", "Main plus release branches"],
+  ["long_lived_development_branches", "Long-lived development branches"],
+  ["mixed", "Mixed"],
+  ["unknown", "Unknown"],
+]);
+
+const CONFIGURED_WORKFLOW_NOTE = "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.";
+
 const BOTTLENECK_DEFINITIONS = [
   {
     id: "review-churn",
@@ -563,6 +585,42 @@ function summarizeRecommendationCategories(bottlenecks) {
   }));
 }
 
+export function normalizeConfiguredWorkflowContext(workflowContext) {
+  if (!workflowContext || typeof workflowContext !== "object" || Array.isArray(workflowContext)) {
+    return null;
+  }
+
+  const configuredWorkflow = {
+    source: "repository_profile",
+    note: CONFIGURED_WORKFLOW_NOTE,
+  };
+  for (const [field] of WORKFLOW_CONTEXT_FIELDS) {
+    if (workflowContext[field] !== undefined) {
+      configuredWorkflow[field] = workflowContext[field];
+    }
+  }
+
+  return WORKFLOW_CONTEXT_FIELDS.some(([field]) => configuredWorkflow[field] !== undefined)
+    ? configuredWorkflow
+    : null;
+}
+
+export function configuredWorkflowEntries(configuredWorkflow) {
+  if (!configuredWorkflow || typeof configuredWorkflow !== "object") return [];
+  return WORKFLOW_CONTEXT_FIELDS
+    .filter(([field]) => configuredWorkflow[field] !== undefined)
+    .map(([field, label]) => ({
+      field,
+      label,
+      value: configuredWorkflow[field],
+      valueLabel: WORKFLOW_CONTEXT_VALUE_LABELS.get(configuredWorkflow[field]) ?? configuredWorkflow[field],
+    }));
+}
+
+export function hasConfiguredWorkflowContext(configuredWorkflow) {
+  return configuredWorkflowEntries(configuredWorkflow).length > 0;
+}
+
 function evidenceSignature(bottleneck) {
   return (bottleneck.observedData ?? [])
     .map(evidence => evidence.number)
@@ -712,16 +770,18 @@ function summarizeSensitivity(metricsSummary, baselineBottlenecks) {
   };
 }
 
-export function generateRepositoryFrictionReport(metricsSummary) {
+export function generateRepositoryFrictionReport(metricsSummary, { workflowContext } = {}) {
   const prClasses = summarizePrClasses(metricsSummary);
   const bottlenecksWithSharedSignalKeys = summarizeBottlenecks(metricsSummary, prClasses);
   const sharedSignals = summarizeSharedSignals(bottlenecksWithSharedSignalKeys);
   const bottlenecks = bottlenecksWithSharedSignalKeys.map(({ rankingKey, ...bottleneck }) => bottleneck);
+  const configuredWorkflow = normalizeConfiguredWorkflowContext(workflowContext);
   return {
     reportVersion: FRICTION_REPORT_VERSION,
     metricVersion: metricsSummary.metricVersion,
     targetRepository: metricsSummary.targetRepository,
     ...(metricsSummary.analysisFilter ? { analysisFilter: metricsSummary.analysisFilter } : {}),
+    ...(configuredWorkflow ? { configuredWorkflow } : {}),
     summary: {
       pullRequests: metricsSummary.totals?.pullRequests ?? 0,
       changedLines: metricsSummary.totals?.changedLines ?? 0,
@@ -1152,6 +1212,23 @@ function renderPrClassContext(prClasses) {
   ].join("\n");
 }
 
+function renderConfiguredWorkflowContext(configuredWorkflow) {
+  const entries = configuredWorkflowEntries(configuredWorkflow);
+  if (!entries.length) return "";
+
+  return [
+    "## Configured Workflow Context",
+    "",
+    configuredWorkflow.note ?? CONFIGURED_WORKFLOW_NOTE,
+    "",
+    renderMarkdownTable(
+      ["Field", "Configured value"],
+      entries.map(entry => [entry.label, entry.valueLabel]),
+    ),
+    "",
+  ].join("\n");
+}
+
 function classDominanceCaveat(bottleneck) {
   return bottleneck.classDominance?.status === "single_class_dominates"
     ? bottleneck.classDominance.note
@@ -1299,7 +1376,13 @@ export function renderRepositoryFrictionMarkdown(report) {
     "- Interpretation is the analyzer's explanation of what the observed evidence suggests.",
     "- Recommendation is a workflow intervention to consider; the report does not modify repositories.",
     "- Confidence and caveats call out outliers, missing coverage, and evidence-quality limits before you act.",
+    ...(hasConfiguredWorkflowContext(report.configuredWorkflow)
+      ? ["- Configured workflow context, when shown, comes from the repository profile and is not observed GitHub evidence."]
+      : []),
     "",
+    ...(hasConfiguredWorkflowContext(report.configuredWorkflow)
+      ? [renderConfiguredWorkflowContext(report.configuredWorkflow)]
+      : []),
     "## Evidence Quality And Coverage",
     "",
     renderCoverageSummary(report.coverage),
@@ -1370,6 +1453,9 @@ export function renderRepositoryFrictionMarkdown(report) {
     "- Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.",
     "- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.",
     "- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.",
+    ...(hasConfiguredWorkflowContext(report.configuredWorkflow)
+      ? ["- Configured workflow context is user-configured repository-profile context; it does not change scoring, ranking, CSV exports, or PR class matching."]
+      : []),
     "- Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.",
     report.analysisFilter?.excludedPrClasses?.length
       ? "- PR class filtering was explicitly applied before metrics and ranking; PR class context still supports interpretation of the filtered sample."

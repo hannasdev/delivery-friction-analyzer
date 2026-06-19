@@ -1,3 +1,8 @@
+import {
+  configuredWorkflowEntries,
+  hasConfiguredWorkflowContext,
+} from "./friction-report.js";
+
 const BOT_OR_SCANNER_SOURCES = new Set([
   "copilot",
   "github_actions_bot",
@@ -336,6 +341,21 @@ function formatSensitivitySummaries(report) {
   }).join("\n");
 }
 
+function formatConfiguredWorkflowContext(report) {
+  const configuredWorkflow = report.configuredWorkflow;
+  if (!hasConfiguredWorkflowContext(configuredWorkflow)) return [];
+
+  return [
+    "## Configured Workflow Context",
+    "",
+    configuredWorkflow.note ?? "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.",
+    "",
+    ...configuredWorkflowEntries(configuredWorkflow)
+      .map(entry => `- ${entry.label}: ${entry.valueLabel}`),
+    "",
+  ];
+}
+
 export function renderRepositoryFrictionMethodology({
   report,
   sourceBundle,
@@ -373,6 +393,7 @@ export function renderRepositoryFrictionMethodology({
     "",
     "The repository profile maps file paths to categories, roles, and functional surfaces. Those classifications drive non-generated changed-line counts, support-surface summaries, planning-document signals, and low-signal weighting.",
     "",
+    ...formatConfiguredWorkflowContext(report),
     "## Scores And Rankings",
     "",
     "The report ranks bottlenecks by transparent component metrics from `friction-metrics.v1`: review churn, change scope (the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched), validation gap, planning gap, review surprise, and fix amplification. These are not an opaque composite score, and they are not individual contributor or reviewer rankings.",
