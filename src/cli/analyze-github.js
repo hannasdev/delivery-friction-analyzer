@@ -311,23 +311,24 @@ async function inspectProfilePath(profilePath) {
   if (hasTrailingPathSeparator(profilePath)) {
     throw new Error("profile path must be a JSON file path, not a directory or special file.");
   }
+  let profileLinkStat;
   try {
-    const profileLinkStat = await lstat(profilePath);
-    const isSymbolicLink = profileLinkStat.isSymbolicLink();
-    const profileStat = isSymbolicLink ? await stat(profilePath) : profileLinkStat;
-    if (!profileStat.isFile()) {
-      throw new Error("profile path must be a JSON file path, not a directory or special file.");
-    }
-    const text = await readFile(profilePath, "utf8");
-    const profile = parseProfileJson(text);
-    validateProfile(profile);
-    return { exists: true, profile, text, isSymbolicLink };
+    profileLinkStat = await lstat(profilePath);
   } catch (error) {
     if (error.code === "ENOENT") {
       return { exists: false, profile: null, text: null, isSymbolicLink: false };
     }
     throw error;
   }
+  const isSymbolicLink = profileLinkStat.isSymbolicLink();
+  const profileStat = isSymbolicLink ? await stat(profilePath) : profileLinkStat;
+  if (!profileStat.isFile()) {
+    throw new Error("profile path must be a JSON file path, not a directory or special file.");
+  }
+  const text = await readFile(profilePath, "utf8");
+  const profile = parseProfileJson(text);
+  validateProfile(profile);
+  return { exists: true, profile, text, isSymbolicLink };
 }
 
 async function readProfile(profilePath) {
@@ -384,6 +385,10 @@ async function writeProfileFile(profilePath, profile) {
   await writeFile(profilePath, formatProfile(profile), { encoding: "utf8", flag: "wx" });
 }
 
+function shouldWriteGeneratedProfileAfterCreateFailure(error) {
+  return ["EEXIST", "EISDIR", "ELOOP"].includes(error.code);
+}
+
 async function replaceProfileFile(profilePath, profile) {
   const tempPath = `${profilePath}.${process.pid}.${Date.now()}.tmp`;
   try {
@@ -437,7 +442,7 @@ async function writeInteractiveProfile(profilePath, profile, {
       await writeProfileFile(profilePath, profile);
       return profilePath;
     } catch (error) {
-      if (error.code === "EEXIST") {
+      if (shouldWriteGeneratedProfileAfterCreateFailure(error)) {
         return writeGeneratedProfileFile(profilePath, profile);
       }
       throw error;
