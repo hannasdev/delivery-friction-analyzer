@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { chmod, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import fsPromises, { chmod, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, it } from "node:test";
+import { describe, it, mock } from "node:test";
 import { promisify } from "node:util";
 import {
   ANALYZE_GITHUB_ARTIFACTS,
@@ -795,6 +796,68 @@ describe("GitHub live analyze CLI", () => {
         "releaseStrategy",
         "branchStrategy",
       ]);
+    });
+  });
+
+  it("retries canonical profile rewrites when Windows refuses destination overwrite", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeCanonicalProfile(directory, "windows-profile.json", {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        rules: [],
+      });
+      const outDir = join(directory, "windows-profile-out");
+      const originalRename = fsPromises.rename.bind(fsPromises);
+      let profileRenameAttempts = 0;
+      const renameMock = mock.method(fsPromises, "rename", async (oldPath, newPath) => {
+        if (newPath === profilePath) {
+          profileRenameAttempts += 1;
+          if (profileRenameAttempts === 1) {
+            throw Object.assign(new Error("destination exists"), { code: "EPERM" });
+          }
+        }
+        return originalRename(oldPath, newPath);
+      });
+      syncBuiltinESMExports();
+
+      try {
+        const result = await runAnalyzeGithubCli([
+          "--interactive",
+          "--repo",
+          "example/example-repo",
+          "--limit",
+          "1",
+          "--profile",
+          profilePath,
+          "--out",
+          outDir,
+          "--dry-run",
+          "--no-csv",
+          "--json",
+        ], {
+          provider: createProvider(),
+          isInteractiveTerminal: true,
+          promptAdapter: createScriptedPromptAdapter({
+            configureWorkflow: "yes",
+            primaryMergeMethod: "merge_commit",
+            releaseStrategy: "direct_tags",
+            branchStrategy: "trunk_based",
+          }),
+          stdout: { write() {} },
+          stderr: { write() {} },
+        });
+
+        assert.equal(result.savedProfilePath, profilePath);
+        assert.equal(profileRenameAttempts, 2);
+        assert.deepEqual((await readJson(profilePath)).workflow, {
+          primaryMergeMethod: "merge_commit",
+          releaseStrategy: "direct_tags",
+          branchStrategy: "trunk_based",
+        });
+      } finally {
+        renameMock.mock.restore();
+        syncBuiltinESMExports();
+      }
     });
   });
 

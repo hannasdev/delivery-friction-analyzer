@@ -389,14 +389,35 @@ function shouldWriteGeneratedProfileAfterCreateFailure(error) {
   return ["EEXIST", "EISDIR", "ELOOP"].includes(error.code);
 }
 
-async function replaceProfileFile(profilePath, profile) {
+function shouldRetryProfileReplaceAfterRenameFailure(error) {
+  return ["EEXIST", "EPERM"].includes(error.code);
+}
+
+async function replaceProfileFile(profilePath, profile, originalText) {
   const tempPath = `${profilePath}.${process.pid}.${Date.now()}.tmp`;
+  let shouldCleanupTemp = true;
   try {
     await writeFile(tempPath, formatProfile(profile), { encoding: "utf8", flag: "wx" });
-    await rename(tempPath, profilePath);
-  } catch (error) {
-    await rm(tempPath, { force: true });
-    throw error;
+    try {
+      await rename(tempPath, profilePath);
+      shouldCleanupTemp = false;
+      return true;
+    } catch (error) {
+      if (!shouldRetryProfileReplaceAfterRenameFailure(error)) {
+        throw error;
+      }
+      if (!await profileStillMatchesOriginal(profilePath, originalText)) {
+        return false;
+      }
+      await rm(profilePath, { force: true });
+      await rename(tempPath, profilePath);
+      shouldCleanupTemp = false;
+      return true;
+    }
+  } finally {
+    if (shouldCleanupTemp) {
+      await rm(tempPath, { force: true });
+    }
   }
 }
 
@@ -451,7 +472,9 @@ async function writeInteractiveProfile(profilePath, profile, {
   if (!await profileStillMatchesOriginal(profilePath, originalText)) {
     return writeGeneratedProfileFile(profilePath, profile);
   }
-  await replaceProfileFile(profilePath, profile);
+  if (!await replaceProfileFile(profilePath, profile, originalText)) {
+    return writeGeneratedProfileFile(profilePath, profile);
+  }
   return profilePath;
 }
 
