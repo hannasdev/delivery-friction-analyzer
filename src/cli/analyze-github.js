@@ -303,7 +303,14 @@ function parseProfileJson(text) {
   }
 }
 
+function hasTrailingPathSeparator(profilePath) {
+  return /[/\\]$/.test(profilePath);
+}
+
 async function inspectProfilePath(profilePath) {
+  if (hasTrailingPathSeparator(profilePath)) {
+    throw new Error("profile path must be a JSON file path, not a directory or special file.");
+  }
   try {
     const profileLinkStat = await lstat(profilePath);
     const isSymbolicLink = profileLinkStat.isSymbolicLink();

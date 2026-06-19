@@ -425,6 +425,52 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("rejects directory-style interactive profile paths before creation", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "profile.json");
+      const outDir = join(directory, "directory-style-profile-out");
+      const prompts = [];
+      let errorOutput = "";
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        output: { write: chunk => { errorOutput += chunk; } },
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "1",
+          profilePath: [`${join(directory, "missing-profile")}/`, profilePath],
+          createProfile: "yes",
+          primaryMergeMethod: "squash_merge",
+          releaseStrategy: "direct_tags",
+          branchStrategy: "trunk_based",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+        }, prompts),
+      });
+
+      assert.equal(options.profilePath, profilePath);
+      assert.equal(options.savedProfilePath, profilePath);
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "repository",
+        "limit",
+        "profilePath",
+        "profilePath",
+        "createProfile",
+        "primaryMergeMethod",
+        "releaseStrategy",
+        "branchStrategy",
+        "outDir",
+        "dryRun",
+        "json",
+      ]);
+      assert.match(errorOutput, /profile path must be a JSON file path/);
+    });
+  });
+
   it("creates an interactive workflow profile with a release title rule", async () => {
     await withTempDirectory(async directory => {
       const profilePath = join(directory, "generated-profile.json");
