@@ -122,7 +122,7 @@ Repository workflow context has an additive, validated profile contract before i
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged
 
 ## M3: Workflow Profile Wizard
 
@@ -185,7 +185,12 @@ Interactive setup can create or update validated repository workflow profile fie
 
 ### Status
 
-- [ ] Not started
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [ ] PR opened
+- [ ] Merged
 
 ## M4: Workflow Context Surfacing
 

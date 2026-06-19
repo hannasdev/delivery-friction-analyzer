@@ -50,7 +50,7 @@ For a guided first run in a local terminal, use the opt-in interactive flow:
 npm run analyze:github -- --interactive
 ```
 
-Interactive mode asks for the same run choices supported by flags, including repository, PR limit, profile path, output directory, dry-run mode, CSV exports, JSON completion output, and configured PR class exclusions. Scripted and CI usage should keep passing explicit flags; missing required flags without `--interactive` fail deterministically instead of waiting for input.
+Interactive mode asks for the same run choices supported by flags, including repository, PR limit, profile path, output directory, dry-run mode, CSV exports, JSON completion output, and configured PR class exclusions. It can also create a missing repository profile path or write a generated profile copy with confirmed workflow context and release PR title rules. Scripted and CI usage should keep passing explicit flags; missing required flags without `--interactive` fail deterministically instead of waiting for input.
 
 ## Repository Profiles
 
@@ -61,7 +61,8 @@ Profiles can define:
 - file categories such as code, tests, docs, generated files, infrastructure, or config;
 - file roles such as core product code, release notes, fixtures, planning docs, or generated docs;
 - functional surfaces such as runtime, test suite, release notes, or user docs;
-- PR classes such as release, dependency, feature, or other repository-specific groups.
+- PR classes such as release, dependency, feature, or other repository-specific groups;
+- workflow context such as merge method, release strategy, and branch strategy.
 
 Use `fixtures/github/mcp-writing/profile.json` as a starting point, then save a copy for the repository you want to analyze. The full profile format is documented in `docs/reference/repository-profile.md`, and the schema lives at `schemas/repository-profile.schema.json`.
 

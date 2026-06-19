@@ -54,9 +54,11 @@ If both matchers are present on one rule, both must match. If no rule matches, t
 
 Class identifiers are validated as lower-kebab-case or lower_snake_case strings. Profile validation rejects duplicate PR class rule IDs, empty match objects, invalid class identifiers, and invalid title regexes.
 
+Interactive setup can add a release PR class rule from a confirmed title convention using the current title-only matcher shape. Branch strategy answers stay in `workflow` context only; they do not create branch-based PR class matching.
+
 ## Workflow Context
 
-`workflow` is optional user-configured context. It records repository workflow assumptions that later setup and report milestones can rely on, but M2 does not infer these values from GitHub and does not change scoring, rankings, collection, PR class matching, or report wording.
+`workflow` is optional user-configured context. It records repository workflow assumptions that later setup and report milestones can rely on, but the analyzer does not infer these values from GitHub and does not change scoring, rankings, collection, PR class matching, or report wording.
 
 When provided, `workflow` must include at least one supported field.
 
@@ -79,3 +81,5 @@ Example:
 ```
 
 Use stable identifiers exactly as shown above. Display labels such as "squash merges" or "release PRs" belong in CLI prompts or documentation, not in profile data.
+
+When interactive setup writes profile changes, it preserves deterministic two-space JSON formatting in place. If an existing profile uses other formatting, setup writes a generated profile copy and prints that generated path in completion output instead of rewriting the original file.
