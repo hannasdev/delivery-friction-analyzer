@@ -54,7 +54,7 @@ Users can understand how to create a repository profile, why PR class values may
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M2: Interactive Choice UX And PR Class Presets
