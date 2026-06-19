@@ -64,7 +64,21 @@ Profiles can define:
 - PR classes such as release, dependency, feature, or other repository-specific groups;
 - workflow context such as merge method, release strategy, and branch strategy.
 
-Use `fixtures/github/mcp-writing/profile.json` as a starting point, then save a copy for the repository you want to analyze. The full profile format is documented in `docs/reference/repository-profile.md`, and the schema lives at `schemas/repository-profile.schema.json`.
+For a new repository, the easiest path is to let interactive setup create the profile file you plan to use:
+
+```sh
+npm run analyze:github -- \
+  --interactive \
+  --repo owner/name \
+  --limit 30 \
+  --profile profiles/owner-name.json \
+  --out reports/owner-name \
+  --dry-run
+```
+
+If `profiles/owner-name.json` does not exist, interactive setup asks whether to create it, then writes a minimal `repository-profile.v1` profile with confirmed workflow context and optional release PR title rules. `--dry-run` still validates repository access, profile JSON, output directory writability, and a small sample of GitHub API coverage. It may create the output directory and briefly write then remove a temporary probe file to confirm writability, but it does not write the full report bundle. When interactive setup saves or generates a profile during a dry run, the completion output prints the saved profile path so you can inspect and edit it before a full run.
+
+Use `fixtures/github/mcp-writing/profile.json` as a starting point when you prefer to copy an existing profile by hand. The full profile format is documented in `docs/reference/repository-profile.md`, and the schema lives at `schemas/repository-profile.schema.json`.
 
 ## Outputs
 
@@ -85,7 +99,7 @@ Each ranked bottleneck example includes source references, workflow-run conclusi
 
 ## Common Options
 
-Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts.
+Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. The output directory may be created during this check, and a temporary probe file may be written and removed.
 
 Use `--no-csv` when you want the Markdown, JSON, source, normalized, metrics, and methodology artifacts without spreadsheet-friendly CSV exports.
 

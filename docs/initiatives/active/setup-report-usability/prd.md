@@ -2,11 +2,12 @@
 
 ## Status
 
-Status: Backlog.
+Status: Active; M1 implemented and awaiting PR review.
 
-- State: Backlog
+- State: Active
 - Owner: Hanna
 - Created: 2026-06-19
+- Current milestone: M1: Profile And PR Class Guidance (implemented; awaiting PR review)
 - Related issue:
   - None yet.
 - Related docs:
@@ -14,9 +15,9 @@ Status: Backlog.
   - [Architecture Notes](architecture.md)
   - [Repository Profile Format](../../../reference/repository-profile.md)
   - [Friction Report Contract](../../../contracts/friction-report.md)
-  - [PR Class Segmentation](../../active/pr-class-segmentation/prd.md)
-  - [Interactive CLI Setup](../../active/interactive-cli-setup/prd.md)
-  - [Report First-Glance Actionability](../../active/report-first-glance-actionability/prd.md)
+  - [PR Class Segmentation](../pr-class-segmentation/prd.md)
+  - [Interactive CLI Setup](../interactive-cli-setup/prd.md)
+  - [Report First-Glance Actionability](../report-first-glance-actionability/prd.md)
 
 ## Problem
 
