@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: Active; M1 active.
+Status: Active; M1 implemented and awaiting PR review.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-19
-- Current milestone: M1: Profile And PR Class Guidance (active)
+- Current milestone: M1: Profile And PR Class Guidance (implemented; awaiting PR review)
 - Related issue:
   - None yet.
 - Related docs:

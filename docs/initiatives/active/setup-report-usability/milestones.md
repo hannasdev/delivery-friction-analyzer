@@ -51,9 +51,9 @@ Users can understand how to create a repository profile, why PR class values may
 ### Status
 
 - [x] Active
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
 
