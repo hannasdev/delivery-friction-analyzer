@@ -4,6 +4,8 @@ Repository profiles map paths to file categories, file roles, and functional sur
 
 Schema: `schemas/repository-profile.schema.json`.
 
+Repository profiles own repository semantics. Keep file rules, PR class rules, workflow context, branch or release strategy, and contributor-source declarations here. Optional [run presets](run-presets.md) only store reusable run settings such as the target repository, profile path, sample size, output directory, dry-run mode, CSV preference, JSON completion preference, validation-target mode, and requested PR class exclusions. Explicit CLI flags override preset values.
+
 ## Categories
 
 - `code`

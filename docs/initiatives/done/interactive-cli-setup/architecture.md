@@ -39,6 +39,7 @@ When `--json --interactive` is used, stdout remains reserved for the final machi
 | Keep prompt logic outside `runAnalyzeGithub`. | The analysis pipeline stays deterministic and testable. | Let `runAnalyzeGithub` prompt when options are missing; rejected because it couples programmatic calls to terminal state. |
 | Start with prompts that map to existing flags. | This provides immediate user value without new report contracts. | Start by generating full profiles; higher risk because workflow and contributor fields need contract work. |
 | Store repository semantics in profiles/config, not run presets. | Semantics such as PR classes and contributor sources affect analysis interpretation. | Store everything in a local preset; rejected because it blurs reusable run preferences with repository meaning. |
+| Save run presets as explicit user-chosen local files. | Users can rerun setup non-interactively without hidden writes or global account state. Presets store only run inputs and preferences plus a profile path pointer. | Use only printed commands; useful but less reusable. Use a default global directory; rejected because it would surprise first-run users and imply sync or account state. |
 | Treat contributor-source support as a separate milestone. | Contributor data touches identity and artifact-sensitivity boundaries. | Add contributors file parsing to the first wizard; too much risk for the prompt foundation. |
 | Keep workflow and contributor fields additive to `repository-profile.v1`. | Existing profiles and package users stay compatible while the new fields remain optional. | Bump the profile schema version immediately; unnecessary unless implementation discovers an incompatible shape. |
 | Support `.all-contributorsrc` before Markdown contributor files. | Structured JSON is more testable and less likely to misclassify people. | Heuristically parse `CONTRIBUTORS.md`; deferred because Markdown conventions vary widely. |
@@ -49,7 +50,7 @@ When `--json --interactive` is used, stdout remains reserved for the final machi
 - CLI prompt adapter: owns terminal questions, defaults, validation messages, and answer normalization.
 - CLI option contract: remains the boundary for invoking `runAnalyzeGithub`.
 - Repository profile: owns file roles, PR classes, workflow context, branch/release strategy, and supported contributor-source declarations.
-- Run preset, if implemented: owns non-semantic preferences such as output directory, CSV default, dry-run default, and sample size.
+- Run preset: owns reusable run settings such as target repository, repository profile path, output directory, CSV default, dry-run default, validation-target default, JSON completion default, sample size, and requested PR class exclusions. It does not own PR class definitions, workflow strategy, branch/release strategy, contributor-source declarations, collected source bundles, reports, CSV contents, or secrets.
 - Collector: owns observed GitHub data and optional target-repository contributor-source retrieval.
 - Report/methodology: owns user-facing labels that distinguish observed evidence from configured context.
 
@@ -108,7 +109,7 @@ Existing flag-based usage remains valid. Existing profiles remain valid when wor
 
 Interactive setup should not rewrite existing profiles without confirmation. When updating a profile, preserve user-owned formatting only when the update can be applied deterministically. If formatting preservation is uncertain or expensive, write a clearly named generated profile instead of rewriting the existing file, and tell the user which file to review.
 
-Repository semantics belong in profiles. Run presets, if implemented, may only store non-semantic preferences such as output directory, CSV default, dry-run default, and sample size. Explicit CLI flags should override presets.
+Repository semantics belong in profiles. Run presets are optional local JSON files chosen by the user and may only store rerun inputs and preferences such as output directory, CSV default, dry-run default, validation-target default, JSON completion default, sample size, target repository, repository profile path, and requested PR class exclusions. Explicit CLI flags override presets.
 
 ## Failure Modes
 
@@ -146,4 +147,4 @@ Repository semantics belong in profiles. Run presets, if implemented, may only s
 - [ ] Should the profile schema keep workflow context under a generic `workflow` object, or should each field live under existing PR class/profile sections?
 - [ ] Future decision before branch-based class behavior: should PR class matchers support base/head branch names? Until then, branch strategy prompts record context only.
 - [ ] What future contributor-source parser should follow `.all-contributorsrc`, if any: `CONTRIBUTORS.md`, GitHub collaborators, explicit profile lists, or organization membership lookup?
-- [ ] Future decision before M6 activation: should saved presets live in the output directory, a user-chosen path, or a default local `.delivery-friction-analyzer/` directory?
+- [x] Future decision before M6 activation: should saved presets live in the output directory, a user-chosen path, or a default local `.delivery-friction-analyzer/` directory? M6 uses an explicit user-chosen local preset path and does not invent a default global or cloud-synced location.
