@@ -2,6 +2,8 @@ export const COVERAGE_STATUS = Object.freeze({
   available: "available",
   partial: "partial",
   unavailable: "unavailable",
+  malformed: "malformed",
+  unsupported: "unsupported",
   rateLimited: "rate_limited",
 });
 
@@ -65,8 +67,14 @@ export function mergeCoverageEntries({ family, source, entries, downstreamImpact
   let status = COVERAGE_STATUS.available;
   if (statuses.has(COVERAGE_STATUS.rateLimited)) {
     status = COVERAGE_STATUS.rateLimited;
+  } else if (statuses.size === 1 && statuses.has(COVERAGE_STATUS.unsupported)) {
+    status = COVERAGE_STATUS.unsupported;
+  } else if (statuses.size === 1 && statuses.has(COVERAGE_STATUS.malformed)) {
+    status = COVERAGE_STATUS.malformed;
   } else if (statuses.has(COVERAGE_STATUS.unavailable)) {
     status = statuses.size > 1 ? COVERAGE_STATUS.partial : COVERAGE_STATUS.unavailable;
+  } else if (statuses.has(COVERAGE_STATUS.unsupported) || statuses.has(COVERAGE_STATUS.malformed)) {
+    status = COVERAGE_STATUS.partial;
   } else if (statuses.has(COVERAGE_STATUS.partial)) {
     status = COVERAGE_STATUS.partial;
   }

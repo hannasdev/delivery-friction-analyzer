@@ -11,11 +11,12 @@ const SOURCE = {
 
 export const COMMENT_SOURCES = Object.freeze(Object.values(SOURCE));
 
-export function classifyCommentSource(author = {}, { pullRequestAuthorLogin } = {}) {
+export function classifyCommentSource(author = {}, { pullRequestAuthorLogin, contributorHints } = {}) {
   const login = String(author.login ?? "").toLowerCase();
   const type = String(author.type ?? author.__typename ?? "").toLowerCase();
   const url = String(author.htmlUrl ?? author.html_url ?? "").toLowerCase();
   const prAuthorLogin = String(pullRequestAuthorLogin ?? "").toLowerCase();
+  const contributorLogins = contributorHints?.logins;
 
   if (login === "copilot" || login === "copilot-pull-request-reviewer" || url.includes("/apps/copilot-pull-request-reviewer")) {
     return SOURCE.copilot;
@@ -39,6 +40,10 @@ export function classifyCommentSource(author = {}, { pullRequestAuthorLogin } = 
 
   if (type === "bot" || login.endsWith("[bot]")) {
     return SOURCE.unknownBot;
+  }
+
+  if (login && contributorLogins?.has?.(login)) {
+    return SOURCE.human;
   }
 
   if (type === "user" || author.authorAssociation) {

@@ -1,5 +1,10 @@
 import { validateTargetRepository } from "../contracts/target-repository.js";
 import {
+  assertValidContributorSource,
+  normalizeContributorSourceConfig,
+  parseAllContributorsHints,
+} from "../profile/contributor-source.js";
+import {
   COVERAGE_STATUS,
   classifyCoverageStatus,
   coverageEntry,
@@ -187,6 +192,93 @@ function unavailableWorkflowRuns() {
   };
 }
 
+function isMarkdownContributorPath(path = "") {
+  return /\.(md|mdx|markdown)$/i.test(String(path));
+}
+
+function unsupportedContributorSource(config = {}) {
+  const sourceType = config.sourceType ?? "unknown";
+  const path = config.path ?? null;
+  const diagnostic = path && isMarkdownContributorPath(path)
+    ? `Contributor source path '${path}' is a Markdown file; Markdown contributor files are intentionally not parsed in this milestone.`
+    : `Contributor source type '${sourceType}' is unsupported.`;
+  const coverage = coverageEntry({
+    family: "contributor_source",
+    source: sourceType,
+    status: COVERAGE_STATUS.unsupported,
+    diagnostics: [diagnostic],
+    downstreamImpact: "Contributor-aware comment-source hints are unavailable; scoring and person-level outputs are unchanged.",
+  });
+  return {
+    sourceType,
+    path,
+    coverage,
+    hints: { logins: [] },
+  };
+}
+
+function unavailableContributorSource(config = {}, error) {
+  const coverage = coverageEntry({
+    family: "contributor_source",
+    source: "rest:/repos/{owner}/{repo}/contents/{path}",
+    status: classifyCoverageStatus(error),
+    diagnostics: [redactDiagnostic(error?.message ?? error)],
+    downstreamImpact: "Contributor-aware comment-source hints are unavailable; scoring and person-level outputs are unchanged.",
+  });
+  return {
+    sourceType: config.sourceType,
+    path: config.path,
+    coverage,
+    hints: { logins: [] },
+  };
+}
+
+function contentTextFromResponse(response) {
+  if (typeof response === "string") return response;
+  if (response && typeof response.content === "string" && response.encoding === "base64") {
+    return Buffer.from(response.content.replace(/\s+/g, ""), "base64").toString("utf8");
+  }
+  if (response && typeof response.content === "string") {
+    return response.content;
+  }
+  throw new Error("GitHub content response did not include readable file content.");
+}
+
+async function collectContributorSource({ targetInput, provider, contributors }) {
+  if (contributors == null) return null;
+  assertValidContributorSource({ contributors });
+  const config = normalizeContributorSourceConfig(contributors);
+  if (!config) return null;
+  if (config.sourceType !== "all_contributors" || isMarkdownContributorPath(config.path)) {
+    return unsupportedContributorSource(config);
+  }
+  if (typeof provider.getRepositoryContent !== "function") {
+    return unavailableContributorSource(config, new Error("provider does not support repository content collection."));
+  }
+
+  try {
+    const response = await provider.getRepositoryContent({ ...targetInput, path: config.path });
+    const parsed = parseAllContributorsHints(contentTextFromResponse(response));
+    const coverage = coverageEntry({
+      family: "contributor_source",
+      source: "rest:/repos/{owner}/{repo}/contents/{path}",
+      status: parsed.status,
+      diagnostics: parsed.diagnostics,
+      downstreamImpact: parsed.status === COVERAGE_STATUS.available || parsed.status === COVERAGE_STATUS.partial
+        ? "Contributor-aware comment-source hints are available; scoring and person-level outputs are unchanged."
+        : "Contributor-aware comment-source hints are unavailable; scoring and person-level outputs are unchanged.",
+    });
+    return {
+      sourceType: config.sourceType,
+      path: config.path,
+      coverage,
+      hints: parsed.hints,
+    };
+  } catch (error) {
+    return unavailableContributorSource(config, error);
+  }
+}
+
 function mapPullRequestDetails(details) {
   return {
     number: details.number,
@@ -261,7 +353,14 @@ export function buildCoverageSummary(entries) {
   const statuses = new Set(entries.map(entry => entry.status));
   if (statuses.has(COVERAGE_STATUS.rateLimited)) return COVERAGE_STATUS.rateLimited;
   if (statuses.size === 1 && statuses.has(COVERAGE_STATUS.unavailable)) return COVERAGE_STATUS.unavailable;
-  if (statuses.has(COVERAGE_STATUS.unavailable) || statuses.has(COVERAGE_STATUS.partial)) return COVERAGE_STATUS.partial;
+  if (statuses.size === 1 && statuses.has(COVERAGE_STATUS.unsupported)) return COVERAGE_STATUS.unsupported;
+  if (statuses.size === 1 && statuses.has(COVERAGE_STATUS.malformed)) return COVERAGE_STATUS.malformed;
+  if (
+    statuses.has(COVERAGE_STATUS.unavailable)
+    || statuses.has(COVERAGE_STATUS.partial)
+    || statuses.has(COVERAGE_STATUS.unsupported)
+    || statuses.has(COVERAGE_STATUS.malformed)
+  ) return COVERAGE_STATUS.partial;
   return COVERAGE_STATUS.available;
 }
 
@@ -274,6 +373,7 @@ export async function collectGitHubSourceBundle({
   collectedAt = new Date().toISOString(),
   analysisPullRequestLimit,
   isValidationTarget = false,
+  contributors = null,
 } = {}) {
   if (!provider) {
     throw new Error("provider is required.");
@@ -311,6 +411,12 @@ export async function collectGitHubSourceBundle({
     source: "rest:/repos/{owner}/{repo}/languages",
     downstreamImpact: "Language context omitted when unavailable; file roles must still come from repository profile later.",
     run: () => provider.getLanguages(targetInput),
+  });
+
+  const contributorSource = await collectContributorSource({
+    targetInput,
+    provider,
+    contributors,
   });
 
   const inventory = (await provider.listMergedPullRequests({ ...targetInput, limit: targetPullRequestLimit }))
@@ -424,6 +530,7 @@ export async function collectGitHubSourceBundle({
       diagnostics: ["PR-open diff reconstruction and snapshot capture are intentionally not implemented in M1."],
       downstreamImpact: "Diff growth metrics must remain unavailable.",
     }),
+    ...(contributorSource ? [contributorSource.coverage] : []),
   ];
 
   return {
@@ -450,6 +557,7 @@ export async function collectGitHubSourceBundle({
       bytesByLanguage: languagesAttempt.value ?? {},
       coverage: languagesAttempt.coverage,
     },
+    ...(contributorSource ? { contributorSource } : {}),
     pullRequests,
   };
 }

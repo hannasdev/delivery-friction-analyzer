@@ -1,5 +1,6 @@
 import { classifyCommentSource, groupByCommentSource } from "../github/comment-source.js";
 import { classifyFilePath } from "../profile/file-role.js";
+import { assertValidContributorSource, contributorHintsFromSource } from "../profile/contributor-source.js";
 import { assertValidPrClassRules, classifyPullRequest } from "../profile/pr-class.js";
 import { assertValidWorkflowContext } from "../profile/workflow.js";
 
@@ -114,6 +115,8 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
   const profile = repositoryProfile ?? {};
   assertValidPrClassRules(profile);
   assertValidWorkflowContext(profile);
+  assertValidContributorSource(profile);
+  const contributorHints = contributorHintsFromSource(bundle.contributorSource);
 
   const pullRequests = (bundle.pullRequests ?? []).map(pr => {
     const reviewDates = (pr.reviews ?? []).map(review => review.submittedAt);
@@ -155,7 +158,7 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
       },
       reviewComments: {
         totalCount: threadComments.length,
-        bySource: groupByCommentSource(threadComments, { pullRequestAuthorLogin: pr.author?.login }),
+        bySource: groupByCommentSource(threadComments, { pullRequestAuthorLogin: pr.author?.login, contributorHints }),
       },
       checkRuns: (pr.statusCheckRollup ?? []).map(check => ({
         source: check.__typename === "StatusContext" ? "status_context" : "check_run",
@@ -174,6 +177,7 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
     schemaVersion: "normalized-fixture.v1",
     targetRepository: bundle.targetRepository,
     languageDistribution: bundle.languageDistribution,
+    ...(bundle.contributorSource ? { contributorSource: bundle.contributorSource } : {}),
     pullRequests,
   };
 }

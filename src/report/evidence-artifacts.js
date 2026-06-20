@@ -1,5 +1,6 @@
 import {
   CONFIGURED_WORKFLOW_NOTE,
+  CONTRIBUTOR_SOURCE_NOTE,
   configuredWorkflowEntries,
   hasConfiguredWorkflowContext,
   profileSuggestions,
@@ -368,6 +369,23 @@ function formatConfiguredWorkflowContext(report) {
   ];
 }
 
+function formatContributorSourceContext(report) {
+  const contributorSource = report.contributorSource;
+  if (!contributorSource) return [];
+
+  return [
+    "## Contributor Source Context",
+    "",
+    contributorSource.note ?? CONTRIBUTOR_SOURCE_NOTE,
+    "",
+    `- Source type: ${contributorSource.sourceType ?? "unknown"}`,
+    `- Path: ${contributorSource.path ?? "not recorded"}`,
+    `- Coverage status: ${contributorSource.status ?? "unavailable"}`,
+    `- Parsed hint count: ${contributorSource.hintCount ?? 0}`,
+    "",
+  ];
+}
+
 function formatProfileSuggestions(report) {
   const suggestions = profileSuggestions(report);
   if (!suggestions.length) {
@@ -431,6 +449,7 @@ export function renderRepositoryFrictionMethodology({
     "",
     ...formatProfileSuggestions(report),
     ...formatConfiguredWorkflowContext(report),
+    ...formatContributorSourceContext(report),
     "## Scores And Rankings",
     "",
     "The report ranks bottlenecks by transparent component metrics from `friction-metrics.v1`: review churn, change scope (the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched), validation gap, planning gap, review surprise, and fix amplification. These are not an opaque composite score, and they are not individual contributor or reviewer rankings.",
@@ -454,8 +473,8 @@ export function renderRepositoryFrictionMethodology({
     "## Artifact Sensitivity",
     "",
     csvEnabled
-      ? "Generated artifacts may include repository names, PR URLs, titles, file paths, comment-source counts, and coverage diagnostics. CSV files are curated for spreadsheet inspection but should still be treated as local/private unless intentionally shared."
-      : "Generated artifacts may include repository names, PR URLs, titles, file paths, comment metadata, and coverage diagnostics. CSV export generation was disabled for this run.",
+      ? "Generated artifacts may include repository names, PR URLs, titles, file paths, comment-source counts, contributor-source metadata, and coverage diagnostics. CSV files are curated for spreadsheet inspection but should still be treated as local/private unless intentionally shared. Raw contributor file contents and individual contributor rankings are not emitted."
+      : "Generated artifacts may include repository names, PR URLs, titles, file paths, comment metadata, contributor-source metadata, and coverage diagnostics. CSV export generation was disabled for this run. Raw contributor file contents and individual contributor rankings are not emitted.",
     "",
   ].join("\n").trimEnd()}\n`;
 }

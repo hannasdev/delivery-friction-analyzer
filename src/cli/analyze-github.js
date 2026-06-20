@@ -24,6 +24,7 @@ import {
   WORKFLOW_RELEASE_STRATEGIES,
   assertValidWorkflowContext,
 } from "../profile/workflow.js";
+import { assertValidContributorSource } from "../profile/contributor-source.js";
 
 const ALLOWED_OPTIONS = new Set([
   "repo",
@@ -311,6 +312,7 @@ function normalizeMultiSelectAnswer(raw, prompt) {
 function validateProfile(profile) {
   assertValidPrClassRules(profile);
   assertValidWorkflowContext(profile);
+  assertValidContributorSource(profile);
 }
 
 function parseProfileJson(text) {
@@ -1128,7 +1130,7 @@ function attachCollectionCoverage(report, sourceBundle) {
   return {
     ...report,
     collectionCoverage: sourceBundle.coverage,
-    artifactSensitivity: "Generated artifacts may include repository names, PR URLs, titles, file paths, comment metadata, curated CSV evidence, and coverage diagnostics. Treat them as local/private unless intentionally shared.",
+    artifactSensitivity: "Generated artifacts may include repository names, PR URLs, titles, file paths, comment metadata, contributor-source metadata, curated CSV evidence, and coverage diagnostics. Raw contributor file contents and individual contributor rankings are not emitted. Treat artifacts as local/private unless intentionally shared.",
   };
 }
 
@@ -1214,6 +1216,7 @@ export async function runAnalyzeGithub(options, {
     provider,
     collectedAt: now(),
     isValidationTarget: options.isValidationTarget,
+    contributors: repositoryProfile.contributors,
   });
 
   if (options.dryRun) {
@@ -1238,7 +1241,10 @@ export async function runAnalyzeGithub(options, {
   );
   const metrics = computeRepositoryMetrics(normalized);
   const report = attachCollectionCoverage(
-    generateRepositoryFrictionReport(metrics, { workflowContext: repositoryProfile.workflow }),
+    generateRepositoryFrictionReport(metrics, {
+      workflowContext: repositoryProfile.workflow,
+      contributorSource: normalized.contributorSource,
+    }),
     sourceBundle,
   );
   const markdown = `${renderRepositoryFrictionMarkdown(report)}${collectionCoverageMarkdown(sourceBundle)}`;

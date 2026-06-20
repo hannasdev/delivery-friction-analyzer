@@ -160,3 +160,27 @@ Example:
 Use stable identifiers exactly as shown above. Display labels such as "squash merges" or "release PRs" belong in CLI prompts or documentation, not in profile data.
 
 When interactive setup writes profile changes, it preserves deterministic two-space JSON formatting in place. If an existing profile uses other formatting, setup writes a generated profile copy and prints that generated path in completion output instead of rewriting the original file.
+
+## Contributor Source
+
+`contributors` is optional user-configured context for structured contributor hints. The first supported source is `.all-contributorsrc` as `all_contributors` JSON. When omitted, analysis runs normally without contributor hints.
+
+Supported fields:
+
+- `sourceType`: optional, defaults to `all_contributors` when `contributors` is present.
+- `path`: optional repository-relative path, defaults to `.all-contributorsrc`.
+
+Example:
+
+```json
+{
+  "contributors": {
+    "sourceType": "all_contributors",
+    "path": ".all-contributorsrc"
+  }
+}
+```
+
+Markdown contributor files such as `CONTRIBUTORS.md` are not supported contributor sources in this milestone. The analyzer records them as unsupported/unparsed coverage when encountered and does not parse Markdown into identities.
+
+Contributor hints may improve repository-level comment-source classification coverage, such as classifying a configured contributor login as an existing human-reviewer source. They do not change scoring formulas, PR authorship conclusions, reviewer attribution, PR class matching, CSV export shape, or individual rankings. Reports and CSVs expose only contributor-source metadata such as type, path, status, diagnostics, and parsed hint count; they do not include raw contributor file contents or contributor rankings.

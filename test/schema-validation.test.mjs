@@ -114,7 +114,7 @@ function validateSchema(value, schema, schemas, path = "$") {
 }
 
 describe("repository profile schema", () => {
-  it("validates profiles with omitted or configured PR class and workflow rules", async () => {
+  it("validates profiles with omitted or configured PR class, workflow, and contributor source rules", async () => {
     const schema = await readJson("../schemas/repository-profile.schema.json");
     const baseProfile = {
       schemaVersion: "repository-profile.v1",
@@ -139,10 +139,18 @@ describe("repository profile schema", () => {
         branchStrategy: "main_plus_release_branches",
       },
     };
+    const contributorProfile = {
+      ...baseProfile,
+      contributors: {
+        sourceType: "all_contributors",
+        path: ".all-contributorsrc",
+      },
+    };
 
     assert.deepEqual(validateSchema(baseProfile, schema, {}), []);
     assert.deepEqual(validateSchema(classedProfile, schema, {}), []);
     assert.deepEqual(validateSchema(workflowProfile, schema, {}), []);
+    assert.deepEqual(validateSchema(contributorProfile, schema, {}), []);
   });
 
   it("validates the generated Conventional Commit PR class preset", async () => {
@@ -208,6 +216,53 @@ describe("repository profile schema", () => {
     assert(errors.some(error => error.includes("$.workflow.releaseStrategy must be one of")));
     assert(errors.some(error => error.includes("$.workflow.branchStrategy must be one of")));
     assert(errors.some(error => error.includes("$.workflow.observedFrom is not allowed")));
+  });
+
+  it("rejects unsupported contributor source profile fields", async () => {
+    const schema = await readJson("../schemas/repository-profile.schema.json");
+    const profile = {
+      schemaVersion: "repository-profile.v1",
+      repository: { owner: "example", name: "repo" },
+      rules: [],
+      contributors: {
+        sourceType: "markdown",
+        path: "../CONTRIBUTORS.md",
+        observedFrom: "github",
+      },
+    };
+
+    const errors = validateSchema(profile, schema, {});
+
+    assert(errors.some(error => error.includes("$.contributors.sourceType must be one of")));
+    assert(errors.some(error => error.includes("$.contributors.path must not match disallowed schema")));
+    assert(errors.some(error => error.includes("$.contributors.observedFrom is not allowed")));
+  });
+
+  it("aligns contributor source path schema with runtime repository-relative rules", async () => {
+    const schema = await readJson("../schemas/repository-profile.schema.json");
+    const validProfile = {
+      schemaVersion: "repository-profile.v1",
+      repository: { owner: "example", name: "repo" },
+      rules: [],
+      contributors: {
+        sourceType: "all_contributors",
+        path: "docs/contributors..fixture.json",
+      },
+    };
+
+    assert.deepEqual(validateSchema(validProfile, schema, {}), []);
+
+    for (const path of ["../CONTRIBUTORS.md", "docs/../CONTRIBUTORS.md", "/CONTRIBUTORS.md", "   "]) {
+      const errors = validateSchema({
+        ...validProfile,
+        contributors: {
+          sourceType: "all_contributors",
+          path,
+        },
+      }, schema, {});
+
+      assert(errors.some(error => error.includes("$.contributors.path")), `expected schema to reject ${path}`);
+    }
   });
 
   it("keeps existing fixture profiles valid without workflow context", async () => {
