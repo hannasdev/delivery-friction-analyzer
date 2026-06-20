@@ -294,7 +294,7 @@ describe("friction report generation", () => {
     assert(markdown.includes("| development | 1 | 100 | 33% | fallback\\_rule=1 |"));
     assert(markdown.includes("PR class caveat: Review churn: PR class release contributes 90%"));
     assert(markdown.includes("| [#1](https://example.test/pull/1) | Release 2026.06.14 | 10 | release | unknown | unknown | unknown | 500 |"));
-    assert(markdown.includes("- PR class: release (source=repository\\_profile, rule=release-title)"));
+    assert(markdown.includes("\\[configured\\] release (source=repository\\_profile, rule=release-title)"));
   });
 
   it("keeps filtered empty-state caveats visible before ranked bottlenecks", () => {
@@ -821,16 +821,18 @@ describe("friction report generation", () => {
         "| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | unknown | 1168 | 77 | 13 | 1245 |",
       ),
     );
-    assert(markdown.includes("Evidence details for PR #239:"));
-    assert(markdown.includes("- Workflow coverage: observed"));
-    assert(markdown.includes("- Workflow conclusions: success=8, cancelled=1"));
-    assert(markdown.includes("- Review thread source: graphql:repository.pullRequest.reviewThreads"));
-    assert(markdown.includes("- Threads: 15\n- Resolved threads: 15\n- Outdated threads: 10"));
-    assert(markdown.includes("- Review decision: none (source: reviews)"));
-    assert(markdown.includes("- Human reviewers: 0"));
-    assert(markdown.includes("- Comment sources: author\\_reply=15, copilot=15"));
-    assert(markdown.includes("- PR class: unknown (source=fallback\\_rule)"));
-    assert(markdown.includes("- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\\_request"));
+    assert(markdown.includes("| PR | Validation | Review | Source labels |"));
+    assert(markdown.includes("\\[observed\\] workflow coverage: observed"));
+    assert(markdown.includes("\\[warning\\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs"));
+    assert(markdown.includes("\\[unavailable\\] validation outcome unavailable"));
+    assert(markdown.includes("\\[partial\\] threads: 10, resolved: 0, outdated: 0"));
+    assert(markdown.includes("\\[observed\\] none from reviews; human reviewers: 0; approved: no; changes requested: no"));
+    assert(markdown.includes("comments: \\[observed\\] author\\_reply=15, copilot=15"));
+    assert(markdown.includes("comments: \\[partial\\] none in sampled review-thread evidence"));
+    assert(markdown.includes("\\[observed\\] unknown (source=fallback\\_rule)"));
+    assert(markdown.includes("Review thread source: \\[observed\\] graphql:repository.pullRequest.reviewThreads"));
+    assert(markdown.includes("\\[unavailable\\] workflow coverage: unavailable"));
+    assert(markdown.includes("\\[unavailable\\] unavailable"));
     assert(markdown.includes("#### Review churn Interpretation And Recommendation"));
     assert(markdown.includes("| Inferred diagnosis | Review loops are concentrated in a small set of PRs. |"));
     assert(
@@ -1176,16 +1178,11 @@ describe("friction report generation", () => {
     assert(markdown.includes("| #7 | legacy evidence shape | 2 | unknown | unknown | unknown | unknown | 1 |"));
     assert(markdown.includes("Recommendation category: unspecified"));
     assert(!markdown.includes("Recommendation category: undefined"));
-    assert(markdown.includes("- Workflow coverage: unavailable"));
-    assert(markdown.includes("- Workflow conclusions: none"));
-    assert(markdown.includes("- Failed checks: 0"));
-    assert(markdown.includes("- Failed workflows: 0"));
-    assert(markdown.includes("- Cancelled workflows: 0"));
-    assert(markdown.includes("- Threads: 0"));
-    assert(markdown.includes("- Resolved threads: 0"));
-    assert(markdown.includes("- Outdated threads: 0"));
-    assert(markdown.includes("- Comment sources: none"));
-    assert(markdown.includes("- Workflow source: unavailable"));
+    assert(markdown.includes("| #7 | \\[unavailable\\] workflow coverage: unavailable; \\[unavailable\\] validation outcome unavailable; conclusions: none |"));
+    assert(markdown.includes("\\[unavailable\\] threads: 0, resolved: 0, outdated: 0"));
+    assert(markdown.includes("\\[unavailable\\] unavailable from unavailable; human reviewers: unavailable; approved: unavailable; changes requested: unavailable"));
+    assert(markdown.includes("comments: \\[unavailable\\] comment sources unavailable"));
+    assert(markdown.includes("\\[observed\\] unknown (source=fallback\\_rule)"));
     assert(!markdown.includes("- Review source: unavailable"));
     assert(markdown.includes("- Not enough positive examples to evaluate outlier dominance."));
   });
@@ -1421,11 +1418,10 @@ describe("friction report generation", () => {
     });
     const markdown = renderRepositoryFrictionMarkdown(report);
 
-    assert(markdown.includes("- Threads: 0"));
-    assert(markdown.includes("- Review decision: approved (source: reviews)"));
-    assert(markdown.includes("- Human reviewers: 1"));
-    assert(markdown.includes("- Human approved: yes"));
-    assert(markdown.includes("- Human changes requested: no"));
+    assert(markdown.includes("\\[observed\\] threads: 0, resolved: 0, outdated: 0"));
+    assert(markdown.includes("Review thread source: \\[observed\\] graphql:repository.pullRequest.reviewThreads"));
+    assert(markdown.includes("\\[observed\\] approved from reviews; human reviewers: 1; approved: yes; changes requested: no; \\[healthy\\] human approval observed"));
+    assert(markdown.includes("comments: \\[observed\\] none"));
   });
 
   it("leaves unavailable CSV counts empty while preserving source labels", () => {
@@ -1532,14 +1528,8 @@ describe("friction report generation", () => {
       collectionCoverage: { apiFamilies: [] },
     });
 
-    assert(markdown.includes("- Review decision: unavailable (source: unavailable)"));
-    assert(markdown.includes("- Human reviewers: unavailable"));
-    assert(markdown.includes("- Human approved: unavailable"));
-    assert(markdown.includes("- Human changes requested: unavailable"));
-    assert(markdown.includes("- Review decision: none (source: reviews)"));
-    assert(markdown.includes("- Human reviewers: 0"));
-    assert(markdown.includes("- Human approved: no"));
-    assert(markdown.includes("- Human changes requested: no"));
+    assert(markdown.includes("\\[unavailable\\] unavailable from unavailable; human reviewers: unavailable; approved: unavailable; changes requested: unavailable"));
+    assert(markdown.includes("\\[observed\\] none from reviews; human reviewers: 0; approved: no; changes requested: no"));
     assert(csvArtifacts.prMetricsCsv.includes(
       "1,unavailable coverage,https://example.test/pull/1,unknown,fallback_rule,,10,10,0,,unavailable,,,,0,,,,unavailable,unavailable,unavailable",
     ));

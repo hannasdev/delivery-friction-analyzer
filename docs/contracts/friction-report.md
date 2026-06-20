@@ -64,7 +64,8 @@ The Markdown renderer presents the same report data for human review:
 - outlier and sensitivity analysis when displayed examples are dominated by one PR;
 - a prioritization explanation that describes strongest-signal ordering and how PR size is used as context, using reader-facing change-scope language while mapping back to the internal changed-file-spread signal when needed;
 - ranked bottlenecks with representative PR examples rendered as compact PR-size tables;
-- validation, review, and source-label evidence for each representative PR example rendered as plain Markdown detail lists;
+- validation, review, and source-label evidence for representative PR examples rendered as compact evidence tables;
+- text-backed status labels such as observed, partial, unavailable, configured, warning, and healthy in Markdown evidence tables where they improve scanability;
 - separately labeled inferred diagnosis, suggested action, and confidence/caveat blocks for each bottleneck;
 - shared-evidence notes when multiple recommendation categories use the same representative PR set;
 - recommendation-category, comment-source, and core/support-surface tables;
@@ -73,6 +74,7 @@ The Markdown renderer presents the same report data for human review:
 - guardrails, follow-up, and artifact-sensitivity guidance.
 
 Markdown output should not include individual contributor or reviewer rankings.
+Status labels are Markdown presentation helpers, not `friction-report.v1` fields. They should preserve the underlying source labels and counts rather than replacing auditable evidence.
 
 ## Recommendation Boundaries
 

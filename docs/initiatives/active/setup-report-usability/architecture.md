@@ -145,7 +145,7 @@ Documentation updates can land before code changes. Interactive setup changes sh
 
 ## Open Questions
 
-- [ ] Should status markers use Unicode symbols, ASCII labels, or renderer-configurable marker sets?
+- [x] Should status markers use Unicode symbols, ASCII labels, or renderer-configurable marker sets? Use ASCII text labels only for M3 so copied Markdown and plain terminals preserve the status meaning.
 - [ ] Should workflow caveats appear in the report opening only when coverage is unavailable, or always when workflow context is configured?
 - [ ] Should branch-based PR class matching become a separate initiative after title-based presets prove useful?
 - [ ] Should final PR size wording mention GitHub PR metadata explicitly so readers do not assume merge commits are mined?

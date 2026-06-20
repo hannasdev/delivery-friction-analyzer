@@ -1453,8 +1453,7 @@ describe("GitHub live analyze CLI", () => {
       });
       assert.deepEqual(metricsSummary.pullRequests[0].review.decision, normalized.pullRequests[0].reviewDecision);
       assert.equal(metricsSummary.pullRequests[0].review.threads.totalCount, 0);
-      assert(reportMarkdown.includes("- Review decision: approved (source: reviews)"));
-      assert(reportMarkdown.includes("- Human approved: yes"));
+      assert(reportMarkdown.includes("\\[observed\\] approved from reviews; human reviewers: 1; approved: yes; changes requested: no; \\[healthy\\] human approval observed"));
       assert(prMetricsCsv.includes(",0,approved,1,true,false,"));
     });
   });

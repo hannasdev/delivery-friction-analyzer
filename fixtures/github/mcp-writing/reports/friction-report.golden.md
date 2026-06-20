@@ -117,59 +117,10 @@ Recommendation category: pr_readiness_gate
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | unknown | 1168 | 77 | 13 | 1245 |
 | [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | unknown | 1149 | 58 | 15 | 1207 |
 
-Evidence details for PR #239:
-
-Validation:
-
-- Workflow coverage: observed
-- Workflow conclusions: success=8, cancelled=1
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 1
-
-Review:
-
-- Review thread source: graphql:repository.pullRequest.reviewThreads
-- Threads: 15
-- Resolved threads: 15
-- Outdated threads: 10
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: author\_reply=15, copilot=15
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-
-Evidence details for PR #221:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: not\_sampled\_for\_broad\_file\_spread
-- Threads: 10
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: none
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: unavailable
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | \[observed\] workflow coverage: observed; \[warning\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs; conclusions: success=8, cancelled=1 | \[observed\] threads: 15, resolved: 15, outdated: 10; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[observed\] author\_reply=15, copilot=15 | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[observed\] graphql:repository.pullRequest.reviewThreads; Workflow source: \[observed\] rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[partial\] threads: 10, resolved: 0, outdated: 0; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[partial\] none in sampled review-thread evidence | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[partial\] not\_sampled\_for\_broad\_file\_spread; Workflow source: \[unavailable\] unavailable |
 
 #### Review churn Interpretation And Recommendation
 
@@ -194,59 +145,10 @@ Recommendation category: repo_specific_ai_skills
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 20 | unknown | 1168 | 77 | 13 | 1245 |
 | [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 12 | unknown | 1149 | 58 | 15 | 1207 |
 
-Evidence details for PR #239:
-
-Validation:
-
-- Workflow coverage: observed
-- Workflow conclusions: success=8, cancelled=1
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 1
-
-Review:
-
-- Review thread source: graphql:repository.pullRequest.reviewThreads
-- Threads: 15
-- Resolved threads: 15
-- Outdated threads: 10
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: author\_reply=15, copilot=15
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-
-Evidence details for PR #221:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: not\_sampled\_for\_broad\_file\_spread
-- Threads: 10
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: none
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: unavailable
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | \[observed\] workflow coverage: observed; \[warning\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs; conclusions: success=8, cancelled=1 | \[observed\] threads: 15, resolved: 15, outdated: 10; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[observed\] author\_reply=15, copilot=15 | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[observed\] graphql:repository.pullRequest.reviewThreads; Workflow source: \[observed\] rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[partial\] threads: 10, resolved: 0, outdated: 0; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[partial\] none in sampled review-thread evidence | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[partial\] not\_sampled\_for\_broad\_file\_spread; Workflow source: \[unavailable\] unavailable |
 
 #### Repo guidance gap Interpretation And Recommendation
 
@@ -272,86 +174,11 @@ Recommendation category: smaller_milestones
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 16 | unknown | 1168 | 77 | 13 | 1245 |
 | [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 2 | unknown | 1 | 1 | 1 | 2 |
 
-Evidence details for PR #221:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: not\_sampled\_for\_broad\_file\_spread
-- Threads: 10
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: none
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: unavailable
-
-Evidence details for PR #239:
-
-Validation:
-
-- Workflow coverage: observed
-- Workflow conclusions: success=8, cancelled=1
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 1
-
-Review:
-
-- Review thread source: graphql:repository.pullRequest.reviewThreads
-- Threads: 15
-- Resolved threads: 15
-- Outdated threads: 10
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: author\_reply=15, copilot=15
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-
-Evidence details for PR #223:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: not\_sampled\_low\_friction
-- Threads: 0
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: none
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: unavailable
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[partial\] threads: 10, resolved: 0, outdated: 0; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[partial\] none in sampled review-thread evidence | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[partial\] not\_sampled\_for\_broad\_file\_spread; Workflow source: \[unavailable\] unavailable |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | \[observed\] workflow coverage: observed; \[warning\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs; conclusions: success=8, cancelled=1 | \[observed\] threads: 15, resolved: 15, outdated: 10; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[observed\] author\_reply=15, copilot=15 | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[observed\] graphql:repository.pullRequest.reviewThreads; Workflow source: \[observed\] rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request |
+| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[partial\] threads: 0, resolved: 0, outdated: 0; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[partial\] none in sampled review-thread evidence | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[partial\] not\_sampled\_low\_friction; Workflow source: \[unavailable\] unavailable |
 
 #### Change scope Interpretation And Recommendation
 
@@ -376,59 +203,10 @@ Recommendation category: pr_readiness_gate
 | [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 5 | unknown | 1149 | 58 | 15 | 1207 |
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 4 | unknown | 1168 | 77 | 13 | 1245 |
 
-Evidence details for PR #221:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: not\_sampled\_for\_broad\_file\_spread
-- Threads: 10
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: none
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: unavailable
-
-Evidence details for PR #239:
-
-Validation:
-
-- Workflow coverage: observed
-- Workflow conclusions: success=8, cancelled=1
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 1
-
-Review:
-
-- Review thread source: graphql:repository.pullRequest.reviewThreads
-- Threads: 15
-- Resolved threads: 15
-- Outdated threads: 10
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: author\_reply=15, copilot=15
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[partial\] threads: 10, resolved: 0, outdated: 0; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[partial\] none in sampled review-thread evidence | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[partial\] not\_sampled\_for\_broad\_file\_spread; Workflow source: \[unavailable\] unavailable |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | \[observed\] workflow coverage: observed; \[warning\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs; conclusions: success=8, cancelled=1 | \[observed\] threads: 15, resolved: 15, outdated: 10; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[observed\] author\_reply=15, copilot=15 | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[observed\] graphql:repository.pullRequest.reviewThreads; Workflow source: \[observed\] rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request |
 
 #### Review surprise Interpretation And Recommendation
 
@@ -453,59 +231,10 @@ Recommendation category: smaller_milestones
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 5 | unknown | 1168 | 77 | 13 | 1245 |
 | [#221](https://github.com/hannasdev/mcp-writing/pull/221) | feat(backup): apply project restores transactionally | 1 | unknown | 1149 | 58 | 15 | 1207 |
 
-Evidence details for PR #239:
-
-Validation:
-
-- Workflow coverage: observed
-- Workflow conclusions: success=8, cancelled=1
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 1
-
-Review:
-
-- Review thread source: graphql:repository.pullRequest.reviewThreads
-- Threads: 15
-- Resolved threads: 15
-- Outdated threads: 10
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: author\_reply=15, copilot=15
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
-
-Evidence details for PR #221:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: not\_sampled\_for\_broad\_file\_spread
-- Threads: 10
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: none
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: unavailable
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | \[observed\] workflow coverage: observed; \[warning\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs; conclusions: success=8, cancelled=1 | \[observed\] threads: 15, resolved: 15, outdated: 10; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[observed\] author\_reply=15, copilot=15 | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[observed\] graphql:repository.pullRequest.reviewThreads; Workflow source: \[observed\] rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[partial\] threads: 10, resolved: 0, outdated: 0; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[partial\] none in sampled review-thread evidence | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[partial\] not\_sampled\_for\_broad\_file\_spread; Workflow source: \[unavailable\] unavailable |
 
 #### Fix amplification Interpretation And Recommendation
 
@@ -529,32 +258,9 @@ Recommendation category: preflight_scripts
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | unknown | 1168 | 77 | 13 | 1245 |
 
-Evidence details for PR #239:
-
-Validation:
-
-- Workflow coverage: observed
-- Workflow conclusions: success=8, cancelled=1
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 1
-
-Review:
-
-- Review thread source: graphql:repository.pullRequest.reviewThreads
-- Threads: 15
-- Resolved threads: 15
-- Outdated threads: 10
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: author\_reply=15, copilot=15
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | \[observed\] workflow coverage: observed; \[warning\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs; conclusions: success=8, cancelled=1 | \[observed\] threads: 15, resolved: 15, outdated: 10; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[observed\] author\_reply=15, copilot=15 | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[observed\] graphql:repository.pullRequest.reviewThreads; Workflow source: \[observed\] rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request |
 
 #### Validation gap Interpretation And Recommendation
 
@@ -578,32 +284,9 @@ Recommendation category: hooks
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | unknown | 1168 | 77 | 13 | 1245 |
 
-Evidence details for PR #239:
-
-Validation:
-
-- Workflow coverage: observed
-- Workflow conclusions: success=8, cancelled=1
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 1
-
-Review:
-
-- Review thread source: graphql:repository.pullRequest.reviewThreads
-- Threads: 15
-- Resolved threads: 15
-- Outdated threads: 10
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: author\_reply=15, copilot=15
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | \[observed\] workflow coverage: observed; \[warning\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs; conclusions: success=8, cancelled=1 | \[observed\] threads: 15, resolved: 15, outdated: 10; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[observed\] author\_reply=15, copilot=15 | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[observed\] graphql:repository.pullRequest.reviewThreads; Workflow source: \[observed\] rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request |
 
 #### Local hook gap Interpretation And Recommendation
 
@@ -627,32 +310,9 @@ Recommendation category: test_infrastructure
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | unknown | 1168 | 77 | 13 | 1245 |
 
-Evidence details for PR #239:
-
-Validation:
-
-- Workflow coverage: observed
-- Workflow conclusions: success=8, cancelled=1
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 1
-
-Review:
-
-- Review thread source: graphql:repository.pullRequest.reviewThreads
-- Threads: 15
-- Resolved threads: 15
-- Outdated threads: 10
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: author\_reply=15, copilot=15
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | \[observed\] workflow coverage: observed; \[warning\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs; conclusions: success=8, cancelled=1 | \[observed\] threads: 15, resolved: 15, outdated: 10; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[observed\] author\_reply=15, copilot=15 | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[observed\] graphql:repository.pullRequest.reviewThreads; Workflow source: \[observed\] rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request |
 
 #### Test infrastructure gap Interpretation And Recommendation
 
@@ -678,86 +338,11 @@ Recommendation category: planning_artifacts
 | [#223](https://github.com/hannasdev/mcp-writing/pull/223) | docs: accept architecture snapshot milestone | 1 | unknown | 1 | 1 | 1 | 2 |
 | [#239](https://github.com/hannasdev/mcp-writing/pull/239) | feat: resolve scene vocabulary variants | 1 | unknown | 1168 | 77 | 13 | 1245 |
 
-Evidence details for PR #221:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: not\_sampled\_for\_broad\_file\_spread
-- Threads: 10
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: none
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: unavailable
-
-Evidence details for PR #223:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: not\_sampled\_low\_friction
-- Threads: 0
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: none
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: unavailable
-
-Evidence details for PR #239:
-
-Validation:
-
-- Workflow coverage: observed
-- Workflow conclusions: success=8, cancelled=1
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 1
-
-Review:
-
-- Review thread source: graphql:repository.pullRequest.reviewThreads
-- Threads: 15
-- Resolved threads: 15
-- Outdated threads: 10
-- Review decision: none (source: reviews)
-- Human reviewers: 0
-- Human approved: no
-- Human changes requested: no
-- Comment sources: author\_reply=15, copilot=15
-
-Source labels:
-
-- PR class: unknown (source=fallback\_rule)
-- Workflow source: rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#221](https://github.com/hannasdev/mcp-writing/pull/221) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[partial\] threads: 10, resolved: 0, outdated: 0; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[partial\] none in sampled review-thread evidence | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[partial\] not\_sampled\_for\_broad\_file\_spread; Workflow source: \[unavailable\] unavailable |
+| [#223](https://github.com/hannasdev/mcp-writing/pull/223) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[partial\] threads: 0, resolved: 0, outdated: 0; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[partial\] none in sampled review-thread evidence | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[partial\] not\_sampled\_low\_friction; Workflow source: \[unavailable\] unavailable |
+| [#239](https://github.com/hannasdev/mcp-writing/pull/239) | \[observed\] workflow coverage: observed; \[warning\] 0 failed checks, 0 failed workflows, 1 cancelled workflow runs; conclusions: success=8, cancelled=1 | \[observed\] threads: 15, resolved: 15, outdated: 10; \[observed\] none from reviews; human reviewers: 0; approved: no; changes requested: no; comments: \[observed\] author\_reply=15, copilot=15 | PR class: \[observed\] unknown (source=fallback\_rule); Review thread source: \[observed\] graphql:repository.pullRequest.reviewThreads; Workflow source: \[observed\] rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&amp;event=pull\_request |
 
 #### Planning gap Interpretation And Recommendation
 

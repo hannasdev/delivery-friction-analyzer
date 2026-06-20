@@ -82,13 +82,13 @@ Interactive setup presents closed profile choices as selectable lists and can ge
 
 ### Acceptance Criteria
 
-- [ ] Workflow enum prompts are list/select prompts in interactive mode and no longer require typing raw identifiers.
-- [ ] Enum prompts do not offer unsupported "Other" values.
-- [ ] Users can opt into a Conventional Commit-style PR class preset.
-- [ ] The preset generates exactly these classes, in order, with validated title regex rules: `dependency`, `feature`, `fix`, `docs`, `test`, and `maintenance`.
-- [ ] Generated PR class rules validate against `repository-profile.v1` and preserve existing custom rules unless the user confirms an update.
-- [ ] Completion output names the profile path and indicates that PR class rules were written when applicable.
-- [ ] Existing non-interactive CLI behavior remains deterministic and prompt-free.
+- [x] Workflow enum prompts are list/select prompts in interactive mode and no longer require typing raw identifiers.
+- [x] Enum prompts do not offer unsupported "Other" values.
+- [x] Users can opt into a Conventional Commit-style PR class preset.
+- [x] The preset generates exactly these classes, in order, with validated title regex rules: `dependency`, `feature`, `fix`, `docs`, `test`, and `maintenance`.
+- [x] Generated PR class rules validate against `repository-profile.v1` and preserve existing custom rules unless the user confirms an update.
+- [x] Completion output names the profile path and indicates that PR class rules were written when applicable.
+- [x] Existing non-interactive CLI behavior remains deterministic and prompt-free.
 
 ### Required Validation
 
@@ -116,11 +116,11 @@ Interactive setup presents closed profile choices as selectable lists and can ge
 ### Status
 
 - [x] Active
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged in PR #40 on 2026-06-20
 
 ## M3: Evidence Tables And Status Labels
 
@@ -147,12 +147,12 @@ Markdown reports make repeated evidence details easier to compare through compac
 
 ### Acceptance Criteria
 
-- [ ] Ranked-bottleneck validation, review, and source-label details render as a compact evidence table when representative examples are present.
-- [ ] Tables include enough source/coverage context to remain auditable.
-- [ ] Dominance, sensitivity, unavailable-data caveats, and explanatory source notes remain prose rather than crowded table columns.
-- [ ] Status labels render consistently for observed, partial, unavailable, configured, warning, and healthy states.
-- [ ] Visual markers, if used, always appear with text labels.
-- [ ] Golden Markdown tests cover table output and marker labels for available, partial, unavailable, and configured states.
+- [x] Ranked-bottleneck validation, review, and source-label details render as a compact evidence table when representative examples are present.
+- [x] Tables include enough source/coverage context to remain auditable.
+- [x] Dominance, sensitivity, unavailable-data caveats, and explanatory source notes remain prose rather than crowded table columns.
+- [x] Status labels render consistently for observed, partial, unavailable, configured, warning, and healthy states.
+- [x] Visual markers, if used, always appear with text labels.
+- [x] Golden Markdown tests cover table output and marker labels for available, partial, unavailable, and configured states.
 
 ### Required Validation
 
@@ -177,10 +177,10 @@ Markdown reports make repeated evidence details easier to compare through compac
 
 ### Status
 
-- [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
 
