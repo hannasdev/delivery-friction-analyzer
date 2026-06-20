@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-20 — Report Evidence Status Tables
+
+- What changed: Markdown friction reports now show representative validation, review, and source-label evidence in compact tables with text status labels for observed, partial, unavailable, configured, warning, and healthy states.
+- Why it matters: Maintainers can compare bottleneck evidence more quickly while still seeing when evidence is configured, incomplete, unavailable, or directly observed.
+- Who is affected: Maintainers and contributors reviewing generated Markdown friction reports.
+- Action needed: None.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/44
+
 ### 2026-06-19 — Interactive Setup Choice Presets
 
 - What changed: Interactive setup now shows workflow profile choices as labeled selections and can add an opt-in Conventional Commit PR class preset to generated or updated repository profiles.

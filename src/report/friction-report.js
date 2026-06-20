@@ -933,56 +933,137 @@ function renderEvidenceTable(observedData) {
   );
 }
 
-function renderDetailList(items) {
-  return items.length ? items.map(item => `- ${escapeMarkdownText(item)}`).join("\n") : "- None";
+function statusLabel(status, detail) {
+  return `[${status}] ${detail}`;
 }
 
-function renderEvidenceDetails(observedData) {
+function coverageStatusLabel(value) {
+  switch (value) {
+    case "observed":
+    case "available":
+      return "observed";
+    case "partial":
+      return "partial";
+    default:
+      return "unavailable";
+  }
+}
+
+function validationStatusSummary(validationEvidence = {}) {
+  const coverage = validationEvidence.workflowRunCoverage ?? "unavailable";
+  const coverageStatus = coverageStatusLabel(coverage);
+  const failedCheckRuns = Number(validationEvidence.failedCheckRuns ?? 0);
+  const failedWorkflowRuns = Number(validationEvidence.failedWorkflowRuns ?? 0);
+  const cancelledWorkflowRuns = Number(validationEvidence.cancelledWorkflowRuns ?? 0);
+  const interruptionCount = failedCheckRuns + failedWorkflowRuns + cancelledWorkflowRuns;
+  const coverageLabel = statusLabel(coverageStatus, `workflow coverage: ${coverage}`);
+  let outcomeLabel;
+  if (interruptionCount > 0) {
+    outcomeLabel = statusLabel("warning", `${failedCheckRuns} failed checks, ${failedWorkflowRuns} failed workflows, ${cancelledWorkflowRuns} cancelled workflow runs`);
+  } else if (coverageStatus === "observed") {
+    outcomeLabel = statusLabel("healthy", "no failed or cancelled validation runs");
+  } else if (coverageStatus === "partial") {
+    outcomeLabel = statusLabel("partial", "no failed or cancelled validation runs in sampled workflow evidence");
+  } else {
+    outcomeLabel = statusLabel("unavailable", "validation outcome unavailable");
+  }
+  const conclusions = formatNamedValues(validationEvidence.workflowRunConclusions ?? []);
+
+  return `${coverageLabel}; ${outcomeLabel}; conclusions: ${conclusions}`;
+}
+
+function reviewThreadStatusLabel(reviewEvidence = {}) {
+  const source = reviewEvidence.reviewThreadSource ?? "unavailable";
+  if (source === "unavailable") return "unavailable";
+  if (source.startsWith("not_sampled")) return "partial";
+  return "observed";
+}
+
+function reviewStatusSummary(reviewEvidence = {}) {
+  const threadLabel = statusLabel(
+    reviewThreadStatusLabel(reviewEvidence),
+    `threads: ${reviewEvidence.reviewThreads ?? 0}, resolved: ${reviewEvidence.resolvedThreads ?? 0}, outdated: ${reviewEvidence.outdatedThreads ?? 0}`,
+  );
+
+  return threadLabel;
+}
+
+function reviewDecisionSummary(reviewEvidence = {}) {
+  const observedReviewDecision = hasObservedReviewDecision({
+    state: reviewEvidence.reviewDecision,
+    source: reviewEvidence.reviewDecisionSource,
+  });
+  const status = observedReviewDecision ? "observed" : "unavailable";
+  const humanApproved = formatObservedBoolean(reviewEvidence.humanApproved, observedReviewDecision);
+  const humanChangesRequested = formatObservedBoolean(reviewEvidence.humanChangesRequested, observedReviewDecision);
+  const humanReviewerCount = formatObservedCount(reviewEvidence.humanReviewerCount, observedReviewDecision);
+  const approvalStatus = observedReviewDecision && reviewEvidence.humanApproved
+    ? `; ${statusLabel("healthy", "human approval observed")}`
+    : "";
+
+  return `${statusLabel(status, `${reviewEvidence.reviewDecision ?? "unavailable"} from ${reviewEvidence.reviewDecisionSource ?? "unavailable"}`)}; human reviewers: ${humanReviewerCount}; approved: ${humanApproved}; changes requested: ${humanChangesRequested}${approvalStatus}`;
+}
+
+function commentSourceSummary(reviewEvidence = {}) {
+  const commentSources = reviewEvidence.commentSources ?? [];
+  if (commentSources.length) return statusLabel("observed", formatNamedValues(commentSources));
+  const reviewStatus = reviewThreadStatusLabel(reviewEvidence);
+  if (reviewStatus === "observed") return statusLabel("observed", "none");
+  if (reviewStatus === "partial") return statusLabel("partial", "none in sampled review-thread evidence");
+  return statusLabel("unavailable", "comment sources unavailable");
+}
+
+function prClassStatusSummary(prClass = {}) {
+  const source = prClass.classificationSource ?? "fallback_rule";
+  const status = source === "fallback_rule"
+    ? "observed"
+    : source === "unavailable" ? "unavailable" : "configured";
+  return statusLabel(status, formatPrClass(prClass));
+}
+
+function workflowSourceSummary(validationEvidence = {}) {
+  const source = validationEvidence.workflowRunSource ?? "unavailable";
+  const status = source === "unavailable" ? "unavailable" : "observed";
+  return statusLabel(status, source);
+}
+
+function reviewThreadSourceSummary(reviewEvidence = {}) {
+  const source = reviewEvidence.reviewThreadSource ?? "unavailable";
+  return statusLabel(reviewThreadStatusLabel(reviewEvidence), source);
+}
+
+function sourceLabelSummary(evidence = {}) {
+  return [
+    `PR class: ${prClassStatusSummary(evidence.prClass)}`,
+    `Review thread source: ${reviewThreadSourceSummary(evidence.reviewEvidence)}`,
+    `Workflow source: ${workflowSourceSummary(evidence.validationEvidence)}`,
+  ].join("; ");
+}
+
+function evidenceDetailRows(observedData) {
   return (observedData ?? []).map(evidence => {
     const validationEvidence = evidence.validationEvidence ?? {};
     const reviewEvidence = evidence.reviewEvidence ?? {};
-    const workflowRunConclusions = validationEvidence.workflowRunConclusions ?? [];
-    const reviewCommentSources = reviewEvidence.commentSources ?? [];
-    const observedReviewDecision = hasObservedReviewDecision({
-      state: reviewEvidence.reviewDecision,
-      source: reviewEvidence.reviewDecisionSource,
-    });
 
     return [
-      `Evidence details for PR #${evidence.number}:`,
-      "",
-      "Validation:",
-      "",
-      renderDetailList([
-        `Workflow coverage: ${validationEvidence.workflowRunCoverage ?? "unavailable"}`,
-        `Workflow conclusions: ${formatNamedValues(workflowRunConclusions)}`,
-        `Failed checks: ${validationEvidence.failedCheckRuns ?? 0}`,
-        `Failed workflows: ${validationEvidence.failedWorkflowRuns ?? 0}`,
-        `Cancelled workflows: ${validationEvidence.cancelledWorkflowRuns ?? 0}`,
-      ]),
-      "",
-      "Review:",
-      "",
-      renderDetailList([
-        `Review thread source: ${reviewEvidence.reviewThreadSource ?? "unavailable"}`,
-        `Threads: ${reviewEvidence.reviewThreads ?? 0}`,
-        `Resolved threads: ${reviewEvidence.resolvedThreads ?? 0}`,
-        `Outdated threads: ${reviewEvidence.outdatedThreads ?? 0}`,
-        `Review decision: ${reviewEvidence.reviewDecision ?? "unavailable"} (source: ${reviewEvidence.reviewDecisionSource ?? "unavailable"})`,
-        `Human reviewers: ${formatObservedCount(reviewEvidence.humanReviewerCount, observedReviewDecision)}`,
-        `Human approved: ${formatObservedBoolean(reviewEvidence.humanApproved, observedReviewDecision)}`,
-        `Human changes requested: ${formatObservedBoolean(reviewEvidence.humanChangesRequested, observedReviewDecision)}`,
-        `Comment sources: ${formatNamedValues(reviewCommentSources)}`,
-      ]),
-      "",
-      "Source labels:",
-      "",
-      renderDetailList([
-        `PR class: ${formatPrClass(evidence.prClass)}`,
-        `Workflow source: ${validationEvidence.workflowRunSource ?? "unavailable"}`,
-      ]),
-    ].join("\n");
-  }).join("\n\n");
+      prReference(evidence),
+      validationStatusSummary(validationEvidence),
+      `${reviewStatusSummary(reviewEvidence)}; ${reviewDecisionSummary(reviewEvidence)}; comments: ${commentSourceSummary(reviewEvidence)}`,
+      sourceLabelSummary(evidence),
+    ];
+  });
+}
+
+function renderEvidenceDetails(observedData) {
+  return renderMarkdownTable(
+    [
+      "PR",
+      "Validation",
+      "Review",
+      "Source labels",
+    ],
+    evidenceDetailRows(observedData),
+  );
 }
 
 function recommendationCategoryLabel(bottleneck) {

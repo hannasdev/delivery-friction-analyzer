@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: Active; M1 merged and M2 active.
+Status: Active; M1 and M2 merged; M3 active.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-19
-- Current milestone: M2: Interactive Choice UX And PR Class Presets (active)
+- Current milestone: M3: Evidence Tables And Status Labels (active)
 - Related issue:
   - None yet.
 - Related docs:
@@ -130,11 +130,11 @@ Reports should also explain when configured workflow context affects data interp
 
 ## Acceptance Criteria
 
-- [ ] Documentation explains profile generation, `unknown` PR class fallback, and title-based PR class rules with copyable examples.
-- [ ] Interactive workflow enum prompts render as numbered or selectable choices and persist supported schema identifiers.
-- [ ] Interactive setup can generate opt-in Conventional Commit-style title-based PR class rules.
-- [ ] Reports render stable repeated evidence details as tables without losing caveats or source labels.
-- [ ] Reports use text-backed status markers for observed, partial, unavailable, configured, warning, and healthy states where they improve scanability.
+- [x] Documentation explains profile generation, `unknown` PR class fallback, and title-based PR class rules with copyable examples.
+- [x] Interactive workflow enum prompts render as numbered or selectable choices and persist supported schema identifiers.
+- [x] Interactive setup can generate opt-in Conventional Commit-style title-based PR class rules.
+- [x] Reports render stable repeated evidence details as tables without losing caveats or source labels.
+- [x] Reports use text-backed status markers for observed, partial, unavailable, configured, warning, and healthy states where they improve scanability.
 - [ ] Reports suggest concrete profile improvements when missing profile configuration limits interpretation.
 - [ ] Reports and methodology explain workflow-specific data limits only where relevant, without implying merge commits are currently used to compute PR size.
 - [ ] Existing JSON, CSV, metrics, ranking, and filtering contracts remain backward-compatible unless a later explicit contract change is accepted.
@@ -167,7 +167,7 @@ Reports should also explain when configured workflow context affects data interp
 
 - [x] Which Conventional Commit types should the first preset generate? Generate `dependency`, `feature`, `fix`, `docs`, `test`, and `maintenance` in that order, with dependency-scoped titles matched before broad maintenance titles.
 - [x] Should the generated PR class identifiers use `feature`/`fix`/`docs` labels or mirror Conventional Commit types exactly, such as `feat`? Use reader-facing classes: `feature`, `fix`, `docs`, `test`, `maintenance`, and `dependency`.
-- [ ] Should visual markers use Unicode symbols in Markdown, ASCII labels only, or a renderer helper that can switch based on output target?
+- [x] Should visual markers use Unicode symbols in Markdown, ASCII labels only, or a renderer helper that can switch based on output target? Use ASCII text labels only for M3, such as `[observed]`, `[partial]`, `[unavailable]`, `[configured]`, `[warning]`, and `[healthy]`.
 - [ ] Should workflow-limit caveats live in the main report opening, the methodology, the configured workflow section, or all three at different levels of detail?
 - [ ] Is there enough value in future branch-based PR class matching to plan a separate profile matcher initiative?
 - [x] Should merge strategy remain an interactive profile question even though current metrics do not use it as a score input? Yes. Interactive setup should capture maintainer-confirmed workflow assumptions so downstream analysis logic can avoid unsafe inference and choose conservative interpretation or future reconstruction paths.

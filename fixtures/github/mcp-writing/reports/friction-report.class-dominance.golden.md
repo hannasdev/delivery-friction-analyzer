@@ -103,86 +103,11 @@ Recommendation category: pr_readiness_gate
 | [#2](https://example.test/pull/2) | Release follow-up | 8 | release | unknown | unknown | unknown | 100 |
 | [#3](https://example.test/pull/3) | feature work | 2 | development | unknown | unknown | unknown | 100 |
 
-Evidence details for PR #1:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: unavailable
-- Threads: 0
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: unavailable (source: unavailable)
-- Human reviewers: unavailable
-- Human approved: unavailable
-- Human changes requested: unavailable
-- Comment sources: none
-
-Source labels:
-
-- PR class: release (source=repository\_profile, rule=release-title)
-- Workflow source: unavailable
-
-Evidence details for PR #2:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: unavailable
-- Threads: 0
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: unavailable (source: unavailable)
-- Human reviewers: unavailable
-- Human approved: unavailable
-- Human changes requested: unavailable
-- Comment sources: none
-
-Source labels:
-
-- PR class: release (source=repository\_profile, rule=release-title)
-- Workflow source: unavailable
-
-Evidence details for PR #3:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: unavailable
-- Threads: 0
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: unavailable (source: unavailable)
-- Human reviewers: unavailable
-- Human approved: unavailable
-- Human changes requested: unavailable
-- Comment sources: none
-
-Source labels:
-
-- PR class: development (source=fallback\_rule)
-- Workflow source: unavailable
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#1](https://example.test/pull/1) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[unavailable\] threads: 0, resolved: 0, outdated: 0; \[unavailable\] unavailable from unavailable; human reviewers: unavailable; approved: unavailable; changes requested: unavailable; comments: \[unavailable\] comment sources unavailable | PR class: \[configured\] release (source=repository\_profile, rule=release-title); Review thread source: \[unavailable\] unavailable; Workflow source: \[unavailable\] unavailable |
+| [#2](https://example.test/pull/2) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[unavailable\] threads: 0, resolved: 0, outdated: 0; \[unavailable\] unavailable from unavailable; human reviewers: unavailable; approved: unavailable; changes requested: unavailable; comments: \[unavailable\] comment sources unavailable | PR class: \[configured\] release (source=repository\_profile, rule=release-title); Review thread source: \[unavailable\] unavailable; Workflow source: \[unavailable\] unavailable |
+| [#3](https://example.test/pull/3) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[unavailable\] threads: 0, resolved: 0, outdated: 0; \[unavailable\] unavailable from unavailable; human reviewers: unavailable; approved: unavailable; changes requested: unavailable; comments: \[unavailable\] comment sources unavailable | PR class: \[observed\] development (source=fallback\_rule); Review thread source: \[unavailable\] unavailable; Workflow source: \[unavailable\] unavailable |
 
 #### Review churn Interpretation And Recommendation
 
@@ -209,86 +134,11 @@ Recommendation category: repo_specific_ai_skills
 | [#2](https://example.test/pull/2) | Release follow-up | 8 | release | unknown | unknown | unknown | 100 |
 | [#3](https://example.test/pull/3) | feature work | 2 | development | unknown | unknown | unknown | 100 |
 
-Evidence details for PR #1:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: unavailable
-- Threads: 0
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: unavailable (source: unavailable)
-- Human reviewers: unavailable
-- Human approved: unavailable
-- Human changes requested: unavailable
-- Comment sources: none
-
-Source labels:
-
-- PR class: release (source=repository\_profile, rule=release-title)
-- Workflow source: unavailable
-
-Evidence details for PR #2:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: unavailable
-- Threads: 0
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: unavailable (source: unavailable)
-- Human reviewers: unavailable
-- Human approved: unavailable
-- Human changes requested: unavailable
-- Comment sources: none
-
-Source labels:
-
-- PR class: release (source=repository\_profile, rule=release-title)
-- Workflow source: unavailable
-
-Evidence details for PR #3:
-
-Validation:
-
-- Workflow coverage: unavailable
-- Workflow conclusions: none
-- Failed checks: 0
-- Failed workflows: 0
-- Cancelled workflows: 0
-
-Review:
-
-- Review thread source: unavailable
-- Threads: 0
-- Resolved threads: 0
-- Outdated threads: 0
-- Review decision: unavailable (source: unavailable)
-- Human reviewers: unavailable
-- Human approved: unavailable
-- Human changes requested: unavailable
-- Comment sources: none
-
-Source labels:
-
-- PR class: development (source=fallback\_rule)
-- Workflow source: unavailable
+| PR | Validation | Review | Source labels |
+| --- | --- | --- | --- |
+| [#1](https://example.test/pull/1) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[unavailable\] threads: 0, resolved: 0, outdated: 0; \[unavailable\] unavailable from unavailable; human reviewers: unavailable; approved: unavailable; changes requested: unavailable; comments: \[unavailable\] comment sources unavailable | PR class: \[configured\] release (source=repository\_profile, rule=release-title); Review thread source: \[unavailable\] unavailable; Workflow source: \[unavailable\] unavailable |
+| [#2](https://example.test/pull/2) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[unavailable\] threads: 0, resolved: 0, outdated: 0; \[unavailable\] unavailable from unavailable; human reviewers: unavailable; approved: unavailable; changes requested: unavailable; comments: \[unavailable\] comment sources unavailable | PR class: \[configured\] release (source=repository\_profile, rule=release-title); Review thread source: \[unavailable\] unavailable; Workflow source: \[unavailable\] unavailable |
+| [#3](https://example.test/pull/3) | \[unavailable\] workflow coverage: unavailable; \[unavailable\] validation outcome unavailable; conclusions: none | \[unavailable\] threads: 0, resolved: 0, outdated: 0; \[unavailable\] unavailable from unavailable; human reviewers: unavailable; approved: unavailable; changes requested: unavailable; comments: \[unavailable\] comment sources unavailable | PR class: \[observed\] development (source=fallback\_rule); Review thread source: \[unavailable\] unavailable; Workflow source: \[unavailable\] unavailable |
 
 #### Repo guidance gap Interpretation And Recommendation
 
