@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: Active; M1 implemented and awaiting PR review.
+Status: Active; M1 merged and M2 active.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-19
-- Current milestone: M1: Profile And PR Class Guidance (implemented; awaiting PR review)
+- Current milestone: M2: Interactive Choice UX And PR Class Presets (active)
 - Related issue:
   - None yet.
 - Related docs:

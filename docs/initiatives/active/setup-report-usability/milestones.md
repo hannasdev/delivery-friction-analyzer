@@ -55,7 +55,7 @@ Users can understand how to create a repository profile, why PR class values may
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged in PR #39 on 2026-06-19
 
 ## M2: Interactive Choice UX And PR Class Presets
 
@@ -115,7 +115,7 @@ Interactive setup presents closed profile choices as selectable lists and can ge
 
 ### Status
 
-- [ ] Not started
+- [x] Active
 - [ ] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed

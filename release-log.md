@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-19 — Interactive Setup Choice Presets
+
+- What changed: Interactive setup now shows workflow profile choices as labeled selections and can add an opt-in Conventional Commit PR class preset to generated or updated repository profiles.
+- Why it matters: Maintainers can capture common repository assumptions without typing schema identifiers or hand-writing the first set of title-based PR class rules.
+- Who is affected: Maintainers running `--interactive` to create or update repository profiles.
+- Action needed: None.
+- PR: TBD
+
 ### 2026-06-19 — Workflow Context Surfacing
 
 - What changed: Friction reports and methodology now show configured repository workflow context from the profile when it is present.

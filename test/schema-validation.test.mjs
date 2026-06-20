@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 import { computePullRequestMetrics } from "../src/metrics/friction.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
+import { conventionalCommitPrClassRules } from "../src/profile/pr-class-presets.js";
 
 async function readJson(path) {
   return JSON.parse(await readFile(new URL(path, import.meta.url), "utf8"));
@@ -142,6 +143,18 @@ describe("repository profile schema", () => {
     assert.deepEqual(validateSchema(baseProfile, schema, {}), []);
     assert.deepEqual(validateSchema(classedProfile, schema, {}), []);
     assert.deepEqual(validateSchema(workflowProfile, schema, {}), []);
+  });
+
+  it("validates the generated Conventional Commit PR class preset", async () => {
+    const schema = await readJson("../schemas/repository-profile.schema.json");
+    const profile = {
+      schemaVersion: "repository-profile.v1",
+      repository: { owner: "example", name: "repo" },
+      rules: [],
+      prClasses: conventionalCommitPrClassRules(),
+    };
+
+    assert.deepEqual(validateSchema(profile, schema, {}), []);
   });
 
   it("rejects malformed PR class rule fields", async () => {
