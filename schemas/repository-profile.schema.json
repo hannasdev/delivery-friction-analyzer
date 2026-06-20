@@ -103,6 +103,29 @@
         }
       },
       "minProperties": 1
+    },
+    "contributors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sourceType": {
+          "enum": ["all_contributors"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "not": {
+            "anyOf": [
+              { "pattern": "^/" },
+              { "pattern": "^\\s|\\s$" },
+              { "pattern": "\\\\" },
+              { "pattern": "(^|/)\\.\\.(/|$)" }
+            ]
+          }
+        }
+      },
+      "minProperties": 1
     }
   }
 }

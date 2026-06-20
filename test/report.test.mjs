@@ -78,6 +78,26 @@ describe("friction report generation", () => {
     assert(methodology.includes("- Workflow context: PR-open diff coverage unavailable for 3 PRs; workflow-run coverage unavailable for 2 PRs."));
   });
 
+  it("omits contributor source sections when no contributor source is configured", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle: {
+        selection: { requestedLimit: 30, collectedCount: 3 },
+        coverage: { status: "available", apiFamilies: [] },
+      },
+      profilePath: "fixtures/github/mcp-writing/profile.json",
+      artifactFileNames: {},
+      csvEnabled: false,
+    });
+
+    assert.equal(report.contributorSource, undefined);
+    assert(!markdown.includes("## Contributor Source Context"));
+    assert(!methodology.includes("## Contributor Source Context"));
+  });
+
   it("accepts null report options as omitted options", async () => {
     const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
 
@@ -135,6 +155,65 @@ describe("friction report generation", () => {
     assert(methodology.includes("configured profile context, not observed evidence"));
     assert(methodology.includes("not observed GitHub evidence"));
     assert(!markdown.includes("| Workflow context |"));
+  });
+
+  it("surfaces contributor source metadata without raw contributor data or ranking output", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary, {
+      contributorSource: {
+        sourceType: "all_contributors",
+        path: ".all-contributorsrc",
+        coverage: { status: "partial" },
+        hints: { logins: ["secret-login-one", "secret-login-two"] },
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle: {
+        selection: { requestedLimit: 30, collectedCount: 3 },
+        coverage: { status: "available", apiFamilies: [] },
+      },
+      profilePath: "fixtures/github/mcp-writing/profile.json",
+      artifactFileNames: {},
+      csvEnabled: true,
+    });
+    const csv = generateEvidenceCsvArtifacts({
+      metricsSummary,
+      report,
+      collectionCoverage: {
+        apiFamilies: [
+          {
+            family: "contributor_source",
+            status: "partial",
+            attempts: 1,
+            source: "rest:/repos/{owner}/{repo}/contents/{path}",
+            diagnostics: ["Skipped 1 contributor entry without a supported login hint."],
+            downstreamImpact: "Contributor-aware comment-source hints are available; scoring and person-level outputs are unchanged.",
+          },
+        ],
+      },
+    });
+
+    assert.deepEqual(report.contributorSource, {
+      source: "repository_profile",
+      sourceType: "all_contributors",
+      path: ".all-contributorsrc",
+      status: "partial",
+      hintCount: 2,
+      note: "Contributor source metadata comes from the configured repository profile source. It may improve comment-source classification coverage, but it does not change scores, PR authorship conclusions, reviewer attribution, CSV export shape, person-level CSV output, or individual ranking guardrails.",
+    });
+    assert(markdown.includes("## Contributor Source Context"));
+    assert(markdown.includes("| Parsed hint count | 2 |"));
+    assert(methodology.includes("## Contributor Source Context"));
+    assert(methodology.includes("- Coverage status: partial"));
+    assert(methodology.includes("Raw contributor file contents and individual contributor rankings are not emitted."));
+    assert(csv.collectionCoverageCsv.includes("contributor_source,partial"));
+    assert(!markdown.includes("secret-login-one"));
+    assert(!methodology.includes("secret-login-one"));
+    assert(!csv.prMetricsCsv.includes("secret-login-one"));
+    assert(!csv.bottleneckExamplesCsv.includes("secret-login-one"));
+    assert(!csv.commentSourcesCsv.includes("secret-login-one"));
   });
 
   it("labels configured merge methods as profile context when PR-open diff coverage is unavailable", async () => {

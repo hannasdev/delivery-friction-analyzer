@@ -105,6 +105,13 @@ function requireGraphqlPage(page, label) {
   return page;
 }
 
+function encodeContentPath(path) {
+  return String(path)
+    .split("/")
+    .map(segment => encodeURIComponent(segment))
+    .join("/");
+}
+
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -151,6 +158,10 @@ export function createGhCliProvider({
 
     async getLanguages({ owner, name }) {
       return runGhJson(["api", `repos/${owner}/${name}/languages`]);
+    },
+
+    async getRepositoryContent({ owner, name, path }) {
+      return runGhJson(["api", `repos/${owner}/${name}/contents/${encodeContentPath(path)}`]);
     },
 
     async listMergedPullRequests({ owner, name, limit }) {

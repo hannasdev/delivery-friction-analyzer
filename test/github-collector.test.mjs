@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { createGhCliProvider } from "../src/collect/gh-provider.js";
 import { buildCoverageSummary, collectGitHubSourceBundle } from "../src/collect/github-source-bundle.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
+import { contributorHintsFromSource } from "../src/profile/contributor-source.js";
 
 function repositoryMetadata() {
   return {
@@ -143,6 +144,18 @@ function createProvider(overrides = {}) {
       calls.push(["getLanguages", input]);
       return { JavaScript: 1200, Shell: 20 };
     },
+    async getRepositoryContent(input) {
+      calls.push(["getRepositoryContent", input]);
+      return {
+        encoding: "base64",
+        content: Buffer.from(JSON.stringify({
+          contributors: [
+            { login: "maintainer", name: "Maintainer" },
+            { login: "reviewer" },
+          ],
+        })).toString("base64"),
+      };
+    },
     async listMergedPullRequests(input) {
       calls.push(["listMergedPullRequests", input]);
       return [{ number: 7, mergedAt: "2026-06-01T12:00:00Z" }];
@@ -228,10 +241,149 @@ describe("GitHub source collector", () => {
     assert.equal(coverageFor(bundle, "review_threads").status, "available");
     assert.equal(coverageFor(bundle, "workflow_runs").status, "available");
     assert.equal(coverageFor(bundle, "pr_open_diff").status, "unavailable");
+    assert.equal(coverageFor(bundle, "contributor_source"), undefined);
 
     const normalized = normalizeFixtureBundle(bundle);
     assert.equal(normalized.pullRequests[0].prOpenDiff.source, "unavailable");
     assert.equal(normalized.pullRequests[0].reviewThreads.resolvedCount, 1);
+  });
+
+  it("collects configured all-contributors hints without raw file contents", async () => {
+    const provider = createProvider();
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      provider,
+      contributors: { sourceType: "all_contributors", path: ".all-contributorsrc" },
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+
+    assert.equal(bundle.contributorSource.sourceType, "all_contributors");
+    assert.equal(bundle.contributorSource.path, ".all-contributorsrc");
+    assert.equal(bundle.contributorSource.coverage.status, "available");
+    assert.equal(bundle.contributorSource.hintCount, 2);
+    assert.equal(bundle.contributorSource.hints, undefined);
+    assert.deepEqual([...contributorHintsFromSource(bundle.contributorSource).logins], ["maintainer", "reviewer"]);
+    assert.equal(coverageFor(bundle, "contributor_source").status, "available");
+    assert(provider.calls.some(([method]) => method === "getRepositoryContent"));
+    const serialized = JSON.stringify(bundle);
+    assert(!serialized.includes("Maintainer"));
+    assert(!serialized.includes("contributors\":["));
+    assert(!serialized.includes("\"logins\""));
+  });
+
+  it("marks all-contributors source partial when some entries cannot provide hints", async () => {
+    const provider = createProvider({
+      async getRepositoryContent(input) {
+        this.calls.push(["getRepositoryContent", input]);
+        return JSON.stringify({
+          contributors: [
+            { login: "maintainer" },
+            { name: "No Login" },
+          ],
+        });
+      },
+    });
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      provider,
+      contributors: { sourceType: "all_contributors", path: ".all-contributorsrc" },
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+
+    assert.equal(bundle.contributorSource.coverage.status, "partial");
+    assert.equal(bundle.contributorSource.hintCount, 1);
+    assert.equal(bundle.contributorSource.hints, undefined);
+    assert.deepEqual([...contributorHintsFromSource(bundle.contributorSource).logins], ["maintainer"]);
+    assert.equal(coverageFor(bundle, "contributor_source").status, "partial");
+  });
+
+  it("marks malformed all-contributors content without failing collection", async () => {
+    const provider = createProvider({
+      async getRepositoryContent(input) {
+        this.calls.push(["getRepositoryContent", input]);
+        return "{not json";
+      },
+    });
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      provider,
+      contributors: { sourceType: "all_contributors", path: ".all-contributorsrc" },
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+
+    assert.equal(bundle.contributorSource.coverage.status, "malformed");
+    assert.equal(bundle.contributorSource.hintCount, 0);
+    assert.equal(bundle.contributorSource.hints, undefined);
+    assert.equal(coverageFor(bundle, "contributor_source").status, "malformed");
+  });
+
+  it("marks missing or inaccessible contributor sources unavailable", async () => {
+    const provider = createProvider({
+      async getRepositoryContent(input) {
+        this.calls.push(["getRepositoryContent", input]);
+        throw new Error("HTTP 404: Not Found");
+      },
+    });
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      provider,
+      contributors: { sourceType: "all_contributors", path: ".all-contributorsrc" },
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+
+    assert.equal(bundle.contributorSource.coverage.status, "unavailable");
+    assert.equal(bundle.contributorSource.hintCount, 0);
+    assert.equal(bundle.contributorSource.hints, undefined);
+    assert(coverageFor(bundle, "contributor_source").diagnostics.some(diagnostic => diagnostic.includes("404")));
+  });
+
+  it("records Markdown contributor sources as unsupported and does not parse them", async () => {
+    const provider = createProvider();
+
+    const bundle = await collectGitHubSourceBundle({
+      repository: "example/example-repo",
+      limit: 1,
+      provider,
+      contributors: { sourceType: "all_contributors", path: "CONTRIBUTORS.md" },
+      collectedAt: "2026-06-09T00:00:00Z",
+    });
+
+    assert.equal(bundle.contributorSource.coverage.status, "unsupported");
+    assert.equal(bundle.contributorSource.hintCount, 0);
+    assert.equal(bundle.contributorSource.hints, undefined);
+    assert.equal(coverageFor(bundle, "contributor_source").status, "unsupported");
+    assert.equal(coverageFor(bundle, "contributor_source").source, "rest:/repos/{owner}/{repo}/contents/{path}");
+    assert(coverageFor(bundle, "contributor_source").diagnostics.some(diagnostic => (
+      diagnostic.includes("CONTRIBUTORS.md") && diagnostic.includes("Markdown contributor files")
+    )));
+    assert(!provider.calls.some(([method]) => method === "getRepositoryContent"));
+  });
+
+  it("rejects invalid contributor source paths before repository content collection", async () => {
+    for (const path of ["../contributors.json", "docs/../contributors.json", "/contributors.json", "   "]) {
+      const provider = createProvider();
+
+      await assert.rejects(
+        collectGitHubSourceBundle({
+          repository: "example/example-repo",
+          limit: 1,
+          provider,
+          contributors: { sourceType: "all_contributors", path },
+          collectedAt: "2026-06-09T00:00:00Z",
+        }),
+        /invalid contributor source profile context: contributors\.path/,
+      );
+
+      assert(!provider.calls.some(([method]) => method === "getRepositoryContent"), `content fetched for ${path}`);
+    }
   });
 
   it("enforces latest-merged ordering and limit when a provider returns extra inventory", async () => {
@@ -642,6 +794,21 @@ describe("gh CLI provider", () => {
       }),
       /gh returned empty JSON output for api repos\/example\/example-repo/,
     );
+  });
+
+  it("requests repository content with an encoded repository-relative path", async () => {
+    const provider = createGhCliProvider({
+      async runCommand(args) {
+        assert.deepEqual(args, ["api", "repos/example/example-repo/contents/docs/Contributor%20List.json"]);
+        return JSON.stringify({ encoding: "base64", content: "e30=" });
+      },
+    });
+
+    assert.deepEqual(await provider.getRepositoryContent({
+      owner: "example",
+      name: "example-repo",
+      path: "docs/Contributor List.json",
+    }), { encoding: "base64", content: "e30=" });
   });
 
   it("retries transient GraphQL authentication failures from gh pr view", async () => {

@@ -2,13 +2,13 @@
 
 ## Status
 
-Status: Active; M1, M2, and M3 merged; M4 active.
+Status: Active; M1, M2, M3, and M4 merged; M5 active.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-15
 - Activated: 2026-06-15
-- Current milestone: M4: Workflow Context Surfacing
+- Current milestone: M5: Contributor Source Configuration
 - Related issue:
   - None yet.
 - Related docs:

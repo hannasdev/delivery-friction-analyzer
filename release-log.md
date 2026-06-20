@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-20 — Contributor Source Configuration
+
+- What changed: Repository profiles can now configure `.all-contributorsrc` as a structured contributor source, and analysis records contributor-source coverage while using sanitized hints only for aggregate comment-source classification.
+- Why it matters: Maintainers can improve comment-source coverage without parsing Markdown contributor files, changing scores, or emitting raw contributor contents or person rankings in reports or CSVs.
+- Who is affected: Maintainers authoring repository profiles or reviewing generated reports, methodology, and coverage artifacts.
+- Action needed: Optional; add `contributors.sourceType: "all_contributors"` and a repository-relative `contributors.path` when a target repository has a trusted `.all-contributorsrc`.
+- PR: #47
+
 ### 2026-06-20 — Workflow Data Caveats
 
 - What changed: Markdown friction reports and methodology now explain PR-open diff and workflow-run coverage limits with configured workflow context when it is available, and suggest adding workflow context when omitted context would clarify unavailable evidence.

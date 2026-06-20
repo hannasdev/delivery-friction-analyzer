@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { classifyFilePath } from "../src/profile/file-role.js";
+import {
+  assertValidContributorSource,
+  contributorHintsFromSource,
+  parseAllContributorsHints,
+  validateContributorSource,
+} from "../src/profile/contributor-source.js";
 import { assertValidPrClassRules, classifyPullRequest, validatePrClassRules } from "../src/profile/pr-class.js";
 import { conventionalCommitPrClassRules } from "../src/profile/pr-class-presets.js";
 import { assertValidWorkflowContext, validateWorkflowContext } from "../src/profile/workflow.js";
@@ -196,6 +202,123 @@ describe("workflow context validation", () => {
   });
 });
 
+describe("contributor source profile validation", () => {
+  it("accepts omitted and valid all-contributors source config", () => {
+    assert.deepEqual(validateContributorSource({}), []);
+    assert.deepEqual(validateContributorSource({
+      contributors: {
+        sourceType: "all_contributors",
+        path: ".all-contributorsrc",
+      },
+    }), []);
+    assert.deepEqual(validateContributorSource({
+      contributors: {
+        sourceType: "all_contributors",
+        path: "docs/contributors..fixture.json",
+      },
+    }), []);
+    assert.deepEqual(validateContributorSource({
+      contributors: {
+        sourceType: "all_contributors",
+      },
+    }), []);
+  });
+
+  it("rejects unsupported contributor source profile fields and source types", () => {
+    const errors = validateContributorSource({
+      contributors: {
+        sourceType: "markdown",
+        path: "../CONTRIBUTORS.md",
+        observedFrom: "github",
+      },
+    });
+
+    assert(errors.some(error => error.includes("contributors.sourceType must be one of")));
+    assert(errors.some(error => error.includes("contributors.path must be a trimmed slash-delimited repository-relative path")));
+    assert(errors.some(error => error.includes("contributors.observedFrom is not supported")));
+    assert.throws(
+      () => assertValidContributorSource({ contributors: { sourceType: "markdown" } }),
+      /invalid contributor source profile context: contributors.sourceType must be one of/,
+    );
+  });
+
+  it("aligns contributor source path validation with repository-relative schema rules", () => {
+    assert.deepEqual(validateContributorSource({
+      contributors: {
+        sourceType: "all_contributors",
+        path: "docs/contributors..fixture.json",
+      },
+    }), []);
+
+    for (const path of [
+      "../CONTRIBUTORS.md",
+      "docs/../CONTRIBUTORS.md",
+      "/CONTRIBUTORS.md",
+      "docs\\CONTRIBUTORS.md",
+      " docs/CONTRIBUTORS.md",
+      "docs/CONTRIBUTORS.md ",
+      "   ",
+    ]) {
+      assert(
+        validateContributorSource({
+          contributors: {
+            sourceType: "all_contributors",
+            path,
+          },
+        }).some(error => error.includes("contributors.path")),
+        `expected path to be rejected: ${path}`,
+      );
+    }
+  });
+
+  it("parses all-contributors JSON into sanitized login hints", () => {
+    const parsed = parseAllContributorsHints(JSON.stringify({
+      contributors: [
+        { login: "Maintainer", name: "A Maintainer", profile: "https://example.test" },
+        { github: "@reviewer" },
+      ],
+    }));
+
+    assert.equal(parsed.status, "available");
+    assert.deepEqual(parsed.hints.logins, ["maintainer", "reviewer"]);
+  });
+
+  it("labels malformed and partial all-contributors content", () => {
+    assert.equal(parseAllContributorsHints("{").status, "malformed");
+    const partial = parseAllContributorsHints(JSON.stringify({
+      contributors: [
+        { login: "maintainer" },
+        { name: "No Login" },
+      ],
+    }));
+
+    assert.equal(partial.status, "partial");
+    assert.deepEqual(partial.hints.logins, ["maintainer"]);
+    assert(partial.diagnostics.some(diagnostic => diagnostic.includes("Skipped 1 contributor entry")));
+  });
+
+  it("uses contributor hints only from usable coverage states", () => {
+    for (const status of ["malformed", "unavailable", "rate_limited", "unsupported"]) {
+      assert.equal(
+        contributorHintsFromSource({
+          coverage: { status },
+          hints: { logins: ["known-reviewer"] },
+        }).logins.size,
+        0,
+        `expected ${status} hints to be ignored`,
+      );
+    }
+
+    assert.deepEqual(
+      [...contributorHintsFromSource({
+        coverage: { status: "partial" },
+        hints: { logins: ["Known-Reviewer"] },
+      }).logins],
+      ["known-reviewer"],
+    );
+  });
+});
+
 describe("comment source classification", () => {
   it("distinguishes Copilot, Actions, dependency bots, scanners, humans, and unknown bots", () => {
     assert.equal(classifyCommentSource({ login: "copilot-pull-request-reviewer", type: "Bot" }), "copilot");
@@ -212,5 +335,12 @@ describe("comment source classification", () => {
       "author_reply",
     );
     assert.equal(classifyCommentSource({ login: "some-review-bot", type: "Bot" }), "unknown_bot");
+  });
+
+  it("uses configured contributor hints only for comment-source classification", () => {
+    const contributorHints = { logins: new Set(["known-reviewer"]) };
+
+    assert.equal(classifyCommentSource({ login: "known-reviewer" }, { contributorHints }), "human_reviewer");
+    assert.equal(classifyCommentSource({ login: "unknown-reviewer" }, { contributorHints }), "unknown");
   });
 });

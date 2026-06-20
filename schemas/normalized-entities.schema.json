@@ -36,6 +36,32 @@
         }
       }
     },
+    "contributorSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceType", "path", "coverage", "hintCount"],
+      "properties": {
+        "sourceType": { "enum": ["all_contributors"] },
+        "path": { "type": "string" },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["family", "source", "status", "attempts", "diagnostics", "downstreamImpact"],
+          "properties": {
+            "family": { "const": "contributor_source" },
+            "source": { "type": "string" },
+            "status": { "enum": ["available", "partial", "unavailable", "malformed", "unsupported", "rate_limited"] },
+            "attempts": { "type": "integer", "minimum": 1 },
+            "diagnostics": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "downstreamImpact": { "type": ["string", "null"] }
+          }
+        },
+        "hintCount": { "type": "integer", "minimum": 0 }
+      }
+    },
     "pullRequests": {
       "type": "array",
       "items": {

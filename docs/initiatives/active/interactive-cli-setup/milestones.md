@@ -215,11 +215,11 @@ Generated methodology and report metadata can label configured workflow context 
 
 ### Acceptance Criteria
 
-- [ ] Methodology/report output can show configured workflow context when present.
-- [ ] Output clearly distinguishes configured workflow context from observed GitHub evidence.
-- [ ] Omitted workflow context produces no misleading empty or unknown-heavy report clutter.
-- [ ] Existing metrics, ranking, and PR class filtering remain unchanged.
-- [ ] Tests cover configured and omitted workflow context in generated artifacts.
+- [x] Methodology/report output can show configured workflow context when present.
+- [x] Output clearly distinguishes configured workflow context from observed GitHub evidence.
+- [x] Omitted workflow context produces no misleading empty or unknown-heavy report clutter.
+- [x] Existing metrics, ranking, and PR class filtering remain unchanged.
+- [x] Tests cover configured and omitted workflow context in generated artifacts.
 
 ### Required Validation
 
@@ -246,8 +246,15 @@ Generated methodology and report metadata can label configured workflow context 
 ### Status
 
 - [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged in PR #37 on 2026-06-19
 
 ## M5: Contributor Source Configuration
+
+Status: Implemented on 2026-06-20 for PR review.
 
 ### Outcome
 
@@ -275,12 +282,12 @@ Users can optionally configure `.all-contributorsrc` as a structured contributor
 
 ### Acceptance Criteria
 
-- [ ] Profile/schema validation can name an optional `all_contributors` source path and rejects unsupported contributor-source profile types.
-- [ ] The collector records contributor-source coverage as available, unavailable, partial, malformed, or unsupported.
-- [ ] Contributor-aware comment-source classification and contributor-source coverage metadata can use configured `.all-contributorsrc` hints without changing individual-ranking guardrails.
-- [ ] Contributor hints do not alter scoring formulas, PR authorship conclusions, reviewer attribution, or person-level report/CSV output.
-- [ ] Reports and CSVs do not include raw contributor file contents or person rankings.
-- [ ] Tests cover structured source parsing, unsupported Markdown behavior, malformed content, inaccessible files, and omitted config.
+- [x] Profile/schema validation can name an optional `all_contributors` source path and rejects unsupported contributor-source profile types.
+- [x] The collector records contributor-source coverage as available, unavailable, partial, malformed, or unsupported.
+- [x] Contributor-aware comment-source classification and contributor-source coverage metadata can use configured `.all-contributorsrc` hints without changing individual-ranking guardrails.
+- [x] Contributor hints do not alter scoring formulas, PR authorship conclusions, reviewer attribution, or person-level report/CSV output.
+- [x] Reports and CSVs do not include raw contributor file contents or person rankings.
+- [x] Tests cover structured source parsing, unsupported Markdown behavior, malformed content, inaccessible files, and omitted config.
 
 ### Required Validation
 
@@ -309,7 +316,12 @@ Users can optionally configure `.all-contributorsrc` as a structured contributor
 
 ### Status
 
-- [ ] Not started
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened in PR #47 on 2026-06-20
+- [ ] Merged
 
 ## M6: Reusable Presets And Rerun Guidance
 

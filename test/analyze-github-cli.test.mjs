@@ -144,6 +144,17 @@ function createProvider(overrides = {}) {
       calls.push(["getLanguages", input]);
       return { JavaScript: 1200 };
     },
+    async getRepositoryContent(input) {
+      calls.push(["getRepositoryContent", input]);
+      return {
+        encoding: "base64",
+        content: Buffer.from(JSON.stringify({
+          contributors: [
+            { login: "known-reviewer", name: "Known Reviewer" },
+          ],
+        })).toString("base64"),
+      };
+    },
     async listMergedPullRequests(input) {
       calls.push(["listMergedPullRequests", input]);
       return [{ number: 7, mergedAt: "2026-06-01T12:00:00Z" }];
@@ -207,6 +218,35 @@ async function writeWorkflowProfile(directory) {
       primaryMergeMethod: "squash_merge",
       releaseStrategy: "release_prs",
       branchStrategy: "main_plus_release_branches",
+    },
+    rules: [
+      {
+        id: "runtime",
+        match: { prefix: "src/" },
+        category: "code",
+        role: "core_product_code",
+        functionalSurface: "runtime",
+      },
+      {
+        id: "tests",
+        match: { prefix: "test/" },
+        category: "tests",
+        role: "tests",
+        functionalSurface: "test_suite",
+      },
+    ],
+  }), "utf8");
+  return profilePath;
+}
+
+async function writeContributorProfile(directory) {
+  const profilePath = join(directory, "profile-with-contributors.json");
+  await writeFile(profilePath, JSON.stringify({
+    schemaVersion: "repository-profile.v1",
+    repository: { owner: "example", name: "example-repo" },
+    contributors: {
+      sourceType: "all_contributors",
+      path: ".all-contributorsrc",
     },
     rules: [
       {
@@ -1398,6 +1438,124 @@ describe("GitHub live analyze CLI", () => {
       assert(!prMetricsCsv.includes("squash_merge"));
       assert(!prMetricsCsv.includes("release_prs"));
       assert(!prMetricsCsv.includes("main_plus_release_branches"));
+    });
+  });
+
+  it("uses configured all-contributors hints for comment-source metadata without person-ranking output", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeContributorProfile(directory);
+      const outDir = join(directory, "contributor-source-out");
+      const provider = createProvider({
+        async getReviewThreads(input) {
+          this.calls.push(["getReviewThreads", input]);
+          return {
+            totalCount: 1,
+            nodes: [
+              {
+                id: "thread-1",
+                isResolved: true,
+                isOutdated: false,
+                path: "src/live.js",
+                line: 12,
+                comments: {
+                  nodes: [
+                    {
+                      databaseId: 1001,
+                      author: { login: "known-reviewer" },
+                      path: "src/live.js",
+                      line: 12,
+                      originalLine: 12,
+                      createdAt: "2026-06-01T10:31:00Z",
+                      updatedAt: "2026-06-01T10:31:00Z",
+                      url: "https://github.com/example/example-repo/pull/7#discussion_r1001",
+                    },
+                  ],
+                },
+              },
+            ],
+          };
+        },
+      });
+
+      await runAnalyzeGithub({
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir,
+      }, {
+        provider,
+        now: () => "2026-06-09T00:00:00Z",
+      });
+
+      const [
+        sourceBundle,
+        normalized,
+        metricsSummary,
+        reportJson,
+        reportMarkdown,
+        methodology,
+        prMetricsCsv,
+        bottleneckExamplesCsv,
+        commentSourcesCsv,
+        collectionCoverageCsv,
+      ] = await Promise.all([
+        readJson(join(outDir, "source-bundle.json")),
+        readJson(join(outDir, "normalized.json")),
+        readJson(join(outDir, "metrics-summary.json")),
+        readJson(join(outDir, "friction-report.json")),
+        readFile(join(outDir, "friction-report.md"), "utf8"),
+        readFile(join(outDir, "methodology.md"), "utf8"),
+        readFile(join(outDir, "pr-metrics.csv"), "utf8"),
+        readFile(join(outDir, "bottleneck-examples.csv"), "utf8"),
+        readFile(join(outDir, "comment-sources.csv"), "utf8"),
+        readFile(join(outDir, "collection-coverage.csv"), "utf8"),
+      ]);
+
+      assert.equal(sourceBundle.contributorSource.hintCount, 1);
+      assert.equal(sourceBundle.contributorSource.hints, undefined);
+      assert.equal(normalized.contributorSource.hintCount, 1);
+      assert.equal(normalized.contributorSource.hints, undefined);
+      assert.equal(normalized.pullRequests[0].reviewComments.bySource.human_reviewer, 1);
+      assert.equal(normalized.pullRequests[0].reviewComments.bySource.unknown, 0);
+      assert.deepEqual(normalized.pullRequests[0].reviewDecision, {
+        state: "none",
+        humanApproved: false,
+        humanChangesRequested: false,
+        humanReviewerCount: 0,
+        source: "reviews",
+      });
+      assert.equal(metricsSummary.pullRequests[0].review.comments.bySource.human_reviewer, 1);
+      assert.deepEqual(metricsSummary.pullRequests[0].review.decision, normalized.pullRequests[0].reviewDecision);
+      assert.equal(metricsSummary.pullRequests[0].components.commentSourceDensity.value, 1);
+      assert.equal(reportJson.contributorSource.status, "available");
+      assert.equal(reportJson.contributorSource.hintCount, 1);
+      assert.equal(reportJson.guardrails.avoidsIndividualRanking, true);
+      assert(reportMarkdown.includes("## Contributor Source Context"));
+      assert(reportMarkdown.includes("| Coverage status | available |"));
+      assert(methodology.includes("## Contributor Source Context"));
+      assert(methodology.includes("- Parsed hint count: 1"));
+      assert(collectionCoverageCsv.includes("contributor_source,available"));
+      assert(commentSourcesCsv.includes("human_reviewer,1"));
+
+      const serializedArtifacts = [
+        JSON.stringify(sourceBundle),
+        JSON.stringify(normalized),
+        JSON.stringify(metricsSummary),
+        JSON.stringify(reportJson),
+        reportMarkdown,
+        methodology,
+        prMetricsCsv,
+        bottleneckExamplesCsv,
+        commentSourcesCsv,
+        collectionCoverageCsv,
+      ].join("\n");
+      assert(!serializedArtifacts.includes("Known Reviewer"));
+      assert(!serializedArtifacts.includes("contributors\":["));
+      assert(!serializedArtifacts.includes("\"logins\""));
+      assert(!JSON.stringify(sourceBundle.contributorSource).includes("known-reviewer"));
+      assert(!JSON.stringify(normalized.contributorSource).includes("known-reviewer"));
+      assert(serializedArtifacts.includes("individual contributor rankings are not emitted"));
+      assert(!commentSourcesCsv.includes("known-reviewer"));
     });
   });
 

@@ -82,6 +82,7 @@ const WORKFLOW_CONTEXT_VALUE_LABELS = new Map([
 ]);
 
 export const CONFIGURED_WORKFLOW_NOTE = "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.";
+export const CONTRIBUTOR_SOURCE_NOTE = "Contributor source metadata comes from the configured repository profile source. It may improve comment-source classification coverage, but it does not change scores, PR authorship conclusions, reviewer attribution, CSV export shape, person-level CSV output, or individual ranking guardrails.";
 
 const PR_OPEN_DIFF_LIMITATION_NOTE = "PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data.";
 
@@ -702,6 +703,22 @@ export function hasConfiguredWorkflowContext(configuredWorkflow) {
   return configuredWorkflowEntries(configuredWorkflow).length > 0;
 }
 
+export function normalizeContributorSourceMetadata(contributorSource) {
+  if (!contributorSource || typeof contributorSource !== "object" || Array.isArray(contributorSource)) {
+    return null;
+  }
+  return {
+    source: "repository_profile",
+    sourceType: contributorSource.sourceType ?? "unknown",
+    path: contributorSource.path ?? null,
+    status: contributorSource.coverage?.status ?? "unavailable",
+    hintCount: Number.isInteger(contributorSource.hintCount)
+      ? contributorSource.hintCount
+      : Array.isArray(contributorSource.hints?.logins) ? contributorSource.hints.logins.length : 0,
+    note: CONTRIBUTOR_SOURCE_NOTE,
+  };
+}
+
 function configuredWorkflowEntry(configuredWorkflow, field) {
   const entry = configuredWorkflowEntries(configuredWorkflow).find(candidate => candidate.field === field);
   return entry ?? null;
@@ -885,18 +902,20 @@ function summarizeSensitivity(metricsSummary, baselineBottlenecks) {
 }
 
 export function generateRepositoryFrictionReport(metricsSummary, options = {}) {
-  const { workflowContext } = options ?? {};
+  const { workflowContext, contributorSource } = options ?? {};
   const prClasses = summarizePrClasses(metricsSummary);
   const bottlenecksWithSharedSignalKeys = summarizeBottlenecks(metricsSummary, prClasses);
   const sharedSignals = summarizeSharedSignals(bottlenecksWithSharedSignalKeys);
   const bottlenecks = bottlenecksWithSharedSignalKeys.map(({ rankingKey, ...bottleneck }) => bottleneck);
   const configuredWorkflow = normalizeConfiguredWorkflowContext(workflowContext);
+  const contributorSourceMetadata = normalizeContributorSourceMetadata(contributorSource);
   return {
     reportVersion: FRICTION_REPORT_VERSION,
     metricVersion: metricsSummary.metricVersion,
     targetRepository: metricsSummary.targetRepository,
     ...(metricsSummary.analysisFilter ? { analysisFilter: metricsSummary.analysisFilter } : {}),
     ...(configuredWorkflow ? { configuredWorkflow } : {}),
+    ...(contributorSourceMetadata ? { contributorSource: contributorSourceMetadata } : {}),
     summary: {
       pullRequests: metricsSummary.totals?.pullRequests ?? 0,
       changedLines: metricsSummary.totals?.changedLines ?? 0,
@@ -1303,6 +1322,27 @@ function renderCoverageSummary(coverage) {
   );
 }
 
+function renderContributorSourceContext(contributorSource) {
+  if (!contributorSource) return "";
+
+  return [
+    "## Contributor Source Context",
+    "",
+    contributorSource.note ?? CONTRIBUTOR_SOURCE_NOTE,
+    "",
+    renderMarkdownTable(
+      ["Field", "Value"],
+      [
+        ["Source type", contributorSource.sourceType],
+        ["Path", contributorSource.path ?? "not recorded"],
+        ["Coverage status", contributorSource.status],
+        ["Parsed hint count", contributorSource.hintCount],
+      ],
+    ),
+    "",
+  ].join("\n");
+}
+
 function renderKeyFindings(report) {
   const topBottlenecks = topBottleneckLabels(report);
   const strongest = report.bottlenecks?.[0];
@@ -1612,6 +1652,9 @@ export function renderRepositoryFrictionMarkdown(report) {
     ...(hasConfiguredWorkflowContext(report.configuredWorkflow)
       ? [renderConfiguredWorkflowContext(report.configuredWorkflow)]
       : []),
+    ...(report.contributorSource
+      ? [renderContributorSourceContext(report.contributorSource)]
+      : []),
     ...(workflowDataCaveats(report).length
       ? [renderWorkflowDataCaveats(report)]
       : []),
@@ -1691,6 +1734,9 @@ export function renderRepositoryFrictionMarkdown(report) {
     "- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.",
     ...(hasConfiguredWorkflowContext(report.configuredWorkflow)
       ? ["- Configured workflow context is user-configured repository-profile context; it does not change scoring, ranking, CSV exports, or PR class matching."]
+      : []),
+    ...(report.contributorSource
+      ? ["- Contributor source metadata is coverage context only; raw contributor contents and individual contributor rankings are not emitted."]
       : []),
     ...(workflowDataCaveats(report).length
       ? ["- Workflow data caveats explain unavailable evidence using configured profile context without treating merge method as observed evidence or reconstructing open-time PR size."]
