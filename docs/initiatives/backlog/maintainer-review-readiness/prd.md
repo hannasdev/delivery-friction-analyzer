@@ -12,22 +12,23 @@ Status: Backlog.
 - Related docs:
   - [Milestones](milestones.md)
   - [Architecture Notes](architecture.md)
-  - [Repository friction report](../../../../reports/delivery-friction-analyzer/friction-report.md)
-  - [Repository profile](../../../../profiles/delivery-friction-analyzer.json)
   - [Repository Profile Format](../../../reference/repository-profile.md)
   - [Release Automation](../../../reference/release-automation.md)
   - [Setup And Report Usability](../../active/setup-report-usability/prd.md)
+- Planning evidence:
+  - Local generated report bundle: `reports/delivery-friction-analyzer/` (ignored artifact; not part of this PR)
+  - Planned self-profile path: `profiles/delivery-friction-analyzer.json` (to be added in M1)
 
 ## Problem
 
-The repository's self-analysis report shows that delivery friction is not coming from failed CI. Across the analyzed 30 merged pull requests, the report recorded:
+The repository's local self-analysis report shows that delivery friction is not coming from failed CI. Across the analyzed 30 merged pull requests, the report and supporting CSV review showed:
 
 - 0 failed checks and 0 cancelled workflow runs;
 - 109 review comments, all from Copilot plus author replies;
 - 19 PRs with review threads;
 - 19 PRs with post-review commits;
 - 8 PRs over 1,000 changed lines;
-- all PR classes and functional surfaces reported as `unknown` because the repository profile has no rules.
+- all PR classes and functional surfaces reported as `unknown` because the local draft repository profile used for planning had no rules.
 
 This means the main workflow issue is late discovery during automated review: review comments repeatedly catch contract wording, release automation edge cases, report caveat consistency, and documentation precision after a PR already exists. The report also cannot classify this repository well enough to make future self-analysis actionable.
 

@@ -70,7 +70,7 @@ Maintainers and agents can run focused local commands that catch recurring relea
 
 - Add a general preflight script for ordinary changes that runs the existing full test suite and whitespace checks.
 - Add a release/package preflight script that includes `npm pack --dry-run`, release-versioning tests, and direct CLI entrypoint smoke checks.
-- Document when to use the ordinary preflight versus the release/package preflight.
+- Document when to use the ordinary preflight versus the release/package preflight; this milestone owns command usage docs, while M3 owns broader review-readiness guidance.
 - Keep scripts deterministic, local, and compatible with the existing Node 20+ requirement.
 - Update maintainer documentation where command names or release validation expectations change.
 
@@ -170,6 +170,7 @@ Recurring automated review expectations are available before implementation and 
 
 - Guidance should not become a second README.
 - Broad-change tripwires should trigger judgment, not automatic rejection.
+- The 750-line tripwire is intentionally below the 1,000-line outlier observation so scope gets discussed before a change becomes part of the largest-diff cluster.
 - If guidance grows beyond a short root document, split follow-up skill creation into a separate milestone or initiative.
 
 ### Status

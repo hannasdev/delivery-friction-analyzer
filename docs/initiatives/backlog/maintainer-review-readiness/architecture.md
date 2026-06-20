@@ -15,7 +15,7 @@ This initiative changes maintainer workflow contracts. Product-facing review-the
 
 The repository currently has:
 
-- a minimal `profiles/delivery-friction-analyzer.json` with no path rules and no PR class rules;
+- no committed self-profile for this repository yet; planning used a local draft at `profiles/delivery-friction-analyzer.json`, and M1 will add the committed self-profile;
 - `npm test` as the only npm validation script beyond report fixture generation;
 - CI workflows that run tests and package dry-run validation;
 - release and publish workflows documented in `docs/reference/release-automation.md`;
