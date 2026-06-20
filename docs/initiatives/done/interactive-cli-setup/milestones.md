@@ -325,7 +325,7 @@ Users can optionally configure `.all-contributorsrc` as a structured contributor
 
 ## M6: Reusable Presets And Rerun Guidance
 
-Status: Implemented on 2026-06-20 for PR review.
+Status: Merged in PR #48 on 2026-06-20.
 
 ### Outcome
 
@@ -382,6 +382,6 @@ Interactive setup can save reusable local run preferences so users can rerun ana
 - [x] Active
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged in PR #48 on 2026-06-20

@@ -2,14 +2,14 @@
 
 ## Status
 
-Status: Completed; final milestone implemented for PR preparation on 2026-06-20.
+Status: Completed in PR #48 on 2026-06-20.
 
 - State: Done
 - Owner: Hanna
 - Created: 2026-06-15
 - Activated: 2026-06-15
 - Completed: 2026-06-20
-- Current milestone state: M1, M2, M3, and M4 merged; M5 merged in PR #47; M6 implemented for final review.
+- Current milestone state: M1, M2, M3, and M4 merged; M5 merged in PR #47; M6 merged in PR #48.
 - Related issue:
   - None yet.
 - Related docs:
