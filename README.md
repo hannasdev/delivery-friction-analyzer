@@ -15,11 +15,13 @@ The analyzer runs locally with your GitHub credentials. Generated artifacts pres
 
 - Node.js 20 or newer.
 - GitHub CLI (`gh`) installed and authenticated with access to the target repository.
-- A repository profile JSON for the repository you want to analyze.
+- A repository profile JSON for the repository you want to analyze. Interactive setup can create a starter profile for you.
 
 For public repositories, ordinary read access is usually enough. Private repositories need a `gh` token with enough read access for the requested API families. With a classic PAT, that usually means the `repo` scope. With a fine-grained token or GitHub App, grant read permissions for repository metadata and contents, pull requests, Actions, and checks where available. Missing or partial API coverage is recorded in the generated methodology and coverage artifacts instead of being treated as complete data.
 
 ## Quickstart
+
+### Try the sample target
 
 From this repository, install dependencies and run the analyzer against the sample validation target:
 
@@ -32,25 +34,35 @@ npm run analyze:github -- \
   --out reports/mcp-writing
 ```
 
-From another project or script, run the published CLI with `npx`:
+Open `reports/mcp-writing/friction-report.md` first. It is the main human-readable report. Use the JSON and CSV files when you want to audit a finding, compare PRs, or build follow-up analysis.
+
+### Analyze your own repository
+
+For a guided first run in a local terminal, let interactive setup create or confirm the repository profile:
+
+```sh
+npm run analyze:github -- \
+  --interactive \
+  --repo owner/name \
+  --limit 30 \
+  --profile profiles/owner-name.json \
+  --out reports/owner-name \
+  --dry-run
+```
+
+If the profile path does not exist, interactive setup can create a minimal `repository-profile.v1` profile. `--dry-run` validates repository access, profile JSON, output directory writability, and a small sample of GitHub API coverage without writing the full report bundle. When the profile looks right, rerun the command without `--dry-run`.
+
+To run the CLI from another project with the npm package, pass the same choices as explicit flags:
 
 ```sh
 npx delivery-friction-analyzer \
-  --repo hannasdev/mcp-writing \
+  --repo owner/name \
   --limit 30 \
   --profile path/to/repository-profile.json \
-  --out reports/mcp-writing
+  --out reports/owner-name
 ```
 
-Open `reports/mcp-writing/friction-report.md` first. It is the main human-readable report. Use the JSON and CSV files when you want to audit a finding, compare PRs, or build follow-up analysis.
-
-For a guided first run in a local terminal, use the opt-in interactive flow:
-
-```sh
-npm run analyze:github -- --interactive
-```
-
-Interactive mode asks for the same run choices supported by flags, including repository, PR limit, profile path, output directory, dry-run mode, CSV exports, JSON completion output, and configured PR class exclusions. It can also create a missing repository profile path or write a generated profile copy with confirmed workflow context and release PR title rules. Scripted and CI usage should keep passing explicit flags; missing required flags without `--interactive` fail deterministically instead of waiting for input.
+Interactive mode walks through missing run choices such as repository, PR limit, profile path, output directory, dry-run mode, and JSON completion output. Depending on the run and profile, it can also prompt for profile creation or updates, CSV exports, and configured PR class exclusions. Use it for guided local setup; keep explicit flags for scripts and CI.
 
 ## Repository Profiles
 
@@ -64,32 +76,26 @@ Profiles can define:
 - PR classes such as release, dependency, feature, or other repository-specific groups;
 - workflow context such as merge method, release strategy, and branch strategy.
 
-For a new repository, the easiest path is to let interactive setup create the profile file you plan to use:
-
-```sh
-npm run analyze:github -- \
-  --interactive \
-  --repo owner/name \
-  --limit 30 \
-  --profile profiles/owner-name.json \
-  --out reports/owner-name \
-  --dry-run
-```
-
-If `profiles/owner-name.json` does not exist, interactive setup asks whether to create it, then writes a minimal `repository-profile.v1` profile with confirmed workflow context and optional release PR title rules. `--dry-run` still validates repository access, profile JSON, output directory writability, and a small sample of GitHub API coverage. It may create the output directory and briefly write then remove a temporary probe file to confirm writability, but it does not write the full report bundle. When interactive setup saves or generates a profile during a dry run, the completion output prints the saved profile path so you can inspect and edit it before a full run.
+For a new repository, the easiest path is the guided `--interactive --dry-run` command in Quickstart. If the profile path does not exist, interactive setup asks whether to create it, then writes a minimal `repository-profile.v1` profile with user-provided workflow context and optional release PR title rules. It may create the output directory and briefly write then remove a temporary probe file to confirm writability. When interactive setup saves or generates a profile during a dry run, the completion output prints the saved profile path so you can inspect and edit it before a full run.
 
 Use `fixtures/github/mcp-writing/profile.json` as a starting point when you prefer to copy an existing profile by hand. The full profile format is documented in `docs/reference/repository-profile.md`, and the schema lives at `schemas/repository-profile.schema.json`.
 
 ## Outputs
 
-A successful run writes a report bundle to the output directory:
+A successful run writes a report bundle to the output directory. Read these first:
 
 - `friction-report.md`: the main report to read first.
 - `methodology.md`: data coverage, caveats, and interpretation notes.
+
+Use these when you want to audit, automate, or build follow-up analysis:
+
 - `friction-report.json`: machine-readable report data.
 - `metrics-summary.json`: computed metrics used by the report.
 - `normalized.json`: normalized repository, PR, file, review, and validation entities.
 - `source-bundle.json`: collected source data for auditability.
+
+When CSV exports are enabled, the bundle also includes spreadsheet-friendly evidence files:
+
 - `pr-metrics.csv`: per-PR metrics for spreadsheet review.
 - `bottleneck-examples.csv`: representative bottleneck examples.
 - `comment-sources.csv`: review-comment source breakdowns.
@@ -136,11 +142,13 @@ When using a model this way, keep the deterministic artifacts authoritative: pre
 
 No separate model-ready context artifact is required for this workflow. Reconsider a new artifact only if a concrete consumer needs a smaller single-file context, machine-readable prompt packaging, or fields that cannot be represented clearly by `friction-report.json` plus curated CSV evidence.
 
-## Current Direction
+## Development Notes
+
+### Current Direction
 
 Delivery Friction Analyzer is currently a local, GitHub-connected analyzer that produces repository-level friction reports from live pull request data. It is repo-source-agnostic: repository-specific assumptions live in profiles.
 
-The current product wedge is a maintainer workflow:
+The current product focus is a maintainer workflow:
 
 - collect the latest merged PR sample from a target repository;
 - classify files and PRs through repository profiles;
@@ -151,8 +159,6 @@ The current product wedge is a maintainer workflow:
 The product should eventually combine GitHub delivery friction with token and model usage, but GitHub-only analytics remain the active validation surface.
 
 `hannasdev/mcp-writing` remains the first validation target and fixture source, not product-specific scope.
-
-## Development Notes
 
 The existing metrics-summary-only report command remains available for fixture and advanced workflows:
 
