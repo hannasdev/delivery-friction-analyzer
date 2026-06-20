@@ -252,7 +252,7 @@ describe("repository profile schema", () => {
 
     assert.deepEqual(validateSchema(validProfile, schema, {}), []);
 
-    for (const path of ["../CONTRIBUTORS.md", "docs/../CONTRIBUTORS.md", "/CONTRIBUTORS.md", "   "]) {
+    for (const path of ["../CONTRIBUTORS.md", "docs/../CONTRIBUTORS.md", "/CONTRIBUTORS.md", "docs\\CONTRIBUTORS.md", "   "]) {
       const errors = validateSchema({
         ...validProfile,
         contributors: {

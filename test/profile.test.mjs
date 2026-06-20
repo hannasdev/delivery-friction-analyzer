@@ -234,7 +234,7 @@ describe("contributor source profile validation", () => {
     });
 
     assert(errors.some(error => error.includes("contributors.sourceType must be one of")));
-    assert(errors.some(error => error.includes("contributors.path must be a repository-relative path")));
+    assert(errors.some(error => error.includes("contributors.path must be a slash-delimited repository-relative path")));
     assert(errors.some(error => error.includes("contributors.observedFrom is not supported")));
     assert.throws(
       () => assertValidContributorSource({ contributors: { sourceType: "markdown" } }),
@@ -250,7 +250,7 @@ describe("contributor source profile validation", () => {
       },
     }), []);
 
-    for (const path of ["../CONTRIBUTORS.md", "docs/../CONTRIBUTORS.md", "/CONTRIBUTORS.md", "   "]) {
+    for (const path of ["../CONTRIBUTORS.md", "docs/../CONTRIBUTORS.md", "/CONTRIBUTORS.md", "docs\\CONTRIBUTORS.md", "   "]) {
       assert(
         validateContributorSource({
           contributors: {

@@ -55,8 +55,12 @@ export function validateContributorSource(profile = {}) {
   if (contributors.path !== undefined) {
     if (typeof contributors.path !== "string" || contributors.path.trim() === "") {
       errors.push("contributors.path must be a non-empty string when provided");
-    } else if (contributors.path.startsWith("/") || hasParentDirectorySegment(contributors.path)) {
-      errors.push("contributors.path must be a repository-relative path without parent-directory segments");
+    } else if (
+      contributors.path.startsWith("/")
+      || contributors.path.includes("\\")
+      || hasParentDirectorySegment(contributors.path)
+    ) {
+      errors.push("contributors.path must be a slash-delimited repository-relative path without parent-directory segments");
     }
   }
 
