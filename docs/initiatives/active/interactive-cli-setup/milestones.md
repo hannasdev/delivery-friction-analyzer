@@ -320,7 +320,7 @@ Users can optionally configure `.all-contributorsrc` as a structured contributor
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened in PR #47 on 2026-06-20
 - [ ] Merged
 
 ## M6: Reusable Presets And Rerun Guidance

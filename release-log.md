@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can improve comment-source coverage without parsing Markdown contributor files, changing scores, or emitting raw contributor contents or person rankings in reports or CSVs.
 - Who is affected: Maintainers authoring repository profiles or reviewing generated reports, methodology, and coverage artifacts.
 - Action needed: Optional; add `contributors.sourceType: "all_contributors"` and a repository-relative `contributors.path` when a target repository has a trusted `.all-contributorsrc`.
-- PR: TBD
+- PR: #47
 
 ### 2026-06-20 — Workflow Data Caveats
 
