@@ -39,7 +39,7 @@ The PR-count selection wording and completed-initiative bookkeeping were correct
 
 ## Non-Goals
 
-- Do not implement PR class segmentation; that remains in the separate [PR Class Segmentation](../pr-class-segmentation/prd.md) backlog initiative.
+- Do not implement PR class segmentation; that remains covered by the completed [PR Class Segmentation](../../done/pr-class-segmentation/prd.md) initiative.
 - Do not add date-window collection or `--since`; live analysis remains latest-N merged PRs.
 - Do not add hosted services, GitHub Apps, webhooks, dashboards, or persistent server-side state.
 - Do not redact source bundles by default in this initiative; artifact sensitivity remains documented and local/private.

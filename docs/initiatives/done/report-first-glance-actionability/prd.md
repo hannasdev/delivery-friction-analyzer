@@ -2,20 +2,21 @@
 
 ## Status
 
-Status: Active; M1 merged and M2 active.
+Status: Completed in PR #31 on 2026-06-15.
 
-- State: Active
+- State: Done
 - Owner: Hanna
 - Created: 2026-06-15
 - Activated: 2026-06-15
-- Current milestone: M2: Model-Ready Context Decision And Documentation (active)
+- Completed: 2026-06-15
+- Current milestone state: M1 merged in PR #30; M2 merged in PR #31; M3 deferred because M2 determined existing JSON/CSV artifacts are sufficient.
 - Related docs:
   - [Milestones](milestones.md)
   - [Architecture Notes](architecture.md)
   - [Friction Report Contract](../../../contracts/friction-report.md)
   - [Friction Metrics Contract](../../../contracts/friction-metrics.md)
   - [Report Readability And Evidence Transparency](../../done/report-readability-evidence-transparency/prd.md)
-  - [PR Class Segmentation](../../active/pr-class-segmentation/prd.md)
+  - [PR Class Segmentation](../pr-class-segmentation/prd.md)
 
 ## Problem
 
@@ -129,16 +130,16 @@ The implementation should first decide whether existing `friction-report.json` a
 
 ## Acceptance Criteria
 
-- [ ] Markdown reports include a top-of-report focus snapshot or equivalent section that names focus areas, action categories, reviewed evidence, and confidence caveats.
-- [ ] Recommendation category context appears before detailed ranked bottlenecks.
-- [ ] The executive summary is tailored to findings and reviewed evidence, not only raw totals and top bottleneck IDs.
-- [ ] The opening preserves or intentionally replaces the existing how-to-read trust orientation for observed evidence, interpretation, recommendations, and caveats.
-- [ ] User-visible Markdown phrasing replaces unclear metric-internal wording such as unexplained "changed-file spread" with clearer reader-facing language where appropriate.
-- [ ] Internal stable IDs remain unchanged in JSON and CSV contracts unless a separate contract decision is made.
-- [ ] Coverage, outlier, shared-signal, PR-class, and analysis-filter caveats remain visible before detailed recommendations.
-- [ ] Golden Markdown tests cover the revised top-level section order and key phrasing.
-- [ ] Report contract documentation describes the revised Markdown opening flow.
-- [ ] The model-ready report context question is first resolved as a documented decision about existing artifacts versus a new deterministic local artifact contract.
+- [x] Markdown reports include a top-of-report focus snapshot or equivalent section that names focus areas, action categories, reviewed evidence, and confidence caveats.
+- [x] Recommendation category context appears before detailed ranked bottlenecks.
+- [x] The executive summary is tailored to findings and reviewed evidence, not only raw totals and top bottleneck IDs.
+- [x] The opening preserves or intentionally replaces the existing how-to-read trust orientation for observed evidence, interpretation, recommendations, and caveats.
+- [x] User-visible Markdown phrasing replaces unclear metric-internal wording such as unexplained "changed-file spread" with clearer reader-facing language where appropriate.
+- [x] Internal stable IDs remain unchanged in JSON and CSV contracts unless a separate contract decision is made.
+- [x] Coverage, outlier, shared-signal, PR-class, and analysis-filter caveats remain visible before detailed recommendations.
+- [x] Golden Markdown tests cover the revised top-level section order and key phrasing.
+- [x] Report contract documentation describes the revised Markdown opening flow.
+- [x] The model-ready report context question is first resolved as a documented decision about existing artifacts versus a new deterministic local artifact contract.
 
 ## Risks And Tradeoffs
 
@@ -164,9 +165,9 @@ The implementation should first decide whether existing `friction-report.json` a
 
 ## Open Questions
 
-- [ ] Should implementation keep the preferred default of a compact top recommendation category summary plus the full table later, or does moving the full table near the top prove cleaner?
+- [x] Should implementation keep the preferred default of a compact top recommendation category summary plus the full table later, or does moving the full table near the top prove cleaner? Keep the compact top recommendation category snapshot and retain the full category reference later in the report.
 - [x] What exact wording should replace "changed-file spread" in each Markdown prose context? Use "Change scope" with an explicit explanation that it sums core files touched, directories touched, and functional surfaces touched; it is not a line-count metric.
-- [ ] Should implementation keep the preferred default of deriving the focus snapshot in Markdown only, or is a `friction-report.v1` field needed for downstream consumers?
-- [ ] Should the top focus snapshot combine ranked bottlenecks with category counts, coverage caveats, and outlier/class dominance as proposed, or should it narrow to ranked bottlenecks only?
+- [x] Should implementation keep the preferred default of deriving the focus snapshot in Markdown only, or is a `friction-report.v1` field needed for downstream consumers? Keep the focus snapshot Markdown-derived; no new `friction-report.v1` field is needed.
+- [x] Should the top focus snapshot combine ranked bottlenecks with category counts, coverage caveats, and outlier/class dominance as proposed, or should it narrow to ranked bottlenecks only? Combine ranked bottlenecks with action categories, reviewed evidence, and confidence caveats.
 - [x] Are existing `friction-report.json` plus CSV exports sufficient as model input, or is a smaller model-ready `report-context.json` artifact needed? Existing `friction-report.json` plus curated CSV exports are sufficient for a guarded downstream narrative workflow; no smaller model-ready artifact is needed unless a concrete consumer later requires a single-file context or machine-readable prompt package.
-- [ ] If a model-ready artifact is justified by M2, should the separate artifact-producing milestone generate it by full live analysis only, or also by `src/report/generate-report.js` for fixture and advanced workflows?
+- [x] If a model-ready artifact is justified by M2, should the separate artifact-producing milestone generate it by full live analysis only, or also by `src/report/generate-report.js` for fixture and advanced workflows? Not applicable after M2; no model-ready artifact is justified.
