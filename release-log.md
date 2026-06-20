@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can compare bottleneck evidence more quickly while still seeing when evidence is configured, incomplete, unavailable, or directly observed.
 - Who is affected: Maintainers and contributors reviewing generated Markdown friction reports.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/44
 
 ### 2026-06-19 — Interactive Setup Choice Presets
 

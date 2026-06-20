@@ -181,7 +181,7 @@ Markdown reports make repeated evidence details easier to compare through compac
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M4: Profile Improvement Suggestions
