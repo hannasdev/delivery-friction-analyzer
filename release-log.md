@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can distinguish final GitHub PR metadata from unreconstructable open-time PR size without mistaking merge strategy for observed evidence or a scoring input.
 - Who is affected: Maintainers and contributors reviewing generated reports or authoring repository profiles with workflow context.
 - Action needed: Optional; add repository-profile workflow context when unavailable coverage would be easier to interpret with maintainer-confirmed merge or branch assumptions.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/46
 
 ### 2026-06-20 — Profile Improvement Suggestions
 
