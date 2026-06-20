@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: Active; M1 and M2 merged; M3 active.
+Status: Active; M1, M2, and M3 merged; M4 active.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-19
-- Current milestone: M3: Evidence Tables And Status Labels (active)
+- Current milestone: M4: Profile Improvement Suggestions (active)
 - Related issue:
   - None yet.
 - Related docs:
@@ -135,9 +135,9 @@ Reports should also explain when configured workflow context affects data interp
 - [x] Interactive setup can generate opt-in Conventional Commit-style title-based PR class rules.
 - [x] Reports render stable repeated evidence details as tables without losing caveats or source labels.
 - [x] Reports use text-backed status markers for observed, partial, unavailable, configured, warning, and healthy states where they improve scanability.
-- [ ] Reports suggest concrete profile improvements when missing profile configuration limits interpretation.
+- [x] Reports suggest concrete profile improvements when missing profile configuration limits interpretation.
 - [ ] Reports and methodology explain workflow-specific data limits only where relevant, without implying merge commits are currently used to compute PR size.
-- [ ] Existing JSON, CSV, metrics, ranking, and filtering contracts remain backward-compatible unless a later explicit contract change is accepted.
+- [x] Existing JSON, CSV, metrics, ranking, and filtering contracts remain backward-compatible unless a later explicit contract change is accepted.
 
 ## Risks And Tradeoffs
 

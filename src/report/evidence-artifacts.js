@@ -2,6 +2,7 @@ import {
   CONFIGURED_WORKFLOW_NOTE,
   configuredWorkflowEntries,
   hasConfiguredWorkflowContext,
+  profileSuggestions,
 } from "./friction-report.js";
 
 const BOT_OR_SCANNER_SOURCES = new Set([
@@ -357,6 +358,30 @@ function formatConfiguredWorkflowContext(report) {
   ];
 }
 
+function formatProfileSuggestions(report) {
+  const suggestions = profileSuggestions(report);
+  if (!suggestions.length) {
+    return [
+      "## Profile Suggestions",
+      "",
+      "- No profile suggestion thresholds were triggered by this report's PR class, role, or functional-surface evidence.",
+      "",
+    ];
+  }
+
+  return [
+    "## Profile Suggestions",
+    "",
+    "Profile suggestions are optional interpretation improvements derived from existing report evidence. They do not change scores, rankings, CSV exports, or JSON report fields.",
+    "",
+    ...suggestions.map(suggestion => [
+      `- ${suggestion.area}: ${suggestion.evidence}`,
+      `  Suggested next step: ${suggestion.suggestion}`,
+    ].join("\n")),
+    "",
+  ];
+}
+
 export function renderRepositoryFrictionMethodology({
   report,
   sourceBundle,
@@ -394,6 +419,7 @@ export function renderRepositoryFrictionMethodology({
     "",
     "The repository profile maps file paths to categories, roles, and functional surfaces. Those classifications drive non-generated changed-line counts, support-surface summaries, planning-document signals, and low-signal weighting.",
     "",
+    ...formatProfileSuggestions(report),
     ...formatConfiguredWorkflowContext(report),
     "## Scores And Rankings",
     "",

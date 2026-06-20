@@ -126,6 +126,254 @@ describe("friction report generation", () => {
     assert(methodology.includes("not observed GitHub evidence"));
   });
 
+  it("suggests profile PR class rules when fallback unknown dominates the sample", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+    const report = generateRepositoryFrictionReport(metricsSummary);
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle: {
+        selection: { requestedLimit: 30, collectedCount: 3 },
+        coverage: { status: "available", apiFamilies: [] },
+      },
+      profilePath: "fixtures/github/mcp-writing/profile.json",
+      artifactFileNames: {},
+      csvEnabled: false,
+    });
+
+    assert(!("profileSuggestions" in report));
+    assert(markdown.includes("## Profile Suggestions"));
+    assert(markdown.includes("| PR class rules | 3 of 3 analyzed PRs (100%) use fallback unknown PR class evidence."));
+    assert(markdown.includes("Add or refine repository-profile PR class title rules"));
+    assert(methodology.includes("## Profile Suggestions"));
+    assert(methodology.includes("- PR class rules: 3 of 3 analyzed PRs (100%) use fallback unknown PR class evidence."));
+  });
+
+  it("suggests fallback PR class rules when every analyzed PR is unknown in a small sample", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 1,
+        changedLines: 20,
+        nonGeneratedChangedLines: 20,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "one unknown PR",
+          url: "https://example.test/pull/1",
+          prClass: { class: "unknown", classificationSource: "fallback_rule", ruleId: null },
+          diffAtMerge: { changedLines: 20 },
+          files: {
+            nonGeneratedChangedLines: 20,
+            byRole: { core_product_code: 20 },
+            byFunctionalSurface: { runtime: 20 },
+          },
+        },
+      ],
+      rankings: {},
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assert(markdown.includes("| PR class rules | 1 of 1 analyzed PRs (100%) use fallback unknown PR class evidence."));
+  });
+
+  it("suggests file path profile rules when unknown file evidence crosses the threshold", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 2,
+        changedLines: 100,
+        nonGeneratedChangedLines: 100,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "classified PR",
+          url: "https://example.test/pull/1",
+          prClass: { class: "feature", classificationSource: "repository_profile", ruleId: "feature-title" },
+          diffAtMerge: { changedLines: 60 },
+          files: {
+            nonGeneratedChangedLines: 60,
+            byRole: { unknown: 30, core_product_code: 30 },
+            byFunctionalSurface: { unknown: 10, runtime: 50 },
+          },
+        },
+        {
+          number: 2,
+          title: "another classified PR",
+          url: "https://example.test/pull/2",
+          prClass: { class: "fix", classificationSource: "repository_profile", ruleId: "fix-title" },
+          diffAtMerge: { changedLines: 40 },
+          files: {
+            nonGeneratedChangedLines: 40,
+            byRole: { tests: 40 },
+            byFunctionalSurface: { test_suite: 40 },
+          },
+        },
+      ],
+      rankings: {},
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle: {
+        selection: { requestedLimit: 30, collectedCount: 2 },
+        coverage: { status: "available", apiFamilies: [] },
+      },
+      profilePath: "profile.json",
+      artifactFileNames: {},
+      csvEnabled: false,
+    });
+
+    assert(markdown.includes("| File/path rules | Unknown role lines: 30 of 100 (30%); unknown functional-surface lines: 10 of 100 (10%)."));
+    assert(markdown.includes("Add repository-profile path rules for high-volume unknown roles or functional surfaces"));
+    assert(methodology.includes("- File/path rules: Unknown role lines: 30 of 100 (30%); unknown functional-surface lines: 10 of 100 (10%)."));
+    assert(!markdown.includes("| PR class rules |"));
+  });
+
+  it("suppresses profile suggestions when configured evidence stays below thresholds", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 4,
+        changedLines: 100,
+        nonGeneratedChangedLines: 100,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "feature one",
+          prClass: { class: "feature", classificationSource: "repository_profile", ruleId: "feature-title" },
+          diffAtMerge: { changedLines: 40 },
+          files: {
+            nonGeneratedChangedLines: 40,
+            byRole: { core_product_code: 40 },
+            byFunctionalSurface: { runtime: 40 },
+          },
+        },
+        {
+          number: 2,
+          title: "fix one",
+          prClass: { class: "fix", classificationSource: "repository_profile", ruleId: "fix-title" },
+          diffAtMerge: { changedLines: 30 },
+          files: {
+            nonGeneratedChangedLines: 30,
+            byRole: { tests: 30 },
+            byFunctionalSurface: { test_suite: 30 },
+          },
+        },
+        {
+          number: 3,
+          title: "unknown one",
+          prClass: { class: "unknown", classificationSource: "fallback_rule", ruleId: null },
+          diffAtMerge: { changedLines: 20 },
+          files: {
+            nonGeneratedChangedLines: 20,
+            byRole: { unknown: 20 },
+            byFunctionalSurface: { runtime: 20 },
+          },
+        },
+        {
+          number: 4,
+          title: "docs one",
+          prClass: { class: "docs", classificationSource: "repository_profile", ruleId: "docs-title" },
+          diffAtMerge: { changedLines: 10 },
+          files: {
+            nonGeneratedChangedLines: 10,
+            byRole: { product_docs: 10 },
+            byFunctionalSurface: { user_docs: 10 },
+          },
+        },
+      ],
+      rankings: {},
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle: {
+        selection: { requestedLimit: 30, collectedCount: 4 },
+        coverage: { status: "available", apiFamilies: [] },
+      },
+      profilePath: "profile.json",
+      artifactFileNames: {},
+      csvEnabled: false,
+    });
+
+    assert(!markdown.includes("## Profile Suggestions"));
+    assert(methodology.includes("- No profile suggestion thresholds were triggered by this report's PR class, role, or functional-surface evidence."));
+  });
+
+  it("suppresses PR class suggestions when unknown class evidence is profile-configured", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      totals: {
+        pullRequests: 3,
+        changedLines: 90,
+        nonGeneratedChangedLines: 90,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "configured unknown one",
+          prClass: { class: "unknown", classificationSource: "repository_profile", ruleId: "explicit-unknown" },
+          diffAtMerge: { changedLines: 30 },
+          files: {
+            nonGeneratedChangedLines: 30,
+            byRole: { core_product_code: 30 },
+            byFunctionalSurface: { runtime: 30 },
+          },
+        },
+        {
+          number: 2,
+          title: "configured unknown two",
+          prClass: { class: "unknown", classificationSource: "repository_profile", ruleId: "explicit-unknown" },
+          diffAtMerge: { changedLines: 30 },
+          files: {
+            nonGeneratedChangedLines: 30,
+            byRole: { core_product_code: 30 },
+            byFunctionalSurface: { runtime: 30 },
+          },
+        },
+        {
+          number: 3,
+          title: "configured unknown three",
+          prClass: { class: "unknown", classificationSource: "repository_profile", ruleId: "explicit-unknown" },
+          diffAtMerge: { changedLines: 30 },
+          files: {
+            nonGeneratedChangedLines: 30,
+            byRole: { tests: 30 },
+            byFunctionalSurface: { test_suite: 30 },
+          },
+        },
+      ],
+      rankings: {},
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assert(!markdown.includes("## Profile Suggestions"));
+  });
+
   it("renders a first-glance opening before detailed bottlenecks", async () => {
     const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
     const report = generateRepositoryFrictionReport(metricsSummary);

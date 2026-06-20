@@ -182,7 +182,7 @@ Markdown reports make repeated evidence details easier to compare through compac
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged in PR #44 on 2026-06-20
 
 ## M4: Profile Improvement Suggestions
 
@@ -209,11 +209,11 @@ Reports connect missing profile evidence to concrete profile improvements withou
 
 ### Acceptance Criteria
 
-- [ ] Reports suggest PR class profile improvements when fallback `unknown` is at least 80% of a sample of 3 or more PRs, or when no PR class rules are configured and every analyzed PR is `unknown`.
-- [ ] Reports suggest file/path profile improvements when at least 25% of non-generated changed lines have role `unknown` or functional surface `unknown`.
-- [ ] Profile suggestions render as Markdown and methodology text derived from existing report data, without adding `friction-report.v1` fields.
-- [ ] Each suggestion category renders at most once per report and stays omitted when relevant profile evidence is configured and the fallback threshold is not met.
-- [ ] Tests cover unknown-class suggestions, fallback-classification suggestions, and suppression when thresholds are not met.
+- [x] Reports suggest PR class profile improvements when fallback `unknown` is at least 80% of a sample of 3 or more PRs, or when no PR class rules are configured and every analyzed PR is `unknown`.
+- [x] Reports suggest file/path profile improvements when at least 25% of non-generated changed lines have role `unknown` or functional surface `unknown`.
+- [x] Profile suggestions render as Markdown and methodology text derived from existing report data, without adding `friction-report.v1` fields.
+- [x] Each suggestion category renders at most once per report and stays omitted when relevant profile evidence is configured and the fallback threshold is not met.
+- [x] Tests cover unknown-class suggestions, fallback-classification suggestions, and suppression when thresholds are not met.
 
 ### Required Validation
 
@@ -238,8 +238,8 @@ Reports connect missing profile evidence to concrete profile improvements withou
 
 ### Status
 
-- [ ] Not started
-- [ ] Implemented
+- [x] Active
+- [x] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened

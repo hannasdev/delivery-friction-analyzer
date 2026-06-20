@@ -83,6 +83,12 @@ const WORKFLOW_CONTEXT_VALUE_LABELS = new Map([
 
 export const CONFIGURED_WORKFLOW_NOTE = "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.";
 
+const PROFILE_SUGGESTION_THRESHOLDS = {
+  minimumPrClassSample: 3,
+  unknownPrClassShare: 0.8,
+  unknownFileShare: 0.25,
+};
+
 const BOTTLENECK_DEFINITIONS = [
   {
     id: "review-churn",
@@ -210,6 +216,10 @@ function roundShare(value) {
 }
 
 function percentageLabel(share) {
+  return `${Math.round(Number(share ?? 0) * 100)}%`;
+}
+
+function profileSuggestionPercentageLabel(share) {
   return `${Math.round(Number(share ?? 0) * 100)}%`;
 }
 
@@ -583,6 +593,61 @@ function summarizeRecommendationCategories(bottlenecks) {
     ...category,
     triggeredBottlenecks: triggeredCounts[category.id] ?? 0,
   }));
+}
+
+function entryValue(entries = [], name) {
+  return Number((entries ?? []).find(entry => entry.name === name)?.value ?? 0);
+}
+
+function classSourceValue(entry = {}, source) {
+  return entryValue(entry.classificationSources, source);
+}
+
+export function profileSuggestions(report = {}) {
+  const suggestions = [];
+  const summary = report.summary ?? {};
+  const prClasses = report.prClasses ?? {};
+  const classDistribution = prClasses.distribution ?? [];
+  const totalPullRequests = Number(prClasses.totalPullRequests ?? summary.pullRequests ?? 0);
+  const unknownClass = classDistribution.find(entry => entry.class === "unknown");
+  const unknownClassPullRequests = Number(unknownClass?.pullRequests ?? 0);
+  const fallbackUnknownPullRequests = classSourceValue(unknownClass, "fallback_rule");
+  const fallbackUnknownClassShare = totalPullRequests > 0
+    ? fallbackUnknownPullRequests / totalPullRequests
+    : 0;
+  const everyPrFallbackUnknown = totalPullRequests > 0
+    && unknownClassPullRequests === totalPullRequests
+    && fallbackUnknownPullRequests === unknownClassPullRequests;
+
+  if ((totalPullRequests >= PROFILE_SUGGESTION_THRESHOLDS.minimumPrClassSample
+    && fallbackUnknownClassShare >= PROFILE_SUGGESTION_THRESHOLDS.unknownPrClassShare)
+    || everyPrFallbackUnknown) {
+    suggestions.push({
+      id: "pr-class-rules",
+      area: "PR class rules",
+      evidence: `${fallbackUnknownPullRequests} of ${totalPullRequests} analyzed PRs (${profileSuggestionPercentageLabel(fallbackUnknownClassShare)}) use fallback unknown PR class evidence.`,
+      suggestion: "Add or refine repository-profile PR class title rules, or rerun interactive setup to add the Conventional Commit preset when it matches the repository.",
+    });
+  }
+
+  const nonGeneratedChangedLines = Number(summary.nonGeneratedChangedLines ?? 0);
+  const surfaces = report.surfaces ?? {};
+  const unknownRoleLines = entryValue(surfaces.byRole, "unknown");
+  const unknownSurfaceLines = entryValue(surfaces.byFunctionalSurface, "unknown");
+  const unknownRoleShare = nonGeneratedChangedLines > 0 ? unknownRoleLines / nonGeneratedChangedLines : 0;
+  const unknownSurfaceShare = nonGeneratedChangedLines > 0 ? unknownSurfaceLines / nonGeneratedChangedLines : 0;
+
+  if (unknownRoleShare >= PROFILE_SUGGESTION_THRESHOLDS.unknownFileShare
+    || unknownSurfaceShare >= PROFILE_SUGGESTION_THRESHOLDS.unknownFileShare) {
+    suggestions.push({
+      id: "file-path-rules",
+      area: "File/path rules",
+      evidence: `Unknown role lines: ${unknownRoleLines} of ${nonGeneratedChangedLines} (${profileSuggestionPercentageLabel(unknownRoleShare)}); unknown functional-surface lines: ${unknownSurfaceLines} of ${nonGeneratedChangedLines} (${profileSuggestionPercentageLabel(unknownSurfaceShare)}).`,
+      suggestion: "Add repository-profile path rules for high-volume unknown roles or functional surfaces, starting with the directories that account for the most non-generated changed lines.",
+    });
+  }
+
+  return suggestions;
 }
 
 export function normalizeConfiguredWorkflowContext(workflowContext) {
@@ -1294,6 +1359,27 @@ function renderPrClassContext(prClasses) {
   ].join("\n");
 }
 
+function renderProfileSuggestions(report) {
+  const suggestions = profileSuggestions(report);
+  if (!suggestions.length) return "";
+
+  return [
+    "## Profile Suggestions",
+    "",
+    "Optional profile improvements based on this report's existing evidence. These suggestions do not change scores, rankings, CSV exports, or JSON report fields.",
+    "",
+    renderMarkdownTable(
+      ["Profile area", "Evidence", "Suggested next step"],
+      suggestions.map(suggestion => [
+        suggestion.area,
+        suggestion.evidence,
+        suggestion.suggestion,
+      ]),
+    ),
+    "",
+  ].join("\n");
+}
+
 function renderConfiguredWorkflowContext(configuredWorkflow) {
   const entries = configuredWorkflowEntries(configuredWorkflow);
   if (!entries.length) return "";
@@ -1478,6 +1564,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     renderKeyFindings(report),
     "",
     renderPrClassContext(report.prClasses),
+    renderProfileSuggestions(report),
     renderSharedSignalInterpretation(sharedSignals),
     renderSensitivityAnalysis(report.sensitivity),
     "## How Bottlenecks Are Prioritized",
@@ -1532,6 +1619,9 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     "- Pull requests are selected upstream by the collection or fixture workflow; this renderer explains the resulting metrics summary.",
     "- File roles and functional surfaces come from repository-profile classification, not from language names alone.",
+    profileSuggestions(report).length
+      ? "- Profile suggestions are optional interpretation improvements derived from existing report evidence; they do not change scores, rankings, CSV exports, or JSON report fields."
+      : "- No profile suggestion thresholds were triggered by this report's PR class, role, or functional-surface evidence.",
     "- Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.",
     "- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.",
     "- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.",
