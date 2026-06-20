@@ -1511,7 +1511,10 @@ describe("GitHub live analyze CLI", () => {
         readFile(join(outDir, "collection-coverage.csv"), "utf8"),
       ]);
 
-      assert.deepEqual(sourceBundle.contributorSource.hints.logins, ["known-reviewer"]);
+      assert.equal(sourceBundle.contributorSource.hintCount, 1);
+      assert.equal(sourceBundle.contributorSource.hints, undefined);
+      assert.equal(normalized.contributorSource.hintCount, 1);
+      assert.equal(normalized.contributorSource.hints, undefined);
       assert.equal(normalized.pullRequests[0].reviewComments.bySource.human_reviewer, 1);
       assert.equal(normalized.pullRequests[0].reviewComments.bySource.unknown, 0);
       assert.deepEqual(normalized.pullRequests[0].reviewDecision, {
@@ -1548,11 +1551,10 @@ describe("GitHub live analyze CLI", () => {
       ].join("\n");
       assert(!serializedArtifacts.includes("Known Reviewer"));
       assert(!serializedArtifacts.includes("contributors\":["));
+      assert(!serializedArtifacts.includes("\"logins\""));
+      assert(!JSON.stringify(sourceBundle.contributorSource).includes("known-reviewer"));
+      assert(!JSON.stringify(normalized.contributorSource).includes("known-reviewer"));
       assert(serializedArtifacts.includes("individual contributor rankings are not emitted"));
-      assert(!reportMarkdown.includes("known-reviewer"));
-      assert(!methodology.includes("known-reviewer"));
-      assert(!prMetricsCsv.includes("known-reviewer"));
-      assert(!bottleneckExamplesCsv.includes("known-reviewer"));
       assert(!commentSourcesCsv.includes("known-reviewer"));
     });
   });

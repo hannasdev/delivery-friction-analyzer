@@ -3,6 +3,7 @@ import {
   assertValidContributorSource,
   normalizeContributorSourceConfig,
   parseAllContributorsHints,
+  withTransientContributorHints,
 } from "../profile/contributor-source.js";
 import {
   COVERAGE_STATUS,
@@ -204,17 +205,16 @@ function unsupportedContributorSource(config = {}) {
     : `Contributor source type '${sourceType}' is unsupported.`;
   const coverage = coverageEntry({
     family: "contributor_source",
-    source: sourceType,
+    source: "rest:/repos/{owner}/{repo}/contents/{path}",
     status: COVERAGE_STATUS.unsupported,
     diagnostics: [diagnostic],
     downstreamImpact: "Contributor-aware comment-source hints are unavailable; scoring and person-level outputs are unchanged.",
   });
-  return {
+  return withTransientContributorHints({
     sourceType,
     path,
     coverage,
-    hints: { logins: [] },
-  };
+  });
 }
 
 function unavailableContributorSource(config = {}, error) {
@@ -225,12 +225,11 @@ function unavailableContributorSource(config = {}, error) {
     diagnostics: [redactDiagnostic(error?.message ?? error)],
     downstreamImpact: "Contributor-aware comment-source hints are unavailable; scoring and person-level outputs are unchanged.",
   });
-  return {
+  return withTransientContributorHints({
     sourceType: config.sourceType,
     path: config.path,
     coverage,
-    hints: { logins: [] },
-  };
+  });
 }
 
 function contentTextFromResponse(response) {
@@ -268,12 +267,11 @@ async function collectContributorSource({ targetInput, provider, contributors })
         ? "Contributor-aware comment-source hints are available; scoring and person-level outputs are unchanged."
         : "Contributor-aware comment-source hints are unavailable; scoring and person-level outputs are unchanged.",
     });
-    return {
+    return withTransientContributorHints({
       sourceType: config.sourceType,
       path: config.path,
       coverage,
-      hints: parsed.hints,
-    };
+    }, parsed.hints);
   } catch (error) {
     return unavailableContributorSource(config, error);
   }

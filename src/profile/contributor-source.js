@@ -4,6 +4,8 @@ export const CONTRIBUTOR_SOURCE_TYPES = Object.freeze([
 
 export const DEFAULT_ALL_CONTRIBUTORS_PATH = ".all-contributorsrc";
 
+const transientContributorHints = new WeakMap();
+
 function isObject(value) {
   return value && typeof value === "object" && !Array.isArray(value);
 }
@@ -116,16 +118,43 @@ export function parseAllContributorsHints(text) {
   };
 }
 
+function normalizeLoginSet(logins = []) {
+  if (!Array.isArray(logins)) return new Set();
+  return new Set(logins.map(login => String(login).toLowerCase()).filter(Boolean));
+}
+
+function hintLoginsFromSource(contributorSource = null) {
+  return transientContributorHints.get(contributorSource)?.logins ?? contributorSource?.hints?.logins ?? [];
+}
+
+export function contributorSourceArtifactMetadata(contributorSource = null, hints = null) {
+  if (!isObject(contributorSource)) return null;
+  const logins = Array.isArray(hints?.logins) ? hints.logins : hintLoginsFromSource(contributorSource);
+  return {
+    sourceType: contributorSource.sourceType,
+    path: contributorSource.path,
+    coverage: contributorSource.coverage,
+    hintCount: Number.isInteger(contributorSource.hintCount)
+      ? contributorSource.hintCount
+      : normalizeLoginSet(logins).size,
+  };
+}
+
+export function withTransientContributorHints(contributorSource = null, hints = { logins: [] }) {
+  const metadata = contributorSourceArtifactMetadata(contributorSource, hints);
+  if (!metadata) return null;
+  transientContributorHints.set(metadata, {
+    logins: Array.isArray(hints?.logins) ? [...hints.logins] : [],
+  });
+  return metadata;
+}
+
 export function contributorHintsFromSource(contributorSource = null) {
   const usableStatuses = new Set(["available", "partial"]);
   if (!usableStatuses.has(contributorSource?.coverage?.status)) {
     return { logins: new Set() };
   }
-  const logins = contributorSource?.hints?.logins;
-  if (!Array.isArray(logins)) {
-    return { logins: new Set() };
-  }
   return {
-    logins: new Set(logins.map(login => String(login).toLowerCase()).filter(Boolean)),
+    logins: normalizeLoginSet(hintLoginsFromSource(contributorSource)),
   };
 }

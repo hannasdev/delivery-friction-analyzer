@@ -712,7 +712,9 @@ export function normalizeContributorSourceMetadata(contributorSource) {
     sourceType: contributorSource.sourceType ?? "unknown",
     path: contributorSource.path ?? null,
     status: contributorSource.coverage?.status ?? "unavailable",
-    hintCount: Array.isArray(contributorSource.hints?.logins) ? contributorSource.hints.logins.length : 0,
+    hintCount: Number.isInteger(contributorSource.hintCount)
+      ? contributorSource.hintCount
+      : Array.isArray(contributorSource.hints?.logins) ? contributorSource.hints.logins.length : 0,
     note: CONTRIBUTOR_SOURCE_NOTE,
   };
 }

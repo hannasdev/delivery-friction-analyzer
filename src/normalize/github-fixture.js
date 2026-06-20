@@ -1,6 +1,10 @@
 import { classifyCommentSource, groupByCommentSource } from "../github/comment-source.js";
 import { classifyFilePath } from "../profile/file-role.js";
-import { assertValidContributorSource, contributorHintsFromSource } from "../profile/contributor-source.js";
+import {
+  assertValidContributorSource,
+  contributorHintsFromSource,
+  contributorSourceArtifactMetadata,
+} from "../profile/contributor-source.js";
 import { assertValidPrClassRules, classifyPullRequest } from "../profile/pr-class.js";
 import { assertValidWorkflowContext } from "../profile/workflow.js";
 
@@ -177,7 +181,7 @@ export function normalizeFixtureBundle(bundle, { repositoryProfile } = {}) {
     schemaVersion: "normalized-fixture.v1",
     targetRepository: bundle.targetRepository,
     languageDistribution: bundle.languageDistribution,
-    ...(bundle.contributorSource ? { contributorSource: bundle.contributorSource } : {}),
+    ...(bundle.contributorSource ? { contributorSource: contributorSourceArtifactMetadata(bundle.contributorSource) } : {}),
     pullRequests,
   };
 }

@@ -9,7 +9,7 @@ Milestone 1 defines the first normalized fixture shape. It is intentionally limi
 - `TargetRepository`: owner/name/default branch/visibility/window for the repository being analyzed.
 - `AnalysisFilter`: optional metadata for downstream analysis filters applied after collection and normalization. When present, it records excluded PR classes, the original collected PR count, and the filtered PR count.
 - `RepositoryLanguageDistribution`: byte counts from `GET /repos/{owner}/{repo}/languages`, stored as context only.
-- `ContributorSource`: optional sanitized metadata and parsed login hints from a configured structured contributor source. It records source type, path, coverage status, diagnostics, and hint logins for classifier use. It must not preserve raw contributor file contents.
+- `ContributorSource`: optional sanitized metadata from a configured structured contributor source. It records source type, path, coverage status, diagnostics, and parsed hint count. It must not preserve raw contributor file contents or contributor login lists.
 - `PullRequest`: source IDs, author login when known, URL, state, PR class evidence, lifecycle timestamps, final diff shape, PR-open diff source confidence, optional PR-open additions/deletions/changed-file counts when direct or reconstructed data is available, files, reviews, review decision summary, review threads, comments, checks, and workflow-run coverage.
 - `PrClassSummary`: profile-driven PR class, classification source, and winning rule ID. Unmatched PRs use `class: "unknown"`, `classificationSource: "fallback_rule"`, and `ruleId: null`.
 - `Commit`: commit OID, authored timestamp, committed timestamp when present, and message headline.
@@ -25,7 +25,7 @@ Milestone 1 defines the first normalized fixture shape. It is intentionally limi
 
 Normalized data must preserve whether a value came from a public API, GraphQL thread query, repository profile rule, fallback rule, internal UI partial, or unavailable coverage. Later metric and report stages should use those source labels before making confidence claims.
 
-Configured contributor hints may classify otherwise-unknown comment authors into existing comment-source groups, but they must not change PR authorship, reviewer attribution, scoring formulas, or person-level report/CSV rows.
+Configured contributor hints may classify otherwise-unknown comment authors into existing comment-source groups during the analysis run, but parsed login lists are transient and must not be persisted in generated artifacts. Hints must not change PR authorship, reviewer attribution, scoring formulas, or person-level report/CSV rows.
 
 ## Analysis Filters
 

@@ -39,7 +39,7 @@
     "contributorSource": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sourceType", "path", "coverage", "hints"],
+      "required": ["sourceType", "path", "coverage", "hintCount"],
       "properties": {
         "sourceType": { "enum": ["all_contributors"] },
         "path": { "type": "string" },
@@ -59,17 +59,7 @@
             "downstreamImpact": { "type": ["string", "null"] }
           }
         },
-        "hints": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["logins"],
-          "properties": {
-            "logins": {
-              "type": "array",
-              "items": { "type": "string" }
-            }
-          }
-        }
+        "hintCount": { "type": "integer", "minimum": 0 }
       }
     },
     "pullRequests": {

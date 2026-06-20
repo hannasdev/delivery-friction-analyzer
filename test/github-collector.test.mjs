@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { createGhCliProvider } from "../src/collect/gh-provider.js";
 import { buildCoverageSummary, collectGitHubSourceBundle } from "../src/collect/github-source-bundle.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
+import { contributorHintsFromSource } from "../src/profile/contributor-source.js";
 
 function repositoryMetadata() {
   return {
@@ -261,12 +262,15 @@ describe("GitHub source collector", () => {
     assert.equal(bundle.contributorSource.sourceType, "all_contributors");
     assert.equal(bundle.contributorSource.path, ".all-contributorsrc");
     assert.equal(bundle.contributorSource.coverage.status, "available");
-    assert.deepEqual(bundle.contributorSource.hints.logins, ["maintainer", "reviewer"]);
+    assert.equal(bundle.contributorSource.hintCount, 2);
+    assert.equal(bundle.contributorSource.hints, undefined);
+    assert.deepEqual([...contributorHintsFromSource(bundle.contributorSource).logins], ["maintainer", "reviewer"]);
     assert.equal(coverageFor(bundle, "contributor_source").status, "available");
     assert(provider.calls.some(([method]) => method === "getRepositoryContent"));
     const serialized = JSON.stringify(bundle);
     assert(!serialized.includes("Maintainer"));
     assert(!serialized.includes("contributors\":["));
+    assert(!serialized.includes("\"logins\""));
   });
 
   it("marks all-contributors source partial when some entries cannot provide hints", async () => {
@@ -291,7 +295,9 @@ describe("GitHub source collector", () => {
     });
 
     assert.equal(bundle.contributorSource.coverage.status, "partial");
-    assert.deepEqual(bundle.contributorSource.hints.logins, ["maintainer"]);
+    assert.equal(bundle.contributorSource.hintCount, 1);
+    assert.equal(bundle.contributorSource.hints, undefined);
+    assert.deepEqual([...contributorHintsFromSource(bundle.contributorSource).logins], ["maintainer"]);
     assert.equal(coverageFor(bundle, "contributor_source").status, "partial");
   });
 
@@ -312,7 +318,8 @@ describe("GitHub source collector", () => {
     });
 
     assert.equal(bundle.contributorSource.coverage.status, "malformed");
-    assert.deepEqual(bundle.contributorSource.hints.logins, []);
+    assert.equal(bundle.contributorSource.hintCount, 0);
+    assert.equal(bundle.contributorSource.hints, undefined);
     assert.equal(coverageFor(bundle, "contributor_source").status, "malformed");
   });
 
@@ -333,7 +340,8 @@ describe("GitHub source collector", () => {
     });
 
     assert.equal(bundle.contributorSource.coverage.status, "unavailable");
-    assert.deepEqual(bundle.contributorSource.hints.logins, []);
+    assert.equal(bundle.contributorSource.hintCount, 0);
+    assert.equal(bundle.contributorSource.hints, undefined);
     assert(coverageFor(bundle, "contributor_source").diagnostics.some(diagnostic => diagnostic.includes("404")));
   });
 
@@ -349,8 +357,10 @@ describe("GitHub source collector", () => {
     });
 
     assert.equal(bundle.contributorSource.coverage.status, "unsupported");
-    assert.deepEqual(bundle.contributorSource.hints.logins, []);
+    assert.equal(bundle.contributorSource.hintCount, 0);
+    assert.equal(bundle.contributorSource.hints, undefined);
     assert.equal(coverageFor(bundle, "contributor_source").status, "unsupported");
+    assert.equal(coverageFor(bundle, "contributor_source").source, "rest:/repos/{owner}/{repo}/contents/{path}");
     assert(coverageFor(bundle, "contributor_source").diagnostics.some(diagnostic => (
       diagnostic.includes("CONTRIBUTORS.md") && diagnostic.includes("Markdown contributor files")
     )));
