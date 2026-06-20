@@ -219,10 +219,6 @@ function percentageLabel(share) {
   return `${Math.round(Number(share ?? 0) * 100)}%`;
 }
 
-function profileSuggestionPercentageLabel(share) {
-  return `${Math.round(Number(share ?? 0) * 100)}%`;
-}
-
 function classDominancePercentageLabel(share) {
   const value = Number(share ?? 0);
   const roundedWholePercent = Math.round(value * 100);
@@ -625,7 +621,7 @@ export function profileSuggestions(report = {}) {
     suggestions.push({
       id: "pr-class-rules",
       area: "PR class rules",
-      evidence: `${fallbackUnknownPullRequests} of ${totalPullRequests} analyzed PRs (${profileSuggestionPercentageLabel(fallbackUnknownClassShare)}) use fallback unknown PR class evidence.`,
+      evidence: `${fallbackUnknownPullRequests} of ${totalPullRequests} analyzed PRs (${percentageLabel(fallbackUnknownClassShare)}) use fallback unknown PR class evidence.`,
       suggestion: "Add or refine repository-profile PR class title rules, or rerun interactive setup to add the Conventional Commit preset when it matches the repository.",
     });
   }
@@ -642,7 +638,7 @@ export function profileSuggestions(report = {}) {
     suggestions.push({
       id: "file-path-rules",
       area: "File/path rules",
-      evidence: `Unknown role lines: ${unknownRoleLines} of ${nonGeneratedChangedLines} (${profileSuggestionPercentageLabel(unknownRoleShare)}); unknown functional-surface lines: ${unknownSurfaceLines} of ${nonGeneratedChangedLines} (${profileSuggestionPercentageLabel(unknownSurfaceShare)}).`,
+      evidence: `Unknown role lines: ${unknownRoleLines} of ${nonGeneratedChangedLines} (${percentageLabel(unknownRoleShare)}); unknown functional-surface lines: ${unknownSurfaceLines} of ${nonGeneratedChangedLines} (${percentageLabel(unknownSurfaceShare)}).`,
       suggestion: "Add repository-profile path rules for high-volume unknown roles or functional surfaces, starting with the directories that account for the most non-generated changed lines.",
     });
   }
