@@ -76,7 +76,7 @@ Profiles can define:
 - PR classes such as release, dependency, feature, or other repository-specific groups;
 - workflow context such as merge method, release strategy, and branch strategy.
 
-For a new repository, the easiest path is the guided `--interactive --dry-run` command in Quickstart. If the profile path does not exist, interactive setup asks whether to create it, then writes a minimal `repository-profile.v1` profile with confirmed workflow context and optional release PR title rules. It may create the output directory and briefly write then remove a temporary probe file to confirm writability. When interactive setup saves or generates a profile during a dry run, the completion output prints the saved profile path so you can inspect and edit it before a full run.
+For a new repository, the easiest path is the guided `--interactive --dry-run` command in Quickstart. If the profile path does not exist, interactive setup asks whether to create it, then writes a minimal `repository-profile.v1` profile with user-provided workflow context and optional release PR title rules. It may create the output directory and briefly write then remove a temporary probe file to confirm writability. When interactive setup saves or generates a profile during a dry run, the completion output prints the saved profile path so you can inspect and edit it before a full run.
 
 Use `fixtures/github/mcp-writing/profile.json` as a starting point when you prefer to copy an existing profile by hand. The full profile format is documented in `docs/reference/repository-profile.md`, and the schema lives at `schemas/repository-profile.schema.json`.
 
@@ -148,7 +148,7 @@ No separate model-ready context artifact is required for this workflow. Reconsid
 
 Delivery Friction Analyzer is currently a local, GitHub-connected analyzer that produces repository-level friction reports from live pull request data. It is repo-source-agnostic: repository-specific assumptions live in profiles.
 
-The current product wedge is a maintainer workflow:
+The current product focus is a maintainer workflow:
 
 - collect the latest merged PR sample from a target repository;
 - classify files and PRs through repository profiles;
