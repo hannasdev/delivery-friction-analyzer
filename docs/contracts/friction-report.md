@@ -76,7 +76,7 @@ The Markdown renderer presents the same report data for human review:
 
 Markdown output should not include individual contributor or reviewer rankings.
 Status labels are Markdown presentation helpers, not `friction-report.v1` fields. They should preserve the underlying source labels and counts rather than replacing auditable evidence.
-Profile suggestions are also presentation helpers, not `friction-report.v1` fields. They are derived from existing PR class and file-surface evidence, appear at most once per suggestion category, and do not change scores, rankings, CSV exports, filtering, or PR class matching.
+Profile suggestions are also presentation helpers, not `friction-report.v1` fields. They are derived from existing PR class and file-surface evidence, appear at most once per suggestion category, and do not change scores, rankings, CSV exports, filtering, or PR class matching. Because the report JSON does not carry repository-profile rule inventory, all analyzed PRs using fallback `unknown` PR class evidence is the renderer's small-sample proxy for no configured PR class rule producing usable classification evidence.
 
 ## Recommendation Boundaries
 

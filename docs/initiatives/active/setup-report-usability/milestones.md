@@ -192,7 +192,7 @@ Reports connect missing profile evidence to concrete profile improvements withou
 
 ### Scope
 
-- Add report suggestions when the analyzed sample has at least 3 PRs and fallback `unknown` accounts for at least 80% of PR classes, or when no PR class rules are configured and every analyzed PR is `unknown`.
+- Add report suggestions when the analyzed sample has at least 3 PRs and fallback `unknown` accounts for at least 80% of PR classes, or when every analyzed PR uses fallback `unknown` PR class evidence as the report-layer proxy for no configured PR class rule producing usable classification evidence.
 - Add report suggestions when at least 25% of non-generated changed lines have role `unknown` or functional surface `unknown`.
 - Point users toward profile docs, interactive setup, or concrete profile fields without requiring changes.
 - Keep profile suggestions as Markdown and methodology text derived from existing report data; do not add `friction-report.v1` suggestion fields.
@@ -209,7 +209,7 @@ Reports connect missing profile evidence to concrete profile improvements withou
 
 ### Acceptance Criteria
 
-- [x] Reports suggest PR class profile improvements when fallback `unknown` is at least 80% of a sample of 3 or more PRs, or when no PR class rules are configured and every analyzed PR is `unknown`.
+- [x] Reports suggest PR class profile improvements when fallback `unknown` is at least 80% of a sample of 3 or more PRs, or when every analyzed PR uses fallback `unknown` PR class evidence.
 - [x] Reports suggest file/path profile improvements when at least 25% of non-generated changed lines have role `unknown` or functional surface `unknown`.
 - [x] Profile suggestions render as Markdown and methodology text derived from existing report data, without adding `friction-report.v1` fields.
 - [x] Each suggestion category renders at most once per report and stays omitted when relevant profile evidence is configured and the fallback threshold is not met.

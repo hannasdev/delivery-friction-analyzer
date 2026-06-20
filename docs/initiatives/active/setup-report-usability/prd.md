@@ -109,7 +109,7 @@ Rendering may use visual markers when the output format supports them, but every
 
 Fifth, connect profile and workflow gaps to concrete next steps. Profile suggestions are Markdown and methodology text derived from existing report data; they do not add `friction-report.v1` fields in this initiative. Deterministic trigger rules:
 
-- PR class suggestion: render when the analyzed sample has at least 3 PRs and fallback `unknown` accounts for at least 80% of PRs, or when no PR class rules are configured and every analyzed PR is `unknown`.
+- PR class suggestion: render when the analyzed sample has at least 3 PRs and fallback `unknown` accounts for at least 80% of PRs, or when every analyzed PR uses fallback `unknown` PR class evidence. Because this milestone does not add profile-rule inventory to `friction-report.v1`, all-fallback-unknown is the report-layer proxy for no configured PR class rule producing usable classification evidence.
 - File/path suggestion: render when at least 25% of non-generated changed lines have role `unknown` or functional surface `unknown`, using existing metrics/report surface evidence.
 - Workflow-context suggestion: render when workflow context is omitted and the report also has unavailable PR-open diff coverage or workflow-run coverage caveats that configured workflow context could help explain.
 - Suppression: render each suggestion category at most once per report. Omit class and path suggestions when the profile already has the relevant configured evidence and the fallback threshold is not met. Omit workflow-context suggestions when workflow context is configured or when the relevant coverage caveats are absent.
