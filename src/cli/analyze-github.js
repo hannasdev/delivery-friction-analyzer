@@ -17,6 +17,7 @@ import {
   renderRepositoryFrictionMarkdown,
 } from "../report/friction-report.js";
 import { assertValidPrClassRules } from "../profile/pr-class.js";
+import { conventionalCommitPrClassRules } from "../profile/pr-class-presets.js";
 import {
   WORKFLOW_BRANCH_STRATEGIES,
   WORKFLOW_PRIMARY_MERGE_METHODS,
@@ -197,6 +198,20 @@ function defaultOutDirForRepository(repository) {
   return join("reports", name || "analysis");
 }
 
+function choiceValue(choice) {
+  return typeof choice === "object" && choice !== null ? choice.value : choice;
+}
+
+function choiceLabel(choice) {
+  return typeof choice === "object" && choice !== null ? choice.label : choice;
+}
+
+function formatChoiceList(choices) {
+  return choices
+    .map((choice, index) => `${index + 1}. ${choiceLabel(choice)} (${choiceValue(choice)})`)
+    .join("\n");
+}
+
 function formatInteractivePrompt(prompt) {
   const suffix = prompt.defaultValue === undefined
     ? ""
@@ -207,10 +222,10 @@ function formatInteractivePrompt(prompt) {
     return `${prompt.message}${prompt.defaultValue ? " [Y/n]" : " [y/N]"} `;
   }
   if (prompt.type === "multi-select" && prompt.choices?.length) {
-    return `${prompt.message} (${prompt.choices.join(",")})${suffix}: `;
+    return `${prompt.message} (${prompt.choices.map(choiceValue).join(",")})${suffix}: `;
   }
   if (prompt.type === "select" && prompt.choices?.length) {
-    return `${prompt.message} (${prompt.choices.join(",")})${suffix}: `;
+    return `${prompt.message}\n${formatChoiceList(prompt.choices)}\nChoose a number or identifier${suffix}: `;
   }
   return `${prompt.message}${suffix}: `;
 }
@@ -277,8 +292,14 @@ function normalizeConfirmAnswer(raw, prompt) {
 
 function normalizeChoiceAnswer(raw, prompt) {
   const value = normalizeTextAnswer(raw, prompt);
-  if (prompt.choices?.includes(value)) return value;
-  throw new Error(`${prompt.id} must be one of: ${prompt.choices.join(", ")}`);
+  const choices = prompt.choices ?? [];
+  const numericIndex = Number(value);
+  if (Number.isInteger(numericIndex) && numericIndex >= 1 && numericIndex <= choices.length) {
+    return choiceValue(choices[numericIndex - 1]);
+  }
+  const match = choices.find(choice => choiceValue(choice) === value || choiceLabel(choice) === value);
+  if (match) return choiceValue(match);
+  throw new Error(`${prompt.id} must be one of: ${choices.map(choiceValue).join(", ")}`);
 }
 
 function normalizeMultiSelectAnswer(raw, prompt) {
@@ -519,12 +540,74 @@ function releasePrClassRule(profile, titleIncludes, existingRule = null) {
   };
 }
 
+function withAvailablePrClassRuleIds(profile, rules) {
+  const profileWithIds = {
+    ...profile,
+    prClasses: Array.isArray(profile.prClasses) ? [...profile.prClasses] : [],
+  };
+  return rules.map(rule => {
+    const id = nextPrClassRuleId(profileWithIds, rule.id);
+    const nextRule = {
+      ...rule,
+      id,
+      match: { ...rule.match },
+    };
+    profileWithIds.prClasses.push(nextRule);
+    return nextRule;
+  });
+}
+
+async function promptConventionalCommitPrClassPreset(promptAdapter, output, profile) {
+  const hasExistingPrClasses = Array.isArray(profile.prClasses) && profile.prClasses.length > 0;
+  const message = hasExistingPrClasses
+    ? "Add Conventional Commit PR class preset to existing PR class rules"
+    : "Add Conventional Commit PR class preset";
+  const shouldAddPreset = await askUntilValid(promptAdapter, {
+    id: "addConventionalCommitPrClasses",
+    type: "confirm",
+    message,
+    defaultValue: false,
+  }, {
+    output,
+    normalize: normalizeConfirmAnswer,
+    validate() {},
+  });
+  if (!shouldAddPreset) return { profile, prClassRulesWritten: false };
+
+  const updated = cloneJson(profile);
+  updated.prClasses = Array.isArray(updated.prClasses) ? [...updated.prClasses] : [];
+  const presetRules = withAvailablePrClassRuleIds(updated, conventionalCommitPrClassRules());
+  updated.prClasses.push(...presetRules);
+  return { profile: updated, prClassRulesWritten: true };
+}
+
+const WORKFLOW_CHOICE_LABELS = Object.freeze({
+  merge_commit: "Merge commits",
+  squash_merge: "Squash merges",
+  rebase_merge: "Rebase merges",
+  release_prs: "Release PRs",
+  direct_tags: "Direct tags",
+  release_branches: "Release branches",
+  trunk_based: "Trunk-based",
+  main_plus_release_branches: "Main plus release branches",
+  long_lived_development_branches: "Long-lived development branches",
+  mixed: "Mixed",
+  unknown: "Unknown",
+});
+
+function workflowChoices(values) {
+  return values.map(value => ({
+    value,
+    label: WORKFLOW_CHOICE_LABELS[value] ?? value,
+  }));
+}
+
 async function promptWorkflowField(promptAdapter, output, { id, message, choices, defaultValue }) {
   return askUntilValid(promptAdapter, {
     id,
     type: "select",
     message,
-    choices,
+    choices: workflowChoices(choices),
     defaultValue,
   }, {
     output,
@@ -535,6 +618,7 @@ async function promptWorkflowField(promptAdapter, output, { id, message, choices
 
 async function promptWorkflowProfileUpdate(promptAdapter, output, profile, { isNewProfile }) {
   const updated = cloneJson(profile);
+  let prClassRulesWritten = false;
   updated.workflow = {
     primaryMergeMethod: await promptWorkflowField(promptAdapter, output, {
       id: "primaryMergeMethod",
@@ -588,6 +672,7 @@ async function promptWorkflowProfileUpdate(promptAdapter, output, profile, { isN
             titleIncludes,
             updated.prClasses[updateableReleaseIndex],
           );
+          prClassRulesWritten = true;
         }
       } else {
         const shouldAddReleaseRule = isNewProfile
@@ -604,13 +689,18 @@ async function promptWorkflowProfileUpdate(promptAdapter, output, profile, { isN
           });
         if (shouldAddReleaseRule) {
           updated.prClasses.push(releasePrClassRule(updated, titleIncludes));
+          prClassRulesWritten = true;
         }
       }
     }
   }
 
-  validateProfile(updated);
-  return updated;
+  const presetUpdate = await promptConventionalCommitPrClassPreset(promptAdapter, output, updated);
+  validateProfile(presetUpdate.profile);
+  return {
+    profile: presetUpdate.profile,
+    prClassRulesWritten: prClassRulesWritten || presetUpdate.prClassRulesWritten,
+  };
 }
 
 async function maybeConfigureInteractiveProfile(promptAdapter, output, profileState, repository) {
@@ -644,15 +734,33 @@ async function maybeConfigureInteractiveProfile(promptAdapter, output, profileSt
       validate() {},
     });
     if (!shouldConfigureWorkflow) {
+      const presetUpdate = await promptConventionalCommitPrClassPreset(promptAdapter, output, profile);
+      validateProfile(presetUpdate.profile);
+      if (presetUpdate.prClassRulesWritten) {
+        const savedProfilePath = await writeInteractiveProfile(profileState.profilePath, presetUpdate.profile, {
+          exists: profileState.exists,
+          originalProfile,
+          originalText: profileState.text,
+          originalIsSymbolicLink: profileState.isSymbolicLink,
+        });
+        return {
+          profile: presetUpdate.profile,
+          profilePath: savedProfilePath,
+          savedProfilePath,
+          prClassRulesWritten: true,
+        };
+      }
       return {
         profile,
         profilePath: profileState.profilePath,
         savedProfilePath: null,
+        prClassRulesWritten: false,
       };
     }
   }
 
-  profile = await promptWorkflowProfileUpdate(promptAdapter, output, profile, { isNewProfile });
+  const profileUpdate = await promptWorkflowProfileUpdate(promptAdapter, output, profile, { isNewProfile });
+  profile = profileUpdate.profile;
   const savedProfilePath = await writeInteractiveProfile(profileState.profilePath, profile, {
     exists: profileState.exists,
     originalProfile,
@@ -663,6 +771,7 @@ async function maybeConfigureInteractiveProfile(promptAdapter, output, profileSt
     profile,
     profilePath: savedProfilePath,
     savedProfilePath,
+    prClassRulesWritten: profileUpdate.prClassRulesWritten,
   };
 }
 
@@ -774,6 +883,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
     resolved.profilePath = profileUpdate.profilePath;
     if (profileUpdate.savedProfilePath) {
       resolved.savedProfilePath = profileUpdate.savedProfilePath;
+      resolved.prClassRulesWritten = profileUpdate.prClassRulesWritten;
       if (typeof onSavedProfilePath === "function") {
         onSavedProfilePath(profileUpdate.savedProfilePath);
       }
@@ -1022,7 +1132,7 @@ function attachCollectionCoverage(report, sourceBundle) {
   };
 }
 
-function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv, analysisFilter, savedProfilePath }) {
+function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv, analysisFilter, savedProfilePath, prClassRulesWritten }) {
   const summary = {
     ok: true,
     dryRun,
@@ -1040,6 +1150,9 @@ function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report,
   };
   if (savedProfilePath) {
     summary.savedProfilePath = savedProfilePath;
+  }
+  if (prClassRulesWritten) {
+    summary.prClassRulesWritten = true;
   }
   return summary;
 }
@@ -1114,6 +1227,7 @@ export async function runAnalyzeGithub(options, {
       csv: false,
       analysisFilter: null,
       savedProfilePath: options.savedProfilePath,
+      prClassRulesWritten: options.prClassRulesWritten,
     });
   }
 
@@ -1166,6 +1280,7 @@ export async function runAnalyzeGithub(options, {
     csv: csvEnabled,
     analysisFilter: normalized.analysisFilter ?? null,
     savedProfilePath: options.savedProfilePath,
+    prClassRulesWritten: options.prClassRulesWritten,
   });
 }
 
@@ -1237,6 +1352,9 @@ export function formatAnalyzeGithubCompletion(result) {
 
   if (result.savedProfilePath) {
     lines.push(`Repository profile saved: ${result.savedProfilePath}.`);
+  }
+  if (result.prClassRulesWritten) {
+    lines.push("PR class rules written: Conventional Commit preset or release title rule.");
   }
 
   lines.push(`Collection coverage: ${result.collectionCoverage?.status ?? "unknown"}.`);

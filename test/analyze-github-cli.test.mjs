@@ -360,6 +360,7 @@ describe("GitHub live analyze CLI", () => {
           limit: "2",
           profilePath,
           configureWorkflow: "no",
+          addConventionalCommitPrClasses: "no",
           outDir,
           dryRun: "no",
           csv: "no",
@@ -384,12 +385,71 @@ describe("GitHub live analyze CLI", () => {
         "limit",
         "profilePath",
         "configureWorkflow",
+        "addConventionalCommitPrClasses",
         "outDir",
         "dryRun",
         "csv",
         "json",
         "excludedPrClasses",
       ]);
+    });
+  });
+
+  it("renders workflow enum prompts as labeled choices while storing schema identifiers", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "labeled-workflow-profile.json");
+      const outDir = join(directory, "labeled-workflow-out");
+      const prompts = [];
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "2",
+          profilePath,
+          createProfile: "yes",
+          primaryMergeMethod: "2",
+          releaseStrategy: "Direct tags",
+          branchStrategy: "1",
+          addConventionalCommitPrClasses: "no",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+        }, prompts),
+      });
+
+      const workflowPrompts = prompts.filter(prompt => [
+        "primaryMergeMethod",
+        "releaseStrategy",
+        "branchStrategy",
+      ].includes(prompt.id));
+      assert.deepEqual(workflowPrompts.map(prompt => prompt.type), ["select", "select", "select"]);
+      assert.deepEqual(workflowPrompts[0].choices.map(choice => choice.label), [
+        "Merge commits",
+        "Squash merges",
+        "Rebase merges",
+        "Mixed",
+        "Unknown",
+      ]);
+      assert.deepEqual(workflowPrompts[0].choices.map(choice => choice.value), [
+        "merge_commit",
+        "squash_merge",
+        "rebase_merge",
+        "mixed",
+        "unknown",
+      ]);
+      for (const prompt of workflowPrompts) {
+        assert(!prompt.choices.some(choice => choice.label === "Other" || choice.value === "other"));
+      }
+      assert.equal(options.profilePath, profilePath);
+      assert.deepEqual((await readJson(profilePath)).workflow, {
+        primaryMergeMethod: "squash_merge",
+        releaseStrategy: "direct_tags",
+        branchStrategy: "trunk_based",
+      });
     });
   });
 
@@ -413,6 +473,7 @@ describe("GitHub live analyze CLI", () => {
           limit: ["0", "2"],
           profilePath,
           configureWorkflow: "no",
+          addConventionalCommitPrClasses: "no",
           outDir: [blockedOutPath, outDir],
           dryRun: ["maybe", "yes"],
           json: "no",
@@ -438,6 +499,7 @@ describe("GitHub live analyze CLI", () => {
         "limit",
         "profilePath",
         "configureWorkflow",
+        "addConventionalCommitPrClasses",
         "outDir",
         "outDir",
         "dryRun",
@@ -477,6 +539,7 @@ describe("GitHub live analyze CLI", () => {
           primaryMergeMethod: "squash_merge",
           releaseStrategy: "direct_tags",
           branchStrategy: "trunk_based",
+          addConventionalCommitPrClasses: "no",
           outDir,
           dryRun: "yes",
           json: "no",
@@ -494,6 +557,7 @@ describe("GitHub live analyze CLI", () => {
         "primaryMergeMethod",
         "releaseStrategy",
         "branchStrategy",
+        "addConventionalCommitPrClasses",
         "outDir",
         "dryRun",
         "json",
@@ -525,6 +589,7 @@ describe("GitHub live analyze CLI", () => {
           primaryMergeMethod: "squash_merge",
           releaseStrategy: "direct_tags",
           branchStrategy: "trunk_based",
+          addConventionalCommitPrClasses: "no",
           outDir,
           dryRun: "yes",
           json: "no",
@@ -542,6 +607,7 @@ describe("GitHub live analyze CLI", () => {
         "primaryMergeMethod",
         "releaseStrategy",
         "branchStrategy",
+        "addConventionalCommitPrClasses",
         "outDir",
         "dryRun",
         "json",
@@ -570,6 +636,7 @@ describe("GitHub live analyze CLI", () => {
           releaseStrategy: "release_prs",
           branchStrategy: "main_plus_release_branches",
           releasePrTitleIncludes: "Release",
+          addConventionalCommitPrClasses: "no",
           outDir,
           dryRun: "yes",
           json: "no",
@@ -590,6 +657,7 @@ describe("GitHub live analyze CLI", () => {
         "releaseStrategy",
         "branchStrategy",
         "releasePrTitleIncludes",
+        "addConventionalCommitPrClasses",
         "outDir",
         "dryRun",
         "json",
@@ -809,6 +877,7 @@ describe("GitHub live analyze CLI", () => {
           primaryMergeMethod: "merge_commit",
           releaseStrategy: "direct_tags",
           branchStrategy: "trunk_based",
+          addConventionalCommitPrClasses: "no",
         }, prompts),
         stdout: { write() {} },
         stderr: { write() {} },
@@ -825,6 +894,7 @@ describe("GitHub live analyze CLI", () => {
         "primaryMergeMethod",
         "releaseStrategy",
         "branchStrategy",
+        "addConventionalCommitPrClasses",
       ]);
     });
   });
@@ -1012,7 +1082,10 @@ describe("GitHub live analyze CLI", () => {
         excludedPrClasses: [],
       }, {
         isInteractiveTerminal: true,
-        promptAdapter: createScriptedPromptAdapter({ configureWorkflow: "no" }, prompts),
+        promptAdapter: createScriptedPromptAdapter({
+          configureWorkflow: "no",
+          addConventionalCommitPrClasses: "no",
+        }, prompts),
       });
 
       assert.deepEqual(options, {
@@ -1026,7 +1099,10 @@ describe("GitHub live analyze CLI", () => {
         csv: true,
         json: false,
       });
-      assert.deepEqual(prompts.map(prompt => prompt.id), ["configureWorkflow"]);
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "configureWorkflow",
+        "addConventionalCommitPrClasses",
+      ]);
     });
   });
 
@@ -1622,6 +1698,8 @@ describe("GitHub live analyze CLI", () => {
           repository: "example/example-repo",
           limit: "1",
           profilePath,
+          configureWorkflow: "no",
+          addConventionalCommitPrClasses: "no",
           outDir,
           dryRun: "yes",
         }, prompts),
@@ -1642,6 +1720,7 @@ describe("GitHub live analyze CLI", () => {
         "limit",
         "profilePath",
         "configureWorkflow",
+        "addConventionalCommitPrClasses",
         "outDir",
         "dryRun",
       ]);
@@ -1683,6 +1762,147 @@ describe("GitHub live analyze CLI", () => {
         releaseStrategy: "release_prs",
         branchStrategy: "main_plus_release_branches",
       });
+    });
+  });
+
+  it("writes opt-in Conventional Commit PR class preset and reports it in completion output", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "interactive-conventional-profile.json");
+      const outDir = join(directory, "interactive-conventional-profile-out");
+      let stdout = "";
+
+      await runAnalyzeGithubCli(["--interactive"], {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "1",
+          profilePath,
+          createProfile: "yes",
+          primaryMergeMethod: "squash_merge",
+          releaseStrategy: "direct_tags",
+          branchStrategy: "trunk_based",
+          addConventionalCommitPrClasses: "yes",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+          excludedPrClasses: "",
+        }),
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write() {} },
+      });
+
+      const profile = await readJson(profilePath);
+      assert.deepEqual(profile.prClasses.map(rule => rule.class), [
+        "dependency",
+        "feature",
+        "fix",
+        "docs",
+        "test",
+        "maintenance",
+      ]);
+      assert(profile.prClasses.every(rule => typeof rule.match.titleRegex === "string"));
+      assert(stdout.includes(`Repository profile saved: ${profilePath}.`));
+      assert(stdout.includes("PR class rules written: Conventional Commit preset or release title rule."));
+    });
+  });
+
+  it("preserves existing custom PR class rules unless the preset update is confirmed", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeCanonicalProfile(directory, "custom-pr-classes.json", {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        prClasses: [
+          {
+            id: "custom-feature",
+            class: "custom_feature",
+            match: { titleIncludes: "Feature" },
+          },
+        ],
+        rules: [],
+      });
+      const outDir = join(directory, "custom-pr-classes-out");
+
+      await runAnalyzeGithubCli(["--interactive"], {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "1",
+          profilePath,
+          configureWorkflow: "yes",
+          primaryMergeMethod: "merge_commit",
+          releaseStrategy: "direct_tags",
+          branchStrategy: "trunk_based",
+          addConventionalCommitPrClasses: "no",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+          excludedPrClasses: "",
+        }),
+        stdout: { write() {} },
+        stderr: { write() {} },
+      });
+
+      assert.deepEqual((await readJson(profilePath)).prClasses, [
+        {
+          id: "custom-feature",
+          class: "custom_feature",
+          match: { titleIncludes: "Feature" },
+        },
+      ]);
+    });
+  });
+
+  it("can add the Conventional Commit preset to an existing profile without changing workflow fields", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeCanonicalProfile(directory, "existing-profile-pr-preset.json", {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        workflow: {
+          primaryMergeMethod: "unknown",
+          releaseStrategy: "unknown",
+          branchStrategy: "unknown",
+        },
+        rules: [],
+      });
+      const outDir = join(directory, "existing-profile-pr-preset-out");
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir,
+        dryRun: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          configureWorkflow: "no",
+          addConventionalCommitPrClasses: "yes",
+          json: "no",
+        }),
+      });
+
+      const profile = await readJson(profilePath);
+      assert.equal(options.savedProfilePath, profilePath);
+      assert.equal(options.prClassRulesWritten, true);
+      assert.deepEqual(profile.workflow, {
+        primaryMergeMethod: "unknown",
+        releaseStrategy: "unknown",
+        branchStrategy: "unknown",
+      });
+      assert.deepEqual(profile.prClasses.map(rule => rule.class), [
+        "dependency",
+        "feature",
+        "fix",
+        "docs",
+        "test",
+        "maintenance",
+      ]);
     });
   });
 

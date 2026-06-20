@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { classifyFilePath } from "../src/profile/file-role.js";
 import { assertValidPrClassRules, classifyPullRequest, validatePrClassRules } from "../src/profile/pr-class.js";
+import { conventionalCommitPrClassRules } from "../src/profile/pr-class-presets.js";
 import { assertValidWorkflowContext, validateWorkflowContext } from "../src/profile/workflow.js";
 import { classifyCommentSource } from "../src/github/comment-source.js";
 
@@ -132,6 +133,28 @@ describe("pull request class classification", () => {
       () => assertValidPrClassRules({ prClasses: null }),
       /invalid PR class profile rules: prClasses must be an array when provided/,
     );
+  });
+
+  it("provides ordered Conventional Commit preset rules with title regex matchers", () => {
+    const rules = conventionalCommitPrClassRules();
+    const profile = { prClasses: rules };
+
+    assert.deepEqual(rules.map(rule => rule.class), [
+      "dependency",
+      "feature",
+      "fix",
+      "docs",
+      "test",
+      "maintenance",
+    ]);
+    assert(rules.every(rule => typeof rule.match.titleRegex === "string"));
+    assert.doesNotThrow(() => assertValidPrClassRules(profile));
+    assert.equal(classifyPullRequest({ title: "chore(deps): update lockfile" }, profile).class, "dependency");
+    assert.equal(classifyPullRequest({ title: "feat(cli)!: add setup preset" }, profile).class, "feature");
+    assert.equal(classifyPullRequest({ title: "fix(parser): handle title rules" }, profile).class, "fix");
+    assert.equal(classifyPullRequest({ title: "docs: explain profiles" }, profile).class, "docs");
+    assert.equal(classifyPullRequest({ title: "test(cli): cover prompts" }, profile).class, "test");
+    assert.equal(classifyPullRequest({ title: "chore: refresh tooling" }, profile).class, "maintenance");
   });
 });
 
