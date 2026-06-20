@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-20 — Profile Improvement Suggestions
+
+- What changed: Markdown friction reports and methodology now suggest PR class or file/path profile improvements when fallback `unknown` evidence dominates the analyzed sample.
+- Why it matters: Maintainers can see where repository profile rules would improve interpretation without treating the suggestions as score changes or required fixes.
+- Who is affected: Maintainers and contributors reviewing generated reports or authoring repository profiles.
+- Action needed: Optional; add or refine profile rules when the suggestions match repository conventions.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/45
+
 ### 2026-06-20 — Report Evidence Status Tables
 
 - What changed: Markdown friction reports now show representative validation, review, and source-label evidence in compact tables with text status labels for observed, partial, unavailable, configured, warning, and healthy states.

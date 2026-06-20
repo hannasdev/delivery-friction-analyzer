@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: Active; M1 and M2 merged; M3 active.
+Status: Active; M1, M2, and M3 merged; M4 active.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-19
-- Current milestone: M3: Evidence Tables And Status Labels (active)
+- Current milestone: M4: Profile Improvement Suggestions (active)
 - Related issue:
   - None yet.
 - Related docs:
@@ -109,7 +109,7 @@ Rendering may use visual markers when the output format supports them, but every
 
 Fifth, connect profile and workflow gaps to concrete next steps. Profile suggestions are Markdown and methodology text derived from existing report data; they do not add `friction-report.v1` fields in this initiative. Deterministic trigger rules:
 
-- PR class suggestion: render when the analyzed sample has at least 3 PRs and fallback `unknown` accounts for at least 80% of PRs, or when no PR class rules are configured and every analyzed PR is `unknown`.
+- PR class suggestion: render when the analyzed sample has at least 3 PRs and fallback `unknown` accounts for at least 80% of PRs, or when every analyzed PR uses fallback `unknown` PR class evidence. Because this milestone does not add profile-rule inventory to `friction-report.v1`, all-fallback-unknown is the report-layer proxy for no configured PR class rule producing usable classification evidence.
 - File/path suggestion: render when at least 25% of non-generated changed lines have role `unknown` or functional surface `unknown`, using existing metrics/report surface evidence.
 - Workflow-context suggestion: render when workflow context is omitted and the report also has unavailable PR-open diff coverage or workflow-run coverage caveats that configured workflow context could help explain.
 - Suppression: render each suggestion category at most once per report. Omit class and path suggestions when the profile already has the relevant configured evidence and the fallback threshold is not met. Omit workflow-context suggestions when workflow context is configured or when the relevant coverage caveats are absent.
@@ -135,9 +135,9 @@ Reports should also explain when configured workflow context affects data interp
 - [x] Interactive setup can generate opt-in Conventional Commit-style title-based PR class rules.
 - [x] Reports render stable repeated evidence details as tables without losing caveats or source labels.
 - [x] Reports use text-backed status markers for observed, partial, unavailable, configured, warning, and healthy states where they improve scanability.
-- [ ] Reports suggest concrete profile improvements when missing profile configuration limits interpretation.
+- [x] Reports suggest concrete profile improvements when missing profile configuration limits interpretation.
 - [ ] Reports and methodology explain workflow-specific data limits only where relevant, without implying merge commits are currently used to compute PR size.
-- [ ] Existing JSON, CSV, metrics, ranking, and filtering contracts remain backward-compatible unless a later explicit contract change is accepted.
+- [x] Existing JSON, CSV, metrics, ranking, and filtering contracts remain backward-compatible unless a later explicit contract change is accepted.
 
 ## Risks And Tradeoffs
 

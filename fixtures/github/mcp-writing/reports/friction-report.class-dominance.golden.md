@@ -72,6 +72,7 @@ PR classes are repository-profile evidence for interpretation only; they do not 
 | release | 2 | 600 | 67% | repository\_profile=2 |
 | development | 1 | 100 | 33% | fallback\_rule=1 |
 
+
 ## Shared Signal Interpretation
 
 Shared-signal groups are report interpretation only; they do not change scores, ranking, or recommendation categories.
@@ -201,6 +202,7 @@ None
 
 - Pull requests are selected upstream by the collection or fixture workflow; this renderer explains the resulting metrics summary.
 - File roles and functional surfaces come from repository-profile classification, not from language names alone.
+- No profile suggestion thresholds were triggered by this report's PR class, role, or functional-surface evidence.
 - Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.
 - Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.
 - Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.

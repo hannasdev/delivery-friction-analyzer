@@ -76,6 +76,14 @@ PR classes are repository-profile evidence for interpretation only; they do not 
 | --- | --- | --- | --- | --- |
 | unknown | 3 | 2454 | 100% | fallback\_rule=3 |
 
+## Profile Suggestions
+
+Optional profile improvements based on this report's existing evidence. These suggestions do not change scores, rankings, CSV exports, or JSON report fields.
+
+| Profile area | Evidence | Suggested next step |
+| --- | --- | --- |
+| PR class rules | 3 of 3 analyzed PRs (100%) use fallback unknown PR class evidence. | Add or refine repository-profile PR class title rules, or rerun interactive setup to add the Conventional Commit preset when it matches the repository. |
+
 ## Shared Signal Interpretation
 
 Shared-signal groups are report interpretation only; they do not change scores, ranking, or recommendation categories.
@@ -428,6 +436,7 @@ File roles:
 
 - Pull requests are selected upstream by the collection or fixture workflow; this renderer explains the resulting metrics summary.
 - File roles and functional surfaces come from repository-profile classification, not from language names alone.
+- Profile suggestions are optional interpretation improvements derived from existing report evidence; they do not change scores, rankings, CSV exports, or JSON report fields.
 - Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.
 - Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.
 - Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.

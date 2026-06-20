@@ -1,6 +1,6 @@
 # Friction Report Contract
 
-Milestone 3 introduces `friction-report.v1`, a deterministic report generated from a `friction-metrics.v1` repository metrics summary. The report layer does not fetch GitHub data, mutate repositories, rank individuals, or depend on services beyond the data collection path that produced the metrics summary.
+Milestone 3 introduced `friction-report.v1`, a deterministic report generated from a `friction-metrics.v1` repository metrics summary. Milestone 4 adds Markdown and methodology profile suggestions without adding report JSON fields. The report layer does not fetch GitHub data, mutate repositories, rank individuals, or depend on services beyond the data collection path that produced the metrics summary.
 
 ## Outputs
 
@@ -60,6 +60,7 @@ The Markdown renderer presents the same report data for human review:
 - evidence-quality and coverage tables before detailed recommendations;
 - key findings that highlight top bottlenecks, strongest displayed signal, outlier caveats, PR class caveats, and coverage caveats;
 - a PR class context table that shows analyzed PR counts, changed lines, sample share, and classification sources by class;
+- profile suggestions when fallback `unknown` PR classes or unknown file role/surface evidence cross deterministic thresholds;
 - a top-level shared-signal interpretation callout when multiple displayed bottlenecks share a ranking key or representative PR evidence;
 - outlier and sensitivity analysis when displayed examples are dominated by one PR;
 - a prioritization explanation that describes strongest-signal ordering and how PR size is used as context, using reader-facing change-scope language while mapping back to the internal changed-file-spread signal when needed;
@@ -75,6 +76,7 @@ The Markdown renderer presents the same report data for human review:
 
 Markdown output should not include individual contributor or reviewer rankings.
 Status labels are Markdown presentation helpers, not `friction-report.v1` fields. They should preserve the underlying source labels and counts rather than replacing auditable evidence.
+Profile suggestions are also presentation helpers, not `friction-report.v1` fields. They are derived from existing PR class and file-surface evidence, appear at most once per suggestion category, and do not change scores, rankings, CSV exports, filtering, or PR class matching. Because the report JSON does not carry repository-profile rule inventory, all analyzed PRs using fallback `unknown` PR class evidence is the renderer's small-sample proxy for no configured PR class rule producing usable classification evidence.
 
 ## Recommendation Boundaries
 
@@ -109,6 +111,7 @@ Full live analysis writes `methodology.md` as a hybrid artifact: stable explanat
 - target repository and report/metric versions;
 - profile path when available;
 - configured workflow context when supplied by the repository profile, labeled as user-configured context rather than observed GitHub evidence;
+- profile suggestions when PR class or file/path profile evidence crosses deterministic fallback thresholds, or an explicit no-threshold note when none were triggered;
 - requested and collected PR counts;
 - collection coverage status and API-family diagnostics;
 - scoring, ranking, dominance, sensitivity, and limitation explanations;
