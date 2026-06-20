@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can rerun an interactive setup non-interactively without moving repository semantics out of repository profiles.
 - Who is affected: Maintainers using `--interactive` or repeated local analysis commands.
 - Action needed: Optional; save a local preset for repeated runs and delete stale preset files when they no longer match the desired analysis settings.
-- PR: TBD
+- PR: #48
 
 ### 2026-06-20 — Contributor Source Configuration
 
