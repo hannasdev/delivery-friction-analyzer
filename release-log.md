@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can capture common repository assumptions without typing schema identifiers or hand-writing the first set of title-based PR class rules.
 - Who is affected: Maintainers running `--interactive` to create or update repository profiles.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/40
 
 ### 2026-06-19 — Workflow Context Surfacing
 
