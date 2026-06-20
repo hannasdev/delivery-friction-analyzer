@@ -123,7 +123,7 @@ describe("friction report generation", () => {
     assert(markdown.includes("| Branch strategy | Main plus release branches |"));
     assert(markdown.includes("## Workflow Data Caveats"));
     assert(markdown.includes("Profile context says primary merge method is Squash merge; this is configured profile context, not observed evidence."));
-    assert(markdown.includes("Final PR metadata") === false);
+    assert(!markdown.includes("Final PR metadata"));
     assert(markdown.includes("final PR metadata available through GitHub PR data"));
     assert(markdown.includes("PR-open diff growth requires an open-time snapshot or equivalent captured state."));
     assert(markdown.includes("## Evidence Quality And Coverage"));

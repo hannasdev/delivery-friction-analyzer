@@ -702,7 +702,7 @@ export function hasConfiguredWorkflowContext(configuredWorkflow) {
   return configuredWorkflowEntries(configuredWorkflow).length > 0;
 }
 
-function configuredWorkflowValue(configuredWorkflow, field) {
+function configuredWorkflowEntry(configuredWorkflow, field) {
   const entry = configuredWorkflowEntries(configuredWorkflow).find(candidate => candidate.field === field);
   return entry ?? null;
 }
@@ -714,7 +714,7 @@ export function workflowDataCaveats(report = {}) {
   const unavailableWorkflowRuns = Number(report.coverage?.workflowRuns?.unavailable ?? 0);
   if (unavailablePrOpenDiff <= 0 && unavailableWorkflowRuns <= 0) return [];
 
-  const mergeMethod = configuredWorkflowValue(report.configuredWorkflow, "primaryMergeMethod");
+  const mergeMethod = configuredWorkflowEntry(report.configuredWorkflow, "primaryMergeMethod");
   const caveats = [];
   if (unavailablePrOpenDiff > 0) {
     const prefix = mergeMethod
