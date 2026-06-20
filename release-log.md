@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can see where repository profile rules would improve interpretation without treating the suggestions as score changes or required fixes.
 - Who is affected: Maintainers and contributors reviewing generated reports or authoring repository profiles.
 - Action needed: Optional; add or refine profile rules when the suggestions match repository conventions.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/45
 
 ### 2026-06-20 — Report Evidence Status Tables
 

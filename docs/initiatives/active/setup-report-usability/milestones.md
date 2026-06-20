@@ -240,9 +240,9 @@ Reports connect missing profile evidence to concrete profile improvements withou
 
 - [x] Active
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
 
 ## M5: Workflow Data Caveats
