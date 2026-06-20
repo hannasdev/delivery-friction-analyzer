@@ -52,7 +52,7 @@ npm run analyze:github -- \
 
 If the profile path does not exist, interactive setup can create a minimal `repository-profile.v1` profile. `--dry-run` validates repository access, profile JSON, output directory writability, and a small sample of GitHub API coverage without writing the full report bundle. When the profile looks right, rerun the command without `--dry-run`.
 
-To run the CLI from another project after installing the npm package, pass the same choices as explicit flags:
+To run the CLI from another project with the npm package, pass the same choices as explicit flags:
 
 ```sh
 npx delivery-friction-analyzer \
