@@ -86,7 +86,6 @@ A successful run writes a report bundle to the output directory. Read these firs
 
 - `friction-report.md`: the main report to read first.
 - `methodology.md`: data coverage, caveats, and interpretation notes.
-- `pr-metrics.csv`: per-PR metrics for spreadsheet review.
 
 Use these when you want to audit, automate, or build follow-up analysis:
 
@@ -94,6 +93,10 @@ Use these when you want to audit, automate, or build follow-up analysis:
 - `metrics-summary.json`: computed metrics used by the report.
 - `normalized.json`: normalized repository, PR, file, review, and validation entities.
 - `source-bundle.json`: collected source data for auditability.
+
+When CSV exports are enabled, the bundle also includes spreadsheet-friendly evidence files:
+
+- `pr-metrics.csv`: per-PR metrics for spreadsheet review.
 - `bottleneck-examples.csv`: representative bottleneck examples.
 - `comment-sources.csv`: review-comment source breakdowns.
 - `collection-coverage.csv`: API coverage diagnostics.
