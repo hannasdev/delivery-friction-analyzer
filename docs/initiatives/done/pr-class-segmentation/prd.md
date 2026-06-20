@@ -2,13 +2,14 @@
 
 ## Status
 
-Status: Implemented; final initiative completion deferred until PR merge.
+Status: Completed in PR #27 on 2026-06-14.
 
-- State: Review
+- State: Done
 - Owner: Hanna
 - Created: 2026-06-12
 - Activated: 2026-06-14
-- Current milestone: M3: Explicit Class Filtering (implemented; awaiting PR review and merge)
+- Completed: 2026-06-14
+- Current milestone state: M1 merged in PR #25; M2 merged in PR #26; M3 merged in PR #27.
 - Related issue:
   - [#16: Release PRs are a different population and skew the ranking](https://github.com/hannasdev/delivery-friction-analyzer/issues/16)
 - Related docs:
@@ -74,14 +75,14 @@ After class evidence is present and tested, add an explicit CLI filtering path s
 
 ## Acceptance Criteria
 
-- [ ] Repository profile schema supports optional PR classification rules.
-- [ ] Normalized PRs carry a stable PR class and classification source.
-- [ ] Metrics and CSV artifacts expose PR class without changing existing metric formulas.
-- [ ] Reports include PR class distribution context.
-- [ ] Reports warn when displayed bottlenecks are dominated by a single PR class.
-- [ ] Optional filtering, if included, is explicit in CLI input and report output.
-- [ ] Default behavior remains backwards-compatible for profiles without PR class rules.
-- [ ] Tests cover profile validation, rule matching, normalization, metrics/artifacts, and report output.
+- [x] Repository profile schema supports optional PR classification rules.
+- [x] Normalized PRs carry a stable PR class and classification source.
+- [x] Metrics and CSV artifacts expose PR class without changing existing metric formulas.
+- [x] Reports include PR class distribution context.
+- [x] Reports warn when displayed bottlenecks are dominated by a single PR class.
+- [x] Optional filtering, if included, is explicit in CLI input and report output.
+- [x] Default behavior remains backwards-compatible for profiles without PR class rules.
+- [x] Tests cover profile validation, rule matching, normalization, metrics/artifacts, and report output.
 
 ## Risks And Tradeoffs
 

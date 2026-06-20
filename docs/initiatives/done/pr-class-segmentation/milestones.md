@@ -175,11 +175,11 @@ Allow users to run an explicitly filtered analysis when they want to inspect dev
 
 ### Status
 
-Status: Implemented; final initiative completion deferred until PR merge.
+Status: Merged in PR #27 on 2026-06-14.
 
 - [x] Active
 - [x] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged in PR #27 on 2026-06-14

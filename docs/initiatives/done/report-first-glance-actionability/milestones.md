@@ -50,14 +50,14 @@ Make the top of `friction-report.md` immediately communicate what the reader sho
 
 ### Acceptance Criteria
 
-- [ ] A reader can see focus areas, recommendation categories, evidence reviewed, and confidence caveats before the detailed bottleneck sections.
-- [ ] Recommendation category context appears before `## Ranked Bottlenecks`.
-- [ ] The executive summary includes findings-oriented content such as top bottleneck labels, triggered categories, reviewed sample/evidence counts, and caveats.
-- [ ] The opening preserves or intentionally replaces the existing "How To Read This Report" guidance for observed evidence, interpretation, recommendations, and caveats.
-- [ ] Markdown prose avoids unclear unexplained "changed-file spread" phrasing where clearer terms such as "files changed" or "number of files" are more appropriate; stable IDs, table fields, contract references, and immediately explained metric-family labels may retain internal names.
-- [ ] Golden Markdown tests assert the stable top-level order before `## Ranked Bottlenecks`, including filtered PR-class caveats when class filtering is applied, plus focused coverage for no bottlenecks, no triggered categories, unavailable coverage, and unavailable PR class context.
-- [ ] Manual fixture inspection confirms the opening remains compact, scannable, shorter than the detailed ranked bottleneck section, readable when there are no caveats, and limited to a compact category summary rather than repeating the full detailed category reference.
-- [ ] Report contract docs reflect the new opening flow and map reader-facing file-count wording back to `changedFileSpread` when that internal concept is referenced.
+- [x] A reader can see focus areas, recommendation categories, evidence reviewed, and confidence caveats before the detailed bottleneck sections.
+- [x] Recommendation category context appears before `## Ranked Bottlenecks`.
+- [x] The executive summary includes findings-oriented content such as top bottleneck labels, triggered categories, reviewed sample/evidence counts, and caveats.
+- [x] The opening preserves or intentionally replaces the existing "How To Read This Report" guidance for observed evidence, interpretation, recommendations, and caveats.
+- [x] Markdown prose avoids unclear unexplained "changed-file spread" phrasing where clearer terms such as "files changed" or "number of files" are more appropriate; stable IDs, table fields, contract references, and immediately explained metric-family labels may retain internal names.
+- [x] Golden Markdown tests assert the stable top-level order before `## Ranked Bottlenecks`, including filtered PR-class caveats when class filtering is applied, plus focused coverage for no bottlenecks, no triggered categories, unavailable coverage, and unavailable PR class context.
+- [x] Manual fixture inspection confirms the opening remains compact, scannable, shorter than the detailed ranked bottleneck section, readable when there are no caveats, and limited to a compact category summary rather than repeating the full detailed category reference.
+- [x] Report contract docs reflect the new opening flow and map reader-facing file-count wording back to `changedFileSpread` when that internal concept is referenced.
 
 ### Required Validation
 
@@ -124,11 +124,11 @@ Resolve whether existing analyzer artifacts are sufficient input for users who w
 
 ### Acceptance Criteria
 
-- [ ] `docs/contracts/friction-report.md` records whether existing JSON/CSV artifacts are sufficient for downstream model use or whether a later artifact milestone is justified.
-- [ ] README guidance names the source artifacts, expected local workflow, and source-of-truth guardrails clearly.
-- [ ] If a later artifact is justified, `architecture.md` records the missing data and the required output-surface decisions before M3 activation.
-- [ ] No new artifact, CLI flag, fixture output, or artifact write path is added in M2.
-- [ ] The documented model-ready path preserves artifact sensitivity warnings and report guardrails.
+- [x] `docs/contracts/friction-report.md` records whether existing JSON/CSV artifacts are sufficient for downstream model use or whether a later artifact milestone is justified.
+- [x] README guidance names the source artifacts, expected local workflow, and source-of-truth guardrails clearly.
+- [x] No later artifact is justified by M2; existing `friction-report.json` plus CSV exports are sufficient, so M3 remains deferred.
+- [x] No new artifact, CLI flag, fixture output, or artifact write path is added in M2.
+- [x] The documented model-ready path preserves artifact sensitivity warnings and report guardrails.
 
 ### Required Validation
 
@@ -144,11 +144,11 @@ Resolve whether existing analyzer artifacts are sufficient input for users who w
 ### Status
 
 - [x] Active
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged in PR #31 on 2026-06-15
 
 ## M3: Optional Model-Ready Context Artifact
 
@@ -209,7 +209,7 @@ If M2 proves existing artifacts are insufficient, add a deterministic local mode
 
 ### Status
 
-- [ ] Not started
+- [x] Deferred; not activated because M2 determined existing `friction-report.json` plus CSV exports are sufficient for the guarded downstream narrative workflow.
 - [ ] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed

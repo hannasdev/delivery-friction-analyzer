@@ -15,9 +15,9 @@ Status: Active; M1 merged and M2 active.
   - [Architecture Notes](architecture.md)
   - [Repository Profile Format](../../../reference/repository-profile.md)
   - [Friction Report Contract](../../../contracts/friction-report.md)
-  - [PR Class Segmentation](../pr-class-segmentation/prd.md)
+  - [PR Class Segmentation](../../done/pr-class-segmentation/prd.md)
   - [Interactive CLI Setup](../interactive-cli-setup/prd.md)
-  - [Report First-Glance Actionability](../report-first-glance-actionability/prd.md)
+  - [Report First-Glance Actionability](../../done/report-first-glance-actionability/prd.md)
 
 ## Problem
 

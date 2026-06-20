@@ -134,9 +134,9 @@ M1 activation should account for the active PR class segmentation dependency. If
 
 ## Open Questions
 
-- [ ] Is there a concrete downstream consumer that requires focus snapshot data as a structured `friction-report.v1` field instead of the preferred Markdown-only derivation?
-- [ ] Does implementation evidence justify moving the full recommendation category table near the top, or should it keep the preferred compact top summary plus later full table?
+- [x] Is there a concrete downstream consumer that requires focus snapshot data as a structured `friction-report.v1` field instead of the preferred Markdown-only derivation? No. The focus snapshot remains Markdown-derived.
+- [x] Does implementation evidence justify moving the full recommendation category table near the top, or should it keep the preferred compact top summary plus later full table? Keep the compact top summary plus later full table.
 - [x] Does M2 show that `report-context.json` is materially different enough from `friction-report.json` plus CSVs to justify activating M3? No. Existing `friction-report.json` plus curated CSV exports are sufficient for the guarded downstream narrative workflow, so M3 remains deferred unless a concrete consumer needs a smaller single-file context or machine-readable prompt package.
-- [ ] If M3 is activated, should the model context artifact be default, opt-in, or limited to specific commands?
-- [ ] If M3 is activated, should `src/report/generate-report.js` remain JSON/Markdown-only or support the new artifact explicitly?
-- [ ] Has the PR class segmentation report contract landed on the base branch, or does the implementation packet need an explicit rebase/dependency note?
+- [x] If M3 is activated, should the model context artifact be default, opt-in, or limited to specific commands? Not applicable after M2; no model context artifact is activated.
+- [x] If M3 is activated, should `src/report/generate-report.js` remain JSON/Markdown-only or support the new artifact explicitly? Not applicable after M2; `src/report/generate-report.js` remains JSON/Markdown-only.
+- [x] Has the PR class segmentation report contract landed on the base branch, or does the implementation packet need an explicit rebase/dependency note? Yes. PR Class Segmentation M3 merged in PR #27 before this initiative completed.
