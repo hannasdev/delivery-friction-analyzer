@@ -254,7 +254,7 @@ Generated methodology and report metadata can label configured workflow context 
 
 ## M5: Contributor Source Configuration
 
-Status: Implemented on 2026-06-20 for PR review.
+Status: Merged in PR #47 on 2026-06-20.
 
 ### Outcome
 
@@ -321,9 +321,11 @@ Users can optionally configure `.all-contributorsrc` as a structured contributor
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened in PR #47 on 2026-06-20
-- [ ] Merged
+- [x] Merged in PR #47 on 2026-06-20
 
 ## M6: Reusable Presets And Rerun Guidance
+
+Status: Implemented on 2026-06-20 for PR review.
 
 ### Outcome
 
@@ -347,12 +349,12 @@ Interactive setup can save reusable local run preferences so users can rerun ana
 
 ### Acceptance Criteria
 
-- [ ] The initiative records and implements a clear ownership split between run presets and repository profiles.
-- [ ] Users can rerun an interactive setup non-interactively from saved or printed settings.
-- [ ] Explicit CLI flags override preset values predictably.
-- [ ] Presets never store tokens, raw source bundles, or generated report content.
-- [ ] Generated or updated preset paths are printed in completion output.
-- [ ] Documentation explains preset paths, precedence, and cleanup.
+- [x] The initiative records and implements a clear ownership split between run presets and repository profiles.
+- [x] Users can rerun an interactive setup non-interactively from saved or printed settings.
+- [x] Explicit CLI flags override preset values predictably.
+- [x] Presets never store tokens, raw source bundles, or generated report content.
+- [x] Generated or updated preset paths are printed in completion output.
+- [x] Documentation explains preset paths, precedence, and cleanup.
 
 ### Required Validation
 
@@ -377,4 +379,9 @@ Interactive setup can save reusable local run preferences so users can rerun ana
 
 ### Status
 
-- [ ] Not started
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [ ] Adversarially reviewed
+- [ ] PR opened
+- [ ] Merged

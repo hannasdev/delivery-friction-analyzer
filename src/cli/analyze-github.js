@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { constants, realpathSync } from "node:fs";
-import { access, lstat, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { access, lstat, mkdir, open, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -26,18 +26,71 @@ import {
 } from "../profile/workflow.js";
 import { assertValidContributorSource } from "../profile/contributor-source.js";
 
+const RUN_PRESET_SCHEMA_VERSION = "analyze-github-run-preset.v1";
+
 const ALLOWED_OPTIONS = new Set([
   "repo",
   "limit",
   "profile",
   "out",
   "dry-run",
+  "no-dry-run",
   "metadata-only",
   "validation-target",
+  "no-validation-target",
+  "csv",
   "no-csv",
   "exclude-pr-class",
   "json",
+  "no-json",
   "interactive",
+  "preset",
+  "save-preset",
+]);
+
+const BOOLEAN_OPTIONS = new Set([
+  "dry-run",
+  "no-dry-run",
+  "metadata-only",
+  "validation-target",
+  "no-validation-target",
+  "csv",
+  "no-csv",
+  "json",
+  "no-json",
+  "interactive",
+]);
+
+const CLI_OPTION_KEYS = Object.freeze({
+  repo: "repository",
+  limit: "limit",
+  profile: "profilePath",
+  out: "outDir",
+  "dry-run": "dryRun",
+  "no-dry-run": "dryRun",
+  "metadata-only": "dryRun",
+  "validation-target": "isValidationTarget",
+  "no-validation-target": "isValidationTarget",
+  csv: "csv",
+  "no-csv": "csv",
+  "exclude-pr-class": "excludedPrClasses",
+  json: "json",
+  "no-json": "json",
+  interactive: "interactive",
+  preset: "presetPath",
+  "save-preset": "savePresetPath",
+});
+
+const RUN_PRESET_OPTION_KEYS = Object.freeze([
+  "repository",
+  "limit",
+  "profilePath",
+  "outDir",
+  "dryRun",
+  "isValidationTarget",
+  "csv",
+  "json",
+  "excludedPrClasses",
 ]);
 
 const REPOSITORY_SLUG = /^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/;
@@ -72,16 +125,58 @@ Options:
   --profile <path>          Repository profile JSON used for file role classification.
   --out <directory>         Output directory for generated artifacts.
   --dry-run                 Validate inputs and sample GitHub coverage without writing artifacts.
+  --no-dry-run              Disable dry-run mode when a preset enabled it.
   --metadata-only           Alias for --dry-run.
   --validation-target       Mark the target repository as a validation target in output metadata.
+  --no-validation-target    Disable validation-target mode when a preset enabled it.
   --exclude-pr-class <cls>  Exclude a PR class from normalized, metrics, report, methodology, and CSV artifacts. Repeat or comma-separate values.
+  --csv                     Enable curated CSV evidence exports when a preset disabled them.
   --no-csv                  Suppress curated CSV evidence exports.
   --json                    Print the machine-readable completion receipt to stdout.
+  --no-json                 Disable JSON completion output when a preset enabled it.
   --interactive             Prompt for missing run options in a terminal.
+  --preset <path>           Load local run settings from a saved preset. Explicit CLI flags override preset values.
+  --save-preset <path>      Save local run settings for non-interactive reruns.
 `;
 
+function attachOptionSource(options, property, value) {
+  Object.defineProperty(options, property, {
+    value,
+    enumerable: false,
+    configurable: true,
+  });
+  return options;
+}
+
+function optionSourceSet(options, property) {
+  return options?.[property] instanceof Set ? options[property] : new Set();
+}
+
+function explicitCliOptionKeys(argv) {
+  const keys = new Set();
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--help" || arg === "-h") continue;
+    if (!arg.startsWith("--")) continue;
+    const key = arg.slice(2);
+    const optionKey = CLI_OPTION_KEYS[key];
+    if (optionKey) keys.add(optionKey);
+    if (!BOOLEAN_OPTIONS.has(key)) {
+      index += 1;
+    }
+  }
+  return keys;
+}
+
 export function parseAnalyzeGithubArgs(argv) {
-  const options = {};
+  const options = {
+    dryRun: false,
+    isValidationTarget: false,
+    csv: true,
+    json: false,
+    interactive: false,
+  };
+  const explicitOptions = explicitCliOptionKeys(argv);
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
@@ -96,15 +191,16 @@ export function parseAnalyzeGithubArgs(argv) {
       throw new Error(`Unknown option: ${arg}`);
     }
 
-    if (
-      key === "dry-run"
-      || key === "metadata-only"
-      || key === "validation-target"
-      || key === "no-csv"
-      || key === "json"
-      || key === "interactive"
-    ) {
-      options[key] = true;
+    if (BOOLEAN_OPTIONS.has(key)) {
+      if (key === "dry-run" || key === "metadata-only") options.dryRun = true;
+      if (key === "no-dry-run") options.dryRun = false;
+      if (key === "validation-target") options.isValidationTarget = true;
+      if (key === "no-validation-target") options.isValidationTarget = false;
+      if (key === "csv") options.csv = true;
+      if (key === "no-csv") options.csv = false;
+      if (key === "json") options.json = true;
+      if (key === "no-json") options.json = false;
+      if (key === "interactive") options.interactive = true;
       continue;
     }
 
@@ -113,25 +209,29 @@ export function parseAnalyzeGithubArgs(argv) {
       throw new Error(`Missing value for ${arg}`);
     }
     if (key === "exclude-pr-class") {
-      options[key] = [...(options[key] ?? []), value];
+      options.excludedPrClasses = [...(options.excludedPrClasses ?? []), value];
     } else {
       options[key] = value;
     }
     index += 1;
   }
 
-  return {
+  const parsed = {
     repository: options.repo,
     limit: options.limit === undefined ? undefined : Number(options.limit),
     profilePath: options.profile,
     outDir: options.out,
-    dryRun: Boolean(options["dry-run"] || options["metadata-only"]),
-    isValidationTarget: Boolean(options["validation-target"]),
-    excludedPrClasses: normalizeExcludedPrClasses(options["exclude-pr-class"] ?? []),
-    csv: !options["no-csv"],
-    json: Boolean(options.json),
-    interactive: Boolean(options.interactive),
+    dryRun: options.dryRun,
+    isValidationTarget: options.isValidationTarget,
+    excludedPrClasses: normalizeExcludedPrClasses(options.excludedPrClasses ?? []),
+    csv: options.csv,
+    json: options.json,
+    interactive: options.interactive,
   };
+  if (options.preset !== undefined) parsed.presetPath = options.preset;
+  if (options["save-preset"] !== undefined) parsed.savePresetPath = options["save-preset"];
+
+  return attachOptionSource(parsed, "explicitCliOptions", explicitOptions);
 }
 
 function normalizeExcludedPrClasses(values) {
@@ -139,6 +239,164 @@ function normalizeExcludedPrClasses(values) {
     .flatMap(value => String(value).split(","))
     .map(value => value.trim())
     .filter(Boolean))];
+}
+
+function assertPlainObject(value, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${label} must be an object.`);
+  }
+}
+
+function normalizePresetRunOptions(runOptions) {
+  assertPlainObject(runOptions, "preset run");
+  const unknown = Object.keys(runOptions).filter(key => !RUN_PRESET_OPTION_KEYS.includes(key));
+  if (unknown.length) {
+    throw new Error(`preset run contains unsupported key(s): ${unknown.join(", ")}`);
+  }
+
+  const normalized = {};
+  for (const key of RUN_PRESET_OPTION_KEYS) {
+    if (!Object.prototype.hasOwnProperty.call(runOptions, key)) continue;
+    const value = runOptions[key];
+    if (key === "limit") {
+      if (typeof value !== "number") throw new Error("preset run.limit must be a number.");
+      normalized.limit = value;
+    } else if (key === "dryRun" || key === "isValidationTarget" || key === "csv" || key === "json") {
+      if (typeof value !== "boolean") throw new Error(`preset run.${key} must be a boolean.`);
+      normalized[key] = value;
+    } else if (key === "excludedPrClasses") {
+      if (!Array.isArray(value)) throw new Error("preset run.excludedPrClasses must be an array.");
+      if (!value.every(item => typeof item === "string")) {
+        throw new Error("preset run.excludedPrClasses must contain only strings.");
+      }
+      normalized.excludedPrClasses = normalizeExcludedPrClasses(value);
+    } else {
+      if (typeof value !== "string" || !value.trim()) {
+        throw new Error(`preset run.${key} must be a non-empty string.`);
+      }
+      normalized[key] = value.trim();
+    }
+  }
+
+  if (normalized.repository !== undefined) validateRepositorySlug(normalized.repository);
+  if (normalized.limit !== undefined) validateLimit(normalized.limit);
+  validateExcludedPrClasses(normalized.excludedPrClasses ?? []);
+  return normalized;
+}
+
+function parseRunPresetJson(text) {
+  let preset;
+  try {
+    preset = JSON.parse(text);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`preset must be valid JSON: ${error.message}`);
+    }
+    throw error;
+  }
+  assertPlainObject(preset, "preset");
+  if (preset.schemaVersion !== RUN_PRESET_SCHEMA_VERSION) {
+    throw new Error(`preset schemaVersion must be ${RUN_PRESET_SCHEMA_VERSION}.`);
+  }
+  const allowedTopLevel = new Set(["schemaVersion", "run"]);
+  const unknown = Object.keys(preset).filter(key => !allowedTopLevel.has(key));
+  if (unknown.length) {
+    throw new Error(`preset contains unsupported key(s): ${unknown.join(", ")}`);
+  }
+  return normalizePresetRunOptions(preset.run);
+}
+
+async function readRunPreset(presetPath) {
+  try {
+    const presetStat = await stat(presetPath);
+    if (!presetStat.isFile()) {
+      throw new Error("preset path must be a JSON file path, not a directory or special file.");
+    }
+    return parseRunPresetJson(await readFile(presetPath, "utf8"));
+  } catch (error) {
+    if (error.message?.startsWith("preset ")) throw error;
+    if (error.code === "ENOENT") {
+      throw new Error("preset could not be read: no such file or directory");
+    }
+    throw new Error(`preset could not be read: ${error.message}`);
+  }
+}
+
+async function mergeRunPresetOptions(options) {
+  if (!options.presetPath) return options;
+
+  const presetOptions = await readRunPreset(options.presetPath);
+  const explicitOptions = optionSourceSet(options, "explicitCliOptions");
+  const merged = { ...options };
+  const presetOptionKeys = new Set();
+  for (const key of RUN_PRESET_OPTION_KEYS) {
+    if (!Object.prototype.hasOwnProperty.call(presetOptions, key)) continue;
+    if (!explicitOptions.has(key)) {
+      merged[key] = presetOptions[key];
+    }
+    presetOptionKeys.add(key);
+  }
+  attachOptionSource(merged, "explicitCliOptions", explicitOptions);
+  attachOptionSource(merged, "presetOptionKeys", presetOptionKeys);
+  return merged;
+}
+
+function presetRunOptionsFromAnalyzeOptions(options) {
+  requireOptions(options);
+  validateRepositorySlug(options.repository);
+  validateLimit(options.limit);
+  validateExcludedPrClasses(options.excludedPrClasses ?? []);
+  return {
+    repository: options.repository,
+    limit: options.limit,
+    profilePath: options.profilePath,
+    outDir: options.outDir,
+    dryRun: Boolean(options.dryRun),
+    isValidationTarget: Boolean(options.isValidationTarget),
+    csv: options.csv !== false,
+    json: Boolean(options.json),
+    excludedPrClasses: [...(options.excludedPrClasses ?? [])],
+  };
+}
+
+function formatRunPreset(options) {
+  return `${JSON.stringify({
+    schemaVersion: RUN_PRESET_SCHEMA_VERSION,
+    run: presetRunOptionsFromAnalyzeOptions(options),
+  }, null, 2)}\n`;
+}
+
+async function writeRunPresetFile(presetPath, options) {
+  if (hasTrailingPathSeparator(presetPath)) {
+    throw new Error("preset path must be a JSON file path, not a directory or special file.");
+  }
+  await mkdir(dirname(presetPath), { recursive: true });
+  try {
+    const presetLinkStat = await lstat(presetPath);
+    if (!presetLinkStat.isFile()) {
+      throw new Error("preset path must be a JSON file path, not a directory or special file.");
+    }
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+
+  let file;
+  try {
+    file = await open(
+      presetPath,
+      constants.O_WRONLY | constants.O_CREAT | constants.O_TRUNC | constants.O_NOFOLLOW,
+      0o666,
+    );
+    await file.writeFile(formatRunPreset(options), "utf8");
+  } catch (error) {
+    if (error.code === "ELOOP" || error.code === "EISDIR") {
+      throw new Error("preset path must be a JSON file path, not a directory or special file.");
+    }
+    throw error;
+  } finally {
+    await file?.close();
+  }
+  return presetPath;
 }
 
 function requireOptions(options) {
@@ -818,6 +1076,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
   output = process.stderr,
   isInteractiveTerminal = Boolean(input?.isTTY),
   onSavedProfilePath = null,
+  promptForRunPreset = false,
 } = {}) {
   if (!isInteractiveTerminal) {
     throw new Error("interactive mode requires a terminal. Re-run with --repo <owner/name> --limit <1-100> --profile <path> --out <directory>, or provide a TTY for prompts.");
@@ -965,6 +1224,36 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
           validate(value) {
             validateExcludedPrClasses(value);
             validateExcludedPrClassesAreConfigured(value, repositoryProfile);
+          },
+        });
+      }
+    }
+
+    if (promptForRunPreset && !resolved.savePresetPath) {
+      const shouldSavePreset = await askUntilValid(adapter, {
+        id: "saveRunPreset",
+        type: "confirm",
+        message: "Save local run preset for non-interactive reruns",
+        defaultValue: false,
+      }, {
+        output,
+        normalize: normalizeConfirmAnswer,
+        validate() {},
+      });
+      if (shouldSavePreset) {
+        resolved.savePresetPath = await askUntilValid(adapter, {
+          id: "runPresetPath",
+          type: "path",
+          message: "Run preset path",
+        }, {
+          output,
+          normalize: normalizeTextAnswer,
+          async validate(value) {
+            if (!value) throw new Error("Run preset path is required.");
+            if (hasTrailingPathSeparator(value)) {
+              throw new Error("preset path must be a JSON file path, not a directory or special file.");
+            }
+            await mkdir(dirname(value), { recursive: true });
           },
         });
       }
@@ -1134,7 +1423,7 @@ function attachCollectionCoverage(report, sourceBundle) {
   };
 }
 
-function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv, analysisFilter, savedProfilePath, prClassRulesWritten }) {
+function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv, analysisFilter, savedProfilePath, savedRunPresetPath, prClassRulesWritten }) {
   const summary = {
     ok: true,
     dryRun,
@@ -1152,6 +1441,9 @@ function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report,
   };
   if (savedProfilePath) {
     summary.savedProfilePath = savedProfilePath;
+  }
+  if (savedRunPresetPath) {
+    summary.savedRunPresetPath = savedRunPresetPath;
   }
   if (prClassRulesWritten) {
     summary.prClassRulesWritten = true;
@@ -1230,6 +1522,7 @@ export async function runAnalyzeGithub(options, {
       csv: false,
       analysisFilter: null,
       savedProfilePath: options.savedProfilePath,
+      savedRunPresetPath: options.savedRunPresetPath,
       prClassRulesWritten: options.prClassRulesWritten,
     });
   }
@@ -1286,6 +1579,7 @@ export async function runAnalyzeGithub(options, {
     csv: csvEnabled,
     analysisFilter: normalized.analysisFilter ?? null,
     savedProfilePath: options.savedProfilePath,
+    savedRunPresetPath: options.savedRunPresetPath,
     prClassRulesWritten: options.prClassRulesWritten,
   });
 }
@@ -1359,6 +1653,9 @@ export function formatAnalyzeGithubCompletion(result) {
   if (result.savedProfilePath) {
     lines.push(`Repository profile saved: ${result.savedProfilePath}.`);
   }
+  if (result.savedRunPresetPath) {
+    lines.push(`Run preset saved: ${result.savedRunPresetPath}.`);
+  }
   if (result.prClassRulesWritten) {
     lines.push("PR class rules written: Conventional Commit preset or release title rule.");
   }
@@ -1395,26 +1692,33 @@ export async function runAnalyzeGithubCli(argv, {
   isInteractiveTerminal = Boolean(stdin?.isTTY),
 } = {}) {
   let savedProfilePath = null;
+  let savedRunPresetPath = null;
   try {
-    const options = parseAnalyzeGithubArgs(argv);
-    if (options.help) {
+    const parsedOptions = parseAnalyzeGithubArgs(argv);
+    if (parsedOptions.help) {
       stdout.write(USAGE);
       return null;
     }
+    const options = await mergeRunPresetOptions(parsedOptions);
 
+    const providedOptionKeys = new Set([
+      ...optionSourceSet(options, "explicitCliOptions"),
+      ...optionSourceSet(options, "presetOptionKeys"),
+    ]);
     const resolvedOptions = options.interactive
       ? await collectInteractiveAnalyzeGithubOptions({
         ...options,
         interactivePromptDefaults: {
-          dryRun: !options.dryRun,
-          csv: options.csv !== false,
-          json: !options.json,
+          dryRun: !providedOptionKeys.has("dryRun"),
+          csv: !providedOptionKeys.has("csv"),
+          json: !providedOptionKeys.has("json"),
         },
       }, {
         promptAdapter,
         input: stdin,
         output: stderr,
         isInteractiveTerminal,
+        promptForRunPreset: true,
         onSavedProfilePath(path) {
           savedProfilePath = path;
         },
@@ -1422,6 +1726,10 @@ export async function runAnalyzeGithubCli(argv, {
       : options;
     if (resolvedOptions.savedProfilePath) {
       savedProfilePath = resolvedOptions.savedProfilePath;
+    }
+    if (resolvedOptions.savePresetPath) {
+      savedRunPresetPath = await writeRunPresetFile(resolvedOptions.savePresetPath, resolvedOptions);
+      resolvedOptions.savedRunPresetPath = savedRunPresetPath;
     }
     const runOptions = {
       onProgress: message => writeProgress(message, stderr),
@@ -1435,6 +1743,9 @@ export async function runAnalyzeGithubCli(argv, {
   } catch (error) {
     if (savedProfilePath) {
       stderr.write(`Repository profile saved before failure: ${savedProfilePath}.\n`);
+    }
+    if (savedRunPresetPath) {
+      stderr.write(`Run preset saved before failure: ${savedRunPresetPath}.\n`);
     }
     throw error;
   }

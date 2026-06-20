@@ -370,6 +370,17 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("prints help without loading preset files", async () => {
+    let stdout = "";
+
+    await runAnalyzeGithubCli(["--help", "--preset", "missing-preset.json"], {
+      stdout: { write: chunk => { stdout += chunk; } },
+      stderr: { write() {} },
+    });
+
+    assert(stdout.includes("--preset <path>"));
+  });
+
   it("parses --json as a machine-readable completion output opt-in", () => {
     assert.equal(parseAnalyzeGithubArgs([
       "--repo",
@@ -935,6 +946,7 @@ describe("GitHub live analyze CLI", () => {
         "releaseStrategy",
         "branchStrategy",
         "addConventionalCommitPrClasses",
+        "saveRunPreset",
       ]);
     });
   });
@@ -1255,6 +1267,56 @@ describe("GitHub live analyze CLI", () => {
     ]).csv, false);
   });
 
+  it("parses inverse boolean flags with deterministic last-one-wins conflicts", () => {
+    const disabled = parseAnalyzeGithubArgs([
+      "--repo",
+      "example/example-repo",
+      "--limit",
+      "1",
+      "--profile",
+      "profile.json",
+      "--out",
+      "reports/live",
+      "--dry-run",
+      "--no-dry-run",
+      "--validation-target",
+      "--no-validation-target",
+      "--no-csv",
+      "--csv",
+      "--json",
+      "--no-json",
+    ]);
+
+    assert.equal(disabled.dryRun, false);
+    assert.equal(disabled.isValidationTarget, false);
+    assert.equal(disabled.csv, true);
+    assert.equal(disabled.json, false);
+
+    const enabled = parseAnalyzeGithubArgs([
+      "--repo",
+      "example/example-repo",
+      "--limit",
+      "1",
+      "--profile",
+      "profile.json",
+      "--out",
+      "reports/live",
+      "--no-dry-run",
+      "--metadata-only",
+      "--no-validation-target",
+      "--validation-target",
+      "--csv",
+      "--no-csv",
+      "--no-json",
+      "--json",
+    ]);
+
+    assert.equal(enabled.dryRun, true);
+    assert.equal(enabled.isValidationTarget, true);
+    assert.equal(enabled.csv, false);
+    assert.equal(enabled.json, true);
+  });
+
   it("parses repeated and comma-separated PR class exclusions", () => {
     assert.deepEqual(parseAnalyzeGithubArgs([
       "--repo",
@@ -1270,6 +1332,273 @@ describe("GitHub live analyze CLI", () => {
       "--exclude-pr-class",
       "release",
     ]).excludedPrClasses, ["release", "dependency"]);
+  });
+
+  it("parses run preset load and save paths", () => {
+    const parsed = parseAnalyzeGithubArgs([
+      "--preset",
+      "presets/local-run.json",
+      "--save-preset",
+      "presets/updated-run.json",
+      "--repo",
+      "example/example-repo",
+      "--limit",
+      "1",
+      "--profile",
+      "profile.json",
+      "--out",
+      "reports/live",
+    ]);
+
+    assert.equal(parsed.presetPath, "presets/local-run.json");
+    assert.equal(parsed.savePresetPath, "presets/updated-run.json");
+  });
+
+  it("saves an interactive run preset with only reusable run settings", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "interactive-preset-out");
+      const presetPath = join(directory, "presets", "example-run.json");
+      const prompts = [];
+      let stdout = "";
+
+      const result = await runAnalyzeGithubCli([
+        "--interactive",
+        "--repo",
+        "example/example-repo",
+        "--limit",
+        "2",
+        "--profile",
+        profilePath,
+        "--out",
+        outDir,
+        "--dry-run",
+        "--no-csv",
+      ], {
+        provider: createProvider(),
+        isInteractiveTerminal: true,
+        promptAdapter: createScriptedPromptAdapter({
+          configureWorkflow: "no",
+          addConventionalCommitPrClasses: "no",
+          json: "no",
+          saveRunPreset: "yes",
+          runPresetPath: presetPath,
+        }, prompts),
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write() {} },
+      });
+
+      assert.equal(result.savedRunPresetPath, presetPath);
+      assert.match(stdout, new RegExp(`Run preset saved: ${presetPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.`));
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "configureWorkflow",
+        "addConventionalCommitPrClasses",
+        "json",
+        "saveRunPreset",
+        "runPresetPath",
+      ]);
+      assert.deepEqual(await readJson(presetPath), {
+        schemaVersion: "analyze-github-run-preset.v1",
+        run: {
+          repository: "example/example-repo",
+          limit: 2,
+          profilePath,
+          outDir,
+          dryRun: true,
+          isValidationTarget: false,
+          csv: false,
+          json: false,
+          excludedPrClasses: [],
+        },
+      });
+    });
+  });
+
+  it("rejects symlinked run preset save paths without modifying the target", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const targetPath = join(directory, "target.json");
+      const presetPath = join(directory, "symlink-preset.json");
+      const originalTarget = "{\"doNot\":\"overwrite\"}\n";
+      const provider = createProvider();
+      await writeFile(targetPath, originalTarget, "utf8");
+      await symlink(targetPath, presetPath);
+
+      await assert.rejects(
+        runAnalyzeGithubCli([
+          "--repo",
+          "example/example-repo",
+          "--limit",
+          "1",
+          "--profile",
+          profilePath,
+          "--out",
+          join(directory, "out"),
+          "--save-preset",
+          presetPath,
+        ], {
+          provider,
+          stdout: { write() {} },
+          stderr: { write() {} },
+        }),
+        /preset path must be a JSON file path, not a directory or special file/,
+      );
+
+      assert.equal(await readFile(targetPath, "utf8"), originalTarget);
+      assert((await lstat(presetPath)).isSymbolicLink());
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("loads saved run presets and lets explicit CLI flags override preset values", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const presetOutDir = join(directory, "preset-out");
+      const presetPath = join(directory, "run-preset.json");
+      await writeFile(presetPath, `${JSON.stringify({
+        schemaVersion: "analyze-github-run-preset.v1",
+        run: {
+          repository: "example/example-repo",
+          limit: 2,
+          profilePath,
+          outDir: presetOutDir,
+          dryRun: true,
+          isValidationTarget: false,
+          csv: true,
+          json: false,
+          excludedPrClasses: [],
+        },
+      }, null, 2)}\n`, "utf8");
+      let stdout = "";
+
+      const result = await runAnalyzeGithubCli([
+        "--preset",
+        presetPath,
+        "--limit",
+        "1",
+        "--no-csv",
+        "--save-preset",
+        presetPath,
+      ], {
+        provider: createProvider(),
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write() {} },
+      });
+
+      assert.equal(result.requestedLimit, 1);
+      assert.equal(result.sampledLimit, 1);
+      assert.equal(result.csvArtifactsEnabled, false);
+      assert.equal(result.outputDirectory, presetOutDir);
+      assert.equal(result.savedRunPresetPath, presetPath);
+      assert.match(stdout, /Dry run complete for example\/example-repo\./);
+      assert.match(stdout, /Run preset saved: .*run-preset\.json\./);
+      assert.deepEqual((await readJson(presetPath)).run, {
+        repository: "example/example-repo",
+        limit: 1,
+        profilePath,
+        outDir: presetOutDir,
+        dryRun: true,
+        isValidationTarget: false,
+        csv: false,
+        json: false,
+        excludedPrClasses: [],
+      });
+    });
+  });
+
+  it("lets explicit inverse boolean CLI flags override true or false preset values", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const presetOutDir = join(directory, "preset-boolean-out");
+      const presetPath = join(directory, "boolean-run-preset.json");
+      await writeFile(presetPath, `${JSON.stringify({
+        schemaVersion: "analyze-github-run-preset.v1",
+        run: {
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir: presetOutDir,
+          dryRun: true,
+          isValidationTarget: true,
+          csv: false,
+          json: true,
+          excludedPrClasses: [],
+        },
+      }, null, 2)}\n`, "utf8");
+      let stdout = "";
+
+      const result = await runAnalyzeGithubCli([
+        "--preset",
+        presetPath,
+        "--no-dry-run",
+        "--no-validation-target",
+        "--csv",
+        "--no-json",
+      ], {
+        provider: createProvider(),
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write() {} },
+      });
+
+      assert.equal(result.dryRun, false);
+      assert.equal(result.targetRepository.isValidationTarget, false);
+      assert.equal(result.csvArtifactsEnabled, true);
+      assert.equal(result.outputDirectory, presetOutDir);
+      assert.match(stdout, /Analysis complete for example\/example-repo\./);
+      assert.doesNotThrow(() => JSON.parse(JSON.stringify(result)));
+    });
+  });
+
+  it("rejects wrong-type preset JSON values before CLI-style normalization", async () => {
+    await withTempDirectory(async directory => {
+      const malformedPresets = [
+        {
+          name: "boolean-limit.json",
+          run: { limit: true },
+          message: /preset run\.limit must be a number/,
+        },
+        {
+          name: "array-limit.json",
+          run: { limit: [1] },
+          message: /preset run\.limit must be a number/,
+        },
+        {
+          name: "numeric-excluded-class.json",
+          run: { excludedPrClasses: [1] },
+          message: /preset run\.excludedPrClasses must contain only strings/,
+        },
+      ];
+
+      for (const malformedPreset of malformedPresets) {
+        const presetPath = join(directory, malformedPreset.name);
+        await writeFile(presetPath, `${JSON.stringify({
+          schemaVersion: "analyze-github-run-preset.v1",
+          run: {
+            repository: "example/example-repo",
+            limit: 1,
+            profilePath: "profile.json",
+            outDir: "reports/live",
+            dryRun: true,
+            isValidationTarget: false,
+            csv: true,
+            json: false,
+            excludedPrClasses: [],
+            ...malformedPreset.run,
+          },
+        }, null, 2)}\n`, "utf8");
+        const provider = createProvider();
+
+        await assert.rejects(
+          runAnalyzeGithubCli(["--preset", presetPath], {
+            provider,
+            stdout: { write() {} },
+            stderr: { write() {} },
+          }),
+          malformedPreset.message,
+        );
+        assert.deepEqual(provider.calls, []);
+      }
+    });
   });
 
   it("rejects malformed PR class exclusion identifiers with matching guidance", async () => {
@@ -1880,6 +2209,7 @@ describe("GitHub live analyze CLI", () => {
         "addConventionalCommitPrClasses",
         "outDir",
         "dryRun",
+        "saveRunPreset",
       ]);
       assert.deepEqual(await readdir(outDir), []);
     });

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-20 — Reusable Run Presets
+
+- What changed: GitHub analysis can now load local run settings from `--preset` and save reusable settings with `--save-preset` or the interactive setup flow, with explicit CLI flags taking precedence.
+- Why it matters: Maintainers can rerun an interactive setup non-interactively without moving repository semantics out of repository profiles.
+- Who is affected: Maintainers using `--interactive` or repeated local analysis commands.
+- Action needed: Optional; save a local preset for repeated runs and delete stale preset files when they no longer match the desired analysis settings.
+- PR: TBD
+
 ### 2026-06-20 — Contributor Source Configuration
 
 - What changed: Repository profiles can now configure `.all-contributorsrc` as a structured contributor source, and analysis records contributor-source coverage while using sanitized hints only for aggregate comment-source classification.

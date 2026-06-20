@@ -17,7 +17,7 @@ Status: Completed; final milestone implemented for PR preparation on 2026-06-20.
   - [Repository Profile Format](../../../reference/repository-profile.md)
   - [Friction Report Contract](../../../contracts/friction-report.md)
   - [PR Class Segmentation](../../done/pr-class-segmentation/prd.md)
-  - [Interactive CLI Setup](../../active/interactive-cli-setup/prd.md)
+  - [Interactive CLI Setup](../interactive-cli-setup/prd.md)
   - [Report First-Glance Actionability](../../done/report-first-glance-actionability/prd.md)
 
 ## Problem
