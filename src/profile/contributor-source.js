@@ -56,11 +56,12 @@ export function validateContributorSource(profile = {}) {
     if (typeof contributors.path !== "string" || contributors.path.trim() === "") {
       errors.push("contributors.path must be a non-empty string when provided");
     } else if (
-      contributors.path.startsWith("/")
+      contributors.path.trim() !== contributors.path
+      || contributors.path.startsWith("/")
       || contributors.path.includes("\\")
       || hasParentDirectorySegment(contributors.path)
     ) {
-      errors.push("contributors.path must be a slash-delimited repository-relative path without parent-directory segments");
+      errors.push("contributors.path must be a trimmed slash-delimited repository-relative path without parent-directory segments");
     }
   }
 

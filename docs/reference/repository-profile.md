@@ -168,7 +168,7 @@ When interactive setup writes profile changes, it preserves deterministic two-sp
 Supported fields:
 
 - `sourceType`: optional, defaults to `all_contributors` when `contributors` is present.
-- `path`: optional slash-delimited repository-relative path, defaults to `.all-contributorsrc`.
+- `path`: optional trimmed, slash-delimited repository-relative path, defaults to `.all-contributorsrc`.
 
 Example:
 

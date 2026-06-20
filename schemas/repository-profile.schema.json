@@ -118,6 +118,7 @@
           "not": {
             "anyOf": [
               { "pattern": "^/" },
+              { "pattern": "^\\s|\\s$" },
               { "pattern": "\\\\" },
               { "pattern": "(^|/)\\.\\.(/|$)" }
             ]
