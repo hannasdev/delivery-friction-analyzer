@@ -52,7 +52,7 @@ Pull requests analyzed: 3
 
 Coverage notes:
 
-- PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.
+- PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data.
 - Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
 
 ## Key Findings
@@ -61,7 +61,7 @@ Coverage notes:
 - Strongest displayed signal: Review churn (iteration drag).
 - Outlier caveat: displayed bottleneck examples are not dominated by a single PR.
 - PR class caveat: Review churn: PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat. Repo guidance gap: PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat.
-- Coverage caveat: PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
+- Coverage caveat: PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
 
 ## PR Class Context
 
@@ -72,6 +72,13 @@ PR classes are repository-profile evidence for interpretation only; they do not 
 | release | 2 | 600 | 67% | repository\_profile=2 |
 | development | 1 | 100 | 33% | fallback\_rule=1 |
 
+## Profile Suggestions
+
+Optional profile improvements based on this report's existing evidence. These suggestions do not change scores, rankings, CSV exports, or JSON report fields.
+
+| Profile area | Evidence | Suggested next step |
+| --- | --- | --- |
+| Workflow context | PR-open diff coverage unavailable for 3 PRs; workflow-run coverage unavailable for 3 PRs. | Configure repository-profile workflow context, such as primary merge method or branch strategy, so unavailable diff-growth or workflow-run evidence is interpreted with maintainer-confirmed context instead of guesses. |
 
 ## Shared Signal Interpretation
 
@@ -202,7 +209,7 @@ None
 
 - Pull requests are selected upstream by the collection or fixture workflow; this renderer explains the resulting metrics summary.
 - File roles and functional surfaces come from repository-profile classification, not from language names alone.
-- No profile suggestion thresholds were triggered by this report's PR class, role, or functional-surface evidence.
+- Profile suggestions are optional interpretation improvements derived from existing report evidence; they do not change scores, rankings, CSV exports, or JSON report fields.
 - Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.
 - Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.
 - Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.

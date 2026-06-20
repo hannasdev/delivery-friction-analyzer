@@ -37,7 +37,7 @@
       "not_sampled_for_broad_file_spread": 1
     },
     "notes": [
-      "PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.",
+      "PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data.",
       "Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing."
     ]
   },

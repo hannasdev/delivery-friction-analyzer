@@ -57,7 +57,7 @@ Pull requests analyzed: 3
 
 Coverage notes:
 
-- PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.
+- PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data.
 - Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
 
 ## Key Findings
@@ -66,7 +66,7 @@ Coverage notes:
 - Strongest displayed signal: Review churn (iteration drag).
 - Outlier caveat: Review churn: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Repo guidance gap: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Review surprise: PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing. Fix amplification: PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
 - PR class caveat: only one PR class appears in the analyzed sample, so class dominance comparison is not meaningful.
-- Coverage caveat: PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
+- Coverage caveat: PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
 
 ## PR Class Context
 
@@ -83,6 +83,7 @@ Optional profile improvements based on this report's existing evidence. These su
 | Profile area | Evidence | Suggested next step |
 | --- | --- | --- |
 | PR class rules | 3 of 3 analyzed PRs (100%) use fallback unknown PR class evidence. | Add or refine repository-profile PR class title rules, or rerun interactive setup to add the Conventional Commit preset when it matches the repository. |
+| Workflow context | PR-open diff coverage unavailable for 3 PRs; workflow-run coverage unavailable for 2 PRs. | Configure repository-profile workflow context, such as primary merge method or branch strategy, so unavailable diff-growth or workflow-run evidence is interpreted with maintainer-confirmed context instead of guesses. |
 
 ## Shared Signal Interpretation
 

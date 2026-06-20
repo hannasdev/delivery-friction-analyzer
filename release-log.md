@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-20 — Workflow Data Caveats
+
+- What changed: Markdown friction reports and methodology now explain PR-open diff and workflow-run coverage limits with configured workflow context when it is available, and suggest adding workflow context when omitted context would clarify unavailable evidence.
+- Why it matters: Maintainers can distinguish final GitHub PR metadata from unreconstructable open-time PR size without mistaking merge strategy for observed evidence or a scoring input.
+- Who is affected: Maintainers and contributors reviewing generated reports or authoring repository profiles with workflow context.
+- Action needed: Optional; add repository-profile workflow context when unavailable coverage would be easier to interpret with maintainer-confirmed merge or branch assumptions.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/46
+
 ### 2026-06-20 — Profile Improvement Suggestions
 
 - What changed: Markdown friction reports and methodology now suggest PR class or file/path profile improvements when fallback `unknown` evidence dominates the analyzed sample.

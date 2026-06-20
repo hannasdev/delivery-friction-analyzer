@@ -2,12 +2,13 @@
 
 ## Status
 
-Status: Active; M1, M2, and M3 merged; M4 active.
+Status: Completed; final milestone implemented for PR preparation on 2026-06-20.
 
-- State: Active
+- State: Done
 - Owner: Hanna
 - Created: 2026-06-19
-- Current milestone: M4: Profile Improvement Suggestions (active)
+- Completed: 2026-06-20
+- Current milestone state: M1 merged in PR #39; M2 merged in PR #40; M3 merged in PR #44; M4 merged in PR #45; M5 implemented for final review.
 - Related issue:
   - None yet.
 - Related docs:
@@ -16,7 +17,7 @@ Status: Active; M1, M2, and M3 merged; M4 active.
   - [Repository Profile Format](../../../reference/repository-profile.md)
   - [Friction Report Contract](../../../contracts/friction-report.md)
   - [PR Class Segmentation](../../done/pr-class-segmentation/prd.md)
-  - [Interactive CLI Setup](../interactive-cli-setup/prd.md)
+  - [Interactive CLI Setup](../../active/interactive-cli-setup/prd.md)
   - [Report First-Glance Actionability](../../done/report-first-glance-actionability/prd.md)
 
 ## Problem
@@ -136,7 +137,7 @@ Reports should also explain when configured workflow context affects data interp
 - [x] Reports render stable repeated evidence details as tables without losing caveats or source labels.
 - [x] Reports use text-backed status markers for observed, partial, unavailable, configured, warning, and healthy states where they improve scanability.
 - [x] Reports suggest concrete profile improvements when missing profile configuration limits interpretation.
-- [ ] Reports and methodology explain workflow-specific data limits only where relevant, without implying merge commits are currently used to compute PR size.
+- [x] Reports and methodology explain workflow-specific data limits only where relevant, without implying merge commits are currently used to compute PR size.
 - [x] Existing JSON, CSV, metrics, ranking, and filtering contracts remain backward-compatible unless a later explicit contract change is accepted.
 
 ## Risks And Tradeoffs

@@ -243,9 +243,11 @@ Reports connect missing profile evidence to concrete profile improvements withou
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged in PR #45 on 2026-06-20
 
 ## M5: Workflow Data Caveats
+
+Status: Implemented on 2026-06-20 for PR review.
 
 ### Outcome
 
@@ -269,11 +271,11 @@ Reports explain workflow-related data limits where configured workflow context c
 
 ### Acceptance Criteria
 
-- [ ] Reports or methodology mention PR-open diff growth limitations when relevant coverage is unavailable.
-- [ ] Reports suggest configuring workflow context when it is omitted and unavailable PR-open diff coverage or workflow-run coverage caveats would be clearer with maintainer-confirmed context.
-- [ ] Configured squash/rebase/merge workflow context is clearly labeled as profile context, not observed evidence.
-- [ ] Wording distinguishes final PR metadata from unreconstructable open-time size.
-- [ ] Tests cover at least omitted workflow context, squash-merge context, and unavailable PR-open diff coverage.
+- [x] Reports or methodology mention PR-open diff growth limitations when relevant coverage is unavailable.
+- [x] Reports suggest configuring workflow context when it is omitted and unavailable PR-open diff coverage or workflow-run coverage caveats would be clearer with maintainer-confirmed context.
+- [x] Configured squash/rebase/merge workflow context is clearly labeled as profile context, not observed evidence.
+- [x] Wording distinguishes final PR metadata from unreconstructable open-time size.
+- [x] Tests cover at least omitted workflow context, squash-merge context, and unavailable PR-open diff coverage.
 
 ### Required Validation
 
@@ -299,9 +301,9 @@ Reports explain workflow-related data limits where configured workflow context c
 
 ### Status
 
-- [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
