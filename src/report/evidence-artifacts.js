@@ -3,6 +3,7 @@ import {
   configuredWorkflowEntries,
   hasConfiguredWorkflowContext,
   profileSuggestions,
+  workflowDataCaveats,
 } from "./friction-report.js";
 
 const BOT_OR_SCANNER_SOURCES = new Set([
@@ -346,6 +347,7 @@ function formatSensitivitySummaries(report) {
 function formatConfiguredWorkflowContext(report) {
   const configuredWorkflow = report.configuredWorkflow;
   if (!hasConfiguredWorkflowContext(configuredWorkflow)) return [];
+  const caveats = workflowDataCaveats(report);
 
   return [
     "## Configured Workflow Context",
@@ -354,6 +356,14 @@ function formatConfiguredWorkflowContext(report) {
     "",
     ...configuredWorkflowEntries(configuredWorkflow)
       .map(entry => `- ${entry.label}: ${entry.valueLabel}`),
+    ...(caveats.length
+      ? [
+          "",
+          "Workflow data caveats:",
+          "",
+          ...caveats.map(caveat => `- ${caveat}`),
+        ]
+      : []),
     "",
   ];
 }
@@ -364,7 +374,7 @@ function formatProfileSuggestions(report) {
     return [
       "## Profile Suggestions",
       "",
-      "- No profile suggestion thresholds were triggered by this report's PR class, role, or functional-surface evidence.",
+      "- No profile suggestion thresholds were triggered by this report's PR class, role, functional-surface, or workflow-coverage evidence.",
       "",
     ];
   }

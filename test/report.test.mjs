@@ -73,6 +73,9 @@ describe("friction report generation", () => {
     assert(!markdown.includes("Configured workflow context"));
     assert(!methodology.includes("## Configured Workflow Context"));
     assert(!methodology.includes("Configured workflow context"));
+    assert(markdown.includes("| Workflow context | PR-open diff coverage unavailable for 3 PRs; workflow-run coverage unavailable for 2 PRs."));
+    assert(markdown.includes("Configure repository-profile workflow context"));
+    assert(methodology.includes("- Workflow context: PR-open diff coverage unavailable for 3 PRs; workflow-run coverage unavailable for 2 PRs."));
   });
 
   it("accepts null report options as omitted options", async () => {
@@ -118,12 +121,41 @@ describe("friction report generation", () => {
     assert(markdown.includes("| Primary merge method | Squash merge |"));
     assert(markdown.includes("| Release strategy | Release PRs |"));
     assert(markdown.includes("| Branch strategy | Main plus release branches |"));
+    assert(markdown.includes("## Workflow Data Caveats"));
+    assert(markdown.includes("Profile context says primary merge method is Squash merge; this is configured profile context, not observed evidence."));
+    assert(markdown.includes("Final PR metadata") === false);
+    assert(markdown.includes("final PR metadata available through GitHub PR data"));
+    assert(markdown.includes("PR-open diff growth requires an open-time snapshot or equivalent captured state."));
     assert(markdown.includes("## Evidence Quality And Coverage"));
     assert(methodology.includes("## Configured Workflow Context"));
     assert(methodology.includes("- Primary merge method: Squash merge"));
     assert(methodology.includes("- Release strategy: Release PRs"));
     assert(methodology.includes("- Branch strategy: Main plus release branches"));
+    assert(methodology.includes("Workflow data caveats:"));
+    assert(methodology.includes("configured profile context, not observed evidence"));
     assert(methodology.includes("not observed GitHub evidence"));
+    assert(!markdown.includes("| Workflow context |"));
+  });
+
+  it("labels configured merge methods as profile context when PR-open diff coverage is unavailable", async () => {
+    const metricsSummary = await readJson("../fixtures/github/mcp-writing/metrics-summary.golden.json");
+
+    for (const [method, label, expectedLimit] of [
+      ["squash_merge", "Squash merge", "does not preserve the original branch commit topology"],
+      ["rebase_merge", "Rebase merge", "do not provide a reliable open-time diff snapshot"],
+      ["merge_commit", "Merge commit", "does not reconstruct PR-open size from merge commits or branch history"],
+    ]) {
+      const report = generateRepositoryFrictionReport(metricsSummary, {
+        workflowContext: { primaryMergeMethod: method },
+      });
+      const markdown = renderRepositoryFrictionMarkdown(report);
+
+      assert(markdown.includes(`| Primary merge method | ${label} |`));
+      assert(markdown.includes(`Profile context says primary merge method is ${label}; this is configured profile context, not observed evidence.`));
+      assert(markdown.includes(expectedLimit));
+      assert(markdown.includes("PR-open diff growth requires an open-time snapshot or equivalent captured state."));
+      assert(!markdown.includes("| Workflow context |"));
+    }
   });
 
   it("suggests profile PR class rules when fallback unknown dominates the sample", async () => {
@@ -144,9 +176,11 @@ describe("friction report generation", () => {
     assert(!("profileSuggestions" in report));
     assert(markdown.includes("## Profile Suggestions"));
     assert(markdown.includes("| PR class rules | 3 of 3 analyzed PRs (100%) use fallback unknown PR class evidence."));
+    assert(markdown.includes("| Workflow context | PR-open diff coverage unavailable for 3 PRs; workflow-run coverage unavailable for 2 PRs."));
     assert(markdown.includes("Add or refine repository-profile PR class title rules"));
     assert(methodology.includes("## Profile Suggestions"));
     assert(methodology.includes("- PR class rules: 3 of 3 analyzed PRs (100%) use fallback unknown PR class evidence."));
+    assert(methodology.includes("- Workflow context: PR-open diff coverage unavailable for 3 PRs; workflow-run coverage unavailable for 2 PRs."));
   });
 
   it("suggests fallback PR class rules when every analyzed PR is unknown in a small sample", () => {
@@ -177,6 +211,8 @@ describe("friction report generation", () => {
         },
       ],
       rankings: {},
+    }, {
+      workflowContext: { primaryMergeMethod: "merge_commit" },
     });
     const markdown = renderRepositoryFrictionMarkdown(report);
 
@@ -223,6 +259,8 @@ describe("friction report generation", () => {
         },
       ],
       rankings: {},
+    }, {
+      workflowContext: { primaryMergeMethod: "merge_commit" },
     });
     const markdown = renderRepositoryFrictionMarkdown(report);
     const methodology = renderRepositoryFrictionMethodology({
@@ -302,6 +340,8 @@ describe("friction report generation", () => {
         },
       ],
       rankings: {},
+    }, {
+      workflowContext: { primaryMergeMethod: "merge_commit" },
     });
     const markdown = renderRepositoryFrictionMarkdown(report);
     const methodology = renderRepositoryFrictionMethodology({
@@ -316,7 +356,7 @@ describe("friction report generation", () => {
     });
 
     assert(!markdown.includes("## Profile Suggestions"));
-    assert(methodology.includes("- No profile suggestion thresholds were triggered by this report's PR class, role, or functional-surface evidence."));
+    assert(methodology.includes("- No profile suggestion thresholds were triggered by this report's PR class, role, functional-surface, or workflow-coverage evidence."));
   });
 
   it("suppresses PR class suggestions when unknown class evidence is profile-configured", () => {
@@ -368,6 +408,8 @@ describe("friction report generation", () => {
         },
       ],
       rankings: {},
+    }, {
+      workflowContext: { primaryMergeMethod: "merge_commit" },
     });
     const markdown = renderRepositoryFrictionMarkdown(report);
 
@@ -1092,7 +1134,7 @@ describe("friction report generation", () => {
     assert(markdown.includes("- PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing."));
     assert(
       markdown.includes(
-        "- PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.",
+        "- PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data.",
       ),
     );
     assert(markdown.includes("- Workflow-run coverage is unavailable for some PRs"));

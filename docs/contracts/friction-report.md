@@ -1,6 +1,6 @@
 # Friction Report Contract
 
-Milestone 3 introduced `friction-report.v1`, a deterministic report generated from a `friction-metrics.v1` repository metrics summary. Milestone 4 adds Markdown and methodology profile suggestions without adding report JSON fields. The report layer does not fetch GitHub data, mutate repositories, rank individuals, or depend on services beyond the data collection path that produced the metrics summary.
+Milestone 3 introduced `friction-report.v1`, a deterministic report generated from a `friction-metrics.v1` repository metrics summary. Milestones 4 and 5 add Markdown and methodology profile suggestions without adding report JSON fields. The report layer does not fetch GitHub data, mutate repositories, rank individuals, or depend on services beyond the data collection path that produced the metrics summary.
 
 ## Outputs
 
@@ -57,10 +57,11 @@ The Markdown renderer presents the same report data for human review:
 - a compact recommendation-category snapshot before detailed bottlenecks, with the full category reference retained later in the report;
 - a short "How To Read This Report" guide that distinguishes observed evidence, interpretation, recommendations, and caveats;
 - a configured workflow context section only when repository profile workflow fields are present, labeled as user-configured profile context rather than observed GitHub evidence;
+- workflow data caveats when configured workflow context clarifies unavailable PR-open diff or workflow-run evidence;
 - evidence-quality and coverage tables before detailed recommendations;
 - key findings that highlight top bottlenecks, strongest displayed signal, outlier caveats, PR class caveats, and coverage caveats;
 - a PR class context table that shows analyzed PR counts, changed lines, sample share, and classification sources by class;
-- profile suggestions when fallback `unknown` PR classes or unknown file role/surface evidence cross deterministic thresholds;
+- profile suggestions when fallback `unknown` PR classes, unknown file role/surface evidence, or omitted workflow context with relevant unavailable coverage cross deterministic thresholds;
 - a top-level shared-signal interpretation callout when multiple displayed bottlenecks share a ranking key or representative PR evidence;
 - outlier and sensitivity analysis when displayed examples are dominated by one PR;
 - a prioritization explanation that describes strongest-signal ordering and how PR size is used as context, using reader-facing change-scope language while mapping back to the internal changed-file-spread signal when needed;
@@ -78,6 +79,8 @@ Markdown output should not include individual contributor or reviewer rankings.
 Status labels are Markdown presentation helpers, not `friction-report.v1` fields. They should preserve the underlying source labels and counts rather than replacing auditable evidence.
 Profile suggestions are also presentation helpers, not `friction-report.v1` fields. They are derived from existing PR class and file-surface evidence, appear at most once per suggestion category, and do not change scores, rankings, CSV exports, filtering, or PR class matching. Because the report JSON does not carry repository-profile rule inventory, all analyzed PRs using fallback `unknown` PR class evidence is the renderer's small-sample proxy for no configured PR class rule producing usable classification evidence.
 
+Workflow-context suggestions are presentation helpers, not `friction-report.v1` fields. They render when workflow context is omitted and the report has unavailable PR-open diff coverage or workflow-run coverage that maintainer-confirmed workflow context could help explain. They are omitted when workflow context is configured or when those coverage caveats are absent.
+
 ## Recommendation Boundaries
 
 Recommendations are inferred from transparent component metrics and representative PR examples. They suggest workflow interventions such as readiness gates, preflight scripts, smaller milestones, planning artifacts, or scope control. They do not automate repository changes.
@@ -94,7 +97,7 @@ The M3 report contract supports these recommendation categories:
 
 ## Coverage And Confidence
 
-Reports must label unavailable or partial GitHub data instead of inferring unavailable values from merge-time data. PR-open diff growth remains unavailable unless direct or reconstructed counts exist. Workflow coverage and review-thread sources are summarized separately.
+Reports must label unavailable or partial GitHub data instead of inferring unavailable values from merge-time data. Final/current PR metadata can come from GitHub PR data, but PR-open diff growth remains unavailable unless an open-time snapshot or equivalent captured state exists. Workflow coverage and review-thread sources are summarized separately.
 
 Representative examples should carry enough source evidence to trace a report claim back to generated artifacts. Validation examples should name the workflow-run source and conclusions. Review churn examples should name the review-thread source, review decision evidence, and comment sources. PR class evidence should be visible in representative bottleneck examples so readers can distinguish workflow populations such as release, dependency, development, or repository-specific classes. When `reviewThreads` is zero, review decision evidence should make clean human approval distinguishable from unavailable review evidence and from observed absence of human review. When displayed examples are dominated by one PR or one PR class, the report should say so instead of implying a repository-wide pattern from an outlier or workflow population.
 
@@ -111,7 +114,7 @@ Full live analysis writes `methodology.md` as a hybrid artifact: stable explanat
 - target repository and report/metric versions;
 - profile path when available;
 - configured workflow context when supplied by the repository profile, labeled as user-configured context rather than observed GitHub evidence;
-- profile suggestions when PR class or file/path profile evidence crosses deterministic fallback thresholds, or an explicit no-threshold note when none were triggered;
+- profile suggestions when PR class, file/path, or workflow-context profile evidence crosses deterministic fallback thresholds, or an explicit no-threshold note when none were triggered;
 - requested and collected PR counts;
 - collection coverage status and API-family diagnostics;
 - scoring, ranking, dominance, sensitivity, and limitation explanations;

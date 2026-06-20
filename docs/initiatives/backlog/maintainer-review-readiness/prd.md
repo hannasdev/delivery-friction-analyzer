@@ -14,7 +14,7 @@ Status: Backlog.
   - [Architecture Notes](architecture.md)
   - [Repository Profile Format](../../../reference/repository-profile.md)
   - [Release Automation](../../../reference/release-automation.md)
-  - [Setup And Report Usability](../../active/setup-report-usability/prd.md)
+  - [Setup And Report Usability](../../done/setup-report-usability/prd.md)
 - Planning evidence:
   - Local generated report bundle: `reports/delivery-friction-analyzer/` (ignored artifact; not part of this PR)
   - Planned self-profile path: `profiles/delivery-friction-analyzer.json` (to be added in M1)

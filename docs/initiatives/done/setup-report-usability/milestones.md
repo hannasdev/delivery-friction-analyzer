@@ -243,9 +243,11 @@ Reports connect missing profile evidence to concrete profile improvements withou
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged in PR #45 on 2026-06-20
 
 ## M5: Workflow Data Caveats
+
+Status: Implemented on 2026-06-20 for PR review.
 
 ### Outcome
 
@@ -299,8 +301,8 @@ Reports explain workflow-related data limits where configured workflow context c
 
 ### Status
 
-- [ ] Not started
-- [ ] Implemented
+- [x] Active
+- [x] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened

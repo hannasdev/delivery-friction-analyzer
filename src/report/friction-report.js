@@ -83,6 +83,8 @@ const WORKFLOW_CONTEXT_VALUE_LABELS = new Map([
 
 export const CONFIGURED_WORKFLOW_NOTE = "Configured workflow context comes from the repository profile. It is user-configured context, not observed GitHub evidence, and it does not change scores, rankings, CSV exports, or PR class matching.";
 
+const PR_OPEN_DIFF_LIMITATION_NOTE = "PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data.";
+
 const PROFILE_SUGGESTION_THRESHOLDS = {
   minimumPrClassSample: 3,
   unknownPrClassShare: 0.8,
@@ -421,9 +423,7 @@ function summarizeCoverage(metricsSummary) {
 
   const notes = [];
   if (prOpenDiff.unavailable) {
-    notes.push(
-      "PR-open diff growth is unavailable for PRs without captured or reconstructed open-time snapshots; it is not inferred from merge-time data.",
-    );
+    notes.push(PR_OPEN_DIFF_LIMITATION_NOTE);
   }
   if (workflowRuns.unavailable) {
     notes.push("Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.");
@@ -643,6 +643,26 @@ export function profileSuggestions(report = {}) {
     });
   }
 
+  const hasWorkflowContext = hasConfiguredWorkflowContext(report.configuredWorkflow);
+  const unavailablePrOpenDiff = Number(report.coverage?.prOpenDiff?.unavailable ?? 0);
+  const unavailableWorkflowRuns = Number(report.coverage?.workflowRuns?.unavailable ?? 0);
+  if (!hasWorkflowContext && (unavailablePrOpenDiff > 0 || unavailableWorkflowRuns > 0)) {
+    const evidence = [
+      unavailablePrOpenDiff > 0
+        ? `PR-open diff coverage unavailable for ${formatCount(unavailablePrOpenDiff, "PR")}`
+        : null,
+      unavailableWorkflowRuns > 0
+        ? `workflow-run coverage unavailable for ${formatCount(unavailableWorkflowRuns, "PR")}`
+        : null,
+    ].filter(Boolean).join("; ");
+    suggestions.push({
+      id: "workflow-context",
+      area: "Workflow context",
+      evidence: `${evidence}.`,
+      suggestion: "Configure repository-profile workflow context, such as primary merge method or branch strategy, so unavailable diff-growth or workflow-run evidence is interpreted with maintainer-confirmed context instead of guesses.",
+    });
+  }
+
   return suggestions;
 }
 
@@ -680,6 +700,39 @@ export function configuredWorkflowEntries(configuredWorkflow) {
 
 export function hasConfiguredWorkflowContext(configuredWorkflow) {
   return configuredWorkflowEntries(configuredWorkflow).length > 0;
+}
+
+function configuredWorkflowValue(configuredWorkflow, field) {
+  const entry = configuredWorkflowEntries(configuredWorkflow).find(candidate => candidate.field === field);
+  return entry ?? null;
+}
+
+export function workflowDataCaveats(report = {}) {
+  if (!hasConfiguredWorkflowContext(report.configuredWorkflow)) return [];
+
+  const unavailablePrOpenDiff = Number(report.coverage?.prOpenDiff?.unavailable ?? 0);
+  const unavailableWorkflowRuns = Number(report.coverage?.workflowRuns?.unavailable ?? 0);
+  if (unavailablePrOpenDiff <= 0 && unavailableWorkflowRuns <= 0) return [];
+
+  const mergeMethod = configuredWorkflowValue(report.configuredWorkflow, "primaryMergeMethod");
+  const caveats = [];
+  if (unavailablePrOpenDiff > 0) {
+    const prefix = mergeMethod
+      ? `Profile context says primary merge method is ${mergeMethod.valueLabel}; this is configured profile context, not observed evidence.`
+      : "Configured workflow fields are profile context, not observed evidence.";
+    const methodLimit = {
+      squash_merge: "Squash merge keeps final PR metadata available through GitHub PR data, but it does not preserve the original branch commit topology on the base branch.",
+      rebase_merge: "Rebase merge keeps final PR metadata available through GitHub PR data, but rebased commits do not provide a reliable open-time diff snapshot from base-branch history.",
+      merge_commit: "Merge commits can preserve a merge boundary, but this analyzer still uses GitHub PR data for final/current PR metadata and does not reconstruct PR-open size from merge commits or branch history.",
+    }[mergeMethod?.value] ?? "Final/current PR metadata can come from GitHub PR data, but PR-open diff growth still needs captured open-time evidence.";
+    caveats.push(`${prefix} ${methodLimit} PR-open diff growth requires an open-time snapshot or equivalent captured state.`);
+  }
+
+  if (unavailableWorkflowRuns > 0) {
+    caveats.push("Unavailable workflow-run coverage remains a GitHub collection coverage limit; configured workflow context can explain the repository's expected workflow shape, but it is not observed run evidence.");
+  }
+
+  return caveats;
 }
 
 function evidenceSignature(bottleneck) {
@@ -1393,6 +1446,18 @@ function renderConfiguredWorkflowContext(configuredWorkflow) {
   ].join("\n");
 }
 
+function renderWorkflowDataCaveats(report) {
+  const caveats = workflowDataCaveats(report);
+  if (!caveats.length) return "";
+
+  return [
+    "## Workflow Data Caveats",
+    "",
+    renderList(caveats),
+    "",
+  ].join("\n");
+}
+
 function classDominanceCaveat(bottleneck) {
   return bottleneck.classDominance?.status === "single_class_dominates"
     ? bottleneck.classDominance.note
@@ -1547,6 +1612,9 @@ export function renderRepositoryFrictionMarkdown(report) {
     ...(hasConfiguredWorkflowContext(report.configuredWorkflow)
       ? [renderConfiguredWorkflowContext(report.configuredWorkflow)]
       : []),
+    ...(workflowDataCaveats(report).length
+      ? [renderWorkflowDataCaveats(report)]
+      : []),
     "## Evidence Quality And Coverage",
     "",
     renderCoverageSummary(report.coverage),
@@ -1617,12 +1685,15 @@ export function renderRepositoryFrictionMarkdown(report) {
     "- File roles and functional surfaces come from repository-profile classification, not from language names alone.",
     profileSuggestions(report).length
       ? "- Profile suggestions are optional interpretation improvements derived from existing report evidence; they do not change scores, rankings, CSV exports, or JSON report fields."
-      : "- No profile suggestion thresholds were triggered by this report's PR class, role, or functional-surface evidence.",
+      : "- No profile suggestion thresholds were triggered by this report's PR class, role, functional-surface, or workflow-coverage evidence.",
     "- Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.",
     "- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.",
     "- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.",
     ...(hasConfiguredWorkflowContext(report.configuredWorkflow)
       ? ["- Configured workflow context is user-configured repository-profile context; it does not change scoring, ranking, CSV exports, or PR class matching."]
+      : []),
+    ...(workflowDataCaveats(report).length
+      ? ["- Workflow data caveats explain unavailable evidence using configured profile context without treating merge method as observed evidence or reconstructing open-time PR size."]
       : []),
     "- Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.",
     report.analysisFilter?.excludedPrClasses?.length
