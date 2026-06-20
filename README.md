@@ -62,7 +62,7 @@ npx delivery-friction-analyzer \
   --out reports/owner-name
 ```
 
-Interactive mode prompts for repository, PR limit, profile path, output directory, dry-run mode, and JSON completion output. Depending on the run and profile, it can also prompt for CSV exports and configured PR class exclusions. Use it for guided local setup; keep explicit flags for scripts and CI.
+Interactive mode walks through missing run choices such as repository, PR limit, profile path, output directory, dry-run mode, and JSON completion output. Depending on the run and profile, it can also prompt for profile creation or updates, CSV exports, and configured PR class exclusions. Use it for guided local setup; keep explicit flags for scripts and CI.
 
 ## Repository Profiles
 
