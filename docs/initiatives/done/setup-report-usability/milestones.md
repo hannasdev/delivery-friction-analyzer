@@ -305,5 +305,5 @@ Reports explain workflow-related data limits where configured workflow context c
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
