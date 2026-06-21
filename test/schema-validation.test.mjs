@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { computePullRequestMetrics } from "../src/metrics/friction.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
 import { conventionalCommitPrClassRules } from "../src/profile/pr-class-presets.js";
-import { validateSchema } from "./support/schema-validation.mjs";
+import { assertSchemaValid, validateSchema } from "./support/schema-validation.mjs";
 
 async function readJson(path) {
   return JSON.parse(await readFile(new URL(path, import.meta.url), "utf8"));
@@ -174,13 +174,6 @@ function validSourceBundle() {
     },
     pullRequests: [validSourcePullRequest()],
   };
-}
-
-function formatSchemaValidationErrors({ artifact, schemaPath, errors }) {
-  return errors.map(error => (
-    `${artifact} failed ${schemaPath} at ${error.split(" ")[0]}: ${error}. `
-    + "Fix the collector output or intentionally update the schema contract."
-  ));
 }
 
 describe("repository profile schema", () => {
@@ -401,7 +394,13 @@ describe("github source bundle schema", () => {
     const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
     const bundle = validSourceBundle();
 
-    assert.deepEqual(validateSchema(bundle, schema, refs), []);
+    assertSchemaValid({
+      artifact: "source-bundle.json",
+      schemaPath: "schemas/github-source-bundle.schema.json",
+      value: bundle,
+      schema,
+      refs,
+    });
   });
 
   it("rejects missing required collector, selection, coverage, and PR fields", async () => {
@@ -489,7 +488,7 @@ describe("github source bundle schema", () => {
     assert.deepEqual(validateSchema(bundle, schema, refs), []);
   });
 
-  it("formats source-bundle schema failures with artifact, path, and fix direction", async () => {
+  it("reports source-bundle schema failures with artifact, path, and fix direction", async () => {
     const [sourceBundleSchema, targetSchema] = await Promise.all([
       readJson("../schemas/github-source-bundle.schema.json"),
       readJson("../schemas/target-repository.schema.json"),
@@ -498,18 +497,21 @@ describe("github source bundle schema", () => {
     const bundle = validSourceBundle();
     delete bundle.selection.requestedLimit;
 
-    const messages = formatSchemaValidationErrors({
-      artifact: "source-bundle.json",
-      schemaPath: "schemas/github-source-bundle.schema.json",
-      errors: validateSchema(bundle, schema, refs),
-    });
-
-    assert(messages.some(message => (
-      message.includes("source-bundle.json")
-      && message.includes("schemas/github-source-bundle.schema.json")
-      && message.includes("$.selection.requestedLimit")
-      && message.includes("Fix the collector output or intentionally update the schema contract")
-    )));
+    assert.throws(
+      () => assertSchemaValid({
+        artifact: "source-bundle.json",
+        schemaPath: "schemas/github-source-bundle.schema.json",
+        value: bundle,
+        schema,
+        refs,
+      }),
+      error => (
+        error.message.includes("source-bundle.json")
+        && error.message.includes("schemas/github-source-bundle.schema.json")
+        && error.message.includes("$.selection.requestedLimit")
+        && error.message.includes("Fix the collector output or intentionally update the schema contract")
+      ),
+    );
   });
 });
 

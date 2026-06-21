@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+
 export function matchesType(value, expected) {
   if (Array.isArray(expected)) {
     return expected.some(type => matchesType(value, type));
@@ -111,4 +113,18 @@ export function validateSchema(value, schema, schemas, path = "$", rootSchema = 
     });
   }
   return errors;
+}
+
+function formatSchemaValidationErrors({ artifact, schemaPath, errors }) {
+  return errors.map(error => (
+    `${artifact} failed ${schemaPath} at ${error.split(" ")[0]}: ${error}. `
+    + "Fix the collector output or intentionally update the schema contract."
+  ));
+}
+
+export function assertSchemaValid({ artifact, schemaPath, value, schema, refs = {} }) {
+  const errors = validateSchema(value, schema, refs);
+  if (errors.length === 0) return;
+
+  assert.fail(formatSchemaValidationErrors({ artifact, schemaPath, errors }).join("\n"));
 }
