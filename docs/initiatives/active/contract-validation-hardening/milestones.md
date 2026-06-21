@@ -131,6 +131,11 @@ The live collector emits a source bundle that is validated against a checked-in 
 ### Status
 
 - [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged in PR #56 on 2026-06-21
 
 ## M3: Done-Docs Hygiene Guard
 
@@ -184,4 +189,4 @@ Completed initiative docs stay reliable as implementation records instead of acc
 
 ### Status
 
-- [ ] Not started
+- [x] Active

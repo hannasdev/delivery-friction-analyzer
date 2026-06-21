@@ -8,7 +8,7 @@ Status: Active.
 - Owner: Hanna
 - Created: 2026-06-13
 - Activated: 2026-06-21
-- Active milestone: M2 Source Bundle Schema Contract
+- Active milestone: M3 Done-Docs Hygiene Guard
 - Relevance reviewed: 2026-06-21 against `main` at v0.14.2. Still relevant, with baseline updates for completed PR class segmentation, setup/report usability, interactive setup, and maintainer review readiness work.
 - Related issue:
   - None yet.
