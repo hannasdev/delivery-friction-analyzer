@@ -146,6 +146,9 @@ Recurring automated review expectations are available before implementation and 
 
 ### Acceptance Criteria
 
+These criteria track M3 implementation acceptance. Merge completion remains
+separate in the status checklist below.
+
 - [x] Repo guidance names the recurring Copilot review themes from the baseline report.
 - [x] Repo guidance defines starter tripwires for broad changes: 10 or more changed files, 750 or more non-generated changed lines, or more than one functional surface.
 - [x] Repo guidance tells agents which validation commands to run for ordinary, report/contract, profile, docs, and release/package changes.

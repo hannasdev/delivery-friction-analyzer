@@ -96,6 +96,10 @@ Implementation should prefer small docs, profile, script, and test changes over 
 
 ## Acceptance Criteria
 
+These criteria track implementation acceptance across the initiative. Final
+initiative completion remains pending until the M3 PR merges and the
+post-merge lifecycle step moves the initiative out of `active/`.
+
 - [x] The self-profile classifies meaningful repository paths, roles, functional surfaces, and Conventional Commit-style PR classes for this repository.
 - [x] A rerun self-analysis no longer reports every PR class and functional surface as `unknown`.
 - [x] Local preflight scripts cover the recurring validation stories for ordinary changes and release/package changes.

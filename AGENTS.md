@@ -1,8 +1,7 @@
 # Repository Guidance
 
-Use this with the global agent notes. Keep changes narrow, preserve existing
-patterns, and treat this file as repo-specific review readiness guidance rather
-than a second README.
+Keep changes narrow, preserve existing patterns, and treat this file as
+repo-specific review readiness guidance rather than a second README.
 
 ## Review Readiness
 
