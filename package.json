@@ -19,6 +19,8 @@
   ],
   "scripts": {
     "analyze:github": "node src/cli/analyze-github.js",
+    "preflight": "npm test && git diff --check HEAD",
+    "preflight:release": "node --test test/release-versioning.test.mjs && node scripts/release-versioning.mjs assert-package-not-behind-latest-tag && npm pack --dry-run",
     "report:fixture": "node src/report/generate-report.js --metrics-summary fixtures/github/mcp-writing/metrics-summary.golden.json --json-out fixtures/github/mcp-writing/reports/friction-report.golden.json --markdown-out fixtures/github/mcp-writing/reports/friction-report.golden.md",
     "test": "node --test"
   },

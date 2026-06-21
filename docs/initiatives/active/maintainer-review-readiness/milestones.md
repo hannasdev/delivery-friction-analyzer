@@ -58,7 +58,7 @@ Future self-analysis of this repository can classify PRs, file roles, and functi
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged in PR #50 on 2026-06-21
 
 Pre-PR adversary review found maintainer-readiness fixes; remediation was applied before PR opening.
 
@@ -85,20 +85,19 @@ Maintainers and agents can run focused local commands that catch recurring relea
 
 ### Acceptance Criteria
 
-- [ ] `package.json` exposes a general local preflight command for ordinary PRs.
-- [ ] `package.json` exposes a release/package preflight command that includes package dry-run validation.
-- [ ] Release automation docs name the local command maintainers should run before release/package PRs.
-- [ ] Existing tests continue to pass under `npm test`.
-- [ ] The release/package preflight catches the validation story represented by PR #28: SemVer handling, direct CLI entrypoint invocation, and package metadata/package contents.
+- [x] `package.json` exposes a general local preflight command for ordinary PRs.
+- [x] `package.json` exposes a release/package preflight command that includes package dry-run validation.
+- [x] Release automation docs name the local command maintainers should run before release/package PRs.
+- [x] Existing tests continue to pass under `npm test`.
+- [x] The release/package preflight catches the validation story represented by PR #28: SemVer handling, direct CLI entrypoint invocation, and package metadata/package contents.
 
 ### Required Validation
 
 - `npm test`
-- `git diff --check`
+- `git diff --check HEAD`
 - `npm pack --dry-run`
-- `node --test test/release-versioning.test.mjs`
-- `printf 'feat: release smoke\n' | node scripts/release-versioning.mjs increment`
-- `node scripts/release-versioning.mjs assert-not-behind 1.2.3 v1.2.3`
+- `node --test test/release-versioning.test.mjs` (includes direct CLI entrypoint smoke coverage)
+- `node scripts/release-versioning.mjs assert-package-not-behind-latest-tag`
 
 ### Scope Budget
 
@@ -117,11 +116,11 @@ Maintainers and agents can run focused local commands that catch recurring relea
 
 ### Status
 
-- [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
 
 ## M3: Repo-Specific Review Guidance

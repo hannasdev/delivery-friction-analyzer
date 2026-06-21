@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-21 — Local Preflight Commands
+
+- What changed: Added `npm run preflight` for ordinary PR checks and `npm run preflight:release` for focused release/package validation, with release automation docs describing when to use each command.
+- Why it matters: Maintainers and agents can catch recurring test, whitespace, release-versioning, and package dry-run issues before opening review.
+- Who is affected: Maintainers preparing ordinary PRs, release automation changes, package metadata changes, package contents changes, or publish workflow changes.
+- Action needed: Optional; run `npm run preflight` before ordinary review and `npm run preflight:release` before release/package review.
+- PR: #51
+
 ### 2026-06-21 — Maintainer Self-Profile Baseline
 
 - What changed: Added a repository self-profile for delivery-friction-analyzer so local self-analysis can classify normal development paths, functional surfaces, workflow context, and Conventional Commit-style PR classes.

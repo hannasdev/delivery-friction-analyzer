@@ -3,8 +3,11 @@ import { spawnSync } from "node:child_process";
 import { describe, it } from "node:test";
 import {
   assertNotBehind,
+  assertPackageNotBehindLatestTag,
   compareSemver,
   determineIncrement,
+  latestVersionTagFromList,
+  packageVersionFromJson,
   parseSemver,
 } from "../scripts/release-versioning.mjs";
 
@@ -83,6 +86,31 @@ describe("release versioning", () => {
     );
   });
 
+  it("selects the newest version tag from sorted git tag output", () => {
+    assert.equal(latestVersionTagFromList("v1.2.3\nv1.2.2\n"), "v1.2.3");
+    assert.equal(latestVersionTagFromList("\n"), null);
+  });
+
+  it("reads package versions from package metadata", () => {
+    assert.equal(packageVersionFromJson('{"version":"1.2.3"}'), "1.2.3");
+    assert.equal(packageVersionFromJson('{"version":" 1.2.3 "}'), "1.2.3");
+    assert.throws(() => packageVersionFromJson("{}"), /non-empty string version/);
+  });
+
+  it("validates package metadata against the latest release tag", () => {
+    assert.doesNotThrow(() => {
+      assertPackageNotBehindLatestTag('{"version":"1.2.4"}', "v1.2.3\nv1.2.2\n");
+    });
+    assert.throws(
+      () => assertPackageNotBehindLatestTag('{"version":"1.2.2"}', "v1.2.3\n"),
+      /Package version 1\.2\.2 is behind latest tag v1\.2\.3/,
+    );
+    assert.throws(
+      () => assertPackageNotBehindLatestTag('{"version":"1.2.3"}', ""),
+      /No v\* release tags found/,
+    );
+  });
+
   it("runs the CLI entrypoint when invoked through a relative path", () => {
     const result = spawnSync(process.execPath, [
       "scripts/release-versioning.mjs",
@@ -95,5 +123,21 @@ describe("release versioning", () => {
     assert.equal(result.status, 0);
     assert.equal(result.stderr, "");
     assert.equal(result.stdout, "minor\n");
+  });
+
+  it("reports git spawn failures when validating package metadata from the CLI", () => {
+    const result = spawnSync(process.execPath, [
+      "scripts/release-versioning.mjs",
+      "assert-package-not-behind-latest-tag",
+    ], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PATH: "",
+      },
+    });
+
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Failed to list release tags/);
   });
 });
