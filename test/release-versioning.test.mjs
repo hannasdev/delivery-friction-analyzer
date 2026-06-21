@@ -93,6 +93,7 @@ describe("release versioning", () => {
 
   it("reads package versions from package metadata", () => {
     assert.equal(packageVersionFromJson('{"version":"1.2.3"}'), "1.2.3");
+    assert.equal(packageVersionFromJson('{"version":" 1.2.3 "}'), "1.2.3");
     assert.throws(() => packageVersionFromJson("{}"), /non-empty string version/);
   });
 
@@ -122,5 +123,21 @@ describe("release versioning", () => {
     assert.equal(result.status, 0);
     assert.equal(result.stderr, "");
     assert.equal(result.stdout, "minor\n");
+  });
+
+  it("reports git spawn failures when validating package metadata from the CLI", () => {
+    const result = spawnSync(process.execPath, [
+      "scripts/release-versioning.mjs",
+      "assert-package-not-behind-latest-tag",
+    ], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PATH: "",
+      },
+    });
+
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Failed to list release tags/);
   });
 });

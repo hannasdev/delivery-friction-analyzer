@@ -84,7 +84,7 @@ export function packageVersionFromJson(packageJsonText) {
   if (typeof packageJson.version !== "string" || packageJson.version.trim() === "") {
     throw new Error("package.json must contain a non-empty string version.");
   }
-  return packageJson.version;
+  return packageJson.version.trim();
 }
 
 export function assertPackageNotBehindLatestTag(packageJsonText, tagList) {
@@ -134,8 +134,12 @@ async function main(argv) {
     const tagResult = spawnSync("git", ["tag", "--list", "v*", "--sort=-v:refname"], {
       encoding: "utf8",
     });
+    if (tagResult.error) {
+      throw new Error(`Failed to list release tags: ${tagResult.error.message}`);
+    }
     if (tagResult.status !== 0) {
-      throw new Error(tagResult.stderr.trim() || "Failed to list release tags.");
+      const stderr = typeof tagResult.stderr === "string" ? tagResult.stderr.trim() : "";
+      throw new Error(stderr || "Failed to list release tags.");
     }
     assertPackageNotBehindLatestTag(await readFile("package.json", "utf8"), tagResult.stdout);
     return;
