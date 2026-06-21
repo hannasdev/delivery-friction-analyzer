@@ -58,7 +58,7 @@ Future self-analysis of this repository can classify PRs, file roles, and functi
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [x] Merged
+- [x] Merged in PR #50 on 2026-06-21
 
 Pre-PR adversary review found maintainer-readiness fixes; remediation was applied before PR opening.
 
