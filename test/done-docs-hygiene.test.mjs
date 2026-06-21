@@ -8,6 +8,7 @@ const DONE_DOCS_ROOT = "docs/initiatives/done";
 const CHECKBOX_RE = /^\s*[-*]\s+\[\s\]\s+(.+?)\s*$/;
 const HEADING_RE = /^#{1,6}\s+(.+?)\s*#*\s*$/;
 const ALLOWED_LABEL_RE = /^(Deferred|Future decision|Intentionally omitted):\s+/i;
+const BACKLOG_LINKED_LABEL_RE = /^Backlog-linked:\s+/i;
 const BACKLOG_LINK_RE = /(?:docs\/initiatives\/backlog\/[^\s)]+|\]\(\.\.\/backlog\/[^)]+\)|https?:\/\/github\.com\/[^\s)]+\/(?:issues|pull)\/\d+)/i;
 const STATUS_ITEMS = new Set([
   "active",
@@ -43,9 +44,13 @@ function isAllowedHistoricalStatusItem(item, currentHeading) {
   return normalizeHeading(currentHeading) === "status" && STATUS_ITEMS.has(item.trim().toLowerCase());
 }
 
+function isAllowedBacklogLinkedItem(item) {
+  return BACKLOG_LINKED_LABEL_RE.test(item) && BACKLOG_LINK_RE.test(item);
+}
+
 function isAllowedUncheckedItem(item, currentHeading) {
   return ALLOWED_LABEL_RE.test(item)
-    || BACKLOG_LINK_RE.test(item)
+    || isAllowedBacklogLinkedItem(item)
     || isAllowedHistoricalStatusItem(item, currentHeading);
 }
 
@@ -132,11 +137,25 @@ describe("done initiative docs hygiene", () => {
 - [ ] Future decision: Decide whether branch matchers belong in a later profile contract.
 - [ ] Intentionally omitted: Hosted dashboards remain outside this local CLI initiative.
 - [ ] Backlog-linked: Continue in docs/initiatives/backlog/future-profile-matchers/prd.md.
+- [ ] Backlog-linked: Track the follow-up in [future profile matchers](../backlog/future-profile-matchers/prd.md).
+- [ ] Backlog-linked: Track the follow-up in https://github.com/hannasdev/delivery-friction-analyzer/issues/123.
+`, "docs/initiatives/done/example/prd.md");
+
+    assert.deepEqual(failures, []);
+  });
+
+  it("rejects concrete backlog and GitHub follow-ups without the backlog-linked label", () => {
+    const failures = findMarkdownHygieneFailures(`# Acceptance Criteria
+
+- [ ] Track the follow-up in docs/initiatives/backlog/future-profile-matchers/prd.md.
 - [ ] Track the follow-up in [future profile matchers](../backlog/future-profile-matchers/prd.md).
 - [ ] Track the follow-up in https://github.com/hannasdev/delivery-friction-analyzer/issues/123.
 `, "docs/initiatives/done/example/prd.md");
 
-    assert.deepEqual(failures, []);
+    assert.equal(failures.length, 3);
+    assert.match(failures[0], /unchecked checklist item: Track the follow-up in docs\/initiatives\/backlog\/future-profile-matchers\/prd\.md\./);
+    assert.match(failures[1], /unchecked checklist item: Track the follow-up in \[future profile matchers\]\(\.\.\/backlog\/future-profile-matchers\/prd\.md\)\./);
+    assert.match(failures[2], /unchecked checklist item: Track the follow-up in https:\/\/github\.com\/hannasdev\/delivery-friction-analyzer\/issues\/123\./);
   });
 
   it("ignores unchecked backlog items because the guard only scans done initiatives", async () => {
