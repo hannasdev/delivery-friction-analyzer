@@ -9,7 +9,9 @@ const CHECKBOX_RE = /^\s*[-*]\s+\[\s\]\s+(.+?)\s*$/;
 const HEADING_RE = /^#{1,6}\s+(.+?)\s*#*\s*$/;
 const ALLOWED_LABEL_RE = /^(Deferred|Future decision|Intentionally omitted):\s+/i;
 const BACKLOG_LINKED_LABEL_RE = /^Backlog-linked:\s+/i;
-const BACKLOG_LINK_RE = /(?:docs\/initiatives\/backlog\/[^\s)]+|\]\(\.\.\/backlog\/[^)]+\)|https?:\/\/github\.com\/[^\s)]+\/(?:issues|pull)\/\d+)/i;
+const BACKLOG_PATH_RE = /docs\/initiatives\/backlog\/[^\s)]+/i;
+const RELATIVE_BACKLOG_LINK_RE = /\]\(\.\.\/backlog\/[^)]+\)/i;
+const GITHUB_ISSUE_OR_PR_RE = /https?:\/\/github\.com\/[^\s/)]+\/[^\s/)]+\/(?:issues|pull)\/\d+(?=$|[\s).,;!?])/i;
 const STATUS_ITEMS = new Set([
   "active",
   "implemented",
@@ -44,8 +46,16 @@ function isAllowedHistoricalStatusItem(item, currentHeading) {
   return normalizeHeading(currentHeading) === "status" && STATUS_ITEMS.has(item.trim().toLowerCase());
 }
 
+function hasConcreteBacklogReference(item) {
+  return [BACKLOG_PATH_RE, RELATIVE_BACKLOG_LINK_RE, GITHUB_ISSUE_OR_PR_RE]
+    .some(pattern => {
+      const match = item.match(pattern);
+      return match && !match[0].includes("...");
+    });
+}
+
 function isAllowedBacklogLinkedItem(item) {
-  return BACKLOG_LINKED_LABEL_RE.test(item) && BACKLOG_LINK_RE.test(item);
+  return BACKLOG_LINKED_LABEL_RE.test(item) && hasConcreteBacklogReference(item);
 }
 
 function isAllowedUncheckedItem(item, currentHeading) {
@@ -194,6 +204,32 @@ describe("done initiative docs hygiene", () => {
     assert.match(failures[0], /Backlog-linked: requires a concrete docs\/initiatives\/backlog\/\.\.\. path/);
     assert.match(failures[0], /relative \.\.\/backlog\/\.\.\. Markdown link/);
     assert.match(failures[0], /GitHub issue\/PR URL/);
+  });
+
+  it("rejects backlog-linked placeholder ellipses paths and links", () => {
+    const failures = findMarkdownHygieneFailures(`# Acceptance Criteria
+
+- [ ] Backlog-linked: Continue in docs/initiatives/backlog/...
+- [ ] Backlog-linked: Track the follow-up in [future profile matchers](../backlog/...)
+`, "docs/initiatives/done/example/prd.md");
+
+    assert.equal(failures.length, 2);
+    assert.match(failures[0], /unchecked checklist item: Backlog-linked: Continue in docs\/initiatives\/backlog\/\.\.\./);
+    assert.match(failures[1], /unchecked checklist item: Backlog-linked: Track the follow-up in \[future profile matchers\]\(\.\.\/backlog\/\.\.\.\)/);
+  });
+
+  it("rejects partial GitHub issue and PR URL numbers followed by identifier characters", () => {
+    const failures = findMarkdownHygieneFailures(`# Acceptance Criteria
+
+- [ ] Backlog-linked: Track the follow-up in https://github.com/hannasdev/delivery-friction-analyzer/issues/123abc.
+- [ ] Backlog-linked: Track the follow-up in https://github.com/hannasdev/delivery-friction-analyzer/pull/456-extra.
+- [ ] Backlog-linked: Track the follow-up in https://github.com/hannasdev/delivery-friction-analyzer/issues/789/comments.
+`, "docs/initiatives/done/example/prd.md");
+
+    assert.equal(failures.length, 3);
+    assert.match(failures[0], /issues\/123abc/);
+    assert.match(failures[1], /pull\/456-extra/);
+    assert.match(failures[2], /issues\/789\/comments/);
   });
 
   it("does not treat historical status allowance as acceptance criteria cleanup", () => {

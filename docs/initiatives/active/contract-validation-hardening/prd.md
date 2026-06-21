@@ -105,13 +105,13 @@ Human approval checkpoint: Approved by Hanna on 2026-06-21 for the refreshed use
 
 ## Acceptance Criteria
 
-- [ ] Live analysis rejects the configured product repository before provider calls.
-- [ ] Repository profile validation runs before GitHub collection or report generation depends on profile rules, including repository identity, file-role rules, duplicate IDs, unsupported keys, category/role/surface values, PR class rules, workflow context, contributor-source config, and invalid regex matchers.
-- [ ] `github-source-bundle.v1` has a checked-in schema and tests that validate mocked collector output, including optional contributor-source metadata and contributor privacy boundaries.
-- [ ] Contract docs are audited and reconciled for latest-N PR selection, profile validation, run preset/profile ownership, source-bundle schema boundaries, and known workflow-run caveats.
-- [ ] Completed initiative docs contain no stale unchecked implemented criteria or bare unanswered open questions; legitimate deferred or future-decision items are labeled consistently or linked to backlog follow-up.
-- [ ] User-facing validation, schema-validation, and docs-hygiene failures name the failing file or command context, the invalid field/path/rule or schema path when available, the problem, and the next action.
-- [ ] Validation commands cover target repository contracts, profile validation, source-bundle schema validation, CLI preflight behavior, existing report fixtures, and `npm run preflight`.
+- [x] Live analysis rejects the configured product repository before provider calls.
+- [x] Repository profile validation runs before GitHub collection or report generation depends on profile rules, including repository identity, file-role rules, duplicate IDs, unsupported keys, category/role/surface values, PR class rules, workflow context, contributor-source config, and invalid regex matchers.
+- [x] `github-source-bundle.v1` has a checked-in schema and tests that validate mocked collector output, including optional contributor-source metadata and contributor privacy boundaries.
+- [x] Contract docs are audited and reconciled for latest-N PR selection, profile validation, run preset/profile ownership, source-bundle schema boundaries, and known workflow-run caveats.
+- [x] Completed initiative docs contain no stale unchecked implemented criteria or bare unanswered open questions; legitimate deferred or future-decision items are labeled consistently or linked to backlog follow-up.
+- [x] User-facing validation, schema-validation, and docs-hygiene failures name the failing file or command context, the invalid field/path/rule or schema path when available, the problem, and the next action.
+- [x] Validation commands cover target repository contracts, profile validation, source-bundle schema validation, CLI preflight behavior, existing report fixtures, and `npm run preflight`.
 
 ## Risks And Tradeoffs
 
