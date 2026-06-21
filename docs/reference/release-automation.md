@@ -28,6 +28,12 @@ It validates:
 
 CI runs on Node 20 and Node 24 so the advertised `engines.node >=20` floor is exercised before release.
 
+## Local Preflight
+
+For ordinary PRs, run `npm run preflight` before opening or updating review. It runs the full local test suite and `git diff --check` so whitespace issues are caught against the current working tree.
+
+For release automation, package metadata, package contents, or publish workflow changes, run `npm run preflight:release`. It runs the focused release-versioning tests, including direct CLI entrypoint coverage, validates the package version is not behind an equal latest tag, and runs `npm pack --dry-run`.
+
 ## Release Workflow
 
 The release workflow runs on pushes to `main` and skips commits whose subject starts with `Release `.
