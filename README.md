@@ -144,6 +144,8 @@ No separate model-ready context artifact is required for this workflow. Reconsid
 
 ## Development Notes
 
+Repo-local maintainer and agent review expectations live in [AGENTS.md](AGENTS.md).
+
 ### Current Direction
 
 Delivery Friction Analyzer is currently a local, GitHub-connected analyzer that produces repository-level friction reports from live pull request data. It is repo-source-agnostic: repository-specific assumptions live in profiles.

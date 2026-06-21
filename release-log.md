@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-21 — Repo-Specific Review Guidance
+
+- What changed: Added repo-local maintainer and agent guidance for recurring review themes, broad-change tripwires, and validation command selection, with self-profile coverage for the new guidance file.
+- Why it matters: Maintainers and agents can catch known review-readiness issues before opening PRs without applying heavy process to tiny docs or test changes, and future self-analysis can classify the guidance surface.
+- Who is affected: Maintainers and agents preparing changes in this repository.
+- Action needed: Optional; review `AGENTS.md` before broad, report/contract, profile, docs, or release/package changes.
+- PR: #52
+
 ### 2026-06-21 — Local Preflight Commands
 
 - What changed: Added `npm run preflight` for ordinary PR checks and `npm run preflight:release` for focused release/package validation, with release automation docs describing when to use each command.
