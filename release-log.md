@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can review future self-analysis with fewer `unknown` classifications before changing process or opening follow-up workflow PRs.
 - Who is affected: Maintainers running local analysis against this repository or reviewing profile validation.
 - Action needed: Optional; rerun local self-analysis with `profiles/delivery-friction-analyzer.json` when validating maintainer workflow changes.
-- PR: TBD
+- PR: #50
 
 ### 2026-06-20 — Reusable Run Presets
 
