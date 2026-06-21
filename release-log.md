@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can tell when collector output drifts from the supported contract without treating the bundle as a complete raw GitHub API dump.
 - Who is affected: Maintainers reviewing source bundles, contract tests, collector changes, or packaged schema/docs.
 - Action needed: None.
-- PR: TBD
+- PR: #56
 
 ### 2026-06-21 — Runtime Contract Preflight
 
