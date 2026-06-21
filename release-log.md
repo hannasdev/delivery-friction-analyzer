@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-21 — Done Initiative Hygiene Guard
+
+- What changed: `npm test` now enforces completed initiative documentation hygiene, and `AGENTS.md` documents how shipped, deferred, future-decision, backlog-linked, and intentionally omitted items should be recorded in done initiative docs.
+- Why it matters: Maintainers get local feedback when completed initiative records still look like active TODO lists or contain unresolved open questions without a clear deferred or follow-up path.
+- Who is affected: Maintainers and agents updating initiative docs or running local validation.
+- Action needed: When moving initiative docs to done, check shipped work, label deferred or intentionally omitted scope, and include a concrete backlog or GitHub follow-up link for backlog-linked unchecked items.
+- PR: TBD
+
 ### 2026-06-21 — Source Bundle Schema Contract
 
 - What changed: Live GitHub `source-bundle.json` artifacts now have a documented analyzer-owned schema that covers the canonical fields used downstream, including coverage metadata and sanitized contributor-source context.

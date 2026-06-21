@@ -97,11 +97,11 @@ User-facing validation copy should be specific enough to recover from without re
 
 Profile validation copy should make the direct recovery path clear. For an existing malformed profile, tell the maintainer which field or rule to edit; mention interactive setup only as a way to create or regenerate a starter profile. Example shape: `Invalid repository profile: rules[3] "docs-regex" match.regex is not a valid JavaScript regex. Fix that rule in <profile path>. If you want to regenerate a starter profile instead, rerun interactive setup with --interactive --dry-run.`
 
-Done-doc hygiene failures should also name the file and convention to use. Example shape: `Done initiative has an unchecked open question: docs/initiatives/done/.../prd.md:139. Mark it as Future decision:, Deferred:, Intentionally omitted:, or link it to a backlog follow-up.`
+Done-doc hygiene failures should also name the file and convention to use. Example shape: `Done initiative has an unchecked open question: docs/initiatives/done/.../prd.md:139. Mark it as Future decision:, Deferred:, Intentionally omitted:, or link it to a concrete backlog or GitHub follow-up.`
 
 Intentionally unchanged: latest-N PR selection, PR class scoring/ranking behavior, run preset persistence, contributor-source parser scope, artifact sensitivity defaults, and hosted/service behavior.
 
-Human approval checkpoint: Approved by Hanna on 2026-06-21 for the refreshed user-perspective preview and milestone shape. The initiative remains in backlog until activation is requested.
+Human approval checkpoint: Approved by Hanna on 2026-06-21 for the refreshed user-perspective preview and milestone shape. The initiative was activated and completed on 2026-06-21; M3 is complete for pre-PR cleanup, and the initiative remains under `docs/initiatives/active/` until PR merge and initiative-completion cleanup move it to the completed initiative archive.
 
 ## Acceptance Criteria
 
