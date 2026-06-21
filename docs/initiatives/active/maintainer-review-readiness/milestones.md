@@ -121,7 +121,7 @@ Maintainers and agents can run focused local commands that catch recurring relea
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged in PR #51 on 2026-06-21
 
 ## M3: Repo-Specific Review Guidance
 
@@ -176,7 +176,7 @@ Recurring automated review expectations are available before implementation and 
 
 ### Status
 
-- [ ] Not started
+- [x] Active
 - [ ] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed

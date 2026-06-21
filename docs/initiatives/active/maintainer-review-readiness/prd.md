@@ -7,7 +7,7 @@ Status: Active.
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-20
-- Current milestone state: M2 PR opened after implementation, conformance review, and adversarial review.
+- Current milestone state: M3 active after M2 merged in PR #51 on 2026-06-21.
 - Activation review: Accepted with notes on 2026-06-21; carry surface-taxonomy, tripwire, and self-analysis rerun details into M1 implementation.
 - Related issue:
   - None yet.
