@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-21 — Runtime Contract Preflight
+
+- What changed: GitHub analysis now rejects this tool's product repository before collection and validates repository profiles more completely before provider calls, including file-rule shape, duplicate IDs, unsupported keys, invalid values, and malformed regexes.
+- Why it matters: Maintainers get clearer failures before rate-limited GitHub work begins, so invalid targets or profiles are fixed at the input boundary instead of producing misleading reports.
+- Who is affected: Maintainers running live GitHub analysis, dry runs, or preset-based runs, and contributors authoring repository profiles.
+- Action needed: If a run now fails preflight, choose the repository you want to measure with `--repo owner/name` or fix the named profile field or rule before rerunning.
+- PR: TBD
+
 ### 2026-06-21 — Repo-Specific Review Guidance
 
 - What changed: Added repo-local maintainer and agent guidance for recurring review themes, broad-change tripwires, and validation command selection, with self-profile coverage for the new guidance file.

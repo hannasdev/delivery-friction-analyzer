@@ -1183,7 +1183,7 @@ describe("GitHub live analyze CLI", () => {
           isInteractiveTerminal: true,
           promptAdapter: createScriptedPromptAdapter({}),
         }),
-        /profile is invalid: invalid PR class profile rules: prClasses must be an array when provided/,
+        /Invalid repository profile at .*malformed-pr-classes\.json: invalid repository profile: prClasses must be an array when provided.*Fix the named field or rule.*interactive setup with --interactive --dry-run/s,
       );
     });
   });
@@ -1213,7 +1213,7 @@ describe("GitHub live analyze CLI", () => {
           isInteractiveTerminal: true,
           promptAdapter: createScriptedPromptAdapter({}),
         }),
-        /profile is invalid: invalid workflow profile context: workflow must include at least one field when provided/,
+        /Invalid repository profile at .*malformed-workflow\.json: invalid repository profile: workflow must include at least one field when provided.*Fix the named field or rule.*interactive setup with --interactive --dry-run/s,
       );
     });
   });
@@ -2587,6 +2587,95 @@ describe("GitHub live analyze CLI", () => {
           outDir: join(directory, "out"),
         }, { provider }),
         /repo must use owner\/name/,
+      );
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("rejects the configured product repository before provider calls", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "hannasdev/delivery-friction-analyzer",
+          limit: 1,
+          profilePath,
+          outDir: join(directory, "out"),
+        }, { provider }),
+        /Cannot analyze hannasdev\/delivery-friction-analyzer because it is this tool's product repository, not the target repository to measure.*Choose a different repository with --repo owner\/name.*No GitHub data was collected/s,
+      );
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("rejects invalid explicit repository profiles before provider calls", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeCanonicalProfile(directory, "invalid-profile.json", {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "example", name: "example-repo" },
+        rules: [
+          {
+            id: "runtime",
+            match: { prefix: "src/" },
+            category: "code",
+            role: "core_product_code",
+          },
+          {
+            id: "runtime",
+            match: { regex: "[" },
+            category: "source",
+            role: "core_product_code",
+          },
+        ],
+        unsupported: true,
+      });
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "example/example-repo",
+          limit: 1,
+          profilePath,
+          outDir: join(directory, "out"),
+        }, { provider }),
+        /Invalid repository profile at .*invalid-profile\.json: invalid repository profile: profile\.unsupported is not supported.*rules rule id "runtime" is duplicated.*rules\[1\] "runtime" match\.regex is not a valid JavaScript regex.*rules\[1\] "runtime" category must be one of.*Fix the named field or rule/s,
+      );
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("validates preset-sourced repository profiles before provider calls during dry run", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeCanonicalProfile(directory, "preset-invalid-profile.json", {
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "bad owner", name: "example-repo" },
+        rules: [],
+      });
+      const presetPath = join(directory, "run-preset.json");
+      await writeFile(presetPath, `${JSON.stringify({
+        schemaVersion: "analyze-github-run-preset.v1",
+        run: {
+          repository: "example/example-repo",
+          limit: 10,
+          profilePath,
+          outDir: join(directory, "out"),
+          dryRun: true,
+          csv: false,
+          json: true,
+          excludedPrClasses: [],
+        },
+      })}\n`, "utf8");
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithubCli(["--preset", presetPath], {
+          provider,
+          stdout: { write() {} },
+          stderr: { write() {} },
+        }),
+        /Invalid repository profile at .*preset-invalid-profile\.json: invalid repository profile: repository\.owner must be a GitHub owner\/name segment/s,
       );
       assert.deepEqual(provider.calls, []);
     });

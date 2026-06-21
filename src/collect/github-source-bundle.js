@@ -1,4 +1,9 @@
-import { validateTargetRepository } from "../contracts/target-repository.js";
+import {
+  DEFAULT_PRODUCT_REPOSITORY,
+  isProductRepositoryTarget,
+  productRepositoryTargetError,
+  validateTargetRepository,
+} from "../contracts/target-repository.js";
 import {
   assertValidContributorSource,
   normalizeContributorSourceConfig,
@@ -44,7 +49,7 @@ function visibilityOf(repository) {
   return "unknown";
 }
 
-function mapTargetRepository({ owner, name, repositoryMetadata, analysisPullRequestLimit, isValidationTarget }) {
+function mapTargetRepository({ owner, name, repositoryMetadata, analysisPullRequestLimit, isValidationTarget, productRepository }) {
   const targetRepository = {
     owner,
     name,
@@ -53,7 +58,7 @@ function mapTargetRepository({ owner, name, repositoryMetadata, analysisPullRequ
     analysisPullRequestLimit,
     isValidationTarget,
   };
-  const errors = validateTargetRepository(targetRepository);
+  const errors = validateTargetRepository(targetRepository, { productRepository });
   if (errors.length > 0) {
     throw new Error(`collected target repository metadata is invalid: ${errors.join(" ")}`);
   }
@@ -372,6 +377,7 @@ export async function collectGitHubSourceBundle({
   analysisPullRequestLimit,
   isValidationTarget = false,
   contributors = null,
+  productRepository = DEFAULT_PRODUCT_REPOSITORY,
 } = {}) {
   if (!provider) {
     throw new Error("provider is required.");
@@ -379,13 +385,16 @@ export async function collectGitHubSourceBundle({
   const targetPullRequestLimit = analysisPullRequestLimit ?? limit;
   requirePullRequestLimit(targetPullRequestLimit);
   const targetInput = repository ? parseRepositoryInput(repository) : { owner, name };
+  if (isProductRepositoryTarget(targetInput, productRepository)) {
+    throw new Error(productRepositoryTargetError(targetInput));
+  }
   const targetNameErrors = validateTargetRepository({
     ...targetInput,
     defaultBranch: "main",
     visibility: "unknown",
     analysisPullRequestLimit: targetPullRequestLimit,
     isValidationTarget,
-  }).filter(error => !error.includes("defaultBranch") && !error.includes("visibility"));
+  }, { productRepository }).filter(error => !error.includes("defaultBranch") && !error.includes("visibility"));
   if (targetNameErrors.length > 0) {
     throw new Error(targetNameErrors.join(" "));
   }
@@ -396,6 +405,7 @@ export async function collectGitHubSourceBundle({
     repositoryMetadata,
     analysisPullRequestLimit: targetPullRequestLimit,
     isValidationTarget,
+    productRepository,
   });
   const repositoryCoverage = coverageEntry({
     family: "repository_metadata",

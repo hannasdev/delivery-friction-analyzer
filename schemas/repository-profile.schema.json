@@ -14,8 +14,14 @@
       "additionalProperties": false,
       "required": ["owner", "name"],
       "properties": {
-        "owner": { "type": "string" },
-        "name": { "type": "string" }
+        "owner": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+$"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+$"
+        }
       }
     },
     "rules": {
@@ -25,16 +31,20 @@
         "additionalProperties": false,
         "required": ["id", "match", "category", "role"],
         "properties": {
-          "id": { "type": "string" },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+          },
           "match": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "exact": { "type": "string" },
-              "prefix": { "type": "string" },
-              "suffix": { "type": "string" },
-              "includes": { "type": "string" },
-              "regex": { "type": "string" }
+              "exact": { "type": "string", "minLength": 1 },
+              "prefix": { "type": "string", "minLength": 1 },
+              "suffix": { "type": "string", "minLength": 1 },
+              "includes": { "type": "string", "minLength": 1 },
+              "regex": { "type": "string", "minLength": 1 }
             },
             "minProperties": 1
           },
@@ -57,7 +67,10 @@
               "unknown"
             ]
           },
-          "functionalSurface": { "type": "string" },
+          "functionalSurface": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+          },
           "generated": { "type": "boolean" },
           "notes": { "type": "string" }
         }

@@ -1,6 +1,11 @@
 const OWNER_OR_NAME = /^[A-Za-z0-9_.-]+$/;
 const REF_NAME = /^[A-Za-z0-9._/-]+$/;
 
+export const DEFAULT_PRODUCT_REPOSITORY = Object.freeze({
+  owner: "hannasdev",
+  name: "delivery-friction-analyzer",
+});
+
 function validateRepoPart(value, label) {
   if (typeof value !== "string" || !OWNER_OR_NAME.test(value)) {
     return `${label} must be a GitHub owner/name segment using letters, numbers, dots, underscores, or dashes.`;
@@ -72,4 +77,27 @@ export function normalizeTargetRepository(input, options = {}) {
       isValidationTarget: input.isValidationTarget ?? false,
     },
   };
+}
+
+export function isProductRepositoryTarget(input, productRepository = DEFAULT_PRODUCT_REPOSITORY) {
+  const normalizedInputOwner = typeof input?.owner === "string" ? input.owner.toLowerCase() : null;
+  const normalizedInputName = typeof input?.name === "string" ? input.name.toLowerCase() : null;
+  const normalizedProductOwner = typeof productRepository?.owner === "string" ? productRepository.owner.toLowerCase() : null;
+  const normalizedProductName = typeof productRepository?.name === "string" ? productRepository.name.toLowerCase() : null;
+
+  return Boolean(
+    normalizedInputOwner
+    && normalizedInputName
+    && normalizedProductOwner
+    && normalizedProductName
+    && normalizedInputOwner === normalizedProductOwner
+    && normalizedInputName === normalizedProductName
+  );
+}
+
+export function productRepositoryTargetError(input) {
+  const repository = typeof input?.owner === "string" && typeof input?.name === "string"
+    ? `${input.owner}/${input.name}`
+    : "the requested repository";
+  return `Cannot analyze ${repository} because it is this tool's product repository, not the target repository to measure. Choose a different repository with --repo owner/name. No GitHub data was collected.`;
 }

@@ -16,15 +16,13 @@ import {
   generateRepositoryFrictionReport,
   renderRepositoryFrictionMarkdown,
 } from "../report/friction-report.js";
-import { assertValidPrClassRules } from "../profile/pr-class.js";
 import { conventionalCommitPrClassRules } from "../profile/pr-class-presets.js";
+import { assertValidRepositoryProfile } from "../profile/repository-profile.js";
 import {
   WORKFLOW_BRANCH_STRATEGIES,
   WORKFLOW_PRIMARY_MERGE_METHODS,
   WORKFLOW_RELEASE_STRATEGIES,
-  assertValidWorkflowContext,
 } from "../profile/workflow.js";
-import { assertValidContributorSource } from "../profile/contributor-source.js";
 
 const RUN_PRESET_SCHEMA_VERSION = "analyze-github-run-preset.v1";
 
@@ -568,9 +566,7 @@ function normalizeMultiSelectAnswer(raw, prompt) {
 }
 
 function validateProfile(profile) {
-  assertValidPrClassRules(profile);
-  assertValidWorkflowContext(profile);
-  assertValidContributorSource(profile);
+  assertValidRepositoryProfile(profile);
 }
 
 function parseProfileJson(text) {
@@ -586,6 +582,14 @@ function parseProfileJson(text) {
 
 function hasTrailingPathSeparator(profilePath) {
   return /[/\\]$/.test(profilePath);
+}
+
+function invalidProfileMessage(profilePath, error) {
+  return `Invalid repository profile at ${profilePath}: ${error.message}. Fix the named field or rule in this profile. If you want to create or regenerate a starter profile instead, rerun interactive setup with --interactive --dry-run.`;
+}
+
+function invalidProfileJsonMessage(profilePath, error) {
+  return `Invalid repository profile at ${profilePath}: ${error.message}. Fix the JSON syntax in this profile. If you want to create or regenerate a starter profile instead, rerun interactive setup with --interactive --dry-run.`;
 }
 
 async function inspectProfilePath(profilePath) {
@@ -618,10 +622,10 @@ async function readProfile(profilePath) {
     inspected = await inspectProfilePath(profilePath);
   } catch (error) {
     if (error.message?.startsWith("profile must be valid JSON")) {
-      throw error;
+      throw new Error(invalidProfileJsonMessage(profilePath, error));
     }
     if (error.message?.startsWith("invalid ")) {
-      throw new Error(`profile is invalid: ${error.message}`);
+      throw new Error(invalidProfileMessage(profilePath, error));
     }
     throw new Error(`profile could not be read: ${error.message}`);
   }
@@ -1046,10 +1050,10 @@ async function promptProfilePath(promptAdapter, output, prompt) {
         profileState = await inspectProfilePath(value);
       } catch (error) {
         if (error.message?.startsWith("profile must be valid JSON")) {
-          throw error;
+          throw new Error(invalidProfileJsonMessage(value, error));
         }
         if (error.message?.startsWith("invalid ")) {
-          throw new Error(`profile is invalid: ${error.message}`);
+          throw new Error(invalidProfileMessage(value, error));
         }
         throw new Error(`profile could not be read: ${error.message}`);
       }
@@ -1130,10 +1134,10 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         };
       } catch (error) {
         if (error.message?.startsWith("profile must be valid JSON")) {
-          throw error;
+          throw new Error(invalidProfileJsonMessage(resolved.profilePath, error));
         }
         if (error.message?.startsWith("invalid ")) {
-          throw new Error(`profile is invalid: ${error.message}`);
+          throw new Error(invalidProfileMessage(resolved.profilePath, error));
         }
         throw new Error(`profile could not be read: ${error.message}`);
       }
@@ -1477,6 +1481,7 @@ export async function runAnalyzeGithub(options, {
   provider = createGhCliProvider(),
   now = () => new Date().toISOString(),
   onProgress = null,
+  productRepository,
 } = {}) {
   requireOptions(options);
   validateRepositorySlug(options.repository);
@@ -1509,6 +1514,7 @@ export async function runAnalyzeGithub(options, {
     collectedAt: now(),
     isValidationTarget: options.isValidationTarget,
     contributors: repositoryProfile.contributors,
+    productRepository,
   });
 
   if (options.dryRun) {
