@@ -53,3 +53,7 @@ Availability decision:
 - `gh api 'repos/hannasdev/mcp-writing/actions/runs?branch=feat/extended-vocabulary-resolution&event=pull_request&per_page=30'`
 
 Fixtures store compact, redacted source-shaped data rather than full raw payloads.
+Live `source-bundle.json` artifacts use the analyzer-owned
+`github-source-bundle.v1` contract in `schemas/github-source-bundle.schema.json`;
+that schema covers the canonical fields consumed downstream, not the full GitHub
+REST or GraphQL API response shape.

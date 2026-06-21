@@ -66,6 +66,11 @@ Live analysis fails early and clearly when the target repository or current repo
 ### Status
 
 - [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged in PR #55 on 2026-06-21
 
 ## M2: Source Bundle Schema Contract
 
@@ -125,7 +130,7 @@ The live collector emits a source bundle that is validated against a checked-in 
 
 ### Status
 
-- [ ] Not started
+- [x] Active
 
 ## M3: Done-Docs Hygiene Guard
 

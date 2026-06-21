@@ -1,0 +1,470 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://delivery-friction-analyzer.local/schemas/github-source-bundle.schema.json",
+  "title": "GitHubSourceBundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "collectedAt",
+    "collector",
+    "targetRepository",
+    "repositoryMetadata",
+    "selection",
+    "coverage",
+    "languageDistribution",
+    "pullRequests"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "github-source-bundle.v1" },
+    "collectedAt": { "type": "string" },
+    "collector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "provider"],
+      "properties": {
+        "name": { "const": "github-live-collector" },
+        "provider": { "type": "string", "minLength": 1 }
+      }
+    },
+    "targetRepository": { "$ref": "target-repository.schema.json" },
+    "repositoryMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "owner", "fullName", "defaultBranch", "visibility", "isPrivate", "htmlUrl"],
+      "properties": {
+        "id": { "type": ["integer", "string", "null"] },
+        "name": { "type": ["string", "null"] },
+        "owner": { "type": ["string", "null"] },
+        "fullName": { "type": ["string", "null"] },
+        "defaultBranch": { "type": ["string", "null"] },
+        "visibility": { "enum": ["public", "private", "unknown"] },
+        "isPrivate": { "type": ["boolean", "null"] },
+        "htmlUrl": { "type": ["string", "null"] }
+      }
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "requestedLimit", "collectedCount", "source"],
+      "properties": {
+        "strategy": { "const": "latest_merged_pull_requests" },
+        "requestedLimit": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "collectedCount": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "source": { "type": "string", "minLength": 1 }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "apiFamilies"],
+      "properties": {
+        "status": { "$ref": "#/$defs/coverageStatus" },
+        "apiFamilies": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/apiCoverageEntry" }
+        }
+      }
+    },
+    "languageDistribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "bytesByLanguage", "coverage"],
+      "properties": {
+        "source": { "const": "rest:/repos/{owner}/{repo}/languages" },
+        "bytesByLanguage": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "coverage": {
+          "allOf": [
+            { "$ref": "#/$defs/coverageEntry" },
+            {
+              "type": "object",
+              "properties": {
+                "family": { "const": "languages" },
+                "source": { "const": "rest:/repos/{owner}/{repo}/languages" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "contributorSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceType", "path", "coverage", "hintCount"],
+      "properties": {
+        "sourceType": { "enum": ["all_contributors"] },
+        "path": { "type": "string", "minLength": 1 },
+        "coverage": {
+          "allOf": [
+            { "$ref": "#/$defs/coverageEntry" },
+            {
+              "type": "object",
+              "properties": {
+                "family": { "const": "contributor_source" },
+                "source": { "const": "rest:/repos/{owner}/{repo}/contents/{path}" }
+              }
+            }
+          ]
+        },
+        "hintCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "pullRequests": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pullRequest" }
+    },
+    "raw": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "coverageStatus": {
+      "enum": ["available", "partial", "unavailable", "malformed", "unsupported", "rate_limited"]
+    },
+    "nullableString": { "type": ["string", "null"] },
+    "author": {
+      "type": ["object", "null"],
+      "properties": {
+        "login": { "type": ["string", "null"] },
+        "type": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "coverageEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "source", "status", "attempts", "diagnostics", "downstreamImpact"],
+      "properties": {
+        "family": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "#/$defs/coverageStatus" },
+        "attempts": { "type": "integer", "minimum": 0 },
+        "diagnostics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "downstreamImpact": { "type": ["string", "null"] }
+      }
+    },
+    "apiCoverageEntry": {
+      "allOf": [
+        { "$ref": "#/$defs/coverageEntry" },
+        {
+          "type": "object",
+          "properties": {
+            "family": {
+              "enum": [
+                "repository_metadata",
+                "languages",
+                "pull_request_inventory",
+                "pull_request_details",
+                "review_threads",
+                "workflow_runs",
+                "pr_open_diff",
+                "contributor_source"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "pullRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "number",
+        "title",
+        "author",
+        "url",
+        "state",
+        "createdAt",
+        "mergedAt",
+        "updatedAt",
+        "baseRefName",
+        "headRefName",
+        "headRefOid",
+        "additions",
+        "deletions",
+        "changedFiles",
+        "prOpenDiff",
+        "commits",
+        "files",
+        "reviews",
+        "reviewThreads",
+        "statusCheckRollup",
+        "workflowRuns",
+        "coverage"
+      ],
+      "properties": {
+        "number": { "type": "integer" },
+        "title": { "type": "string" },
+        "author": { "$ref": "#/$defs/author" },
+        "url": { "type": "string" },
+        "state": { "enum": ["OPEN", "CLOSED", "MERGED"] },
+        "createdAt": { "$ref": "#/$defs/nullableString" },
+        "mergedAt": { "$ref": "#/$defs/nullableString" },
+        "updatedAt": { "$ref": "#/$defs/nullableString" },
+        "baseRefName": { "$ref": "#/$defs/nullableString" },
+        "headRefName": { "$ref": "#/$defs/nullableString" },
+        "headRefOid": { "$ref": "#/$defs/nullableString" },
+        "additions": { "type": "integer", "minimum": 0 },
+        "deletions": { "type": "integer", "minimum": 0 },
+        "changedFiles": { "type": "integer", "minimum": 0 },
+        "prOpenDiff": { "$ref": "#/$defs/prOpenDiff" },
+        "commits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/commit" }
+        },
+        "files": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/changedFile" }
+        },
+        "reviews": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/review" }
+        },
+        "reviewThreads": { "$ref": "#/$defs/reviewThreads" },
+        "statusCheckRollup": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/statusCheck" }
+        },
+        "workflowRuns": { "$ref": "#/$defs/workflowRuns" },
+        "coverage": { "$ref": "#/$defs/prCoverage" }
+      }
+    },
+    "prOpenDiff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "confidence"],
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "anyOf": [
+              { "required": ["additions"] },
+              { "required": ["deletions"] },
+              { "required": ["changedFiles"] }
+            ]
+          },
+          "then": { "required": ["additions", "deletions", "changedFiles"] }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": ["source"],
+            "properties": { "source": { "enum": ["snapshot_only", "unavailable"] } }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["additions"] },
+                { "required": ["deletions"] },
+                { "required": ["changedFiles"] }
+              ]
+            }
+          }
+        }
+      ],
+      "properties": {
+        "source": { "enum": ["direct", "reconstructed", "snapshot_only", "unavailable"] },
+        "confidence": { "type": "string" },
+        "reason": { "type": "string" },
+        "additions": { "type": "integer", "minimum": 0 },
+        "deletions": { "type": "integer", "minimum": 0 },
+        "changedFiles": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "commit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["oid", "authoredDate", "committedDate", "messageHeadline"],
+      "properties": {
+        "oid": { "$ref": "#/$defs/nullableString" },
+        "authoredDate": { "$ref": "#/$defs/nullableString" },
+        "committedDate": { "$ref": "#/$defs/nullableString" },
+        "messageHeadline": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "changedFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "additions", "deletions", "changeType"],
+      "properties": {
+        "path": { "$ref": "#/$defs/nullableString" },
+        "additions": { "type": "integer", "minimum": 0 },
+        "deletions": { "type": "integer", "minimum": 0 },
+        "changeType": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "author", "submittedAt", "state", "commitOid", "generatedCommentCount", "failedAttempt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nullableString" },
+        "author": { "$ref": "#/$defs/author" },
+        "submittedAt": { "$ref": "#/$defs/nullableString" },
+        "state": { "$ref": "#/$defs/nullableString" },
+        "commitOid": { "$ref": "#/$defs/nullableString" },
+        "generatedCommentCount": { "type": ["integer", "null"], "minimum": 0 },
+        "failedAttempt": { "type": "boolean" }
+      }
+    },
+    "reviewThreads": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "totalCount", "nodes"],
+      "properties": {
+        "source": { "enum": ["graphql:repository.pullRequest.reviewThreads", "unavailable"] },
+        "totalCount": { "type": "integer", "minimum": 0 },
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reviewThread" }
+        }
+      }
+    },
+    "reviewThread": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "isResolved", "isOutdated", "path", "line", "comments"],
+      "properties": {
+        "id": { "type": "string" },
+        "isResolved": { "type": "boolean" },
+        "isOutdated": { "type": "boolean" },
+        "path": { "$ref": "#/$defs/nullableString" },
+        "line": { "type": ["integer", "null"], "minimum": 1 },
+        "comments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reviewThreadComment" }
+        }
+      }
+    },
+    "reviewThreadComment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["databaseId", "author", "path", "line", "originalLine", "createdAt", "updatedAt", "url"],
+      "properties": {
+        "databaseId": { "type": ["integer", "string", "null"] },
+        "author": { "$ref": "#/$defs/author" },
+        "path": { "$ref": "#/$defs/nullableString" },
+        "line": { "type": ["integer", "null"], "minimum": 1 },
+        "originalLine": { "type": ["integer", "null"], "minimum": 1 },
+        "createdAt": { "$ref": "#/$defs/nullableString" },
+        "updatedAt": { "$ref": "#/$defs/nullableString" },
+        "url": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "statusCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["__typename", "name", "context", "workflowName", "status", "conclusion", "startedAt", "completedAt"],
+      "properties": {
+        "__typename": { "enum": ["CheckRun", "StatusContext"] },
+        "name": { "$ref": "#/$defs/nullableString" },
+        "context": { "$ref": "#/$defs/nullableString" },
+        "workflowName": { "$ref": "#/$defs/nullableString" },
+        "status": { "$ref": "#/$defs/nullableString" },
+        "conclusion": { "$ref": "#/$defs/nullableString" },
+        "startedAt": { "$ref": "#/$defs/nullableString" },
+        "completedAt": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "workflowRuns": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "totalCount", "conclusions", "runs"],
+      "properties": {
+        "source": { "enum": ["rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request", "unavailable"] },
+        "totalCount": { "type": ["integer", "null"], "minimum": 0 },
+        "conclusions": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "runs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/workflowRun" }
+        }
+      }
+    },
+    "workflowRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "workflowName",
+        "headSha",
+        "headBranch",
+        "event",
+        "status",
+        "conclusion",
+        "createdAt",
+        "updatedAt",
+        "runStartedAt",
+        "htmlUrl"
+      ],
+      "properties": {
+        "id": { "type": ["integer", "string", "null"] },
+        "name": { "$ref": "#/$defs/nullableString" },
+        "workflowName": { "$ref": "#/$defs/nullableString" },
+        "headSha": { "$ref": "#/$defs/nullableString" },
+        "headBranch": { "$ref": "#/$defs/nullableString" },
+        "event": { "$ref": "#/$defs/nullableString" },
+        "status": { "$ref": "#/$defs/nullableString" },
+        "conclusion": { "$ref": "#/$defs/nullableString" },
+        "createdAt": { "$ref": "#/$defs/nullableString" },
+        "updatedAt": { "$ref": "#/$defs/nullableString" },
+        "runStartedAt": { "$ref": "#/$defs/nullableString" },
+        "htmlUrl": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "prCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prOpenDiff", "reviewThreads", "workflowRuns"],
+      "properties": {
+        "prOpenDiff": {
+          "allOf": [
+            { "$ref": "#/$defs/coverageEntry" },
+            {
+              "type": "object",
+              "properties": {
+                "family": { "const": "pr_open_diff" },
+                "source": { "const": "historical_snapshot" },
+                "status": { "enum": ["available", "partial", "unavailable", "rate_limited"] }
+              }
+            }
+          ]
+        },
+        "reviewThreads": {
+          "allOf": [
+            { "$ref": "#/$defs/coverageEntry" },
+            {
+              "type": "object",
+              "properties": {
+                "family": { "const": "review_threads" },
+                "source": { "const": "graphql:repository.pullRequest.reviewThreads" }
+              }
+            }
+          ]
+        },
+        "workflowRuns": {
+          "allOf": [
+            { "$ref": "#/$defs/coverageEntry" },
+            {
+              "type": "object",
+              "properties": {
+                "family": { "const": "workflow_runs" },
+                "source": { "const": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

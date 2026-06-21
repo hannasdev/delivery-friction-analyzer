@@ -1,9 +1,15 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 import { createGhCliProvider } from "../src/collect/gh-provider.js";
 import { buildCoverageSummary, collectGitHubSourceBundle } from "../src/collect/github-source-bundle.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
 import { contributorHintsFromSource } from "../src/profile/contributor-source.js";
+import { validateSchema } from "./support/schema-validation.mjs";
+
+async function readJson(path) {
+  return JSON.parse(await readFile(new URL(path, import.meta.url), "utf8"));
+}
 
 function repositoryMetadata() {
   return {
@@ -250,6 +256,10 @@ describe("GitHub source collector", () => {
 
   it("collects configured all-contributors hints without raw file contents", async () => {
     const provider = createProvider();
+    const [sourceBundleSchema, targetSchema] = await Promise.all([
+      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
 
     const bundle = await collectGitHubSourceBundle({
       repository: "example/example-repo",
@@ -258,7 +268,11 @@ describe("GitHub source collector", () => {
       contributors: { sourceType: "all_contributors", path: ".all-contributorsrc" },
       collectedAt: "2026-06-09T00:00:00Z",
     });
+    const schemaErrors = validateSchema(bundle, sourceBundleSchema, {
+      "target-repository.schema.json": targetSchema,
+    });
 
+    assert.deepEqual(schemaErrors, []);
     assert.equal(bundle.contributorSource.sourceType, "all_contributors");
     assert.equal(bundle.contributorSource.path, ".all-contributorsrc");
     assert.equal(bundle.contributorSource.coverage.status, "available");
