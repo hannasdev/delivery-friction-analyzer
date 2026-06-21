@@ -10,6 +10,11 @@ import {
 } from "../src/profile/contributor-source.js";
 import { assertValidPrClassRules, classifyPullRequest, validatePrClassRules } from "../src/profile/pr-class.js";
 import { conventionalCommitPrClassRules } from "../src/profile/pr-class-presets.js";
+import {
+  assertValidRepositoryProfile,
+  validateFileRoleRules,
+  validateRepositoryProfile,
+} from "../src/profile/repository-profile.js";
 import { assertValidWorkflowContext, validateWorkflowContext } from "../src/profile/workflow.js";
 import { classifyCommentSource } from "../src/github/comment-source.js";
 
@@ -125,6 +130,95 @@ describe("repository profile classification", () => {
   });
 });
 
+describe("repository profile validation", () => {
+  it("accepts complete profile shape with optional runtime contexts", () => {
+    const profile = {
+      schemaVersion: "repository-profile.v1",
+      repository: { owner: "example", name: "example-repo" },
+      rules: [
+        {
+          id: "runtime",
+          match: { prefix: "src/" },
+          category: "code",
+          role: "core_product_code",
+          functionalSurface: "runtime",
+          generated: false,
+        },
+      ],
+      prClasses: [
+        { id: "feature-title", class: "feature", match: { titleRegex: "^feat:" } },
+      ],
+      workflow: {
+        primaryMergeMethod: "squash_merge",
+      },
+      contributors: {
+        sourceType: "all_contributors",
+        path: ".all-contributorsrc",
+      },
+    };
+
+    assert.deepEqual(validateRepositoryProfile(profile), []);
+    assert.doesNotThrow(() => assertValidRepositoryProfile(profile));
+  });
+
+  it("rejects malformed top-level profile and repository identity fields", () => {
+    const errors = validateRepositoryProfile({
+      schemaVersion: "repository-profile.v0",
+      repository: { owner: "bad owner", name: "", host: "github.com" },
+      rules: [],
+      unsupported: true,
+    });
+
+    assert(errors.some(error => error.includes("profile.unsupported is not supported")));
+    assert(errors.some(error => error.includes("schemaVersion must be repository-profile.v1")));
+    assert(errors.some(error => error.includes("repository.host is not supported")));
+    assert(errors.some(error => error.includes("repository.owner must be a GitHub owner/name segment")));
+    assert(errors.some(error => error.includes("repository.name must be a GitHub owner/name segment")));
+  });
+
+  it("rejects non-object file-role profile inputs", () => {
+    assert.deepEqual(validateFileRoleRules(null), ["profile must be an object"]);
+  });
+
+  it("rejects malformed file-rule fields with rule-specific messages", () => {
+    const errors = validateFileRoleRules({
+      rules: [
+        {
+          id: "duplicate",
+          match: { prefix: "src/" },
+          category: "code",
+          role: "core_product_code",
+        },
+        {
+          id: "duplicate",
+          match: { regex: "[" },
+          category: "source",
+          role: "application",
+          functionalSurface: "Runtime Surface",
+          generated: "false",
+          unexpected: true,
+        },
+        {
+          id: "",
+          match: {},
+          category: "docs",
+          role: "planning_docs",
+        },
+      ],
+    });
+
+    assert(errors.some(error => error.includes('rules rule id "duplicate" is duplicated')));
+    assert(errors.some(error => error.includes('rules[1] "duplicate".unexpected is not supported')));
+    assert(errors.some(error => error.includes('rules[1] "duplicate" match.regex is not a valid JavaScript regex')));
+    assert(errors.some(error => error.includes('rules[1] "duplicate" category must be one of')));
+    assert(errors.some(error => error.includes('rules[1] "duplicate" role must be one of')));
+    assert(errors.some(error => error.includes('rules[1] "duplicate" functionalSurface must be a lowercase identifier')));
+    assert(errors.some(error => error.includes('rules[1] "duplicate" generated must be a boolean')));
+    assert(errors.some(error => error.includes("rules[2].id must be a non-empty lowercase identifier")));
+    assert(errors.some(error => error.includes('rules[2] "index 2" match must include at least one matcher')));
+  });
+});
+
 describe("pull request class classification", () => {
   it("classifies pull requests through first-match title rules", () => {
     const profile = {
@@ -167,15 +261,22 @@ describe("pull request class classification", () => {
     const errors = validatePrClassRules({
       prClasses: [
         { id: "duplicate", class: "release", match: { titleIncludes: "Release" } },
-        { id: "duplicate", class: "release train", match: {} },
+        { id: "duplicate", class: "release train", match: { branchRegex: "^release/" }, observedFrom: "github", notes: 42 },
         { id: "bad-regex", class: "release", match: { titleRegex: "[" } },
+        { id: "empty-includes", class: "feature", match: { titleIncludes: "", titleRegex: "^feat:" } },
+        { id: "wrong-type-regex", class: "feature", match: { titleIncludes: "feat", titleRegex: 42 } },
       ],
     });
 
     assert(errors.some(error => error.includes("duplicated")));
     assert(errors.some(error => error.includes("lower-kebab-case or lower_snake_case")));
+    assert(errors.some(error => error.includes("observedFrom is not supported")));
+    assert(errors.some(error => error.includes("match.branchRegex is not supported")));
+    assert(errors.some(error => error.includes("notes must be a string")));
     assert(errors.some(error => error.includes("must include titleIncludes or titleRegex")));
     assert(errors.some(error => error.includes("titleRegex is invalid")));
+    assert(errors.some(error => error.includes('prClasses rule "empty-includes" match.titleIncludes must be a non-empty string')));
+    assert(errors.some(error => error.includes('prClasses rule "wrong-type-regex" match.titleRegex must be a non-empty string')));
   });
 
   it("reports malformed PR class rule collections without throwing", () => {

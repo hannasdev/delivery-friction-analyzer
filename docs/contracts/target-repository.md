@@ -19,6 +19,8 @@ Schema: `schemas/target-repository.schema.json`. Live analysis selection is late
 
 The validator rejects a target repository that exactly matches the configured product repository. For this repository, the product repository is `hannasdev/delivery-friction-analyzer`; the first validation target is `hannasdev/mcp-writing`.
 
+Live GitHub analysis enforces this separation before GitHub collection starts. If `--repo` names this tool's product repository, the command fails before provider calls, tells you to choose the repository you want to measure with `--repo owner/name`, and confirms that no GitHub data was collected. The product repository identity is repo-local implementation configuration, not a public CLI option.
+
 ## Degraded Behavior
 
 If a target repository is private or the token lacks access, the analyzer should report coverage as unavailable or partial instead of silently emitting complete-looking metrics. Missing `defaultBranch` or malformed owner/name input is a hard contract error.

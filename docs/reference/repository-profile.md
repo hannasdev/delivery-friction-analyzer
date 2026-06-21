@@ -6,6 +6,8 @@ Schema: `schemas/repository-profile.schema.json`.
 
 Repository profiles own repository semantics. Keep file rules, PR class rules, workflow context, branch or release strategy, and contributor-source declarations here. Optional [run presets](run-presets.md) only store reusable run settings such as the target repository, profile path, sample size, output directory, dry-run mode, CSV preference, JSON completion preference, validation-target mode, and requested PR class exclusions. Explicit CLI flags override preset values.
 
+Live analysis validates the selected repository profile before GitHub provider calls in normal runs, dry runs, and preset-loaded runs. Validation failures name the profile path, failing field or rule, problem, and next action. Edit the named field or rule in the existing profile; use interactive setup with `--interactive --dry-run` only when you want to create or regenerate a starter profile.
+
 ## Categories
 
 - `code`
@@ -36,6 +38,8 @@ Repository profiles own repository semantics. Keep file rules, PR class rules, w
 Rules are evaluated in order and can match by `exact`, `prefix`, `suffix`, `includes`, or `regex`. The first matching rule wins. If no profile rule matches, the fallback classifier assigns a conservative category from path conventions and leaves the role as `unknown` except for tests.
 
 This keeps validation-target details in profile data rather than hardcoded product assumptions.
+
+Each file rule must include a unique lowercase `id`, a non-empty `match` object, a supported `category`, and a supported `role`. Optional `functionalSurface` values use the same lowercase identifier shape as rule IDs. Optional `generated` values must be booleans. Unsupported rule or matcher keys fail validation, and invalid JavaScript regexes fail before collection with the rule ID and matcher field in the error.
 
 ## Pull Request Classes
 

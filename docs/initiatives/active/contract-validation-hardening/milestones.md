@@ -65,7 +65,7 @@ Live analysis fails early and clearly when the target repository or current repo
 
 ### Status
 
-- [ ] Not started
+- [x] Active
 
 ## M2: Source Bundle Schema Contract
 

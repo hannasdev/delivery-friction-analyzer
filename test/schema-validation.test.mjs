@@ -189,6 +189,36 @@ describe("repository profile schema", () => {
     assert(errors.some(error => error.includes("$.prClasses[0].unsupported is not allowed")));
   });
 
+  it("rejects malformed file-role rule fields", async () => {
+    const schema = await readJson("../schemas/repository-profile.schema.json");
+    const profile = {
+      schemaVersion: "repository-profile.v1",
+      repository: { owner: "example", name: "repo" },
+      rules: [
+        {
+          id: "",
+          match: { prefix: "", observedFrom: "github" },
+          category: "source",
+          role: "application",
+          functionalSurface: "Runtime Surface",
+          generated: "false",
+          unsupported: true,
+        },
+      ],
+    };
+
+    const errors = validateSchema(profile, schema, {});
+
+    assert(errors.some(error => error.includes("$.rules[0].id must have length >= 1")));
+    assert(errors.some(error => error.includes("$.rules[0].match.prefix must have length >= 1")));
+    assert(errors.some(error => error.includes("$.rules[0].match.observedFrom is not allowed")));
+    assert(errors.some(error => error.includes("$.rules[0].category must be one of")));
+    assert(errors.some(error => error.includes("$.rules[0].role must be one of")));
+    assert(errors.some(error => error.includes("$.rules[0].functionalSurface must match")));
+    assert(errors.some(error => error.includes("$.rules[0].generated must be boolean")));
+    assert(errors.some(error => error.includes("$.rules[0].unsupported is not allowed")));
+  });
+
   it("rejects malformed workflow context fields", async () => {
     const schema = await readJson("../schemas/repository-profile.schema.json");
     const emptyErrors = validateSchema({

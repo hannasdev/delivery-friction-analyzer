@@ -5,6 +5,8 @@ export const PR_CLASS_FALLBACK = Object.freeze({
 });
 
 const PR_CLASS_IDENTIFIER_PATTERN = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
+const PR_CLASS_RULE_KEYS = new Set(["id", "class", "match", "notes"]);
+const PR_CLASS_MATCH_KEYS = new Set(["titleIncludes", "titleRegex"]);
 
 function ruleLabel(rule, index) {
   return typeof rule?.id === "string" && rule.id.length ? rule.id : `index ${index}`;
@@ -35,6 +37,12 @@ export function validatePrClassRules(profile = {}) {
       continue;
     }
 
+    for (const key of Object.keys(rule)) {
+      if (!PR_CLASS_RULE_KEYS.has(key)) {
+        errors.push(`prClasses rule "${label}" ${key} is not supported`);
+      }
+    }
+
     if (typeof rule.id !== "string" || rule.id.length === 0) {
       errors.push(`prClasses[${index}].id must be a non-empty string`);
     } else if (seenRuleIds.has(rule.id)) {
@@ -46,11 +54,29 @@ export function validatePrClassRules(profile = {}) {
     if (typeof rule.class !== "string" || !PR_CLASS_IDENTIFIER_PATTERN.test(rule.class)) {
       errors.push(`prClasses rule "${label}" class must be lower-kebab-case or lower_snake_case`);
     }
+    if (rule.notes !== undefined && typeof rule.notes !== "string") {
+      errors.push(`prClasses rule "${label}" notes must be a string when provided`);
+    }
 
     const match = rule.match;
     if (!match || typeof match !== "object" || Array.isArray(match)) {
       errors.push(`prClasses rule "${label}" match must be an object`);
       continue;
+    }
+
+    for (const key of Object.keys(match)) {
+      if (!PR_CLASS_MATCH_KEYS.has(key)) {
+        errors.push(`prClasses rule "${label}" match.${key} is not supported`);
+      }
+    }
+
+    for (const field of PR_CLASS_MATCH_KEYS) {
+      if (
+        Object.prototype.hasOwnProperty.call(match, field)
+        && (typeof match[field] !== "string" || match[field].length === 0)
+      ) {
+        errors.push(`prClasses rule "${label}" match.${field} must be a non-empty string`);
+      }
     }
 
     const hasTitleIncludes = typeof match.titleIncludes === "string" && match.titleIncludes.length > 0;

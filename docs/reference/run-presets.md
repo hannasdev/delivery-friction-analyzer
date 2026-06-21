@@ -4,6 +4,8 @@ Run presets are optional local JSON files for reusing CLI run settings. They are
 
 Repository meaning stays in repository profiles. Put file rules, PR class rules, workflow context, branch or release strategy, and contributor-source declarations in a repository profile. A run preset may only point at a profile and store run inputs or preferences such as the target repository, sample size, output directory, dry-run mode, CSV preference, JSON completion preference, validation-target mode, and requested PR class exclusions.
 
+When a preset supplies `profilePath`, the CLI validates that referenced profile exactly as if it had been passed with `--profile`. Presets do not copy, freeze, or override profile rules; fixing profile validation failures means editing the referenced profile or choosing a different profile path.
+
 ## Save A Preset
 
 Interactive setup asks whether to save a local run preset near the end of the prompt flow. If you answer yes, you choose the preset path explicitly. The CLI does not invent a global or cloud-synced preset location.
