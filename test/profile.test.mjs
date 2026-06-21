@@ -111,6 +111,7 @@ describe("repository profile classification", () => {
       [".github/workflows/test.yml", "ci_workflows"],
       ["docs/initiatives/active/maintainer-review-readiness/prd.md", "planning"],
       ["docs/reference/repository-profile.md", "maintainer_docs"],
+      ["AGENTS.md", "maintainer_docs"],
       ["README.md", "user_docs"],
     ]);
 

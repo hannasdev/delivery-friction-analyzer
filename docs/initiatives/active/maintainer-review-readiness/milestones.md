@@ -146,11 +146,11 @@ Recurring automated review expectations are available before implementation and 
 
 ### Acceptance Criteria
 
-- [ ] Repo guidance names the recurring Copilot review themes from the baseline report.
-- [ ] Repo guidance defines starter tripwires for broad changes: 10 or more changed files, 750 or more non-generated changed lines, or more than one functional surface.
-- [ ] Repo guidance tells agents which validation commands to run for ordinary, report/contract, profile, docs, and release/package changes.
-- [ ] Guidance stays short enough to be usable during implementation.
-- [ ] Existing README/reference docs link to maintainer guidance only where it helps contributors find local workflow expectations.
+- [x] Repo guidance names the recurring Copilot review themes from the baseline report.
+- [x] Repo guidance defines starter tripwires for broad changes: 10 or more changed files, 750 or more non-generated changed lines, or more than one functional surface.
+- [x] Repo guidance tells agents which validation commands to run for ordinary, report/contract, profile, docs, and release/package changes.
+- [x] Guidance stays short enough to be usable during implementation.
+- [x] Existing README/reference docs link to maintainer guidance only where it helps contributors find local workflow expectations.
 
 ### Required Validation
 
@@ -176,9 +176,13 @@ Recurring automated review expectations are available before implementation and 
 
 ### Status
 
+Status: Implemented, conformance reviewed, and adversarially reviewed; final initiative completion and move-to-done deferred until after the M3 PR merges.
+
 - [x] Active
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
+
+Lifecycle note: M3 implementation-side bookkeeping is recorded before PR review, but the initiative remains under `docs/initiatives/active/` until the M3 PR merges. Final initiative completion and move-to-done are explicitly deferred to the post-merge lifecycle step.

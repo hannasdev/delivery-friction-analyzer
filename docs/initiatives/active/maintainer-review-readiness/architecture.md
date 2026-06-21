@@ -16,11 +16,11 @@ This initiative changes maintainer workflow contracts. Product-facing review-the
 The repository currently has:
 
 - a committed M1 self-profile at `profiles/delivery-friction-analyzer.json`, promoted from the local draft used during planning;
-- `npm test` as the only npm validation script beyond report fixture generation;
+- `npm test`, `npm run preflight`, and `npm run preflight:release` as named local validation scripts;
 - CI workflows that run tests and package dry-run validation;
 - release and publish workflows documented in `docs/reference/release-automation.md`;
 - initiative planning docs under `docs/initiatives/**`;
-- no repo-local `AGENTS.md` guidance file;
+- a root `AGENTS.md` guidance file for repo-local maintainer and agent review readiness;
 - report artifacts that count comment sources but do not include review comment bodies or theme summaries.
 
 The current data flow remains:
@@ -29,7 +29,7 @@ The current data flow remains:
 GitHub provider -> source bundle -> normalized entities -> metrics summary -> report artifacts
 ```
 
-Maintainer workflow currently sits outside that data flow and is mostly encoded in PR comments, chat history, and individual practice.
+Maintainer workflow still sits outside that data flow, but recurring review expectations now have a repo-local guidance home instead of living only in PR comments, chat history, and individual practice.
 
 ## Target Shape
 

@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: Active.
+Status: M3 implementation, conformance review, and adversarial review completed; final initiative completion and move-to-done deferred until after the M3 PR merges.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-20
-- Current milestone state: M3 active after M2 merged in PR #51 on 2026-06-21.
+- Current milestone state: M3 implementation, conformance review, and adversarial review completed; PR, merge, and final initiative move-to-done remain deferred until after the appropriate review and merge steps.
 - Activation review: Accepted with notes on 2026-06-21; carry surface-taxonomy, tripwire, and self-analysis rerun details into M1 implementation.
 - Related issue:
   - None yet.
@@ -96,12 +96,12 @@ Implementation should prefer small docs, profile, script, and test changes over 
 
 ## Acceptance Criteria
 
-- [ ] The self-profile classifies meaningful repository paths, roles, functional surfaces, and Conventional Commit-style PR classes for this repository.
-- [ ] A rerun self-analysis no longer reports every PR class and functional surface as `unknown`.
-- [ ] Local preflight scripts cover the recurring validation stories for ordinary changes and release/package changes.
-- [ ] Repository guidance captures recurring review-readiness expectations for release automation, report/contract changes, docs, fixtures, and broad PRs.
-- [ ] PR readiness tripwires are documented with split-or-justify behavior for broad changes.
-- [ ] The baseline review theme evidence remains summarized in durable docs without raw review-comment text.
+- [x] The self-profile classifies meaningful repository paths, roles, functional surfaces, and Conventional Commit-style PR classes for this repository.
+- [x] A rerun self-analysis no longer reports every PR class and functional surface as `unknown`.
+- [x] Local preflight scripts cover the recurring validation stories for ordinary changes and release/package changes.
+- [x] Repository guidance captures recurring review-readiness expectations for release automation, report/contract changes, docs, fixtures, and broad PRs.
+- [x] PR readiness tripwires are documented with split-or-justify behavior for broad changes.
+- [x] The baseline review theme evidence remains summarized in durable docs without raw review-comment text.
 
 ## Risks And Tradeoffs
 

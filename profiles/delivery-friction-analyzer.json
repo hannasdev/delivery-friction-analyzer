@@ -221,6 +221,14 @@
       "functionalSurface": "maintainer_docs"
     },
     {
+      "id": "repo-agent-guidance",
+      "match": { "exact": "AGENTS.md" },
+      "category": "docs",
+      "role": "unknown",
+      "functionalSurface": "maintainer_docs",
+      "notes": "Root agent guidance captures repo-local review readiness expectations for maintainers and agents."
+    },
+    {
       "id": "research-docs",
       "match": { "prefix": "docs/research/" },
       "category": "docs",
