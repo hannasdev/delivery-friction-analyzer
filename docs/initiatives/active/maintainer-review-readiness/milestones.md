@@ -120,7 +120,7 @@ Maintainers and agents can run focused local commands that catch recurring relea
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 ## M3: Repo-Specific Review Guidance

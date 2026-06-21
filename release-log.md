@@ -8,7 +8,7 @@
 - Why it matters: Maintainers and agents can catch recurring test, whitespace, release-versioning, and package dry-run issues before opening review.
 - Who is affected: Maintainers preparing ordinary PRs, release automation changes, package metadata changes, package contents changes, or publish workflow changes.
 - Action needed: Optional; run `npm run preflight` before ordinary review and `npm run preflight:release` before release/package review.
-- PR: TBD
+- PR: #51
 
 ### 2026-06-21 — Maintainer Self-Profile Baseline
 
