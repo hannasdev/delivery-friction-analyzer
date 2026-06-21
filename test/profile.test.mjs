@@ -263,6 +263,8 @@ describe("pull request class classification", () => {
         { id: "duplicate", class: "release", match: { titleIncludes: "Release" } },
         { id: "duplicate", class: "release train", match: { branchRegex: "^release/" }, observedFrom: "github", notes: 42 },
         { id: "bad-regex", class: "release", match: { titleRegex: "[" } },
+        { id: "empty-includes", class: "feature", match: { titleIncludes: "", titleRegex: "^feat:" } },
+        { id: "wrong-type-regex", class: "feature", match: { titleIncludes: "feat", titleRegex: 42 } },
       ],
     });
 
@@ -273,6 +275,8 @@ describe("pull request class classification", () => {
     assert(errors.some(error => error.includes("notes must be a string")));
     assert(errors.some(error => error.includes("must include titleIncludes or titleRegex")));
     assert(errors.some(error => error.includes("titleRegex is invalid")));
+    assert(errors.some(error => error.includes('prClasses rule "empty-includes" match.titleIncludes must be a non-empty string')));
+    assert(errors.some(error => error.includes('prClasses rule "wrong-type-regex" match.titleRegex must be a non-empty string')));
   });
 
   it("reports malformed PR class rule collections without throwing", () => {

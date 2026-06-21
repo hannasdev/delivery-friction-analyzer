@@ -70,6 +70,15 @@ export function validatePrClassRules(profile = {}) {
       }
     }
 
+    for (const field of PR_CLASS_MATCH_KEYS) {
+      if (
+        Object.prototype.hasOwnProperty.call(match, field)
+        && (typeof match[field] !== "string" || match[field].length === 0)
+      ) {
+        errors.push(`prClasses rule "${label}" match.${field} must be a non-empty string`);
+      }
+    }
+
     const hasTitleIncludes = typeof match.titleIncludes === "string" && match.titleIncludes.length > 0;
     const hasTitleRegex = typeof match.titleRegex === "string" && match.titleRegex.length > 0;
     if (!hasTitleIncludes && !hasTitleRegex) {
