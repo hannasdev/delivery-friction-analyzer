@@ -7,7 +7,7 @@ import { describe, it } from "node:test";
 const DONE_DOCS_ROOT = "docs/initiatives/done";
 const CHECKBOX_RE = /^\s*[-*]\s+\[\s\]\s+(.+?)\s*$/;
 const HEADING_RE = /^#{1,6}\s+(.+?)\s*#*\s*$/;
-const ALLOWED_LABEL_RE = /^(Deferred|Future decision|Intentionally omitted|Backlog-linked):\s+/i;
+const ALLOWED_LABEL_RE = /^(Deferred|Future decision|Intentionally omitted):\s+/i;
 const BACKLOG_LINK_RE = /(?:docs\/initiatives\/backlog\/[^\s)]+|\]\(\.\.\/backlog\/[^)]+\)|https?:\/\/github\.com\/[^\s)]+\/(?:issues|pull)\/\d+)/i;
 const STATUS_ITEMS = new Set([
   "active",
@@ -159,6 +159,20 @@ describe("done initiative docs hygiene", () => {
     assert.match(failures[0], /unchecked Open Questions item: Should this unresolved question stay here\?/);
     assert.match(failures[0], /Use Deferred:, Future decision:, Intentionally omitted:, Backlog-linked:/);
     assert.match(failures[0], /docs\/initiatives\/backlog\/\.\.\./);
+  });
+
+  it("rejects backlog-labeled unchecked items without a concrete backlog link", () => {
+    const failures = findMarkdownHygieneFailures(`# Acceptance Criteria
+
+- [ ] Backlog-linked: follow up later
+`, "docs/initiatives/done/example/prd.md");
+
+    assert.equal(failures.length, 1);
+    assert.match(failures[0], /docs\/initiatives\/done\/example\/prd\.md:3/);
+    assert.match(failures[0], /unchecked checklist item: Backlog-linked: follow up later/);
+    assert.match(failures[0], /Use Deferred:, Future decision:, Intentionally omitted:, Backlog-linked:/);
+    assert.match(failures[0], /docs\/initiatives\/backlog\/\.\.\./);
+    assert.match(failures[0], /GitHub issue\/PR URL/);
   });
 
   it("does not treat historical status allowance as acceptance criteria cleanup", () => {
