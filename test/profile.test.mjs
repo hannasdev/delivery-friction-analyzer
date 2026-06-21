@@ -176,6 +176,10 @@ describe("repository profile validation", () => {
     assert(errors.some(error => error.includes("repository.name must be a GitHub owner/name segment")));
   });
 
+  it("rejects non-object file-role profile inputs", () => {
+    assert.deepEqual(validateFileRoleRules(null), ["profile must be an object"]);
+  });
+
   it("rejects malformed file-rule fields with rule-specific messages", () => {
     const errors = validateFileRoleRules({
       rules: [

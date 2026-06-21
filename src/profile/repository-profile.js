@@ -92,7 +92,7 @@ function validateFileRuleMatch(rule, index) {
 
 export function validateFileRoleRules(profile = {}) {
   const errors = [];
-  if (!isPlainObject(profile)) return errors;
+  if (!isPlainObject(profile)) return ["profile must be an object"];
   if (!Object.prototype.hasOwnProperty.call(profile, "rules")) {
     return ["rules is required"];
   }
