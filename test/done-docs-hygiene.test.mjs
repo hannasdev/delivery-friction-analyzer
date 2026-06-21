@@ -17,7 +17,7 @@ const STATUS_ITEMS = new Set([
   "pr opened",
   "merged",
 ]);
-const ALLOWED_CONVENTION = "Use Deferred:, Future decision:, Intentionally omitted:, Backlog-linked:, or link to docs/initiatives/backlog/..., ../backlog/..., or a GitHub issue/PR URL.";
+const ALLOWED_CONVENTION = "Use Deferred:, Future decision:, or Intentionally omitted:. Backlog-linked: requires a concrete docs/initiatives/backlog/... path, a relative ../backlog/... Markdown link, or a GitHub issue/PR URL.";
 
 async function listMarkdownFiles(root) {
   const entries = await readdir(root, { withFileTypes: true });
@@ -157,8 +157,9 @@ describe("done initiative docs hygiene", () => {
     assert.equal(failures.length, 1);
     assert.match(failures[0], /docs\/initiatives\/done\/example\/prd\.md:3/);
     assert.match(failures[0], /unchecked Open Questions item: Should this unresolved question stay here\?/);
-    assert.match(failures[0], /Use Deferred:, Future decision:, Intentionally omitted:, Backlog-linked:/);
-    assert.match(failures[0], /docs\/initiatives\/backlog\/\.\.\./);
+    assert.match(failures[0], /Use Deferred:, Future decision:, or Intentionally omitted:/);
+    assert.match(failures[0], /Backlog-linked: requires a concrete docs\/initiatives\/backlog\/\.\.\. path/);
+    assert.match(failures[0], /relative \.\.\/backlog\/\.\.\. Markdown link/);
   });
 
   it("rejects backlog-labeled unchecked items without a concrete backlog link", () => {
@@ -170,8 +171,9 @@ describe("done initiative docs hygiene", () => {
     assert.equal(failures.length, 1);
     assert.match(failures[0], /docs\/initiatives\/done\/example\/prd\.md:3/);
     assert.match(failures[0], /unchecked checklist item: Backlog-linked: follow up later/);
-    assert.match(failures[0], /Use Deferred:, Future decision:, Intentionally omitted:, Backlog-linked:/);
-    assert.match(failures[0], /docs\/initiatives\/backlog\/\.\.\./);
+    assert.match(failures[0], /Use Deferred:, Future decision:, or Intentionally omitted:/);
+    assert.match(failures[0], /Backlog-linked: requires a concrete docs\/initiatives\/backlog\/\.\.\. path/);
+    assert.match(failures[0], /relative \.\.\/backlog\/\.\.\. Markdown link/);
     assert.match(failures[0], /GitHub issue\/PR URL/);
   });
 
