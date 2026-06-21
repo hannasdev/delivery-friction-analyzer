@@ -25,7 +25,7 @@ broad milestones.
 
 ## Validation Commands
 
-- Ordinary code, tests, fixtures, docs, and small maintainer-doc changes:
+- Ordinary code, tests, fixtures, and small maintainer-doc changes:
   `npm run preflight`.
 - Report or contract changes: `npm run preflight`, name exact schema/report
   fields, keep displayed labels aligned with values, and add focused report,
@@ -35,7 +35,7 @@ broad milestones.
   `node --test test/schema-validation.test.mjs`, and `npm run preflight`;
   inspect a generated or dry-run self-analysis result when classification
   behavior changes.
-- Docs changes: `npm run preflight`; for README/reference wording, verify
+- README/reference docs changes: `npm run preflight`; verify
   required versus conditional outputs, `npx` assumptions, prompt conditionality,
   and configured versus verified claims.
 - Release automation, package metadata, package contents, or publish workflow
