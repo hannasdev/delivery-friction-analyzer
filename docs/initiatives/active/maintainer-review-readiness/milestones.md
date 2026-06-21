@@ -94,10 +94,10 @@ Maintainers and agents can run focused local commands that catch recurring relea
 ### Required Validation
 
 - `npm test`
-- `git diff --check`
+- `git diff --check HEAD`
 - `npm pack --dry-run`
 - `node --test test/release-versioning.test.mjs` (includes direct CLI entrypoint smoke coverage)
-- `node scripts/release-versioning.mjs assert-not-behind 1.2.3 v1.2.3`
+- `node scripts/release-versioning.mjs assert-package-not-behind-latest-tag`
 
 ### Scope Budget
 

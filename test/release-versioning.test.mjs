@@ -3,8 +3,11 @@ import { spawnSync } from "node:child_process";
 import { describe, it } from "node:test";
 import {
   assertNotBehind,
+  assertPackageNotBehindLatestTag,
   compareSemver,
   determineIncrement,
+  latestVersionTagFromList,
+  packageVersionFromJson,
   parseSemver,
 } from "../scripts/release-versioning.mjs";
 
@@ -80,6 +83,30 @@ describe("release versioning", () => {
     assert.throws(
       () => assertNotBehind("1.2.3-beta.1", "1.2.3"),
       /Package version 1\.2\.3-beta\.1 is behind latest tag 1\.2\.3/,
+    );
+  });
+
+  it("selects the newest version tag from sorted git tag output", () => {
+    assert.equal(latestVersionTagFromList("v1.2.3\nv1.2.2\n"), "v1.2.3");
+    assert.equal(latestVersionTagFromList("\n"), null);
+  });
+
+  it("reads package versions from package metadata", () => {
+    assert.equal(packageVersionFromJson('{"version":"1.2.3"}'), "1.2.3");
+    assert.throws(() => packageVersionFromJson("{}"), /non-empty string version/);
+  });
+
+  it("validates package metadata against the latest release tag", () => {
+    assert.doesNotThrow(() => {
+      assertPackageNotBehindLatestTag('{"version":"1.2.4"}', "v1.2.3\nv1.2.2\n");
+    });
+    assert.throws(
+      () => assertPackageNotBehindLatestTag('{"version":"1.2.2"}', "v1.2.3\n"),
+      /Package version 1\.2\.2 is behind latest tag v1\.2\.3/,
+    );
+    assert.throws(
+      () => assertPackageNotBehindLatestTag('{"version":"1.2.3"}', ""),
+      /No v\* release tags found/,
     );
   });
 

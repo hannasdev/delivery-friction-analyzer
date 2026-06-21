@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 export function parseSemver(version) {
@@ -73,6 +75,26 @@ export function assertNotBehind(packageVersion, tagVersion) {
   }
 }
 
+export function latestVersionTagFromList(tagList) {
+  return tagList.split(/\r?\n/).find(tag => tag.trim() !== "") ?? null;
+}
+
+export function packageVersionFromJson(packageJsonText) {
+  const packageJson = JSON.parse(packageJsonText);
+  if (typeof packageJson.version !== "string" || packageJson.version.trim() === "") {
+    throw new Error("package.json must contain a non-empty string version.");
+  }
+  return packageJson.version;
+}
+
+export function assertPackageNotBehindLatestTag(packageJsonText, tagList) {
+  const latestTag = latestVersionTagFromList(tagList);
+  if (!latestTag) {
+    throw new Error("No v* release tags found. Fetch tags before running release preflight.");
+  }
+  assertNotBehind(packageVersionFromJson(packageJsonText), latestTag);
+}
+
 export function determineIncrement(commitLog) {
   if (/^(?:[a-z]+(?:\([^)]+\))?!:|BREAKING[ -]CHANGE:)/gm.test(commitLog)) {
     return "major";
@@ -108,7 +130,18 @@ async function main(argv) {
     return;
   }
 
-  throw new Error("Usage: release-versioning.mjs <increment|assert-not-behind>");
+  if (command === "assert-package-not-behind-latest-tag") {
+    const tagResult = spawnSync("git", ["tag", "--list", "v*", "--sort=-v:refname"], {
+      encoding: "utf8",
+    });
+    if (tagResult.status !== 0) {
+      throw new Error(tagResult.stderr.trim() || "Failed to list release tags.");
+    }
+    assertPackageNotBehindLatestTag(await readFile("package.json", "utf8"), tagResult.stdout);
+    return;
+  }
+
+  throw new Error("Usage: release-versioning.mjs <increment|assert-not-behind|assert-package-not-behind-latest-tag>");
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
