@@ -19,7 +19,7 @@ Live analysis fails early and clearly when the target repository or current repo
 ### Non-Goals
 
 - Do not add source-bundle schema validation in this milestone.
-- Do not add PR class segmentation.
+- Do not add new PR class behavior; existing PR class segmentation remains baseline.
 - Do not add branch-based PR class matching or new contributor-source parsers.
 - Do not introduce date-window collection.
 - Do not change report ranking formulas or recommendation categories.
@@ -111,7 +111,7 @@ The live collector emits a source bundle that is validated against a checked-in 
 
 ### Scope Budget
 
-- Acceptance criteria: 7
+- Acceptance criteria: 8
 - Major subsystem boundaries: source-bundle schema and collector tests
 - Estimated non-generated diff: under 700 changed lines
 - Validation story: contract tests over mocked collector output plus downstream normalization tests and repo preflight
