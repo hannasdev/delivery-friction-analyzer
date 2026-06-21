@@ -2,12 +2,13 @@
 
 ## Status
 
-Status: M3 implementation, conformance review, adversarial review, and PR opening completed; final initiative completion and move-to-done deferred until after the M3 PR merges.
+Status: Completed; final milestone merged in PR #52 on 2026-06-21.
 
-- State: Active
+- State: Done
 - Owner: Hanna
 - Created: 2026-06-20
-- Current milestone state: M3 implementation, conformance review, adversarial review, and PR #52 opening completed; merge and final initiative move-to-done remain deferred until after the appropriate review and merge steps.
+- Completed: 2026-06-21
+- Current milestone state: M1 merged in PR #50; M2 merged in PR #51; M3 merged in PR #52.
 - Activation review: Accepted with notes on 2026-06-21; carry surface-taxonomy, tripwire, and self-analysis rerun details into M1 implementation.
 - Related issue:
   - None yet.
@@ -16,7 +17,7 @@ Status: M3 implementation, conformance review, adversarial review, and PR openin
   - [Architecture Notes](architecture.md)
   - [Repository Profile Format](../../../reference/repository-profile.md)
   - [Release Automation](../../../reference/release-automation.md)
-  - [Setup And Report Usability](../../done/setup-report-usability/prd.md)
+  - [Setup And Report Usability](../setup-report-usability/prd.md)
 - M1 evidence:
   - Local generated report bundle: `reports/delivery-friction-analyzer/` (ignored artifact; not part of this PR)
   - Self-profile path: `profiles/delivery-friction-analyzer.json` (implemented in M1)
@@ -52,7 +53,7 @@ This means the main workflow issue is late discovery during automated review: re
 - Do not require human reviewer approvals for every local PR as part of this initiative.
 - Do not add hosted services, dashboards, GitHub Apps, webhooks, or persistent workflow state.
 - Do not replace the existing initiative lifecycle with a new planning system.
-- Do not duplicate active setup-report-usability work around generic profile suggestions.
+- Do not duplicate setup-report-usability work around generic profile suggestions.
 - Do not add review-theme report artifacts in this initiative. That product-facing idea is deferred until another repository shows the same need or a separate product initiative accepts the artifact contract.
 
 ## Product And Design Alignment
@@ -97,8 +98,8 @@ Implementation should prefer small docs, profile, script, and test changes over 
 ## Acceptance Criteria
 
 These criteria track implementation acceptance across the initiative. Final
-initiative completion remains pending until the M3 PR merges and the
-post-merge lifecycle step moves the initiative out of `active/`.
+initiative completion was recorded after PR #52 merged and the initiative moved
+to `done/`.
 
 - [x] The self-profile classifies meaningful repository paths, roles, functional surfaces, and Conventional Commit-style PR classes for this repository.
 - [x] A rerun self-analysis no longer reports every PR class and functional surface as `unknown`.

@@ -52,7 +52,7 @@ The analyzer should remain repository-agnostic. Repository-specific workflow exp
 | Prefer npm scripts for local preflight. | The repo is a Node CLI, CI already uses npm commands, and scripts are discoverable. | Git hooks first; deferred because hooks add local setup friction and the report did not show local formatting failures as the primary signal. |
 | Put recurring implementation expectations in repo guidance. | Copilot review comments are catching stable repo expectations after PR open. | Rely on chat history or PR comments; rejected because they are not durable. |
 | Defer product-facing comment-theme artifacts. | Comment bodies explain churn, but they are more sensitive than aggregate counts and need a product artifact contract. | Include review-theme artifact work here; rejected to keep this initiative maintainer-focused and activation-ready. |
-| Keep generic profile-suggestion rendering out of this initiative. | Active setup-report-usability work already owns report suggestions for generic profile gaps. | Merge the work here; rejected to avoid duplicate user-facing report text. |
+| Keep generic profile-suggestion rendering out of this initiative. | Setup-report-usability work already owns report suggestions for generic profile gaps. | Merge the work here; rejected to avoid duplicate user-facing report text. |
 
 ## Contracts And Boundaries
 

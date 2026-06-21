@@ -179,13 +179,13 @@ separate in the status checklist below.
 
 ### Status
 
-Status: Implemented, conformance reviewed, adversarially reviewed, and opened in PR #52; final initiative completion and move-to-done deferred until after the M3 PR merges.
+Status: Merged in PR #52 on 2026-06-21; initiative completed and moved to `done/`.
 
 - [x] Active
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged in PR #52 on 2026-06-21
 
-Lifecycle note: M3 implementation-side bookkeeping is recorded before PR review, but the initiative remains under `docs/initiatives/active/` until the M3 PR merges. Final initiative completion and move-to-done are explicitly deferred to the post-merge lifecycle step.
+Lifecycle note: M3 merged in PR #52 on 2026-06-21, completing the final milestone and moving the initiative from `docs/initiatives/active/` to `docs/initiatives/done/`.
