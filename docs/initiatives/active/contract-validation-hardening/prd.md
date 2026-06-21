@@ -2,13 +2,14 @@
 
 ## Status
 
-Status: Active.
+Status: Completed; final milestone implemented for conformance review on 2026-06-21.
 
-- State: Active
+- State: Done
 - Owner: Hanna
 - Created: 2026-06-13
 - Activated: 2026-06-21
-- Active milestone: M3 Done-Docs Hygiene Guard
+- Completed: 2026-06-21
+- Current milestone state: M1 merged in PR #55; M2 merged in PR #56; M3 implemented for conformance review.
 - Relevance reviewed: 2026-06-21 against `main` at v0.14.2. Still relevant, with baseline updates for completed PR class segmentation, setup/report usability, interactive setup, and maintainer review readiness work.
 - Related issue:
   - None yet.
