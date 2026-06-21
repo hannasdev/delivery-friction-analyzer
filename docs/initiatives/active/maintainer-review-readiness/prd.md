@@ -2,12 +2,12 @@
 
 ## Status
 
-Status: M3 implementation, conformance review, and adversarial review completed; final initiative completion and move-to-done deferred until after the M3 PR merges.
+Status: M3 implementation, conformance review, adversarial review, and PR opening completed; final initiative completion and move-to-done deferred until after the M3 PR merges.
 
 - State: Active
 - Owner: Hanna
 - Created: 2026-06-20
-- Current milestone state: M3 implementation, conformance review, and adversarial review completed; PR, merge, and final initiative move-to-done remain deferred until after the appropriate review and merge steps.
+- Current milestone state: M3 implementation, conformance review, adversarial review, and PR #52 opening completed; merge and final initiative move-to-done remain deferred until after the appropriate review and merge steps.
 - Activation review: Accepted with notes on 2026-06-21; carry surface-taxonomy, tripwire, and self-analysis rerun details into M1 implementation.
 - Related issue:
   - None yet.

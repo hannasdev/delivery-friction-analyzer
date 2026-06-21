@@ -176,13 +176,13 @@ Recurring automated review expectations are available before implementation and 
 
 ### Status
 
-Status: Implemented, conformance reviewed, and adversarially reviewed; final initiative completion and move-to-done deferred until after the M3 PR merges.
+Status: Implemented, conformance reviewed, adversarially reviewed, and opened in PR #52; final initiative completion and move-to-done deferred until after the M3 PR merges.
 
 - [x] Active
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
-- [ ] PR opened
+- [x] PR opened
 - [ ] Merged
 
 Lifecycle note: M3 implementation-side bookkeeping is recorded before PR review, but the initiative remains under `docs/initiatives/active/` until the M3 PR merges. Final initiative completion and move-to-done are explicitly deferred to the post-merge lifecycle step.

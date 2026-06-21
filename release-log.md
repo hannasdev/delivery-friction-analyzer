@@ -8,7 +8,7 @@
 - Why it matters: Maintainers and agents can catch known review-readiness issues before opening PRs without applying heavy process to tiny docs or test changes, and future self-analysis can classify the guidance surface.
 - Who is affected: Maintainers and agents preparing changes in this repository.
 - Action needed: Optional; review `AGENTS.md` before broad, report/contract, profile, docs, or release/package changes.
-- PR: TBD
+- PR: #52
 
 ### 2026-06-21 — Local Preflight Commands
 
