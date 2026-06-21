@@ -23,11 +23,11 @@ Users can understand how to create a repository profile, why PR class values may
 
 ### Acceptance Criteria
 
-- [ ] README tells users how to generate a missing profile and what to expect from `--dry-run`.
-- [ ] Repository profile docs define `unknown` class as the no-matching-rule fallback.
-- [ ] Docs include copyable `prClasses` examples for release, dependency, and Conventional Commit-style title rules.
-- [ ] Docs state that PR class evidence is interpretive/profile-driven and does not change default scoring.
-- [ ] Docs state that branch-based class matching is deferred until a future matcher contract supports it.
+- [x] README tells users how to generate a missing profile and what to expect from `--dry-run`.
+- [x] Repository profile docs define `unknown` class as the no-matching-rule fallback.
+- [x] Docs include copyable `prClasses` examples for release, dependency, and Conventional Commit-style title rules.
+- [x] Docs state that PR class evidence is interpretive/profile-driven and does not change default scoring.
+- [x] Docs state that branch-based class matching is deferred until a future matcher contract supports it.
 
 ### Required Validation
 

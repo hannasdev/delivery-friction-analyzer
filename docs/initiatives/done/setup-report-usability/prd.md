@@ -169,6 +169,6 @@ Reports should also explain when configured workflow context affects data interp
 - [x] Which Conventional Commit types should the first preset generate? Generate `dependency`, `feature`, `fix`, `docs`, `test`, and `maintenance` in that order, with dependency-scoped titles matched before broad maintenance titles.
 - [x] Should the generated PR class identifiers use `feature`/`fix`/`docs` labels or mirror Conventional Commit types exactly, such as `feat`? Use reader-facing classes: `feature`, `fix`, `docs`, `test`, `maintenance`, and `dependency`.
 - [x] Should visual markers use Unicode symbols in Markdown, ASCII labels only, or a renderer helper that can switch based on output target? Use ASCII text labels only for M3, such as `[observed]`, `[partial]`, `[unavailable]`, `[configured]`, `[warning]`, and `[healthy]`.
-- [ ] Should workflow-limit caveats live in the main report opening, the methodology, the configured workflow section, or all three at different levels of detail?
-- [ ] Is there enough value in future branch-based PR class matching to plan a separate profile matcher initiative?
+- [ ] Future decision: Should workflow-limit caveats live in the main report opening, the methodology, the configured workflow section, or all three at different levels of detail?
+- [ ] Future decision: Is there enough value in future branch-based PR class matching to plan a separate profile matcher initiative?
 - [x] Should merge strategy remain an interactive profile question even though current metrics do not use it as a score input? Yes. Interactive setup should capture maintainer-confirmed workflow assumptions so downstream analysis logic can avoid unsafe inference and choose conservative interpretation or future reconstruction paths.
