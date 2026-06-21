@@ -15,12 +15,13 @@ Baseline self-analysis found clean CI but recurring Copilot review loops around:
 - docs precision around conditional artifacts, `npx`, interactive prompts, and
   configured versus verified claims.
 
-Before opening or updating review, check whether the change is broad. A change
-hits a broad-change tripwire when it has 10 or more changed files, 750 or more
-non-generated changed lines, or more than one functional surface. If a tripwire
-fires, split the work or record why the chosen scope is still reviewable. For
-initiative work, keep milestone bookkeeping current when status changes and
-prefer adversarial review before activation or PR work on broad milestones.
+Before opening a PR or updating one for review, check whether the change is
+broad. A change hits a broad-change tripwire when it has 10 or more changed
+files, 750 or more non-generated changed lines, or more than one functional
+surface. If a tripwire fires, split the work or record why the chosen scope is
+still reviewable. For initiative work, keep milestone bookkeeping current when
+status changes and prefer adversarial review before activation or PR work on
+broad milestones.
 
 ## Validation Commands
 
