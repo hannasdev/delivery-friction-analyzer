@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-21 — Source Bundle Schema Contract
+
+- What changed: Live GitHub `source-bundle.json` artifacts now have a documented analyzer-owned schema that covers the canonical fields used downstream, including coverage metadata and sanitized contributor-source context.
+- Why it matters: Maintainers can tell when collector output drifts from the supported contract without treating the bundle as a complete raw GitHub API dump.
+- Who is affected: Maintainers reviewing source bundles, contract tests, collector changes, or packaged schema/docs.
+- Action needed: None.
+- PR: #56
+
 ### 2026-06-21 — Runtime Contract Preflight
 
 - What changed: GitHub analysis now rejects this tool's product repository before collection and validates repository profiles more completely before provider calls, including file-rule shape, duplicate IDs, unsupported keys, invalid values, and malformed regexes.

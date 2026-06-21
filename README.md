@@ -92,7 +92,10 @@ Use these when you want to audit, automate, or build follow-up analysis:
 - `friction-report.json`: machine-readable report data.
 - `metrics-summary.json`: computed metrics used by the report.
 - `normalized.json`: normalized repository, PR, file, review, and validation entities.
-- `source-bundle.json`: collected source data for auditability.
+- `source-bundle.json`: collected source data for auditability. Its canonical
+  analyzer contract is documented in `docs/contracts/source-bundle.md` and
+  checked by `schemas/github-source-bundle.schema.json`; it is not a full GitHub
+  API payload schema.
 
 When CSV exports are enabled, the bundle also includes spreadsheet-friendly evidence files:
 

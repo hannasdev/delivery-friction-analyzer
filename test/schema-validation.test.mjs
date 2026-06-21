@@ -4,113 +4,176 @@ import { describe, it } from "node:test";
 import { computePullRequestMetrics } from "../src/metrics/friction.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
 import { conventionalCommitPrClassRules } from "../src/profile/pr-class-presets.js";
+import { assertSchemaValid, validateSchema } from "./support/schema-validation.mjs";
 
 async function readJson(path) {
   return JSON.parse(await readFile(new URL(path, import.meta.url), "utf8"));
 }
 
-function matchesType(value, expected) {
-  if (Array.isArray(expected)) {
-    return expected.some(type => matchesType(value, type));
-  }
-  if (expected === "null") return value === null;
-  if (expected === "array") return Array.isArray(value);
-  if (expected === "integer") return Number.isInteger(value);
-  return typeof value === expected && !Array.isArray(value) && value !== null;
+function sourceBundleSchemas(sourceBundleSchema, targetSchema) {
+  return {
+    schema: sourceBundleSchema,
+    refs: { "target-repository.schema.json": targetSchema },
+  };
 }
 
-function validateSchema(value, schema, schemas, path = "$") {
-  if (!schema) {
-    return [`${path} has no schema`];
-  }
+const GRAPHQL_REVIEW_THREADS_SOURCE = "graphql:repository.pullRequest.reviewThreads";
+const HISTORICAL_SNAPSHOT_SOURCE = "historical_snapshot";
+const LANGUAGES_SOURCE = "rest:/repos/{owner}/{repo}/languages";
+const REPOSITORY_SOURCE = "rest:/repos/{owner}/{repo}";
+const CONTENTS_SOURCE = "rest:/repos/{owner}/{repo}/contents/{path}";
+const WORKFLOW_RUNS_SOURCE = "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request";
 
-  if (schema.$ref) {
-    const referencedSchema = schemas[schema.$ref];
-    if (!referencedSchema) {
-      return [`${path} references unknown schema ${schema.$ref}`];
-    }
-    return validateSchema(value, referencedSchema, schemas, path);
-  }
+function coverageEntry(family, source, status) {
+  return {
+    family,
+    source,
+    status,
+    attempts: 1,
+    diagnostics: [],
+    downstreamImpact: null,
+  };
+}
 
-  const errors = [];
-  if (schema.allOf) {
-    for (const childSchema of schema.allOf) {
-      errors.push(...validateSchema(value, childSchema, schemas, path));
-    }
-  }
-  if (schema.anyOf) {
-    const childErrors = schema.anyOf.map(childSchema => validateSchema(value, childSchema, schemas, path));
-    if (childErrors.every(result => result.length > 0)) {
-      errors.push(`${path} must match at least one allowed schema`);
-    }
-  }
-  if (schema.not && validateSchema(value, schema.not, schemas, path).length === 0) {
-    errors.push(`${path} must not match disallowed schema`);
-  }
-  if (schema.if) {
-    const conditionMatches = validateSchema(value, schema.if, schemas, path).length === 0;
-    if (conditionMatches && schema.then) {
-      errors.push(...validateSchema(value, schema.then, schemas, path));
-    }
-    if (!conditionMatches && schema.else) {
-      errors.push(...validateSchema(value, schema.else, schemas, path));
-    }
-  }
-  if (schema.const !== undefined && value !== schema.const) {
-    errors.push(`${path} must equal ${JSON.stringify(schema.const)}`);
-  }
-  if (schema.enum && !schema.enum.includes(value)) {
-    errors.push(`${path} must be one of ${schema.enum.join(", ")}`);
-  }
-  if (schema.type && !matchesType(value, schema.type)) {
-    errors.push(`${path} must be ${Array.isArray(schema.type) ? schema.type.join(" or ") : schema.type}`);
-    return errors;
-  }
-  if ((schema.type === "integer" || schema.type === "number" || Array.isArray(schema.type)) && typeof value === "number") {
-    if (schema.minimum !== undefined && value < schema.minimum) {
-      errors.push(`${path} must be >= ${schema.minimum}`);
-    }
-    if (schema.maximum !== undefined && value > schema.maximum) {
-      errors.push(`${path} must be <= ${schema.maximum}`);
-    }
-  }
-  if (typeof value === "string" && schema.pattern) {
-    const pattern = new RegExp(schema.pattern);
-    if (!pattern.test(value)) {
-      errors.push(`${path} must match ${schema.pattern}`);
-    }
-  }
-  if (typeof value === "string" && schema.minLength !== undefined && value.length < schema.minLength) {
-    errors.push(`${path} must have length >= ${schema.minLength}`);
-  }
-  const shouldValidateObjectShape = (schema.type === "object" || schema.required || schema.properties || schema.additionalProperties)
-    && value
-    && typeof value === "object"
-    && !Array.isArray(value);
-  if (shouldValidateObjectShape) {
-    if (schema.minProperties !== undefined && Object.keys(value).length < schema.minProperties) {
-      errors.push(`${path} must have at least ${schema.minProperties} propert${schema.minProperties === 1 ? "y" : "ies"}`);
-    }
-    for (const key of schema.required ?? []) {
-      if (!(key in value)) errors.push(`${path}.${key} is required`);
-    }
-    for (const [key, childValue] of Object.entries(value)) {
-      const childSchema = schema.properties?.[key];
-      if (childSchema) {
-        errors.push(...validateSchema(childValue, childSchema, schemas, `${path}.${key}`));
-      } else if (schema.additionalProperties === false) {
-        errors.push(`${path}.${key} is not allowed`);
-      } else if (typeof schema.additionalProperties === "object") {
-        errors.push(...validateSchema(childValue, schema.additionalProperties, schemas, `${path}.${key}`));
-      }
-    }
-  }
-  if (schema.type === "array" && Array.isArray(value) && schema.items) {
-    value.forEach((item, index) => {
-      errors.push(...validateSchema(item, schema.items, schemas, `${path}[${index}]`));
-    });
-  }
-  return errors;
+function validSourcePullRequest() {
+  return {
+    number: 7,
+    title: "feat: collect live source",
+    author: { login: "maintainer", type: "User", id: "upstream-user-id" },
+    url: "https://github.com/example/example-repo/pull/7",
+    state: "MERGED",
+    createdAt: "2026-06-01T10:00:00Z",
+    mergedAt: "2026-06-01T12:00:00Z",
+    updatedAt: "2026-06-01T12:01:00Z",
+    baseRefName: "main",
+    headRefName: "feat/live-source",
+    headRefOid: "abc123",
+    additions: 10,
+    deletions: 2,
+    changedFiles: 2,
+    prOpenDiff: {
+      source: "unavailable",
+      confidence: "unavailable",
+      reason: "Historical PR-open diff data is not available from the live collector.",
+    },
+    commits: [{
+      oid: "abc123",
+      authoredDate: "2026-06-01T09:55:00Z",
+      committedDate: "2026-06-01T09:56:00Z",
+      messageHeadline: "feat: collect live source",
+    }],
+    files: [{ path: "src/collect/github-source-bundle.js", additions: 8, deletions: 1, changeType: "ADDED" }],
+    reviews: [{
+      id: "review-1",
+      author: { login: "reviewer", type: "User" },
+      submittedAt: "2026-06-01T10:30:00Z",
+      state: "COMMENTED",
+      commitOid: "abc123",
+      generatedCommentCount: 1,
+      failedAttempt: false,
+    }],
+    reviewThreads: {
+      source: GRAPHQL_REVIEW_THREADS_SOURCE,
+      totalCount: 1,
+      nodes: [{
+        id: "thread-1",
+        isResolved: true,
+        isOutdated: false,
+        path: "src/collect/github-source-bundle.js",
+        line: 42,
+        comments: [{
+          databaseId: 1001,
+          author: { login: "reviewer", type: "User" },
+          path: "src/collect/github-source-bundle.js",
+          line: 42,
+          originalLine: 42,
+          createdAt: "2026-06-01T10:31:00Z",
+          updatedAt: "2026-06-01T10:31:00Z",
+          url: "https://github.com/example/example-repo/pull/7#discussion_r1001",
+        }],
+      }],
+    },
+    statusCheckRollup: [{
+      __typename: "CheckRun",
+      name: "Test",
+      context: null,
+      workflowName: "CI",
+      status: "COMPLETED",
+      conclusion: "SUCCESS",
+      startedAt: "2026-06-01T10:05:00Z",
+      completedAt: "2026-06-01T10:07:00Z",
+    }],
+    workflowRuns: {
+      source: WORKFLOW_RUNS_SOURCE,
+      totalCount: 1,
+      conclusions: { success: 1 },
+      runs: [{
+        id: 501,
+        name: "CI",
+        workflowName: "CI",
+        headSha: "abc123",
+        headBranch: "feat/live-source",
+        event: "pull_request",
+        status: "completed",
+        conclusion: "success",
+        createdAt: "2026-06-01T10:01:00Z",
+        updatedAt: "2026-06-01T10:07:00Z",
+        runStartedAt: "2026-06-01T10:05:00Z",
+        htmlUrl: "https://github.com/example/example-repo/actions/runs/501",
+      }],
+    },
+    coverage: {
+      prOpenDiff: coverageEntry("pr_open_diff", HISTORICAL_SNAPSHOT_SOURCE, "unavailable"),
+      reviewThreads: coverageEntry("review_threads", GRAPHQL_REVIEW_THREADS_SOURCE, "available"),
+      workflowRuns: coverageEntry("workflow_runs", WORKFLOW_RUNS_SOURCE, "available"),
+    },
+  };
+}
+
+function validSourceBundle() {
+  return {
+    schemaVersion: "github-source-bundle.v1",
+    collectedAt: "2026-06-09T00:00:00Z",
+    collector: { name: "github-live-collector", provider: "mock-gh" },
+    targetRepository: { owner: "example", name: "example-repo", defaultBranch: "main", visibility: "public", analysisPullRequestLimit: 1, isValidationTarget: false },
+    repositoryMetadata: {
+      id: 42,
+      name: "example-repo",
+      owner: "example",
+      fullName: "example/example-repo",
+      defaultBranch: "main",
+      visibility: "public",
+      isPrivate: false,
+      htmlUrl: "https://github.com/example/example-repo",
+    },
+    selection: {
+      strategy: "latest_merged_pull_requests",
+      requestedLimit: 1,
+      collectedCount: 1,
+      source: "gh pr list --state merged --search \"is:merged sort:merged-desc\"",
+    },
+    coverage: {
+      status: "partial",
+      apiFamilies: [
+        coverageEntry("repository_metadata", REPOSITORY_SOURCE, "available"),
+        coverageEntry("pull_request_details", "gh pr view --json", "available"),
+        coverageEntry("pr_open_diff", HISTORICAL_SNAPSHOT_SOURCE, "unavailable"),
+        coverageEntry("contributor_source", CONTENTS_SOURCE, "partial"),
+      ],
+    },
+    languageDistribution: {
+      source: LANGUAGES_SOURCE,
+      bytesByLanguage: { JavaScript: 1200 },
+      coverage: coverageEntry("languages", LANGUAGES_SOURCE, "available"),
+    },
+    contributorSource: {
+      sourceType: "all_contributors",
+      path: ".all-contributorsrc",
+      coverage: coverageEntry("contributor_source", CONTENTS_SOURCE, "partial"),
+      hintCount: 2,
+    },
+    pullRequests: [validSourcePullRequest()],
+  };
 }
 
 describe("repository profile schema", () => {
@@ -319,6 +382,136 @@ describe("repository profile schema", () => {
     ]);
 
     assert.deepEqual(validateSchema(selfProfile, schema, {}), []);
+  });
+});
+
+describe("github source bundle schema", () => {
+  it("validates the canonical source bundle contract with sanitized contributor-source metadata", async () => {
+    const [sourceBundleSchema, targetSchema] = await Promise.all([
+      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+    const bundle = validSourceBundle();
+
+    assertSchemaValid({
+      artifact: "source-bundle.json",
+      schemaPath: "schemas/github-source-bundle.schema.json",
+      value: bundle,
+      schema,
+      refs,
+    });
+  });
+
+  it("rejects missing required collector, selection, coverage, and PR fields", async () => {
+    const [sourceBundleSchema, targetSchema] = await Promise.all([
+      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+    const bundle = validSourceBundle();
+    delete bundle.collector;
+    delete bundle.selection.requestedLimit;
+    delete bundle.coverage.apiFamilies;
+    delete bundle.pullRequests[0].reviews;
+
+    const errors = validateSchema(bundle, schema, refs);
+
+    assert(errors.some(error => error.includes("$.collector is required")));
+    assert(errors.some(error => error.includes("$.selection.requestedLimit is required")));
+    assert(errors.some(error => error.includes("$.coverage.apiFamilies is required")));
+    assert(errors.some(error => error.includes("$.pullRequests[0].reviews is required")));
+  });
+
+  it("rejects unexpected canonical wrapper fields unless they are under raw", async () => {
+    const [sourceBundleSchema, targetSchema] = await Promise.all([
+      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+    const bundle = validSourceBundle();
+    bundle.unmappedGitHubPayload = { arbitrary: true };
+
+    const errors = validateSchema(bundle, schema, refs);
+
+    assert(errors.some(error => error.includes("$.unmappedGitHubPayload is not allowed")));
+
+    delete bundle.unmappedGitHubPayload;
+    bundle.raw = { futureProviderPayload: { arbitrary: true } };
+    assert.deepEqual(validateSchema(bundle, schema, refs), []);
+  });
+
+  it("preserves unavailable or partial coverage without invented counts", async () => {
+    const [sourceBundleSchema, targetSchema] = await Promise.all([
+      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+    const bundle = validSourceBundle();
+    bundle.pullRequests[0].workflowRuns = {
+      source: "unavailable",
+      totalCount: null,
+      conclusions: {},
+      runs: [],
+    };
+    bundle.pullRequests[0].coverage.workflowRuns.status = "unavailable";
+    bundle.pullRequests[0].prOpenDiff = {
+      source: "unavailable",
+      confidence: "unavailable",
+      reason: "Historical PR-open diff data is not available from the live collector.",
+    };
+
+    assert.deepEqual(validateSchema(bundle, schema, refs), []);
+
+    bundle.pullRequests[0].prOpenDiff.additions = 0;
+    const errors = validateSchema(bundle, schema, refs);
+    assert(errors.some(error => error.includes("$.pullRequests[0].prOpenDiff must not match disallowed schema")));
+  });
+
+  it("keeps contributor-source metadata sanitized", async () => {
+    const [sourceBundleSchema, targetSchema] = await Promise.all([
+      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+    const bundle = validSourceBundle();
+    bundle.contributorSource.hints = { logins: ["maintainer"] };
+    bundle.contributorSource.rawContents = "{\"contributors\":[]}";
+
+    const errors = validateSchema(bundle, schema, refs);
+
+    assert(errors.some(error => error.includes("$.contributorSource.hints is not allowed")));
+    assert(errors.some(error => error.includes("$.contributorSource.rawContents is not allowed")));
+
+    delete bundle.contributorSource.hints;
+    delete bundle.contributorSource.rawContents;
+    assert.deepEqual(validateSchema(bundle, schema, refs), []);
+  });
+
+  it("reports source-bundle schema failures with artifact, path, and fix direction", async () => {
+    const [sourceBundleSchema, targetSchema] = await Promise.all([
+      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+    const bundle = validSourceBundle();
+    delete bundle.selection.requestedLimit;
+
+    assert.throws(
+      () => assertSchemaValid({
+        artifact: "source-bundle.json",
+        schemaPath: "schemas/github-source-bundle.schema.json",
+        value: bundle,
+        schema,
+        refs,
+      }),
+      error => (
+        error.message.includes("source-bundle.json")
+        && error.message.includes("schemas/github-source-bundle.schema.json")
+        && error.message.includes("$.selection.requestedLimit")
+        && error.message.includes("Fix the collector output or intentionally update the schema contract")
+      ),
+    );
   });
 });
 
