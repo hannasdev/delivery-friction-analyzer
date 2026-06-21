@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-21 — Maintainer Self-Profile Baseline
+
+- What changed: Added a repository self-profile for delivery-friction-analyzer so local self-analysis can classify normal development paths, functional surfaces, workflow context, and Conventional Commit-style PR classes.
+- Why it matters: Maintainers can review future self-analysis with fewer `unknown` classifications before changing process or opening follow-up workflow PRs.
+- Who is affected: Maintainers running local analysis against this repository or reviewing profile validation.
+- Action needed: Optional; rerun local self-analysis with `profiles/delivery-friction-analyzer.json` when validating maintainer workflow changes.
+- PR: TBD
+
 ### 2026-06-20 — Reusable Run Presets
 
 - What changed: GitHub analysis can now load local run settings from `--preset` and save reusable settings with `--save-preset` or the interactive setup flow, with explicit CLI flags taking precedence.

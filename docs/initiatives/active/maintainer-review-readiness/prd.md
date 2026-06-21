@@ -2,11 +2,13 @@
 
 ## Status
 
-Status: Backlog.
+Status: Active.
 
-- State: Backlog
+- State: Active
 - Owner: Hanna
 - Created: 2026-06-20
+- Current milestone state: M1 implemented and conformance reviewed; pre-PR adversary review findings have been remediated.
+- Activation review: Accepted with notes on 2026-06-21; carry surface-taxonomy, tripwire, and self-analysis rerun details into M1 implementation.
 - Related issue:
   - None yet.
 - Related docs:
@@ -15,9 +17,11 @@ Status: Backlog.
   - [Repository Profile Format](../../../reference/repository-profile.md)
   - [Release Automation](../../../reference/release-automation.md)
   - [Setup And Report Usability](../../done/setup-report-usability/prd.md)
-- Planning evidence:
+- M1 evidence:
   - Local generated report bundle: `reports/delivery-friction-analyzer/` (ignored artifact; not part of this PR)
-  - Planned self-profile path: `profiles/delivery-friction-analyzer.json` (to be added in M1)
+  - Self-profile path: `profiles/delivery-friction-analyzer.json` (implemented in M1)
+  - M1 conformance review completed before pre-PR adversary review.
+  - Pre-PR adversary review completed and maintainer-bookkeeping fixes have been applied.
 
 ## Problem
 
