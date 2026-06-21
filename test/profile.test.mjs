@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 import { classifyFilePath } from "../src/profile/file-role.js";
 import {
@@ -11,6 +12,10 @@ import { assertValidPrClassRules, classifyPullRequest, validatePrClassRules } fr
 import { conventionalCommitPrClassRules } from "../src/profile/pr-class-presets.js";
 import { assertValidWorkflowContext, validateWorkflowContext } from "../src/profile/workflow.js";
 import { classifyCommentSource } from "../src/github/comment-source.js";
+
+async function readJson(path) {
+  return JSON.parse(await readFile(new URL(path, import.meta.url), "utf8"));
+}
 
 describe("repository profile classification", () => {
   it("classifies validation-target paths through profile rules", () => {
@@ -69,6 +74,53 @@ describe("repository profile classification", () => {
     assert.doesNotThrow(() => classifyFilePath("src/app.js", profile));
     assert.equal(classifyFilePath("src/app.js", profile).classificationSource, "fallback_rule");
     assert.equal(classifyFilePath("docs/readme.md", profile).role, "planning_docs");
+  });
+
+  it("classifies this repository's normal development paths through its self-profile", async () => {
+    const profile = await readJson("../profiles/delivery-friction-analyzer.json");
+
+    assert.deepEqual(classifyFilePath("src/report/generate-report.js", profile), {
+      path: "src/report/generate-report.js",
+      category: "code",
+      role: "core_product_code",
+      functionalSurface: "report_generation",
+      generated: false,
+      classificationSource: "repository_profile",
+      ruleId: "report-runtime",
+    });
+    assert.deepEqual(classifyFilePath("fixtures/github/mcp-writing/reports/friction-report.golden.md", profile), {
+      path: "fixtures/github/mcp-writing/reports/friction-report.golden.md",
+      category: "generated",
+      role: "fixtures",
+      functionalSurface: "report_generation",
+      generated: true,
+      classificationSource: "repository_profile",
+      ruleId: "golden-report-fixtures",
+    });
+
+    const examples = new Map([
+      ["src/profile/file-role.js", "profile_classification"],
+      ["test/profile.test.mjs", "profile_classification"],
+      ["schemas/repository-profile.schema.json", "contracts"],
+      ["docs/contracts/friction-report.md", "contracts"],
+      ["src/collect/gh-provider.js", "github_collection"],
+      ["src/normalize/github-fixture.js", "metrics_normalization"],
+      ["src/cli/analyze-github.js", "cli"],
+      ["scripts/release-versioning.mjs", "release_automation"],
+      ["package.json", "package_metadata"],
+      [".github/workflows/test.yml", "ci_workflows"],
+      ["docs/initiatives/active/maintainer-review-readiness/prd.md", "planning"],
+      ["docs/reference/repository-profile.md", "maintainer_docs"],
+      ["README.md", "user_docs"],
+    ]);
+
+    for (const [path, expectedSurface] of examples) {
+      const classification = classifyFilePath(path, profile);
+      assert.equal(classification.classificationSource, "repository_profile", path);
+      assert.equal(classification.functionalSurface, expectedSurface, path);
+    }
+
+    assert.equal(classifyFilePath("future-area/new-format.xyz", profile).functionalSurface, "unknown");
   });
 });
 
@@ -161,6 +213,18 @@ describe("pull request class classification", () => {
     assert.equal(classifyPullRequest({ title: "docs: explain profiles" }, profile).class, "docs");
     assert.equal(classifyPullRequest({ title: "test(cli): cover prompts" }, profile).class, "test");
     assert.equal(classifyPullRequest({ title: "chore: refresh tooling" }, profile).class, "maintenance");
+  });
+
+  it("classifies this repository's Conventional Commit-style PR titles", async () => {
+    const profile = await readJson("../profiles/delivery-friction-analyzer.json");
+
+    assert.equal(classifyPullRequest({ title: "chore(deps): update lockfile" }, profile).class, "dependency");
+    assert.equal(classifyPullRequest({ title: "feat(report): add PR class context" }, profile).class, "feature");
+    assert.equal(classifyPullRequest({ title: "fix: align PR sample metadata contract" }, profile).class, "fix");
+    assert.equal(classifyPullRequest({ title: "docs: clarify README onboarding flow" }, profile).class, "docs");
+    assert.equal(classifyPullRequest({ title: "test(profile): cover self-profile paths" }, profile).class, "test");
+    assert.equal(classifyPullRequest({ title: "chore: refresh generated fixtures" }, profile).class, "maintenance");
+    assert.equal(classifyPullRequest({ title: "Investigate self-profile output" }, profile).class, "unknown");
   });
 });
 

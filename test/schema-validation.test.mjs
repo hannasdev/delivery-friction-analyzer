@@ -281,6 +281,15 @@ describe("repository profile schema", () => {
 
     assert.deepEqual(validateSchema(fixtureProfile, schema, {}), []);
   });
+
+  it("keeps the delivery-friction-analyzer self-profile schema-valid", async () => {
+    const [schema, selfProfile] = await Promise.all([
+      readJson("../schemas/repository-profile.schema.json"),
+      readJson("../profiles/delivery-friction-analyzer.json"),
+    ]);
+
+    assert.deepEqual(validateSchema(selfProfile, schema, {}), []);
+  });
 });
 
 describe("normalized entity schema", () => {

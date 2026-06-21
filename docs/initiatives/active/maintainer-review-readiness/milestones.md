@@ -23,11 +23,11 @@ Future self-analysis of this repository can classify PRs, file roles, and functi
 
 ### Acceptance Criteria
 
-- [ ] The repository profile contains ordered path rules for all high-level repository areas used by normal development.
-- [ ] The repository profile contains ordered Conventional Commit-style PR class rules matching the existing profile contract.
-- [ ] A validation run proves the updated profile is schema-valid.
-- [ ] A generated self-analysis report confirms PR classes and functional surfaces are no longer all `unknown`.
-- [ ] Profile assumptions are documented in rule IDs or notes where they are not obvious from the path.
+- [x] The repository profile contains ordered path rules for all high-level repository areas used by normal development.
+- [x] The repository profile contains ordered Conventional Commit-style PR class rules matching the existing profile contract.
+- [x] A validation run proves the updated profile is schema-valid.
+- [x] A generated self-analysis report confirms PR classes and functional surfaces are no longer all `unknown`.
+- [x] Profile assumptions are documented in rule IDs or notes where they are not obvious from the path.
 
 ### Required Validation
 
@@ -53,12 +53,14 @@ Future self-analysis of this repository can classify PRs, file roles, and functi
 
 ### Status
 
-- [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
+
+Pre-PR adversary review found maintainer-readiness fixes; remediation was applied before PR opening.
 
 ## M2: Local Preflight Commands
 

@@ -1,0 +1,250 @@
+{
+  "schemaVersion": "repository-profile.v1",
+  "repository": {
+    "owner": "hannasdev",
+    "name": "delivery-friction-analyzer"
+  },
+  "prClasses": [
+    {
+      "id": "conventional-dependency-before-maintenance",
+      "class": "dependency",
+      "match": { "titleRegex": "^(?:deps!?|(?:build|chore|fix)\\(deps\\)!?):|^Bump\\b" },
+      "notes": "Ordered before maintenance and fix so dependency-scoped Conventional Commit titles keep their own class."
+    },
+    {
+      "id": "conventional-feature",
+      "class": "feature",
+      "match": { "titleRegex": "^feat(?:\\([^)]+\\))?!?:" }
+    },
+    {
+      "id": "conventional-fix",
+      "class": "fix",
+      "match": { "titleRegex": "^fix(?:\\((?!deps\\))[^)]+\\))?!?:" }
+    },
+    {
+      "id": "conventional-docs",
+      "class": "docs",
+      "match": { "titleRegex": "^docs(?:\\([^)]+\\))?!?:" }
+    },
+    {
+      "id": "conventional-test",
+      "class": "test",
+      "match": { "titleRegex": "^test(?:\\([^)]+\\))?!?:" }
+    },
+    {
+      "id": "conventional-maintenance",
+      "class": "maintenance",
+      "match": { "titleRegex": "^(refactor|perf|style|build|ci)(?:\\([^)]+\\))?!?:|^chore(?:\\((?!deps\\))[^)]+\\))?!?:" },
+      "notes": "Covers repo-maintenance Conventional Commit types after dependency-scoped titles have been matched."
+    }
+  ],
+  "rules": [
+    {
+      "id": "generated-report-bundles-ignored",
+      "match": { "prefix": "reports/" },
+      "category": "generated",
+      "role": "generated_or_vendored",
+      "functionalSurface": "report_artifacts",
+      "generated": true,
+      "notes": "Local analysis output is intentionally ignored and should not be confused with report-generation source code."
+    },
+    {
+      "id": "golden-report-fixtures",
+      "match": { "prefix": "fixtures/github/mcp-writing/reports/" },
+      "category": "generated",
+      "role": "fixtures",
+      "functionalSurface": "report_generation",
+      "generated": true,
+      "notes": "Golden report outputs are generated fixtures owned by report-generation tests."
+    },
+    {
+      "id": "github-fixture-inputs",
+      "match": { "prefix": "fixtures/github/" },
+      "category": "tests",
+      "role": "fixtures",
+      "functionalSurface": "github_collection"
+    },
+    {
+      "id": "profile-baselines",
+      "match": { "prefix": "profiles/" },
+      "category": "config",
+      "role": "config",
+      "functionalSurface": "profile_classification",
+      "notes": "Committed repository profiles are configuration inputs for analysis, not analyzer runtime code."
+    },
+    {
+      "id": "profile-runtime",
+      "match": { "prefix": "src/profile/" },
+      "category": "code",
+      "role": "core_product_code",
+      "functionalSurface": "profile_classification"
+    },
+    {
+      "id": "profile-tests",
+      "match": { "exact": "test/profile.test.mjs" },
+      "category": "tests",
+      "role": "tests",
+      "functionalSurface": "profile_classification"
+    },
+    {
+      "id": "schema-contracts",
+      "match": { "prefix": "schemas/" },
+      "category": "config",
+      "role": "config",
+      "functionalSurface": "contracts"
+    },
+    {
+      "id": "contract-docs",
+      "match": { "prefix": "docs/contracts/" },
+      "category": "docs",
+      "role": "unknown",
+      "functionalSurface": "contracts"
+    },
+    {
+      "id": "schema-and-contract-tests",
+      "match": { "regex": "^test/(schema-validation|target-repository)\\.test\\.mjs$" },
+      "category": "tests",
+      "role": "tests",
+      "functionalSurface": "contracts"
+    },
+    {
+      "id": "report-runtime",
+      "match": { "prefix": "src/report/" },
+      "category": "code",
+      "role": "core_product_code",
+      "functionalSurface": "report_generation"
+    },
+    {
+      "id": "report-tests",
+      "match": { "exact": "test/report.test.mjs" },
+      "category": "tests",
+      "role": "tests",
+      "functionalSurface": "report_generation"
+    },
+    {
+      "id": "github-provider-runtime",
+      "match": { "regex": "^src/(collect|github)/" },
+      "category": "code",
+      "role": "core_product_code",
+      "functionalSurface": "github_collection"
+    },
+    {
+      "id": "github-provider-tests",
+      "match": { "regex": "^test/(github-collector|fixture-normalization)\\.test\\.mjs$" },
+      "category": "tests",
+      "role": "tests",
+      "functionalSurface": "github_collection"
+    },
+    {
+      "id": "metrics-normalization-runtime",
+      "match": { "regex": "^src/(metrics|normalize)/" },
+      "category": "code",
+      "role": "core_product_code",
+      "functionalSurface": "metrics_normalization"
+    },
+    {
+      "id": "metrics-tests",
+      "match": { "exact": "test/metrics.test.mjs" },
+      "category": "tests",
+      "role": "tests",
+      "functionalSurface": "metrics_normalization"
+    },
+    {
+      "id": "cli-runtime",
+      "match": { "prefix": "src/cli/" },
+      "category": "code",
+      "role": "core_product_code",
+      "functionalSurface": "cli"
+    },
+    {
+      "id": "cli-tests",
+      "match": { "exact": "test/analyze-github-cli.test.mjs" },
+      "category": "tests",
+      "role": "tests",
+      "functionalSurface": "cli"
+    },
+    {
+      "id": "target-repository-runtime",
+      "match": { "prefix": "src/contracts/" },
+      "category": "code",
+      "role": "core_product_code",
+      "functionalSurface": "contracts"
+    },
+    {
+      "id": "release-scripts",
+      "match": { "prefix": "scripts/" },
+      "category": "code",
+      "role": "infrastructure",
+      "functionalSurface": "release_automation"
+    },
+    {
+      "id": "release-tests",
+      "match": { "exact": "test/release-versioning.test.mjs" },
+      "category": "tests",
+      "role": "tests",
+      "functionalSurface": "release_automation"
+    },
+    {
+      "id": "release-notes",
+      "match": { "exact": "release-log.md" },
+      "category": "docs",
+      "role": "release_notes",
+      "functionalSurface": "release_automation"
+    },
+    {
+      "id": "package-metadata",
+      "match": { "regex": "^package(-lock)?\\.json$" },
+      "category": "config",
+      "role": "config",
+      "functionalSurface": "package_metadata"
+    },
+    {
+      "id": "github-workflow-files",
+      "match": { "prefix": ".github/" },
+      "category": "infrastructure",
+      "role": "infrastructure",
+      "functionalSurface": "ci_workflows",
+      "notes": "Covers GitHub workflow configuration such as CI, publish, and release automation files."
+    },
+    {
+      "id": "initiative-planning-docs",
+      "match": { "prefix": "docs/initiatives/" },
+      "category": "docs",
+      "role": "planning_docs",
+      "functionalSurface": "planning"
+    },
+    {
+      "id": "reference-docs",
+      "match": { "prefix": "docs/reference/" },
+      "category": "docs",
+      "role": "unknown",
+      "functionalSurface": "maintainer_docs"
+    },
+    {
+      "id": "research-docs",
+      "match": { "prefix": "docs/research/" },
+      "category": "docs",
+      "role": "unknown",
+      "functionalSurface": "research"
+    },
+    {
+      "id": "readme-and-license",
+      "match": { "regex": "^(README\\.md|LICENSE)$" },
+      "category": "docs",
+      "role": "unknown",
+      "functionalSurface": "user_docs"
+    },
+    {
+      "id": "root-tooling-config",
+      "match": { "regex": "^\\.(gitignore|env\\.example)$" },
+      "category": "config",
+      "role": "config",
+      "functionalSurface": "tooling"
+    }
+  ],
+  "workflow": {
+    "primaryMergeMethod": "squash_merge",
+    "releaseStrategy": "direct_tags",
+    "branchStrategy": "trunk_based"
+  }
+}
