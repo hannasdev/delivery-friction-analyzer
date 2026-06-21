@@ -8,7 +8,7 @@
 - Why it matters: Maintainers get clearer failures before rate-limited GitHub work begins, so invalid targets or profiles are fixed at the input boundary instead of producing misleading reports.
 - Who is affected: Maintainers running live GitHub analysis, dry runs, or preset-based runs, and contributors authoring repository profiles.
 - Action needed: If a run now fails preflight, choose the repository you want to measure with `--repo owner/name` or fix the named profile field or rule before rerunning.
-- PR: TBD
+- PR: #55
 
 ### 2026-06-21 — Repo-Specific Review Guidance
 
