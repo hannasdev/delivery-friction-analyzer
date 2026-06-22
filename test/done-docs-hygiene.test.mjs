@@ -11,7 +11,7 @@ const ALLOWED_LABEL_RE = /^(Deferred|Future decision|Intentionally omitted):\s+/
 const BACKLOG_LINKED_LABEL_RE = /^Backlog-linked:\s+/i;
 const BACKLOG_PATH_RE = /docs\/initiatives\/backlog\/[^\s)]+/i;
 const RELATIVE_BACKLOG_LINK_RE = /\]\(\.\.\/backlog\/[^)]+\)/i;
-const GITHUB_ISSUE_OR_PR_RE = /https?:\/\/github\.com\/[^\s/)]+\/[^\s/)]+\/(?:issues|pull)\/\d+(?=$|[\s).,;!?])/i;
+const GITHUB_ISSUE_OR_PR_RE = /https?:\/\/github\.com\/[^\s/)]+\/[^\s/)]+\/(?:issues|pull)\/\d+\/?(?:[?#][^\s)]*)?(?=$|[\s).,;!?])/i;
 const STATUS_ITEMS = new Set([
   "active",
   "implemented",
@@ -149,6 +149,9 @@ describe("done initiative docs hygiene", () => {
 - [ ] Backlog-linked: Continue in docs/initiatives/backlog/future-profile-matchers/prd.md.
 - [ ] Backlog-linked: Track the follow-up in [future profile matchers](../backlog/future-profile-matchers/prd.md).
 - [ ] Backlog-linked: Track the follow-up in https://github.com/hannasdev/delivery-friction-analyzer/issues/123.
+- [ ] Backlog-linked: Track the follow-up in https://github.com/hannasdev/delivery-friction-analyzer/issues/123/.
+- [ ] Backlog-linked: Track the discussion in https://github.com/hannasdev/delivery-friction-analyzer/issues/123#issuecomment-123456.
+- [ ] Backlog-linked: Track filtered discussion in https://github.com/hannasdev/delivery-friction-analyzer/pull/456?notification_referrer_id=abc.
 `, "docs/initiatives/done/example/prd.md");
 
     assert.deepEqual(failures, []);
