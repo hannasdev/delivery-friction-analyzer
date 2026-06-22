@@ -105,14 +105,14 @@ Prompt answers should be durable only when they have a clear owner:
 
 ## Acceptance Criteria
 
-- [ ] The CLI has an explicit interactive mode that can collect required analysis inputs from a terminal prompt.
-- [ ] Existing non-interactive flags, validation errors, `--json` output, and automation behavior remain backwards-compatible.
-- [ ] Interactive CSV selection maps to the existing CSV export behavior and records the selected output mode in completion/methodology text.
-- [ ] Repository workflow questions are captured in validated repository profile fields before reports rely on them.
-- [ ] Contributor-source setup is optional, supports `.all-contributorsrc` first for contributor-aware comment-source classification and coverage metadata, records Markdown contributor files as unsupported until a future parser is planned, and never produces individual ranking output.
-- [ ] Prompted analysis writes the same artifact set and contracts as equivalent flag-based analysis.
-- [ ] Generated or updated profile and preset paths are printed in completion output whenever interactive setup writes them.
-- [ ] Documentation explains when to use interactive setup, how to rerun non-interactively, and what data each prompt affects.
+- [x] The CLI has an explicit interactive mode that can collect required analysis inputs from a terminal prompt.
+- [x] Existing non-interactive flags, validation errors, `--json` output, and automation behavior remain backwards-compatible.
+- [x] Interactive CSV selection maps to the existing CSV export behavior and records the selected output mode in completion/methodology text.
+- [x] Repository workflow questions are captured in validated repository profile fields before reports rely on them.
+- [x] Contributor-source setup is optional, supports `.all-contributorsrc` first for contributor-aware comment-source classification and coverage metadata, records Markdown contributor files as unsupported until a future parser is planned, and never produces individual ranking output.
+- [x] Prompted analysis writes the same artifact set and contracts as equivalent flag-based analysis.
+- [x] Generated or updated profile and preset paths are printed in completion output whenever interactive setup writes them.
+- [x] Documentation explains when to use interactive setup, how to rerun non-interactively, and what data each prompt affects.
 
 ## Risks And Tradeoffs
 
@@ -148,5 +148,5 @@ Prompt answers should be durable only when they have a clear owner:
 ## Open Questions
 
 - [x] Before M6 activation, decide whether reusable run choices use a separate local preset file or only generated command guidance for CLI-only choices such as output directory and CSV preference. M6 uses optional user-chosen local preset files for reusable reruns and keeps repository semantics in repository profiles.
-- [ ] Before adding branch-based PR class behavior, decide whether profile PR class matchers should support base/head branch names; M3 records branch strategy as context-only metadata.
-- [ ] Should contributor-source support later add `CONTRIBUTORS.md`, GitHub collaborators, explicit profile lists, or organization membership lookup?
+- [ ] Future decision: Before adding branch-based PR class behavior, decide whether profile PR class matchers should support base/head branch names; M3 records branch strategy as context-only metadata.
+- [ ] Future decision: Should contributor-source support later add `CONTRIBUTORS.md`, GitHub collaborators, explicit profile lists, or organization membership lookup?

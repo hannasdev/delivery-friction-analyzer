@@ -146,9 +146,9 @@ Documentation updates can land before code changes. Interactive setup changes sh
 ## Open Questions
 
 - [x] Should status markers use Unicode symbols, ASCII labels, or renderer-configurable marker sets? Use ASCII text labels only for M3 so copied Markdown and plain terminals preserve the status meaning.
-- [ ] Should workflow caveats appear in the report opening only when coverage is unavailable, or always when workflow context is configured?
-- [ ] Should branch-based PR class matching become a separate initiative after title-based presets prove useful?
-- [ ] Should final PR size wording mention GitHub PR metadata explicitly so readers do not assume merge commits are mined?
+- [ ] Future decision: Should workflow caveats appear in the report opening only when coverage is unavailable, or always when workflow context is configured?
+- [ ] Future decision: Should branch-based PR class matching become a separate initiative after title-based presets prove useful?
+- [ ] Future decision: Should final PR size wording mention GitHub PR metadata explicitly so readers do not assume merge commits are mined?
 - [x] Should merge strategy stay in interactive setup if it is only context today? Yes. The setup flow should capture maintainer-confirmed workflow assumptions so downstream analysis logic can make safe interpretation decisions without guessing from repository history.
 - [x] Which Conventional Commit preset scope is most useful without creating too many classes? Use six reader-facing classes: `dependency`, `feature`, `fix`, `docs`, `test`, and `maintenance`.
 - [x] Should PR class preset rules use `titleRegex` only, or combine `titleIncludes` for simpler release/dependency cases? Use `titleRegex` only for the first preset so scoped and breaking Conventional Commit variants are covered consistently.

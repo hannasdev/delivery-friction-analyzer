@@ -146,12 +146,12 @@ Allow users to run an explicitly filtered analysis when they want to inspect dev
 
 ### Acceptance Criteria
 
-- [ ] Users can explicitly exclude at least one configured PR class.
-- [ ] Filtered outputs clearly state the excluded class or classes.
-- [ ] Metrics and rankings are recomputed for the filtered PR set.
-- [ ] Source and methodology artifacts preserve enough context to audit what was filtered, including the full collected source bundle and filtered downstream artifact labels.
-- [ ] Default unfiltered analysis remains unchanged.
-- [ ] CLI and report tests cover filtered and unfiltered behavior.
+- [x] Users can explicitly exclude at least one configured PR class.
+- [x] Filtered outputs clearly state the excluded class or classes.
+- [x] Metrics and rankings are recomputed for the filtered PR set.
+- [x] Source and methodology artifacts preserve enough context to audit what was filtered, including the full collected source bundle and filtered downstream artifact labels.
+- [x] Default unfiltered analysis remains unchanged.
+- [x] CLI and report tests cover filtered and unfiltered behavior.
 
 ### Required Validation
 

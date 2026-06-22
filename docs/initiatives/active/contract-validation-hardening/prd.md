@@ -2,13 +2,14 @@
 
 ## Status
 
-Status: Active.
+Status: Completed; final milestone implemented for conformance review on 2026-06-21.
 
-- State: Active
+- State: Done
 - Owner: Hanna
 - Created: 2026-06-13
 - Activated: 2026-06-21
-- Active milestone: M2 Source Bundle Schema Contract
+- Completed: 2026-06-21
+- Current milestone state: M1 merged in PR #55; M2 merged in PR #56; M3 implemented for conformance review.
 - Relevance reviewed: 2026-06-21 against `main` at v0.14.2. Still relevant, with baseline updates for completed PR class segmentation, setup/report usability, interactive setup, and maintainer review readiness work.
 - Related issue:
   - None yet.
@@ -96,21 +97,21 @@ User-facing validation copy should be specific enough to recover from without re
 
 Profile validation copy should make the direct recovery path clear. For an existing malformed profile, tell the maintainer which field or rule to edit; mention interactive setup only as a way to create or regenerate a starter profile. Example shape: `Invalid repository profile: rules[3] "docs-regex" match.regex is not a valid JavaScript regex. Fix that rule in <profile path>. If you want to regenerate a starter profile instead, rerun interactive setup with --interactive --dry-run.`
 
-Done-doc hygiene failures should also name the file and convention to use. Example shape: `Done initiative has an unchecked open question: docs/initiatives/done/.../prd.md:139. Mark it as Future decision:, Deferred:, Intentionally omitted:, or link it to a backlog follow-up.`
+Done-doc hygiene failures should also name the file and convention to use. Example shape: `Done initiative has an unchecked open question: docs/initiatives/done/.../prd.md:139. Mark it as Future decision:, Deferred:, Intentionally omitted:, or link it to a concrete backlog or GitHub follow-up.`
 
 Intentionally unchanged: latest-N PR selection, PR class scoring/ranking behavior, run preset persistence, contributor-source parser scope, artifact sensitivity defaults, and hosted/service behavior.
 
-Human approval checkpoint: Approved by Hanna on 2026-06-21 for the refreshed user-perspective preview and milestone shape. The initiative remains in backlog until activation is requested.
+Human approval checkpoint: Approved by Hanna on 2026-06-21 for the refreshed user-perspective preview and milestone shape. The initiative was activated and completed on 2026-06-21; M3 is complete for pre-PR cleanup, and the initiative remains under `docs/initiatives/active/` until PR merge and initiative-completion cleanup move it to the completed initiative archive.
 
 ## Acceptance Criteria
 
-- [ ] Live analysis rejects the configured product repository before provider calls.
-- [ ] Repository profile validation runs before GitHub collection or report generation depends on profile rules, including repository identity, file-role rules, duplicate IDs, unsupported keys, category/role/surface values, PR class rules, workflow context, contributor-source config, and invalid regex matchers.
-- [ ] `github-source-bundle.v1` has a checked-in schema and tests that validate mocked collector output, including optional contributor-source metadata and contributor privacy boundaries.
-- [ ] Contract docs are audited and reconciled for latest-N PR selection, profile validation, run preset/profile ownership, source-bundle schema boundaries, and known workflow-run caveats.
-- [ ] Completed initiative docs contain no stale unchecked implemented criteria or bare unanswered open questions; legitimate deferred or future-decision items are labeled consistently or linked to backlog follow-up.
-- [ ] User-facing validation, schema-validation, and docs-hygiene failures name the failing file or command context, the invalid field/path/rule or schema path when available, the problem, and the next action.
-- [ ] Validation commands cover target repository contracts, profile validation, source-bundle schema validation, CLI preflight behavior, existing report fixtures, and `npm run preflight`.
+- [x] Live analysis rejects the configured product repository before provider calls.
+- [x] Repository profile validation runs before GitHub collection or report generation depends on profile rules, including repository identity, file-role rules, duplicate IDs, unsupported keys, category/role/surface values, PR class rules, workflow context, contributor-source config, and invalid regex matchers.
+- [x] `github-source-bundle.v1` has a checked-in schema and tests that validate mocked collector output, including optional contributor-source metadata and contributor privacy boundaries.
+- [x] Contract docs are audited and reconciled for latest-N PR selection, profile validation, run preset/profile ownership, source-bundle schema boundaries, and known workflow-run caveats.
+- [x] Completed initiative docs contain no stale unchecked implemented criteria or bare unanswered open questions; legitimate deferred or future-decision items are labeled consistently or linked to backlog follow-up.
+- [x] User-facing validation, schema-validation, and docs-hygiene failures name the failing file or command context, the invalid field/path/rule or schema path when available, the problem, and the next action.
+- [x] Validation commands cover target repository contracts, profile validation, source-bundle schema validation, CLI preflight behavior, existing report fixtures, and `npm run preflight`.
 
 ## Risks And Tradeoffs
 

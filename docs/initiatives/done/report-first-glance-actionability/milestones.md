@@ -189,11 +189,11 @@ If M2 proves existing artifacts are insufficient, add a deterministic local mode
 
 ### Acceptance Criteria
 
-- [ ] A model-ready context artifact, if implemented, is deterministic, local, tested, and documented in the report contract.
-- [ ] The artifact includes or references guardrails that preserve observed/inferred/recommended separation, caveats, artifact sensitivity, and no-individual-ranking constraints.
-- [ ] Command behavior is explicit and tested for default or opt-in output, fixture generation, and CLI completion listing when applicable.
-- [ ] The artifact omits raw comments, workflow logs, tokens, secrets, and individual ranking outputs.
-- [ ] Existing Markdown, JSON, methodology, and CSV artifacts remain authoritative and compatible.
+- [ ] Deferred: A model-ready context artifact, if implemented, is deterministic, local, tested, and documented in the report contract.
+- [ ] Deferred: The artifact includes or references guardrails that preserve observed/inferred/recommended separation, caveats, artifact sensitivity, and no-individual-ranking constraints.
+- [ ] Deferred: Command behavior is explicit and tested for default or opt-in output, fixture generation, and CLI completion listing when applicable.
+- [ ] Deferred: The artifact omits raw comments, workflow logs, tokens, secrets, and individual ranking outputs.
+- [ ] Deferred: Existing Markdown, JSON, methodology, and CSV artifacts remain authoritative and compatible.
 
 ### Required Validation
 

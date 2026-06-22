@@ -23,6 +23,19 @@ still reviewable. For initiative work, keep milestone bookkeeping current when
 status changes and prefer adversarial review before activation or PR work on
 broad milestones.
 
+Completed initiative docs under `docs/initiatives/done/**` should read as
+implementation history, not active TODO lists. Check shipped or otherwise
+resolved work. Leave unchecked items only when they are explicitly labeled
+`Deferred:`, `Future decision:`, `Backlog-linked:`, or `Intentionally omitted:`.
+Backlog-linked items must include a concrete `docs/initiatives/backlog/...`
+path, a relative Markdown link into `../backlog/`, or a GitHub issue/PR URL.
+Unchecked lifecycle status items such as `Implemented`, `Conformance reviewed`,
+`Adversarially reviewed`, `PR opened`, or `Merged` are allowed only under a
+`Status` heading for historical milestone records. A bare unchecked open
+question such as `- [ ] Should this be handled later?` is not valid in done
+docs; mark it as `Future decision: ...`, `Deferred: ...`, or link it to a
+backlog follow-up instead.
+
 ## Validation Commands
 
 - Ordinary code, tests, fixtures, and small maintainer-doc changes:

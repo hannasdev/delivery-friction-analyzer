@@ -136,4 +136,4 @@ to `done/`.
 
 ## Open Questions
 
-- [ ] Should repo-specific AI guidance live only in `AGENTS.md`, or should this repository also get a dedicated Codex skill after the first guidance milestone proves useful?
+- [ ] Future decision: Should repo-specific AI guidance live only in `AGENTS.md`, or should this repository also get a dedicated Codex skill after the first guidance milestone proves useful?

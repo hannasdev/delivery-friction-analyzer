@@ -143,8 +143,8 @@ Repository semantics belong in profiles. Run presets are optional local JSON fil
 
 ## Open Questions
 
-- [ ] Should `--interactive` run the analysis immediately after setup, or should there also be an `init`-style path that only writes a profile/preset?
-- [ ] Should the profile schema keep workflow context under a generic `workflow` object, or should each field live under existing PR class/profile sections?
-- [ ] Future decision before branch-based class behavior: should PR class matchers support base/head branch names? Until then, branch strategy prompts record context only.
-- [ ] What future contributor-source parser should follow `.all-contributorsrc`, if any: `CONTRIBUTORS.md`, GitHub collaborators, explicit profile lists, or organization membership lookup?
+- [ ] Future decision: Should `--interactive` run the analysis immediately after setup, or should there also be an `init`-style path that only writes a profile/preset?
+- [ ] Future decision: Should the profile schema keep workflow context under a generic `workflow` object, or should each field live under existing PR class/profile sections?
+- [ ] Future decision: Before branch-based class behavior, should PR class matchers support base/head branch names? Until then, branch strategy prompts record context only.
+- [ ] Future decision: What future contributor-source parser should follow `.all-contributorsrc`, if any: `CONTRIBUTORS.md`, GitHub collaborators, explicit profile lists, or organization membership lookup?
 - [x] Future decision before M6 activation: should saved presets live in the output directory, a user-chosen path, or a default local `.delivery-friction-analyzer/` directory? M6 uses an explicit user-chosen local preset path and does not invent a default global or cloud-synced location.

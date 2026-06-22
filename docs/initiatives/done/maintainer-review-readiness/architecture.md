@@ -98,4 +98,4 @@ Review-theme artifacts are deferred. If a future product initiative adds structu
 
 ## Open Questions
 
-- [ ] Should root repo guidance be enough, or should a dedicated Codex skill be created after the guidance stabilizes?
+- [ ] Future decision: Should root repo guidance be enough, or should a dedicated Codex skill be created after the guidance stabilizes?
