@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { describe, it } from "node:test";
 
 const DONE_DOCS_ROOT = "docs/initiatives/done";
-const CHECKBOX_RE = /^\s*[-*]\s+\[\s\]\s+(.+?)\s*$/;
+const CHECKBOX_RE = /^\s*[-*+]\s+\[\s\]\s*(.*?)\s*$/;
 const HEADING_RE = /^#{1,6}\s+(.+?)\s*#*\s*$/;
 const ALLOWED_LABEL_RE = /^(Deferred|Future decision|Intentionally omitted):\s+/i;
 const BACKLOG_LINKED_LABEL_RE = /^Backlog-linked:\s+/i;
@@ -189,6 +189,31 @@ describe("done initiative docs hygiene", () => {
     assert.match(failures[0], /Use Deferred:, Future decision:, or Intentionally omitted:/);
     assert.match(failures[0], /Backlog-linked: requires a concrete docs\/initiatives\/backlog\/\.\.\. path/);
     assert.match(failures[0], /relative \.\.\/backlog\/\.\.\. Markdown link/);
+  });
+
+  it("rejects empty unchecked task markers in done initiatives", () => {
+    const failures = findMarkdownHygieneFailures(`# Acceptance Criteria
+
+- [ ]
+* [ ]${"    "}
+`, "docs/initiatives/done/example/prd.md");
+
+    assert.equal(failures.length, 2);
+    assert.match(failures[0], /docs\/initiatives\/done\/example\/prd\.md:3/);
+    assert.match(failures[0], /unchecked checklist item: \nUse Deferred:/);
+    assert.match(failures[1], /docs\/initiatives\/done\/example\/prd\.md:4/);
+    assert.match(failures[1], /unchecked checklist item: \nUse Deferred:/);
+  });
+
+  it("rejects plus-bullet unchecked task markers in done initiatives", () => {
+    const failures = findMarkdownHygieneFailures(`# Acceptance Criteria
+
++ [ ] Should not be hidden by a plus bullet.
+`, "docs/initiatives/done/example/prd.md");
+
+    assert.equal(failures.length, 1);
+    assert.match(failures[0], /docs\/initiatives\/done\/example\/prd\.md:3/);
+    assert.match(failures[0], /unchecked checklist item: Should not be hidden by a plus bullet\./);
   });
 
   it("rejects backlog-labeled unchecked items without a concrete backlog link", () => {
