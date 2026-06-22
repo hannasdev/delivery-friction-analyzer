@@ -8,7 +8,7 @@
 - Why it matters: Maintainers get local feedback when completed initiative records still look like active TODO lists or contain unresolved open questions without a clear deferred or follow-up path.
 - Who is affected: Maintainers and agents updating initiative docs or running local validation.
 - Action needed: When moving initiative docs to done, check shipped work, label deferred or intentionally omitted scope, and include a concrete backlog or GitHub follow-up link for backlog-linked unchecked items.
-- PR: TBD
+- PR: #57
 
 ### 2026-06-21 — Source Bundle Schema Contract
 
