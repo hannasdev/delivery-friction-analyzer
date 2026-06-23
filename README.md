@@ -21,36 +21,36 @@ For public repositories, ordinary read access is usually enough. Private reposit
 
 ## Quickstart
 
-### Try the sample target
+### Guided setup
 
-From this repository, install dependencies and run the analyzer against the sample validation target:
+From this repository, install dependencies and let interactive setup create or confirm the repository profile for a GitHub repository you want to measure:
 
 ```sh
 npm install
 npm run analyze:github -- \
-  --repo hannasdev/mcp-writing \
-  --limit 30 \
-  --profile fixtures/github/mcp-writing/profile.json \
-  --out reports/mcp-writing
-```
-
-Open `reports/mcp-writing/friction-report.md` first. It is the main human-readable report. Use the JSON and CSV files when you want to audit a finding, compare PRs, or build follow-up analysis.
-
-### Analyze your own repository
-
-For a guided first run in a local terminal, let interactive setup create or confirm the repository profile:
-
-```sh
-npm run analyze:github -- \
-  --interactive \
   --repo owner/name \
   --limit 30 \
   --profile profiles/owner-name.json \
   --out reports/owner-name \
+  --interactive \
   --dry-run
 ```
 
 If the profile path does not exist, interactive setup can create a minimal `repository-profile.v1` profile. `--dry-run` validates repository access, profile JSON, output directory writability, and a small sample of GitHub API coverage without writing the full report bundle. When the profile looks right, rerun the command without `--dry-run`.
+
+### Run the analysis
+
+After you have a repository profile, run the analyzer against the target repository:
+
+```sh
+npm run analyze:github -- \
+  --repo owner/name \
+  --limit 30 \
+  --profile profiles/owner-name.json \
+  --out reports/owner-name
+```
+
+Open `reports/owner-name/friction-report.md` first. It is the main human-readable report. Use the JSON and CSV files when you want to audit a finding, compare PRs, or build follow-up analysis.
 
 To run the CLI from another project with the npm package, pass the same choices as explicit flags:
 
@@ -78,7 +78,7 @@ Profiles can define:
 
 For a new repository, the easiest path is the guided `--interactive --dry-run` command in Quickstart. If the profile path does not exist, interactive setup asks whether to create it, then writes a minimal `repository-profile.v1` profile with user-provided workflow context and optional release PR title rules. It may create the output directory and briefly write then remove a temporary probe file to confirm writability. When interactive setup saves or generates a profile during a dry run, the completion output prints the saved profile path so you can inspect and edit it before a full run.
 
-Use `fixtures/github/mcp-writing/profile.json` as a starting point when you prefer to copy an existing profile by hand. The full profile format is documented in `docs/reference/repository-profile.md`, and the schema lives at `schemas/repository-profile.schema.json`.
+Use `docs/reference/repository-profile.md` and `schemas/repository-profile.schema.json` when you prefer to create a profile by hand. Existing profiles and fixtures in this repository are internal validation examples; copy them only if their repository-specific assumptions match your target.
 
 ## Outputs
 
@@ -163,7 +163,7 @@ The current product focus is a maintainer workflow:
 
 The product should eventually combine GitHub delivery friction with token and model usage, but GitHub-only analytics remain the active validation surface.
 
-`hannasdev/mcp-writing` remains the first validation target and fixture source, not product-specific scope.
+`hannasdev/mcp-writing` remains an internal validation target and fixture source, not a public tutorial path or product-specific scope.
 
 The existing metrics-summary-only report command remains available for fixture and advanced workflows:
 
