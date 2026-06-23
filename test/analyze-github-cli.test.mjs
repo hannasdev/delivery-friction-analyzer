@@ -367,6 +367,7 @@ describe("GitHub live analyze CLI", () => {
 
       assert.match(stdout, /Usage:\n  delivery-friction-analyzer --repo <owner\/name>/);
       assert.match(stdout, /--dry-run/);
+      assert.match(stdout, /--validation-target\s+Mark output metadata as an internal validation run; does not bypass target validation\./);
     });
   });
 
@@ -2604,7 +2605,7 @@ describe("GitHub live analyze CLI", () => {
           profilePath,
           outDir: join(directory, "out"),
         }, { provider }),
-        /Cannot analyze hannasdev\/delivery-friction-analyzer because it is this tool's product repository, not the target repository to measure.*Choose a different repository with --repo owner\/name.*No GitHub data was collected/s,
+        /Cannot analyze hannasdev\/delivery-friction-analyzer because it is this tool's product repository.*guard prevents accidental self-analysis during normal live runs.*not a data-security boundary.*Choose a different repository with --repo owner\/name.*No GitHub data was collected/s,
       );
       assert.deepEqual(provider.calls, []);
     });

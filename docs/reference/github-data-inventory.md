@@ -1,6 +1,6 @@
 # GitHub Data Inventory
 
-Checked against `hannasdev/mcp-writing` on 2026-06-08 with `gh` authenticated as `hannasdev`.
+Internal validation inventory checked against `hannasdev/mcp-writing` on 2026-06-08 with `gh` authenticated as `hannasdev`. This repository is fixture and calibration context, not the public tutorial target.
 
 ## API Fields
 

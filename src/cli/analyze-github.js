@@ -125,7 +125,7 @@ Options:
   --dry-run                 Validate inputs and sample GitHub coverage without writing artifacts.
   --no-dry-run              Disable dry-run mode when a preset enabled it.
   --metadata-only           Alias for --dry-run.
-  --validation-target       Mark the target repository as a validation target in output metadata.
+  --validation-target       Mark output metadata as an internal validation run; does not bypass target validation.
   --no-validation-target    Disable validation-target mode when a preset enabled it.
   --exclude-pr-class <cls>  Exclude a PR class from normalized, metrics, report, methodology, and CSV artifacts. Repeat or comma-separate values.
   --csv                     Enable curated CSV evidence exports when a preset disabled them.

@@ -99,5 +99,5 @@ export function productRepositoryTargetError(input) {
   const repository = typeof input?.owner === "string" && typeof input?.name === "string"
     ? `${input.owner}/${input.name}`
     : "the requested repository";
-  return `Cannot analyze ${repository} because it is this tool's product repository, not the target repository to measure. Choose a different repository with --repo owner/name. No GitHub data was collected.`;
+  return `Cannot analyze ${repository} because it is this tool's product repository. The guard prevents accidental self-analysis during normal live runs; it is not a data-security boundary. Choose a different repository with --repo owner/name. No GitHub data was collected.`;
 }
