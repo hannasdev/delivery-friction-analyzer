@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-23 — Tutorial Target Guidance
+
+- What changed: Public quickstart guidance no longer depends on `hannasdev/mcp-writing`, and product-repository rejection plus `--validation-target` help now make the analysis boundary clearer.
+- Why it matters: First-time users and maintainers get a clearer path for learning the CLI without confusing internal validation history, product-repository guardrails, or validation-target metadata for an override.
+- Who is affected: Users running the CLI for the first time and maintainers reviewing first-run documentation or help text.
+- Action needed: None.
+- PR: TBD
+
 ### 2026-06-21 — Done Initiative Hygiene Guard
 
 - What changed: `npm test` now enforces completed initiative documentation hygiene, and `AGENTS.md` documents how shipped, deferred, future-decision, backlog-linked, and intentionally omitted items should be recorded in done initiative docs.
