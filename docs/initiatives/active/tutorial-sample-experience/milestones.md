@@ -45,10 +45,10 @@ Public docs and CLI copy stop presenting `hannasdev/mcp-writing` as the tutorial
 
 ### Acceptance Criteria
 
-- [ ] README quickstart no longer instructs public users to run `hannasdev/mcp-writing` as the sample tutorial target.
-- [ ] Remaining `mcp-writing` references are clearly internal validation, fixture, or historical context.
-- [ ] Product-repository rejection tells users why the guard exists and names another-target next step; before M4 it does not point to unavailable sample behavior.
-- [ ] `--validation-target` help text no longer sounds like an override for product-repository rejection.
+- [x] README quickstart no longer instructs public users to run `hannasdev/mcp-writing` as the sample tutorial target.
+- [x] Remaining `mcp-writing` references are clearly internal validation, fixture, or historical context.
+- [x] Product-repository rejection tells users why the guard exists and names another-target next step; before M4 it does not point to unavailable sample behavior.
+- [x] `--validation-target` help text no longer sounds like an override for product-repository rejection.
 
 ### Required Validation
 
