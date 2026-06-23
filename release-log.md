@@ -8,7 +8,7 @@
 - Why it matters: First-time users and maintainers get a clearer path for learning the CLI without confusing internal validation history, product-repository guardrails, or validation-target metadata for an override.
 - Who is affected: Users running the CLI for the first time and maintainers reviewing first-run documentation or help text.
 - Action needed: None.
-- PR: TBD
+- PR: #59
 
 ### 2026-06-21 — Done Initiative Hygiene Guard
 
