@@ -2,10 +2,12 @@
 
 ## Status
 
-- State: Backlog
+- State: Active
 - Human approval: Approved
 - Owner: Hanna
 - Created: 2026-06-22
+- Activated: 2026-06-23
+- Current milestone: M1, Public Sample And Validation Target Separation
 - Related issue:
   - None yet.
 - Related docs:
