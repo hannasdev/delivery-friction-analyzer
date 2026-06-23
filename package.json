@@ -1,6 +1,6 @@
 {
   "name": "delivery-friction-analyzer",
-  "version": "0.16.2",
+  "version": "0.16.3",
   "description": "Local GitHub pull request analytics for delivery friction reports.",
   "license": "MIT",
   "type": "module",
