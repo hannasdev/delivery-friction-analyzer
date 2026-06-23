@@ -2,14 +2,14 @@
 
 ## Status
 
-Status: Completed; final milestone implemented for conformance review on 2026-06-21.
+Status: Completed; final milestone merged in PR #57 on 2026-06-22.
 
 - State: Done
 - Owner: Hanna
 - Created: 2026-06-13
 - Activated: 2026-06-21
 - Completed: 2026-06-21
-- Current milestone state: M1 merged in PR #55; M2 merged in PR #56; M3 implemented for conformance review.
+- Current milestone state: M1 merged in PR #55; M2 merged in PR #56; M3 merged in PR #57.
 - Relevance reviewed: 2026-06-21 against `main` at v0.14.2. Still relevant, with baseline updates for completed PR class segmentation, setup/report usability, interactive setup, and maintainer review readiness work.
 - Related issue:
   - None yet.
@@ -101,7 +101,7 @@ Done-doc hygiene failures should also name the file and convention to use. Examp
 
 Intentionally unchanged: latest-N PR selection, PR class scoring/ranking behavior, run preset persistence, contributor-source parser scope, artifact sensitivity defaults, and hosted/service behavior.
 
-Human approval checkpoint: Approved by Hanna on 2026-06-21 for the refreshed user-perspective preview and milestone shape. The initiative was activated and completed on 2026-06-21; M3 is complete for pre-PR cleanup, and the initiative remains under `docs/initiatives/active/` until PR merge and initiative-completion cleanup move it to the completed initiative archive.
+Human approval checkpoint: Approved by Hanna on 2026-06-21 for the refreshed user-perspective preview and milestone shape. The initiative was activated and completed on 2026-06-21; M3 merged in PR #57 on 2026-06-22, and initiative-completion cleanup moved this record into `docs/initiatives/done/`.
 
 ## Acceptance Criteria
 
@@ -137,7 +137,7 @@ Human approval checkpoint: Approved by Hanna on 2026-06-21 for the refreshed use
 - [x] Should analysis be PR-count based or day-window based? PR-count based. Latest-N merged PRs remain the MVP selection model.
 - [x] Should repository profile validation be considered worthwhile? Yes, with the tradeoff that validation should stay small and fail early.
 - [x] Should source bundles get a schema? Yes, as a collector-owned canonical source-bundle schema rather than a complete GitHub raw API schema.
-- [x] Is PR class segmentation implemented? Yes. PR class rules, report context, explicit filtering, and profile docs are completed in the [PR Class Segmentation](../../done/pr-class-segmentation/prd.md) initiative and are baseline behavior for this initiative.
+- [x] Is PR class segmentation implemented? Yes. PR class rules, report context, explicit filtering, and profile docs are completed in the [PR Class Segmentation](../pr-class-segmentation/prd.md) initiative and are baseline behavior for this initiative.
 - [x] Should completed initiative docs be reconciled? Yes. Completed docs should accurately track shipped, deferred, and answered decisions.
 - [x] How should product repository identity be configured? Use a repo-local default plus injectable module/API override; defer public CLI/config surface until reuse outside this repository requires it.
 - [x] How should schema validation be implemented? Use focused runtime validators plus schema contract tests; add a JSON Schema dependency only if local validation becomes misleading or too costly.

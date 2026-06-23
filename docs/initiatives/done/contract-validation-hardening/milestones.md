@@ -27,15 +27,15 @@ Live analysis fails early and clearly when the target repository or current repo
 
 ### Acceptance Criteria
 
-- [ ] `runAnalyzeGithub` or `collectGitHubSourceBundle` rejects the configured product repository before any provider method is called, with copy that explains the product/target distinction, tells the maintainer to choose a different `--repo`, and confirms no GitHub data was collected.
-- [ ] Invalid user-supplied repository profile identity, top-level shape, unsupported keys, or required fields fail before provider calls with an actionable field/path error.
-- [ ] Invalid file-rule IDs, duplicate IDs, matcher shape, category, role, functional surface, generated flag, or unsupported keys fail before provider calls with an actionable field/rule error.
-- [ ] Invalid user-supplied file-rule and PR-class regex patterns fail preflight and name the rule ID and matcher field.
-- [ ] User-facing validation failures name the failing file or command context, the invalid field/path/rule, the problem, and the next action; malformed-profile guidance tells users what to edit and reserves interactive setup for creating or regenerating a starter profile.
-- [ ] Existing PR class, workflow, and contributor-source validation remains enforced through the same profile preflight path.
-- [ ] Preset-sourced profile paths and dry-run flows use the same profile validation path as explicit `--profile` runs.
-- [ ] Existing valid fixture profiles continue to run through live CLI tests.
-- [ ] Existing docs are audited and reconciled to describe target/product separation enforcement, profile validation behavior, and run preset/profile ownership without duplicating already-current guidance.
+- [x] `runAnalyzeGithub` or `collectGitHubSourceBundle` rejects the configured product repository before any provider method is called, with copy that explains the product/target distinction, tells the maintainer to choose a different `--repo`, and confirms no GitHub data was collected.
+- [x] Invalid user-supplied repository profile identity, top-level shape, unsupported keys, or required fields fail before provider calls with an actionable field/path error.
+- [x] Invalid file-rule IDs, duplicate IDs, matcher shape, category, role, functional surface, generated flag, or unsupported keys fail before provider calls with an actionable field/rule error.
+- [x] Invalid user-supplied file-rule and PR-class regex patterns fail preflight and name the rule ID and matcher field.
+- [x] User-facing validation failures name the failing file or command context, the invalid field/path/rule, the problem, and the next action; malformed-profile guidance tells users what to edit and reserves interactive setup for creating or regenerating a starter profile.
+- [x] Existing PR class, workflow, and contributor-source validation remains enforced through the same profile preflight path.
+- [x] Preset-sourced profile paths and dry-run flows use the same profile validation path as explicit `--profile` runs.
+- [x] Existing valid fixture profiles continue to run through live CLI tests.
+- [x] Existing docs are audited and reconciled to describe target/product separation enforcement, profile validation behavior, and run preset/profile ownership without duplicating already-current guidance.
 
 ### Required Validation
 
@@ -97,14 +97,14 @@ The live collector emits a source bundle that is validated against a checked-in 
 
 ### Acceptance Criteria
 
-- [ ] A `github-source-bundle.v1` schema exists and is referenced by documentation.
-- [ ] Collector test output validates against the schema, including a case with contributor-source metadata.
-- [ ] Schema tests catch missing required collector, selection, coverage, and PR fields.
-- [ ] Schema tests reject unexpected collector-owned canonical wrapper fields unless they are under an explicit future `raw` subtree.
-- [ ] Schema validation failures name the generated artifact or fixture, the schema path or field when available, and whether the expected fix is collector output or the schema contract.
-- [ ] The schema preserves explicit unavailable/partial coverage instead of forcing invented counts.
-- [ ] Source-bundle tests prove contributor-source metadata may include source type, path, coverage/status, and hint count, but not raw contributor file contents or login lists.
-- [ ] Documentation explains that the schema covers the analyzer's canonical source bundle, not the full GitHub API, and does not rewrite already-current collection caveats unnecessarily.
+- [x] A `github-source-bundle.v1` schema exists and is referenced by documentation.
+- [x] Collector test output validates against the schema, including a case with contributor-source metadata.
+- [x] Schema tests catch missing required collector, selection, coverage, and PR fields.
+- [x] Schema tests reject unexpected collector-owned canonical wrapper fields unless they are under an explicit future `raw` subtree.
+- [x] Schema validation failures name the generated artifact or fixture, the schema path or field when available, and whether the expected fix is collector output or the schema contract.
+- [x] The schema preserves explicit unavailable/partial coverage instead of forcing invented counts.
+- [x] Source-bundle tests prove contributor-source metadata may include source type, path, coverage/status, and hint count, but not raw contributor file contents or login lists.
+- [x] Documentation explains that the schema covers the analyzer's canonical source bundle, not the full GitHub API, and does not rewrite already-current collection caveats unnecessarily.
 
 ### Required Validation
 
@@ -161,11 +161,11 @@ Completed initiative docs stay reliable as implementation records instead of acc
 
 ### Acceptance Criteria
 
-- [ ] A local Node test identifies stale unchecked items in done initiative docs and runs under `npm test`.
-- [ ] The check permits backlog TODOs and explicitly labeled deferred, intentionally omitted, future-decision, backlog-linked, or narrow historical status items in done docs, while rejecting bare unchecked `Open Questions` in `done/**`; backlog-linked items include a concrete `docs/initiatives/backlog/...` path, a relative Markdown link into `../backlog/`, or an issue/PR URL, and historical status allowance applies only to lifecycle/status checklist entries, not stale acceptance criteria or open questions.
-- [ ] Docs-hygiene failures name the file, the unresolved checklist item or open question, and the allowed labels or backlog-link convention.
-- [ ] Repository guidance explains how to mark shipped, deferred, future-decision, backlog-linked, or intentionally omitted work in completed initiatives.
-- [ ] Current done initiatives pass the check.
+- [x] A local Node test identifies stale unchecked items in done initiative docs and runs under `npm test`.
+- [x] The check permits backlog TODOs and explicitly labeled deferred, intentionally omitted, future-decision, backlog-linked, or narrow historical status items in done docs, while rejecting bare unchecked `Open Questions` in `done/**`; backlog-linked items include a concrete `docs/initiatives/backlog/...` path, a relative Markdown link into `../backlog/`, or an issue/PR URL, and historical status allowance applies only to lifecycle/status checklist entries, not stale acceptance criteria or open questions.
+- [x] Docs-hygiene failures name the file, the unresolved checklist item or open question, and the allowed labels or backlog-link convention.
+- [x] Repository guidance explains how to mark shipped, deferred, future-decision, backlog-linked, or intentionally omitted work in completed initiatives.
+- [x] Current done initiatives pass the check.
 
 ### Required Validation
 
@@ -192,8 +192,8 @@ Completed initiative docs stay reliable as implementation records instead of acc
 - [x] Active
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged in PR #57 on 2026-06-22
 
-Status: Completed for conformance review on 2026-06-21; final lifecycle bookkeeping completed after the review found M3 implementation criteria satisfied.
+Status: Merged in PR #57 on 2026-06-22; final lifecycle bookkeeping moved the completed initiative to `docs/initiatives/done/contract-validation-hardening/`.
