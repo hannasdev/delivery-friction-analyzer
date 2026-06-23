@@ -65,8 +65,8 @@ Public docs and CLI copy stop presenting `hannasdev/mcp-writing` as the tutorial
 ### Status
 
 - [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
+- [x] Implemented
+- [x] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
