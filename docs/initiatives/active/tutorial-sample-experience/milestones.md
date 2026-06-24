@@ -67,9 +67,9 @@ Public docs and CLI copy stop presenting `hannasdev/mcp-writing` as the tutorial
 - [ ] Not started
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged
 
 ## M2: Generic Source Bundle Contract
 

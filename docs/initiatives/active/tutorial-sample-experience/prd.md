@@ -7,7 +7,7 @@
 - Owner: Hanna
 - Created: 2026-06-22
 - Activated: 2026-06-23
-- Current milestone: M1, Public Sample And Validation Target Separation
+- Current milestone: M2, Generic Source Bundle Contract
 - Related issue:
   - None yet.
 - Related docs:
