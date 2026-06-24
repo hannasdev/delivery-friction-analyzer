@@ -247,17 +247,17 @@ function commentSourcesCsv(report, analysisFilter) {
 
 function collectionCoverageCsv(collectionCoverage, analysisFilter) {
   const headers = [
-    "api_family",
+    "source_family",
     "status",
     "attempts",
     "source",
     "diagnostics",
     "downstream_impact",
   ];
-  const rows = [...(collectionCoverage?.apiFamilies ?? [])]
+  const rows = [...(collectionCoverage?.sourceFamilies ?? [])]
     .sort((left, right) => String(left.family).localeCompare(String(right.family)))
     .map(family => ({
-      api_family: family.family,
+      source_family: family.family,
       status: family.status,
       attempts: family.attempts ?? 1,
       source: family.source,
@@ -283,8 +283,13 @@ function repositoryLabel(report) {
     : "unknown repository";
 }
 
+function sourceLabel(source) {
+  if (!source?.label) return "not recorded";
+  return `${source.label}${source.kind ? ` (${source.kind})` : ""}`;
+}
+
 function formatCoverageFamilies(collectionCoverage) {
-  const families = collectionCoverage?.apiFamilies ?? [];
+  const families = collectionCoverage?.sourceFamilies ?? [];
   if (!families.length) return "- No collection coverage families were recorded.";
   return families
     .map(family => {
@@ -419,12 +424,14 @@ export function renderRepositoryFrictionMethodology({
 }) {
   const selection = sourceBundle?.selection ?? {};
   const collectionCoverage = sourceBundle?.coverage ?? report.collectionCoverage;
+  const source = sourceBundle?.source ?? report.source;
 
   return `${[
     `# Methodology: ${repositoryLabel(report)}`,
     "",
     `Report version: ${report.reportVersion}`,
     `Metric version: ${report.metricVersion}`,
+    `Source: ${sourceLabel(source)}`,
     `Repository: ${repositoryLabel(report)}`,
     `Profile path: ${profilePath ?? "not recorded"}`,
     `Requested pull requests: ${selection.requestedLimit ?? "unknown"}`,
@@ -434,7 +441,7 @@ export function renderRepositoryFrictionMethodology({
     "",
     "## What This Analysis Uses",
     "",
-    "The analyzer collects merged GitHub pull requests, normalizes repository-specific fields through the supplied profile, computes transparent component metrics, and renders a repository-level report. It does not inspect local working trees, mutate repositories, rank people, or apply recommendations automatically.",
+    "The analyzer normalizes source-bundle pull request evidence through the supplied profile, computes transparent component metrics, and renders a repository-level report. It does not inspect local working trees, mutate repositories, rank people, or apply recommendations automatically.",
     "",
     "## Pull Request Selection",
     "",

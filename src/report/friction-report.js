@@ -1624,6 +1624,9 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     `Report version: ${report.reportVersion}`,
     `Metric version: ${report.metricVersion}`,
+    ...(report.source?.label
+      ? [`Source: ${report.source.label}${report.source.kind ? ` (${report.source.kind})` : ""}`]
+      : []),
     `Pull requests analyzed: ${report.summary?.pullRequests ?? "unknown"}`,
     "",
     ...analysisFilterLines,

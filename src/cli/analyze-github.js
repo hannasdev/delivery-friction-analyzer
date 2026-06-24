@@ -1400,16 +1400,22 @@ export async function writeAnalysisArtifacts(outDir, paths, artifacts, { disable
 }
 
 function collectionCoverageMarkdown(sourceBundle) {
+  const source = sourceBundle.source;
+  const sourceLabel = source?.label
+    ? `${source.label}${source.kind ? ` (${source.kind})` : ""}`
+    : "not recorded";
   const lines = [
     "",
     "## Collection Coverage",
     "",
+    `Source: ${sourceLabel}`,
+    "",
     `Overall collection coverage: ${sourceBundle.coverage.status}`,
     "",
-    "API families:",
+    "Source families:",
   ];
 
-  for (const family of sourceBundle.coverage.apiFamilies ?? []) {
+  for (const family of sourceBundle.coverage.sourceFamilies ?? []) {
     const diagnostics = (family.diagnostics ?? []).length ? `; diagnostics: ${family.diagnostics.join(" | ")}` : "";
     const impact = family.downstreamImpact ? `; impact: ${family.downstreamImpact}` : "";
     lines.push(`- ${family.family}: ${family.status} (${family.attempts ?? 1} attempt(s))${diagnostics}${impact}`);
@@ -1422,6 +1428,7 @@ function collectionCoverageMarkdown(sourceBundle) {
 function attachCollectionCoverage(report, sourceBundle) {
   return {
     ...report,
+    source: sourceBundle.source,
     collectionCoverage: sourceBundle.coverage,
     artifactSensitivity: "Generated artifacts may include repository names, PR URLs, titles, file paths, comment metadata, contributor-source metadata, curated CSV evidence, and coverage diagnostics. Raw contributor file contents and individual contributor rankings are not emitted. Treat artifacts as local/private unless intentionally shared.",
   };
@@ -1607,7 +1614,7 @@ function coverageLine(family) {
 }
 
 function coverageCaveats(coverage) {
-  return (coverage?.apiFamilies ?? []).filter(family => {
+  return (coverage?.sourceFamilies ?? []).filter(family => {
     const diagnostics = (family.diagnostics ?? []).filter(Boolean);
     return family.status !== "available" || diagnostics.length > 0;
   });

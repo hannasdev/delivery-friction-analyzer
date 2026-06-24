@@ -132,8 +132,12 @@ function validSourcePullRequest() {
 
 function validSourceBundle() {
   return {
-    schemaVersion: "github-source-bundle.v1",
+    schemaVersion: "source-bundle.v1",
     collectedAt: "2026-06-09T00:00:00Z",
+    source: {
+      kind: "github",
+      label: "GitHub live collection",
+    },
     collector: { name: "github-live-collector", provider: "mock-gh" },
     targetRepository: { owner: "example", name: "example-repo", defaultBranch: "main", visibility: "public", analysisPullRequestLimit: 1, isValidationTarget: false },
     repositoryMetadata: {
@@ -154,7 +158,7 @@ function validSourceBundle() {
     },
     coverage: {
       status: "partial",
-      apiFamilies: [
+      sourceFamilies: [
         coverageEntry("repository_metadata", REPOSITORY_SOURCE, "available"),
         coverageEntry("pull_request_details", "gh pr view --json", "available"),
         coverageEntry("pr_open_diff", HISTORICAL_SNAPSHOT_SOURCE, "unavailable"),
@@ -385,10 +389,10 @@ describe("repository profile schema", () => {
   });
 });
 
-describe("github source bundle schema", () => {
+describe("source bundle schema", () => {
   it("validates the canonical source bundle contract with sanitized contributor-source metadata", async () => {
     const [sourceBundleSchema, targetSchema] = await Promise.all([
-      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/source-bundle.schema.json"),
       readJson("../schemas/target-repository.schema.json"),
     ]);
     const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
@@ -396,36 +400,81 @@ describe("github source bundle schema", () => {
 
     assertSchemaValid({
       artifact: "source-bundle.json",
-      schemaPath: "schemas/github-source-bundle.schema.json",
+      schemaPath: "schemas/source-bundle.schema.json",
       value: bundle,
       schema,
       refs,
     });
   });
 
+  it("validates sample source provenance with generic source-family labels", async () => {
+    const [sourceBundleSchema, targetSchema] = await Promise.all([
+      readJson("../schemas/source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+    const bundle = validSourceBundle();
+    bundle.source = {
+      kind: "sample",
+      label: "Bundled synthetic sample, not live GitHub data",
+    };
+    bundle.collector = { name: "tutorial-sample-collector", provider: "bundled-sample" };
+    bundle.selection = {
+      strategy: "bundled_tutorial_pull_requests",
+      requestedLimit: 1,
+      collectedCount: 1,
+      source: "bundled tutorial sample",
+    };
+    bundle.coverage.sourceFamilies[0].source = "bundled tutorial sample";
+    bundle.languageDistribution.source = "bundled tutorial sample";
+    bundle.languageDistribution.coverage.source = "bundled tutorial sample";
+
+    assert.deepEqual(validateSchema(bundle, schema, refs), []);
+  });
+
+  it("rejects legacy github-source-bundle.v1 artifacts instead of silently accepting them", async () => {
+    const [sourceBundleSchema, targetSchema] = await Promise.all([
+      readJson("../schemas/source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+    const bundle = validSourceBundle();
+    bundle.schemaVersion = "github-source-bundle.v1";
+    bundle.coverage.apiFamilies = bundle.coverage.sourceFamilies;
+    delete bundle.coverage.sourceFamilies;
+    delete bundle.source;
+
+    const errors = validateSchema(bundle, schema, refs);
+
+    assert(errors.some(error => error.includes('$.schemaVersion must equal "source-bundle.v1"')));
+    assert(errors.some(error => error.includes("$.source is required")));
+    assert(errors.some(error => error.includes("$.coverage.sourceFamilies is required")));
+    assert(errors.some(error => error.includes("$.coverage.apiFamilies is not allowed")));
+  });
+
   it("rejects missing required collector, selection, coverage, and PR fields", async () => {
     const [sourceBundleSchema, targetSchema] = await Promise.all([
-      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/source-bundle.schema.json"),
       readJson("../schemas/target-repository.schema.json"),
     ]);
     const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
     const bundle = validSourceBundle();
     delete bundle.collector;
     delete bundle.selection.requestedLimit;
-    delete bundle.coverage.apiFamilies;
+    delete bundle.coverage.sourceFamilies;
     delete bundle.pullRequests[0].reviews;
 
     const errors = validateSchema(bundle, schema, refs);
 
     assert(errors.some(error => error.includes("$.collector is required")));
     assert(errors.some(error => error.includes("$.selection.requestedLimit is required")));
-    assert(errors.some(error => error.includes("$.coverage.apiFamilies is required")));
+    assert(errors.some(error => error.includes("$.coverage.sourceFamilies is required")));
     assert(errors.some(error => error.includes("$.pullRequests[0].reviews is required")));
   });
 
   it("rejects unexpected canonical wrapper fields unless they are under raw", async () => {
     const [sourceBundleSchema, targetSchema] = await Promise.all([
-      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/source-bundle.schema.json"),
       readJson("../schemas/target-repository.schema.json"),
     ]);
     const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
@@ -443,7 +492,7 @@ describe("github source bundle schema", () => {
 
   it("preserves unavailable or partial coverage without invented counts", async () => {
     const [sourceBundleSchema, targetSchema] = await Promise.all([
-      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/source-bundle.schema.json"),
       readJson("../schemas/target-repository.schema.json"),
     ]);
     const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
@@ -470,7 +519,7 @@ describe("github source bundle schema", () => {
 
   it("keeps contributor-source metadata sanitized", async () => {
     const [sourceBundleSchema, targetSchema] = await Promise.all([
-      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/source-bundle.schema.json"),
       readJson("../schemas/target-repository.schema.json"),
     ]);
     const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
@@ -490,7 +539,7 @@ describe("github source bundle schema", () => {
 
   it("reports source-bundle schema failures with artifact, path, and fix direction", async () => {
     const [sourceBundleSchema, targetSchema] = await Promise.all([
-      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/source-bundle.schema.json"),
       readJson("../schemas/target-repository.schema.json"),
     ]);
     const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
@@ -500,14 +549,14 @@ describe("github source bundle schema", () => {
     assert.throws(
       () => assertSchemaValid({
         artifact: "source-bundle.json",
-        schemaPath: "schemas/github-source-bundle.schema.json",
+        schemaPath: "schemas/source-bundle.schema.json",
         value: bundle,
         schema,
         refs,
       }),
       error => (
         error.message.includes("source-bundle.json")
-        && error.message.includes("schemas/github-source-bundle.schema.json")
+        && error.message.includes("schemas/source-bundle.schema.json")
         && error.message.includes("$.selection.requestedLimit")
         && error.message.includes("Fix the collector output or intentionally update the schema contract")
       ),

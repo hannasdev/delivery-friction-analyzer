@@ -54,6 +54,6 @@ Availability decision:
 
 Fixtures store compact, redacted source-shaped data rather than full raw payloads.
 Live `source-bundle.json` artifacts use the analyzer-owned
-`github-source-bundle.v1` contract in `schemas/github-source-bundle.schema.json`;
+`source-bundle.v1` contract in `schemas/source-bundle.schema.json`;
 that schema covers the canonical fields consumed downstream, not the full GitHub
 REST or GraphQL API response shape.

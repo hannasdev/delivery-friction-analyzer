@@ -25,6 +25,8 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 
 - `reportVersion`: report contract version.
 - `metricVersion`: source metrics contract version.
+- `source`: optional source-bundle provenance copied into live-generated report
+  artifacts, including `kind` and a human-readable label.
 - `targetRepository`: analyzed repository identity; live analysis sample size is encoded as `targetRepository.analysisPullRequestLimit` from collection metadata.
 - `analysisFilter`: optional metadata for explicit filters applied before metrics computation, including excluded PR classes and before/after PR counts.
 - `configuredWorkflow`: optional user-configured workflow context from the repository profile. It is not observed GitHub evidence and does not change scoring, ranking, CSV exports, or PR class matching.
@@ -138,11 +140,11 @@ Minimum CSV column groups:
 - `pr-metrics.csv`: PR number, title, URL, PR class, PR class source/rule evidence, changed lines, non-generated changed lines, review comments, review threads, review decision, human reviewer count, human approval / changes-requested booleans, failed checks, failed workflow runs, cancelled workflow runs, post-review commits, review-thread source, workflow-run source/coverage, and main ranking scores.
 - `bottleneck-examples.csv`: bottleneck identity, recommendation category, PR identity, score/value, changed lines, validation counts, review counts, comment-source counts, workflow/review source and coverage labels, dominance, and source labels.
 - `comment-sources.csv`: source name, total comments, bot/scanner classification, human/author classification, and share of all comments.
-- `collection-coverage.csv`: API family, status, attempts, source label, diagnostics, and downstream impact.
+- `collection-coverage.csv`: source family, status, attempts, source label, diagnostics, and downstream impact.
 
 Empty CSV cells mean unavailable or not applicable. Numeric zero should be used only for observed or computed zero counts. Count columns that depend on optional GitHub coverage should keep source or coverage labels nearby so spreadsheet readers can tell unavailable evidence apart from observed zeroes. CSVs must not include raw comment bodies, raw workflow logs, tokens, secret-bearing environment details, or individual contributor/reviewer rankings.
 
-Contributor-source coverage appears in `collection-coverage.csv` as the `contributor_source` API family when configured. CSVs may include aggregate comment-source counts influenced by contributor hints, but they must not include raw `.all-contributorsrc` contents, contributor names, contributor login lists, or person rankings.
+Contributor-source coverage appears in `collection-coverage.csv` as the `contributor_source` source family when configured. CSVs may include aggregate comment-source counts influenced by contributor hints, but they must not include raw `.all-contributorsrc` contents, contributor names, contributor login lists, or person rankings.
 
 ## Optional Downstream Narrative Drafting
 

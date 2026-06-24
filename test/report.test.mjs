@@ -61,7 +61,7 @@ describe("friction report generation", () => {
       report,
       sourceBundle: {
         selection: { requestedLimit: 30, collectedCount: 3 },
-        coverage: { status: "available", apiFamilies: [] },
+        coverage: { status: "available", sourceFamilies: [] },
       },
       profilePath: "fixtures/github/mcp-writing/profile.json",
       artifactFileNames: {},
@@ -86,7 +86,7 @@ describe("friction report generation", () => {
       report,
       sourceBundle: {
         selection: { requestedLimit: 30, collectedCount: 3 },
-        coverage: { status: "available", apiFamilies: [] },
+        coverage: { status: "available", sourceFamilies: [] },
       },
       profilePath: "fixtures/github/mcp-writing/profile.json",
       artifactFileNames: {},
@@ -121,7 +121,7 @@ describe("friction report generation", () => {
       report,
       sourceBundle: {
         selection: { requestedLimit: 30, collectedCount: 3 },
-        coverage: { status: "available", apiFamilies: [] },
+        coverage: { status: "available", sourceFamilies: [] },
       },
       profilePath: "fixtures/github/mcp-writing/profile.json",
       artifactFileNames: {},
@@ -172,7 +172,7 @@ describe("friction report generation", () => {
       report,
       sourceBundle: {
         selection: { requestedLimit: 30, collectedCount: 3 },
-        coverage: { status: "available", apiFamilies: [] },
+        coverage: { status: "available", sourceFamilies: [] },
       },
       profilePath: "fixtures/github/mcp-writing/profile.json",
       artifactFileNames: {},
@@ -182,7 +182,7 @@ describe("friction report generation", () => {
       metricsSummary,
       report,
       collectionCoverage: {
-        apiFamilies: [
+        sourceFamilies: [
           {
             family: "contributor_source",
             status: "partial",
@@ -245,7 +245,7 @@ describe("friction report generation", () => {
       report,
       sourceBundle: {
         selection: { requestedLimit: 30, collectedCount: 3 },
-        coverage: { status: "available", apiFamilies: [] },
+        coverage: { status: "available", sourceFamilies: [] },
       },
       profilePath: "fixtures/github/mcp-writing/profile.json",
       artifactFileNames: {},
@@ -346,7 +346,7 @@ describe("friction report generation", () => {
       report,
       sourceBundle: {
         selection: { requestedLimit: 30, collectedCount: 2 },
-        coverage: { status: "available", apiFamilies: [] },
+        coverage: { status: "available", sourceFamilies: [] },
       },
       profilePath: "profile.json",
       artifactFileNames: {},
@@ -427,7 +427,7 @@ describe("friction report generation", () => {
       report,
       sourceBundle: {
         selection: { requestedLimit: 30, collectedCount: 4 },
-        coverage: { status: "available", apiFamilies: [] },
+        coverage: { status: "available", sourceFamilies: [] },
       },
       profilePath: "profile.json",
       artifactFileNames: {},
@@ -1222,7 +1222,7 @@ describe("friction report generation", () => {
 
   it("pins the redacted live-30 calibration sample for source-label regressions", async () => {
     const calibration = await readJson("../fixtures/github/mcp-writing/reports/live-30-calibration.golden.json");
-    const coverageByFamily = new Map(calibration.collectionCoverage.apiFamilies.map(entry => [entry.family, entry]));
+    const coverageByFamily = new Map(calibration.collectionCoverage.sourceFamilies.map(entry => [entry.family, entry]));
     const validationGap = calibration.topBottlenecks.find(bottleneck => bottleneck.id === "validation-gap");
     const reviewChurn = calibration.topBottlenecks.find(bottleneck => bottleneck.id === "review-churn");
     const validationExample = validationGap.observedData[0];
@@ -1634,7 +1634,7 @@ describe("friction report generation", () => {
       ...generateRepositoryFrictionReport(metricsSummary),
       collectionCoverage: {
         status: "partial",
-        apiFamilies: [
+        sourceFamilies: [
           {
             family: "workflow_runs",
             status: "available",
@@ -1650,6 +1650,10 @@ describe("friction report generation", () => {
     const methodology = renderRepositoryFrictionMethodology({
       report,
       sourceBundle: {
+        source: {
+          kind: "sample",
+          label: "Bundled synthetic sample, not live GitHub data",
+        },
         selection: { requestedLimit: 30, collectedCount: 3 },
         coverage: report.collectionCoverage,
       },
@@ -1670,8 +1674,10 @@ describe("friction report generation", () => {
     });
 
     assert(methodology.includes("# Methodology: hannasdev/mcp-writing"));
+    assert(methodology.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
     assert(methodology.includes("Profile path: fixtures/github/mcp-writing/profile.json"));
     assert(methodology.includes("Requested pull requests: 30"));
+    assert(methodology.includes("The analyzer normalizes source-bundle pull request evidence"));
     assert(methodology.includes("- workflow_runs: available; attempts=3; source=rest:actions."));
     assert(methodology.includes("- PR metrics CSV: `pr-metrics.csv`"));
     assert(methodology.includes("PR #239"));
@@ -1684,7 +1690,7 @@ describe("friction report generation", () => {
       metricsSummary,
       report,
       collectionCoverage: {
-        apiFamilies: [
+        sourceFamilies: [
           {
             family: "workflow_runs",
             status: "available",
@@ -1894,7 +1900,7 @@ describe("friction report generation", () => {
     const csvArtifacts = generateEvidenceCsvArtifacts({
       metricsSummary,
       report,
-      collectionCoverage: { apiFamilies: [] },
+      collectionCoverage: { sourceFamilies: [] },
     });
 
     assert(markdown.includes("\\[unavailable\\] unavailable from unavailable; human reviewers: unavailable; approved: unavailable; changes requested: unavailable"));
@@ -1938,7 +1944,7 @@ describe("friction report generation", () => {
         bottlenecks: [],
       },
       collectionCoverage: {
-        apiFamilies: [
+        sourceFamilies: [
           {
             family: "workflow_runs",
             status: "partial",
@@ -1985,7 +1991,7 @@ describe("friction report generation", () => {
         bottlenecks: [],
       },
       collectionCoverage: {
-        apiFamilies: [
+        sourceFamilies: [
           {
             family: "workflow_runs",
             status: "partial",

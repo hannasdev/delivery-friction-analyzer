@@ -17,7 +17,7 @@ The analyzer runs locally with your GitHub credentials. Generated artifacts pres
 - GitHub CLI (`gh`) installed and authenticated with access to the target repository.
 - A repository profile JSON for the repository you want to analyze. Interactive setup can create a starter profile for you.
 
-For public repositories, ordinary read access is usually enough. Private repositories need a `gh` token with enough read access for the requested API families. With a classic PAT, that usually means the `repo` scope. With a fine-grained token or GitHub App, grant read permissions for repository metadata and contents, pull requests, Actions, and checks where available. Missing or partial API coverage is recorded in the generated methodology and coverage artifacts instead of being treated as complete data.
+For public repositories, ordinary read access is usually enough. Private repositories need a `gh` token with enough read access for the requested source families. With a classic PAT, that usually means the `repo` scope. With a fine-grained token or GitHub App, grant read permissions for repository metadata and contents, pull requests, Actions, and checks where available. Missing or partial source coverage is recorded in the generated methodology and coverage artifacts instead of being treated as complete data.
 
 ## Quickstart
 
@@ -94,7 +94,7 @@ Use these when you want to audit, automate, or build follow-up analysis:
 - `normalized.json`: normalized repository, PR, file, review, and validation entities.
 - `source-bundle.json`: collected source data for auditability. Its canonical
   analyzer contract is documented in `docs/contracts/source-bundle.md` and
-  checked by `schemas/github-source-bundle.schema.json`; it is not a full GitHub
+  checked by `schemas/source-bundle.schema.json`; it is not a full GitHub
   API payload schema.
 
 When CSV exports are enabled, the bundle also includes spreadsheet-friendly evidence files:
@@ -102,7 +102,7 @@ When CSV exports are enabled, the bundle also includes spreadsheet-friendly evid
 - `pr-metrics.csv`: per-PR metrics for spreadsheet review.
 - `bottleneck-examples.csv`: representative bottleneck examples.
 - `comment-sources.csv`: review-comment source breakdowns.
-- `collection-coverage.csv`: API coverage diagnostics.
+- `collection-coverage.csv`: source-family coverage diagnostics.
 
 Each ranked bottleneck example includes source references, workflow-run conclusions, review-thread source information, comment-source breakdowns, and a dominance note when one PR contributes most of the displayed signal.
 
