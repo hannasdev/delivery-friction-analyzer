@@ -1644,7 +1644,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     "## How To Read This Report",
     "",
-    "- Observed evidence is measured from GitHub data and repository-profile classifications.",
+    "- Observed evidence is measured from source-bundle evidence and repository-profile classifications.",
     "- Interpretation is the analyzer's explanation of what the observed evidence suggests.",
     "- Recommendation is a workflow intervention to consider; the report does not modify repositories.",
     "- Confidence and caveats call out outliers, missing coverage, and evidence-quality limits before you act.",
@@ -1734,7 +1734,7 @@ export function renderRepositoryFrictionMarkdown(report) {
       : "- No profile suggestion thresholds were triggered by this report's PR class, role, functional-surface, or workflow-coverage evidence.",
     "- Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.",
     "- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.",
-    "- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.",
+    "- Missing or partial source evidence remains visible in coverage tables rather than being inferred from unrelated fields.",
     ...(hasConfiguredWorkflowContext(report.configuredWorkflow)
       ? ["- Configured workflow context is user-configured repository-profile context; it does not change scoring, ranking, CSV exports, or PR class matching."]
       : []),

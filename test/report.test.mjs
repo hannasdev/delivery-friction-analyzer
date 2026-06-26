@@ -1672,9 +1672,21 @@ describe("friction report generation", () => {
       },
       csvEnabled: true,
     });
+    const markdown = renderRepositoryFrictionMarkdown({
+      ...report,
+      source: {
+        kind: "sample",
+        label: "Bundled synthetic sample, not live GitHub data",
+      },
+    });
 
     assert(methodology.includes("# Methodology: hannasdev/mcp-writing"));
     assert(methodology.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
+    assert(markdown.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
+    assert(markdown.includes("- Observed evidence is measured from source-bundle evidence and repository-profile classifications."));
+    assert(markdown.includes("- Missing or partial source evidence remains visible in coverage tables rather than being inferred from unrelated fields."));
+    assert(!markdown.includes("Observed evidence is measured from GitHub data"));
+    assert(!markdown.includes("Missing or partial GitHub data"));
     assert(methodology.includes("Profile path: fixtures/github/mcp-writing/profile.json"));
     assert(methodology.includes("Requested pull requests: 30"));
     assert(methodology.includes("The analyzer normalizes source-bundle pull request evidence"));
@@ -1727,6 +1739,7 @@ describe("friction report generation", () => {
     assert(csvArtifacts.bottleneckExamplesCsv.includes("review-churn,Review churn,pr_readiness_gate,239"));
     assert(csvArtifacts.bottleneckExamplesCsv.includes(",rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request,observed,graphql:repository.pullRequest.reviewThreads,"));
     assert(csvArtifacts.commentSourcesCsv.includes("copilot,15,true,false,0.5"));
+    assert(csvArtifacts.collectionCoverageCsv.startsWith("source_family,status,attempts,source,diagnostics,downstream_impact"));
     assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,available,3,rest:actions,sampled,validation evidence populated"));
     assert(!csvArtifacts.bottleneckExamplesCsv.includes("raw comment"));
   });

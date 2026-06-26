@@ -37,7 +37,7 @@ Pull requests analyzed: 3
 
 ## How To Read This Report
 
-- Observed evidence is measured from GitHub data and repository-profile classifications.
+- Observed evidence is measured from source-bundle evidence and repository-profile classifications.
 - Interpretation is the analyzer's explanation of what the observed evidence suggests.
 - Recommendation is a workflow intervention to consider; the report does not modify repositories.
 - Confidence and caveats call out outliers, missing coverage, and evidence-quality limits before you act.
@@ -212,7 +212,7 @@ None
 - Profile suggestions are optional interpretation improvements derived from existing report evidence; they do not change scores, rankings, CSV exports, or JSON report fields.
 - Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.
 - Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.
-- Missing or partial GitHub data remains visible in coverage tables rather than being inferred from unrelated fields.
+- Missing or partial source evidence remains visible in coverage tables rather than being inferred from unrelated fields.
 - Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.
 - PR class context is interpretation support only; it does not filter PRs or change bottleneck ranking.
 - Full live analysis runs also write a detailed companion methodology artifact: `methodology.md`.
