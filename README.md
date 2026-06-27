@@ -14,20 +14,39 @@ The analyzer runs locally with your GitHub credentials. Generated artifacts pres
 ## Requirements
 
 - Node.js 20 or newer.
-- GitHub CLI (`gh`) installed and authenticated with access to the target repository.
-- A repository profile JSON for the repository you want to analyze. Interactive setup can create a starter profile for you.
+- GitHub CLI (`gh`) installed and authenticated with access to the target repository for live GitHub analysis.
+- A repository profile JSON for the repository you want to analyze in live GitHub mode. Interactive setup can create a starter profile for you.
 
 For public repositories, ordinary read access is usually enough. Private repositories need a `gh` token with enough read access for the requested source families. With a classic PAT, that usually means the `repo` scope. With a fine-grained token or GitHub App, grant read permissions for repository metadata and contents, pull requests, Actions, and checks where available. Missing or partial source coverage is recorded in the generated methodology and coverage artifacts instead of being treated as complete data.
 
 ## Quickstart
 
+### Run the bundled sample
+
+Start with the synthetic tutorial sample. It runs locally without GitHub credentials and writes the same artifact family as live analysis:
+
+```sh
+npx delivery-friction-analyzer --source sample --out reports/tutorial
+```
+
+Open `reports/tutorial/friction-report.md` first. The sample output is labeled `Bundled synthetic sample, not live GitHub data` in the CLI completion, report, methodology, and source bundle.
+
+Short excerpt from the generated sample report context:
+
+> Source: Bundled synthetic sample, not live GitHub data.
+>
+> The generated sample report opens by pointing readers to Change scope, Review churn, and Repo guidance gap. It also shows why the first findings should not be overgeneralized: PR #104 is intentionally broad and outlier-sensitive, PR-open diff coverage is partial, and one PR has unavailable workflow-run history.
+
+Screenshots are intentionally deferred until the project has a visual report surface worth capturing.
+
 ### Guided setup
 
-From this repository, install dependencies and let interactive setup create or confirm the repository profile for a GitHub repository you want to measure:
+After reading the sample report, analyze a repository you own or can read. From this repository, install dependencies and let interactive setup create or confirm the repository profile for a GitHub repository you want to measure:
 
 ```sh
 npm install
 npm run analyze:github -- \
+  --source github \
   --repo owner/name \
   --limit 30 \
   --profile profiles/owner-name.json \
@@ -44,6 +63,7 @@ After you have a repository profile, run the analyzer against the target reposit
 
 ```sh
 npm run analyze:github -- \
+  --source github \
   --repo owner/name \
   --limit 30 \
   --profile profiles/owner-name.json \
@@ -56,6 +76,7 @@ To run the CLI from another project with the npm package, pass the same choices 
 
 ```sh
 npx delivery-friction-analyzer \
+  --source github \
   --repo owner/name \
   --limit 30 \
   --profile path/to/repository-profile.json \
@@ -107,6 +128,8 @@ When CSV exports are enabled, the bundle also includes spreadsheet-friendly evid
 Each ranked bottleneck example includes source references, workflow-run conclusions, review-thread source information, comment-source breakdowns, and a dominance note when one PR contributes most of the displayed signal.
 
 ## Common Options
+
+Use `--source sample` for the bundled synthetic tutorial data. Use `--source github` for live repository analysis. Existing live commands that pass `--repo`, `--profile`, or `--limit` without `--source` still run as GitHub analysis, but new users should prefer the explicit source flag.
 
 Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. The output directory may be created during this check, and a temporary probe file may be written and removed.
 

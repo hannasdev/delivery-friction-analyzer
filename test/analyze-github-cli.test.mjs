@@ -8,10 +8,12 @@ import { describe, it, mock } from "node:test";
 import { promisify } from "node:util";
 import {
   ANALYZE_GITHUB_ARTIFACTS,
+  SOURCE_SELECTION_GUIDANCE,
   collectInteractiveAnalyzeGithubOptions,
   formatAnalyzeGithubCompletion,
   parseAnalyzeGithubArgs,
   runAnalyzeGithub,
+  runAnalyzeSample,
   runAnalyzeGithubCli,
   writeAnalyzeGithubCompletion,
   writeAnalysisArtifacts,
@@ -365,7 +367,9 @@ describe("GitHub live analyze CLI", () => {
 
       const { stdout } = await execFileAsync(process.execPath, [binPath, "--help"]);
 
-      assert.match(stdout, /Usage:\n  delivery-friction-analyzer --repo <owner\/name>/);
+      assert.match(stdout, /Usage:\n  delivery-friction-analyzer --source sample --out <directory>/);
+      assert.match(stdout, /delivery-friction-analyzer --source github --repo <owner\/name>/);
+      assert.match(stdout, /--source <sample\|github>\s+Choose the bundled synthetic sample or live GitHub analysis\./);
       assert.match(stdout, /--dry-run/);
       assert.match(stdout, /--validation-target\s+Mark output metadata as an internal validation run; does not bypass target validation\./);
     });
@@ -394,6 +398,15 @@ describe("GitHub live analyze CLI", () => {
       "reports/live",
       "--json",
     ]).json, true);
+  });
+
+  it("parses --source as an explicit source selector", () => {
+    assert.equal(parseAnalyzeGithubArgs([
+      "--source",
+      "sample",
+      "--out",
+      "reports/tutorial",
+    ]).source, "sample");
   });
 
   it("collects interactive answers and maps them to analyze options", async () => {
@@ -1219,7 +1232,7 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
-  it("does not prompt or wait when required options are missing without --interactive", async () => {
+  it("shows source-selection guidance without source or live options", async () => {
     const provider = createProvider();
     let prompted = false;
 
@@ -1232,7 +1245,12 @@ describe("GitHub live analyze CLI", () => {
         },
         isInteractiveTerminal: true,
       }),
-      /Missing required option\(s\): --repo, --limit, --profile, --out/,
+      error => {
+        assert.equal(error.message, SOURCE_SELECTION_GUIDANCE);
+        assert.match(error.message, /delivery-friction-analyzer --source sample --out reports\/tutorial/);
+        assert.match(error.message, /delivery-friction-analyzer --source github --repo owner\/name --profile path\/to\/profile\.json --out reports\/owner-name/);
+        return true;
+      },
     );
 
     assert.equal(prompted, false);
@@ -1618,6 +1636,185 @@ describe("GitHub live analyze CLI", () => {
         /exclude-pr-class must be a lowercase PR class identifier using letters, digits, "-" or "_" separators: Release PR/,
       );
       assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("runs the bundled sample through reports and writes expected artifacts without provider calls", async () => {
+    await withTempDirectory(async directory => {
+      const outDir = join(directory, "tutorial");
+      const provider = createProvider();
+      const progressMessages = [];
+      let stdout = "";
+      let stderr = "";
+
+      const result = await runAnalyzeGithubCli([
+        "--source",
+        "sample",
+        "--out",
+        outDir,
+      ], {
+        provider,
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write: chunk => { stderr += chunk; } },
+      });
+
+      assert.equal(result.dryRun, false);
+      assert.equal(result.targetRepository.owner, "example-org");
+      assert.equal(result.targetRepository.name, "delivery-dashboard");
+      assert.equal(result.source.label, "Bundled synthetic sample, not live GitHub data");
+      assert.equal(result.source.kind, "sample");
+      assert.deepEqual(provider.calls, []);
+      assert.deepEqual((await readdir(outDir)).sort(), Object.values(ANALYZE_GITHUB_ARTIFACTS).sort());
+
+      const [
+        sourceBundle,
+        reportJson,
+        reportMarkdown,
+        methodology,
+      ] = await Promise.all([
+        readJson(join(outDir, "source-bundle.json")),
+        readJson(join(outDir, "friction-report.json")),
+        readFile(join(outDir, "friction-report.md"), "utf8"),
+        readFile(join(outDir, "methodology.md"), "utf8"),
+      ]);
+
+      assert.equal(sourceBundle.source.label, "Bundled synthetic sample, not live GitHub data");
+      assert.deepEqual(reportJson.source, sourceBundle.source);
+      assert(reportMarkdown.startsWith("# Repository Friction Report: example-org/delivery-dashboard"));
+      assert(reportMarkdown.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
+      assert(methodology.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
+      assert(stdout.startsWith(`Markdown report: ${join(outDir, "friction-report.md")}\n`));
+      assert(stdout.includes("Source: Bundled synthetic sample, not live GitHub data."));
+      assert(stdout.includes("Top bottlenecks:"));
+      assert(stderr.includes("Loading bundled synthetic sample.\n"));
+      assert(stderr.includes("Normalizing source bundle and computing metrics.\n"));
+      assert(stderr.includes("Writing local artifacts.\n"));
+
+      progressMessages.push(...stderr.trim().split("\n"));
+      assert.deepEqual(progressMessages, [
+        "Loading bundled synthetic sample.",
+        "Normalizing source bundle and computing metrics.",
+        "Writing local artifacts.",
+      ]);
+    });
+  });
+
+  it("keeps sample JSON completion machine-readable on stdout", async () => {
+    await withTempDirectory(async directory => {
+      const outDir = join(directory, "sample-json-out");
+      const provider = createProvider();
+      let stdout = "";
+      let stderr = "";
+
+      await runAnalyzeGithubCli([
+        "--source",
+        "sample",
+        "--out",
+        outDir,
+        "--json",
+      ], {
+        provider,
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write: chunk => { stderr += chunk; } },
+      });
+
+      const parsed = JSON.parse(stdout);
+      assert.equal(parsed.ok, true);
+      assert.equal(parsed.source.label, "Bundled synthetic sample, not live GitHub data");
+      assert.equal(parsed.artifactPaths.reportMarkdown, join(outDir, "friction-report.md"));
+      assert(!stdout.includes("Loading bundled synthetic sample"));
+      assert(!stdout.includes("Markdown report:"));
+      assert(stderr.includes("Loading bundled synthetic sample."));
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("suppresses sample CSV exports when --no-csv is requested", async () => {
+    await withTempDirectory(async directory => {
+      const outDir = join(directory, "sample-no-csv");
+
+      const result = await runAnalyzeSample({
+        outDir,
+        csv: false,
+      });
+
+      assert.equal(result.csvArtifactsEnabled, false);
+      assert(!("prMetricsCsv" in result.artifactPaths));
+      assert(formatAnalyzeGithubCompletion(result).includes("CSV evidence: disabled by --no-csv."));
+      assert.deepEqual((await readdir(outDir)).sort(), [
+        "friction-report.json",
+        "friction-report.md",
+        "methodology.md",
+        "metrics-summary.json",
+        "normalized.json",
+        "source-bundle.json",
+      ]);
+      const methodology = await readFile(join(outDir, "methodology.md"), "utf8");
+      assert(methodology.includes("CSV export generation was disabled for this run."));
+    });
+  });
+
+  it("rejects live-only options with --source sample before provider calls", async () => {
+    await withTempDirectory(async directory => {
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithubCli([
+          "--source",
+          "sample",
+          "--repo",
+          "example/example-repo",
+          "--limit",
+          "1",
+          "--profile",
+          "profile.json",
+          "--out",
+          join(directory, "out"),
+          "--validation-target",
+          "--dry-run",
+          "--interactive",
+          "--exclude-pr-class",
+          "feature",
+        ], {
+          provider,
+          isInteractiveTerminal: true,
+        }),
+        /--source sample cannot be combined with live GitHub option\(s\): --repo, --limit, --profile, --dry-run, --validation-target, --interactive, --exclude-pr-class/,
+      );
+
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("infers GitHub live analysis from existing live command flags when source is omitted", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "inferred-live");
+      const provider = createProvider();
+
+      const result = await runAnalyzeGithubCli([
+        "--repo",
+        "example/example-repo",
+        "--limit",
+        "1",
+        "--profile",
+        profilePath,
+        "--out",
+        outDir,
+      ], {
+        provider,
+        stderr: { write() {} },
+        stdout: { write() {} },
+        now: () => "2026-06-09T00:00:00Z",
+      });
+
+      assert.equal(result.source.kind, "github");
+      assert.equal(result.source.label, "GitHub live collection");
+      assert.deepEqual(provider.calls.map(call => call[0]).slice(0, 2), [
+        "getRepository",
+        "getLanguages",
+      ]);
+      assert.equal((await readJson(join(outDir, "source-bundle.json"))).source.kind, "github");
     });
   });
 
