@@ -362,8 +362,8 @@ The product repository remains rejected for ordinary live analysis, but users ca
 ### Status
 
 - [x] Active
-- [ ] Implemented
-- [ ] Conformance reviewed
+- [x] Implemented
+- [x] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged

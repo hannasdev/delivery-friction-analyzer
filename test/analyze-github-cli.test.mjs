@@ -3019,6 +3019,28 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("rejects validation-target runs for the product repository before provider calls", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "validation-target-product-out");
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "hannasdev/delivery-friction-analyzer",
+          limit: 1,
+          profilePath,
+          outDir,
+          isValidationTarget: true,
+        }, { provider }),
+        /Cannot analyze hannasdev\/delivery-friction-analyzer because it is this tool's product repository.*--allow-product-repository.*No GitHub data was collected/s,
+      );
+
+      assert.deepEqual(provider.calls, []);
+      await assert.rejects(lstat(outDir), error => error?.code === "ENOENT");
+    });
+  });
+
   it("fails product-repository override before output creation when repository metadata is unreadable", async () => {
     await withTempDirectory(async directory => {
       const profilePath = await writeProfile(directory);
