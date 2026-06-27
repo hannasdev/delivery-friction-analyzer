@@ -476,6 +476,7 @@ describe("source bundle schema", () => {
     assert(!combined.includes("hannasdev"));
     assert(!combined.includes("mcp-writing"));
     assert(!combined.includes("github.com"));
+    assert(!combined.includes("github-actions"));
     assert(!combined.includes("ghp_"));
     assert(!combined.includes("sk-"));
     assert(!combined.includes("/Users/"));

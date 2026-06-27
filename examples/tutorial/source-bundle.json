@@ -352,7 +352,7 @@
             { "databaseId": "sample-comment-104-d", "author": { "login": "sample-author-platform", "type": "User" }, "path": "apps/web/src/settings/DispatchSettingsForm.tsx", "line": 112, "originalLine": 112, "createdAt": "2026-05-16T16:40:00Z", "updatedAt": "2026-05-16T16:40:00Z", "url": "https://example.com/pull/104#discussion-sample-104-d" }
           ] },
           { "id": "sample-thread-104-c", "isResolved": false, "isOutdated": false, "path": ".github/workflows/dispatch-settings.yml", "line": 18, "comments": [
-            { "databaseId": "sample-comment-104-e", "author": { "login": "github-actions[bot]", "type": "Bot" }, "path": ".github/workflows/dispatch-settings.yml", "line": 18, "originalLine": 18, "createdAt": "2026-05-17T13:10:00Z", "updatedAt": "2026-05-17T13:10:00Z", "url": "https://example.com/pull/104#discussion-sample-104-e" }
+            { "databaseId": "sample-comment-104-e", "author": { "login": "sample-ci-bot", "type": "Bot" }, "path": ".github/workflows/dispatch-settings.yml", "line": 18, "originalLine": 18, "createdAt": "2026-05-17T13:10:00Z", "updatedAt": "2026-05-17T13:10:00Z", "url": "https://example.com/pull/104#discussion-sample-104-e" }
           ] }
         ]
       },
