@@ -430,6 +430,6 @@ Interactive setup explains profile choices in a way that helps users avoid the w
 - [x] Active
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged

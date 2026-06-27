@@ -8,7 +8,7 @@
 - Why it matters: First-time maintainers can understand when a generated profile may leave PR classes, file roles, or functional surfaces as `unknown`, while existing-profile updates avoid misleading setup output.
 - Who is affected: Maintainers and contributors running `--interactive` to create or update repository profiles.
 - Action needed: None.
-- PR: pending; replace with the pull request link after the PR is opened.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/64
 
 ### 2026-06-27 — Product Repository Override
 
