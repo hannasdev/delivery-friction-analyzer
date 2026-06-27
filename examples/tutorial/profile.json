@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "repository-profile.v1",
+  "repository": {
+    "owner": "example-org",
+    "name": "delivery-dashboard"
+  },
+  "rules": [
+    {
+      "id": "frontend-ui-paths",
+      "match": { "prefix": "apps/web/" },
+      "category": "code",
+      "role": "product_ui",
+      "functionalSurface": "dashboard_ui",
+      "generated": false,
+      "notes": "Maps the customer-facing dashboard app to the UI surface so broad UI changes are not treated as unknown code."
+    },
+    {
+      "id": "api-runtime-paths",
+      "match": { "prefix": "services/api/" },
+      "category": "code",
+      "role": "core_product_code",
+      "functionalSurface": "delivery_api",
+      "generated": false,
+      "notes": "Represents backend delivery workflow behavior that usually needs API-focused review."
+    },
+    {
+      "id": "worker-runtime-paths",
+      "match": { "prefix": "workers/" },
+      "category": "code",
+      "role": "core_product_code",
+      "functionalSurface": "background_jobs",
+      "generated": false
+    },
+    {
+      "id": "integration-tests",
+      "match": { "prefix": "tests/integration/" },
+      "category": "tests",
+      "role": "tests",
+      "functionalSurface": "test_suite",
+      "generated": false
+    },
+    {
+      "id": "workflow-config",
+      "match": { "prefix": ".github/workflows/" },
+      "category": "infrastructure",
+      "role": "infrastructure",
+      "functionalSurface": "ci_workflows",
+      "generated": false,
+      "notes": "Classifies CI workflow edits separately from product runtime changes."
+    },
+    {
+      "id": "planning-notes",
+      "match": { "prefix": "docs/initiatives/" },
+      "category": "docs",
+      "role": "planning_docs",
+      "functionalSurface": "planning",
+      "generated": false
+    },
+    {
+      "id": "release-notes",
+      "match": { "exact": "CHANGELOG.md" },
+      "category": "docs",
+      "role": "release_notes",
+      "functionalSurface": "release_docs",
+      "generated": false
+    },
+    {
+      "id": "generated-api-client",
+      "match": { "prefix": "packages/generated-client/" },
+      "category": "generated",
+      "role": "generated_or_vendored",
+      "functionalSurface": "generated_client",
+      "generated": true,
+      "notes": "Shows how generated code can stay visible while receiving low-signal weighting."
+    }
+  ],
+  "prClasses": [
+    {
+      "id": "feature-title",
+      "class": "feature",
+      "match": { "titleRegex": "^feat(?:\\([^)]+\\))?:" },
+      "notes": "Use when feature PR titles follow a Conventional Commit-style prefix."
+    },
+    {
+      "id": "fix-title",
+      "class": "fix",
+      "match": { "titleRegex": "^fix(?:\\([^)]+\\))?:" },
+      "notes": "Separates corrective work from feature delivery in the class distribution."
+    },
+    {
+      "id": "test-title",
+      "class": "test",
+      "match": { "titleRegex": "^test(?:\\([^)]+\\))?:" }
+    },
+    {
+      "id": "maintenance-title",
+      "class": "maintenance",
+      "match": { "titleRegex": "^(?:chore|ci|build|refactor)(?:\\([^)]+\\))?:" }
+    }
+  ],
+  "workflow": {
+    "primaryMergeMethod": "squash_merge",
+    "releaseStrategy": "release_prs",
+    "branchStrategy": "trunk_based"
+  },
+  "contributors": {
+    "sourceType": "all_contributors",
+    "path": ".all-contributorsrc"
+  }
+}

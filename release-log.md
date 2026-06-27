@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-27 — Tutorial Sample Bundle
+
+- What changed: Added the packaged tutorial sample source bundle, educational sample profile, and generated-aligned report excerpt for a fully synthetic repository.
+- Why it matters: Maintainers can review and ship a public-safe sample report experience without relying on private repository access or live GitHub data.
+- Who is affected: Maintainers preparing the tutorial sample experience and future users who inspect the bundled sample artifacts after sample CLI wiring lands.
+- Action needed: None.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/61
+
 ### 2026-06-26 — Generic Source Bundle Report Wording
 
 - What changed: Report Markdown, methodology-adjacent contract docs, and CSV coverage expectations now use generic source-bundle and source-family wording for `source-bundle.v1`, including `collectionCoverage.status` and `collectionCoverage.sourceFamilies`.

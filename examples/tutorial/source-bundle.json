@@ -1,0 +1,388 @@
+{
+  "schemaVersion": "source-bundle.v1",
+  "collectedAt": "2026-06-15T12:00:00Z",
+  "source": {
+    "kind": "sample",
+    "label": "Bundled synthetic sample, not live GitHub data",
+    "metadata": {
+      "tutorial": true,
+      "publicSafety": "fully synthetic placeholder data"
+    }
+  },
+  "collector": {
+    "name": "tutorial-sample-collector",
+    "provider": "bundled-sample"
+  },
+  "targetRepository": {
+    "owner": "example-org",
+    "name": "delivery-dashboard",
+    "defaultBranch": "main",
+    "visibility": "public",
+    "analysisPullRequestLimit": 4,
+    "isValidationTarget": false
+  },
+  "repositoryMetadata": {
+    "id": "sample-repository-001",
+    "name": "delivery-dashboard",
+    "owner": "example-org",
+    "fullName": "example-org/delivery-dashboard",
+    "defaultBranch": "main",
+    "visibility": "public",
+    "isPrivate": false,
+    "htmlUrl": "https://example.com/example-org/delivery-dashboard"
+  },
+  "selection": {
+    "strategy": "bundled_tutorial_pull_requests",
+    "requestedLimit": 4,
+    "collectedCount": 4,
+    "source": "bundled tutorial sample"
+  },
+  "coverage": {
+    "status": "partial",
+    "sourceFamilies": [
+      {
+        "family": "repository_metadata",
+        "source": "bundled tutorial sample",
+        "status": "available",
+        "attempts": 1,
+        "diagnostics": [],
+        "downstreamImpact": "Fictional repository identity is available for report labeling."
+      },
+      {
+        "family": "pull_request_inventory",
+        "source": "bundled tutorial sample",
+        "status": "available",
+        "attempts": 1,
+        "diagnostics": [],
+        "downstreamImpact": "Four fictional merged pull requests are available for normalization and metrics."
+      },
+      {
+        "family": "pull_request_details",
+        "source": "bundled tutorial sample",
+        "status": "available",
+        "attempts": 1,
+        "diagnostics": [],
+        "downstreamImpact": "Synthetic lifecycle, files, reviews, checks, and workflow summaries are populated."
+      },
+      {
+        "family": "review_threads",
+        "source": "bundled tutorial sample",
+        "status": "available",
+        "attempts": 1,
+        "diagnostics": [],
+        "downstreamImpact": "Review-thread counts and comment sources are populated without comment text."
+      },
+      {
+        "family": "workflow_runs",
+        "source": "bundled tutorial sample",
+        "status": "partial",
+        "attempts": 1,
+        "diagnostics": ["One PR intentionally has unavailable workflow-run history to demonstrate coverage caveats."],
+        "downstreamImpact": "Validation-gap metrics use observed runs where present and preserve unavailable coverage where missing."
+      },
+      {
+        "family": "pr_open_diff",
+        "source": "bundled tutorial sample",
+        "status": "partial",
+        "attempts": 1,
+        "diagnostics": ["One PR intentionally lacks PR-open diff data to demonstrate partial diff-growth coverage."],
+        "downstreamImpact": "Diff-growth ratios are computed only for PRs with open-time snapshots."
+      },
+      {
+        "family": "languages",
+        "source": "bundled tutorial sample",
+        "status": "available",
+        "attempts": 1,
+        "diagnostics": [],
+        "downstreamImpact": "Language distribution is illustrative context only."
+      },
+      {
+        "family": "contributor_source",
+        "source": "bundled tutorial sample",
+        "status": "partial",
+        "attempts": 1,
+        "diagnostics": ["Synthetic contributor hints omit one reviewer to demonstrate partial profile context."],
+        "downstreamImpact": "Contributor-aware comment-source hints are available; scoring and person-level outputs are unchanged."
+      }
+    ]
+  },
+  "languageDistribution": {
+    "source": "bundled tutorial sample",
+    "bytesByLanguage": {
+      "TypeScript": 420000,
+      "JavaScript": 180000,
+      "Markdown": 52000,
+      "YAML": 18000
+    },
+    "coverage": {
+      "family": "languages",
+      "source": "bundled tutorial sample",
+      "status": "available",
+      "attempts": 1,
+      "diagnostics": [],
+      "downstreamImpact": "Language distribution is illustrative context only."
+    }
+  },
+  "contributorSource": {
+    "sourceType": "all_contributors",
+    "path": ".all-contributorsrc",
+    "coverage": {
+      "family": "contributor_source",
+      "source": "bundled tutorial sample",
+      "status": "partial",
+      "attempts": 1,
+      "diagnostics": ["Synthetic contributor hints omit one reviewer to demonstrate partial profile context."],
+      "downstreamImpact": "Contributor-aware comment-source hints are available; scoring and person-level outputs are unchanged."
+    },
+    "hintCount": 3
+  },
+  "pullRequests": [
+    {
+      "number": 101,
+      "title": "feat: add route health dashboard",
+      "author": { "login": "sample-author-ui", "type": "User" },
+      "url": "https://example.com/pull/101",
+      "state": "MERGED",
+      "createdAt": "2026-05-04T09:00:00Z",
+      "mergedAt": "2026-05-05T16:30:00Z",
+      "updatedAt": "2026-05-05T16:45:00Z",
+      "baseRefName": "main",
+      "headRefName": "sample/route-health-dashboard",
+      "headRefOid": "sample101merge",
+      "additions": 410,
+      "deletions": 96,
+      "changedFiles": 5,
+      "prOpenDiff": { "source": "direct", "confidence": "high", "additions": 190, "deletions": 44, "changedFiles": 5 },
+      "commits": [
+        { "oid": "sample101a", "authoredDate": "2026-05-04T08:40:00Z", "committedDate": "2026-05-04T08:42:00Z", "messageHeadline": "feat: add route health dashboard" },
+        { "oid": "sample101b", "authoredDate": "2026-05-05T12:15:00Z", "committedDate": "2026-05-05T12:16:00Z", "messageHeadline": "test: cover delayed route states" }
+      ],
+      "files": [
+        { "path": "apps/web/src/routes/RouteHealthPanel.tsx", "additions": 140, "deletions": 22, "changeType": "ADDED" },
+        { "path": "apps/web/src/routes/RouteHealthChart.tsx", "additions": 94, "deletions": 16, "changeType": "ADDED" },
+        { "path": "services/api/src/routes/health-summary.ts", "additions": 78, "deletions": 18, "changeType": "MODIFIED" },
+        { "path": "tests/integration/route-health.test.ts", "additions": 82, "deletions": 20, "changeType": "ADDED" },
+        { "path": "CHANGELOG.md", "additions": 16, "deletions": 20, "changeType": "MODIFIED" }
+      ],
+      "reviews": [
+        { "id": "sample-review-101-a", "author": { "login": "sample-reviewer-a", "type": "User" }, "submittedAt": "2026-05-04T14:20:00Z", "state": "CHANGES_REQUESTED", "commitOid": "sample101a", "generatedCommentCount": 0, "failedAttempt": true },
+        { "id": "sample-review-101-b", "author": { "login": "sample-reviewer-a", "type": "User" }, "submittedAt": "2026-05-05T15:20:00Z", "state": "APPROVED", "commitOid": "sample101b", "generatedCommentCount": 0, "failedAttempt": false }
+      ],
+      "reviewThreads": {
+        "source": "bundled tutorial sample:review_threads",
+        "totalCount": 2,
+        "nodes": [
+          { "id": "sample-thread-101-a", "isResolved": true, "isOutdated": false, "path": "apps/web/src/routes/RouteHealthPanel.tsx", "line": 88, "comments": [
+            { "databaseId": "sample-comment-101-a", "author": { "login": "sample-reviewer-a", "type": "User" }, "path": "apps/web/src/routes/RouteHealthPanel.tsx", "line": 88, "originalLine": 88, "createdAt": "2026-05-04T14:21:00Z", "updatedAt": "2026-05-04T14:21:00Z", "url": "https://example.com/pull/101#discussion-sample-101-a" },
+            { "databaseId": "sample-comment-101-b", "author": { "login": "sample-author-ui", "type": "User" }, "path": "apps/web/src/routes/RouteHealthPanel.tsx", "line": 88, "originalLine": 88, "createdAt": "2026-05-05T12:18:00Z", "updatedAt": "2026-05-05T12:18:00Z", "url": "https://example.com/pull/101#discussion-sample-101-b" }
+          ] },
+          { "id": "sample-thread-101-b", "isResolved": true, "isOutdated": true, "path": "services/api/src/routes/health-summary.ts", "line": 41, "comments": [
+            { "databaseId": "sample-comment-101-c", "author": { "login": "sample-reviewer-b", "type": "User" }, "path": "services/api/src/routes/health-summary.ts", "line": 41, "originalLine": 41, "createdAt": "2026-05-04T15:02:00Z", "updatedAt": "2026-05-04T15:02:00Z", "url": "https://example.com/pull/101#discussion-sample-101-c" }
+          ] }
+        ]
+      },
+      "statusCheckRollup": [
+        { "__typename": "CheckRun", "name": "unit", "context": null, "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS", "startedAt": "2026-05-04T09:10:00Z", "completedAt": "2026-05-04T09:16:00Z" },
+        { "__typename": "CheckRun", "name": "integration", "context": null, "workflowName": "CI", "status": "COMPLETED", "conclusion": "FAILURE", "startedAt": "2026-05-04T09:12:00Z", "completedAt": "2026-05-04T09:24:00Z" },
+        { "__typename": "CheckRun", "name": "integration", "context": null, "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS", "startedAt": "2026-05-05T12:20:00Z", "completedAt": "2026-05-05T12:31:00Z" }
+      ],
+      "workflowRuns": {
+        "source": "bundled tutorial sample:workflow_runs",
+        "totalCount": 2,
+        "conclusions": { "success": 1, "failure": 1 },
+        "runs": [
+          { "id": "sample-run-101-a", "name": "CI", "workflowName": "CI", "headSha": "sample101a", "headBranch": "sample/route-health-dashboard", "event": "pull_request", "status": "completed", "conclusion": "failure", "createdAt": "2026-05-04T09:10:00Z", "updatedAt": "2026-05-04T09:24:00Z", "runStartedAt": "2026-05-04T09:12:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-101-a" },
+          { "id": "sample-run-101-b", "name": "CI", "workflowName": "CI", "headSha": "sample101b", "headBranch": "sample/route-health-dashboard", "event": "pull_request", "status": "completed", "conclusion": "success", "createdAt": "2026-05-05T12:20:00Z", "updatedAt": "2026-05-05T12:31:00Z", "runStartedAt": "2026-05-05T12:21:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-101-b" }
+        ]
+      },
+      "coverage": {
+        "prOpenDiff": { "family": "pr_open_diff", "source": "bundled tutorial sample", "status": "available", "attempts": 1, "diagnostics": [], "downstreamImpact": "Diff-growth metrics can compare open and merge sizes." },
+        "reviewThreads": { "family": "review_threads", "source": "bundled tutorial sample", "status": "available", "attempts": 1, "diagnostics": [], "downstreamImpact": "Review-thread evidence is available." },
+        "workflowRuns": { "family": "workflow_runs", "source": "bundled tutorial sample", "status": "available", "attempts": 1, "diagnostics": [], "downstreamImpact": "Workflow-run evidence is available." }
+      }
+    },
+    {
+      "number": 102,
+      "title": "fix: retry stalled dispatch jobs",
+      "author": { "login": "sample-author-api", "type": "User" },
+      "url": "https://example.com/pull/102",
+      "state": "MERGED",
+      "createdAt": "2026-05-07T10:00:00Z",
+      "mergedAt": "2026-05-07T18:10:00Z",
+      "updatedAt": "2026-05-07T18:20:00Z",
+      "baseRefName": "main",
+      "headRefName": "sample/retry-dispatch-jobs",
+      "headRefOid": "sample102merge",
+      "additions": 126,
+      "deletions": 34,
+      "changedFiles": 4,
+      "prOpenDiff": { "source": "direct", "confidence": "high", "additions": 120, "deletions": 30, "changedFiles": 4 },
+      "commits": [
+        { "oid": "sample102a", "authoredDate": "2026-05-07T09:45:00Z", "committedDate": "2026-05-07T09:46:00Z", "messageHeadline": "fix: retry stalled dispatch jobs" },
+        { "oid": "sample102b", "authoredDate": "2026-05-07T15:10:00Z", "committedDate": "2026-05-07T15:12:00Z", "messageHeadline": "test: cover retry backoff" }
+      ],
+      "files": [
+        { "path": "workers/dispatch/retry.ts", "additions": 58, "deletions": 18, "changeType": "MODIFIED" },
+        { "path": "services/api/src/jobs/dispatch.ts", "additions": 24, "deletions": 8, "changeType": "MODIFIED" },
+        { "path": "tests/integration/dispatch-retry.test.ts", "additions": 42, "deletions": 8, "changeType": "ADDED" },
+        { "path": "docs/initiatives/retry-jobs/checklist.md", "additions": 2, "deletions": 0, "changeType": "ADDED" }
+      ],
+      "reviews": [
+        { "id": "sample-review-102-a", "author": { "login": "sample-reviewer-b", "type": "User" }, "submittedAt": "2026-05-07T13:00:00Z", "state": "COMMENTED", "commitOid": "sample102a", "generatedCommentCount": 0, "failedAttempt": false },
+        { "id": "sample-review-102-b", "author": { "login": "sample-reviewer-b", "type": "User" }, "submittedAt": "2026-05-07T17:40:00Z", "state": "APPROVED", "commitOid": "sample102b", "generatedCommentCount": 0, "failedAttempt": false }
+      ],
+      "reviewThreads": {
+        "source": "bundled tutorial sample:review_threads",
+        "totalCount": 1,
+        "nodes": [
+          { "id": "sample-thread-102-a", "isResolved": true, "isOutdated": false, "path": "workers/dispatch/retry.ts", "line": 30, "comments": [
+            { "databaseId": "sample-comment-102-a", "author": { "login": "sample-reviewer-b", "type": "User" }, "path": "workers/dispatch/retry.ts", "line": 30, "originalLine": 30, "createdAt": "2026-05-07T13:01:00Z", "updatedAt": "2026-05-07T13:01:00Z", "url": "https://example.com/pull/102#discussion-sample-102-a" },
+            { "databaseId": "sample-comment-102-b", "author": { "login": "sample-author-api", "type": "User" }, "path": "workers/dispatch/retry.ts", "line": 30, "originalLine": 30, "createdAt": "2026-05-07T15:15:00Z", "updatedAt": "2026-05-07T15:15:00Z", "url": "https://example.com/pull/102#discussion-sample-102-b" }
+          ] }
+        ]
+      },
+      "statusCheckRollup": [
+        { "__typename": "CheckRun", "name": "unit", "context": null, "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS", "startedAt": "2026-05-07T10:10:00Z", "completedAt": "2026-05-07T10:16:00Z" }
+      ],
+      "workflowRuns": {
+        "source": "bundled tutorial sample:workflow_runs",
+        "totalCount": 1,
+        "conclusions": { "success": 1 },
+        "runs": [
+          { "id": "sample-run-102-a", "name": "CI", "workflowName": "CI", "headSha": "sample102b", "headBranch": "sample/retry-dispatch-jobs", "event": "pull_request", "status": "completed", "conclusion": "success", "createdAt": "2026-05-07T15:20:00Z", "updatedAt": "2026-05-07T15:29:00Z", "runStartedAt": "2026-05-07T15:21:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-102-a" }
+        ]
+      },
+      "coverage": {
+        "prOpenDiff": { "family": "pr_open_diff", "source": "bundled tutorial sample", "status": "available", "attempts": 1, "diagnostics": [], "downstreamImpact": "Diff-growth metrics can compare open and merge sizes." },
+        "reviewThreads": { "family": "review_threads", "source": "bundled tutorial sample", "status": "available", "attempts": 1, "diagnostics": [], "downstreamImpact": "Review-thread evidence is available." },
+        "workflowRuns": { "family": "workflow_runs", "source": "bundled tutorial sample", "status": "available", "attempts": 1, "diagnostics": [], "downstreamImpact": "Workflow-run evidence is available." }
+      }
+    },
+    {
+      "number": 103,
+      "title": "test: add billing webhook contract coverage",
+      "author": { "login": "sample-author-test", "type": "User" },
+      "url": "https://example.com/pull/103",
+      "state": "MERGED",
+      "createdAt": "2026-05-10T11:00:00Z",
+      "mergedAt": "2026-05-10T14:40:00Z",
+      "updatedAt": "2026-05-10T14:45:00Z",
+      "baseRefName": "main",
+      "headRefName": "sample/billing-webhook-tests",
+      "headRefOid": "sample103merge",
+      "additions": 88,
+      "deletions": 10,
+      "changedFiles": 3,
+      "prOpenDiff": { "source": "unavailable", "confidence": "unavailable", "reason": "Open-time snapshot intentionally omitted from the bundled sample." },
+      "commits": [
+        { "oid": "sample103a", "authoredDate": "2026-05-10T10:40:00Z", "committedDate": "2026-05-10T10:41:00Z", "messageHeadline": "test: add billing webhook contract coverage" }
+      ],
+      "files": [
+        { "path": "tests/integration/billing-webhooks.test.ts", "additions": 72, "deletions": 4, "changeType": "ADDED" },
+        { "path": "services/api/src/billing/webhook-fixtures.ts", "additions": 10, "deletions": 4, "changeType": "MODIFIED" },
+        { "path": "packages/generated-client/billing.ts", "additions": 6, "deletions": 2, "changeType": "MODIFIED" }
+      ],
+      "reviews": [
+        { "id": "sample-review-103-a", "author": { "login": "sample-reviewer-a", "type": "User" }, "submittedAt": "2026-05-10T13:30:00Z", "state": "APPROVED", "commitOid": "sample103a", "generatedCommentCount": 0, "failedAttempt": false }
+      ],
+      "reviewThreads": { "source": "bundled tutorial sample:review_threads", "totalCount": 0, "nodes": [] },
+      "statusCheckRollup": [
+        { "__typename": "CheckRun", "name": "unit", "context": null, "workflowName": "CI", "status": "COMPLETED", "conclusion": "SUCCESS", "startedAt": "2026-05-10T11:10:00Z", "completedAt": "2026-05-10T11:15:00Z" }
+      ],
+      "workflowRuns": {
+        "source": "unavailable",
+        "totalCount": null,
+        "conclusions": {},
+        "runs": []
+      },
+      "coverage": {
+        "prOpenDiff": { "family": "pr_open_diff", "source": "bundled tutorial sample", "status": "unavailable", "attempts": 1, "diagnostics": ["Open-time snapshot intentionally omitted from the bundled sample."], "downstreamImpact": "Diff-growth metrics are unavailable for this PR." },
+        "reviewThreads": { "family": "review_threads", "source": "bundled tutorial sample", "status": "available", "attempts": 1, "diagnostics": [], "downstreamImpact": "Review-thread evidence is available and shows zero threads." },
+        "workflowRuns": { "family": "workflow_runs", "source": "bundled tutorial sample", "status": "unavailable", "attempts": 1, "diagnostics": ["Workflow-run history intentionally omitted for this PR."], "downstreamImpact": "Validation-gap metrics preserve unavailable workflow coverage." }
+      }
+    },
+    {
+      "number": 104,
+      "title": "feat: consolidate dispatch settings",
+      "author": { "login": "sample-author-platform", "type": "User" },
+      "url": "https://example.com/pull/104",
+      "state": "MERGED",
+      "createdAt": "2026-05-14T08:00:00Z",
+      "mergedAt": "2026-05-17T19:00:00Z",
+      "updatedAt": "2026-05-17T19:15:00Z",
+      "baseRefName": "main",
+      "headRefName": "sample/consolidate-dispatch-settings",
+      "headRefOid": "sample104merge",
+      "additions": 980,
+      "deletions": 420,
+      "changedFiles": 8,
+      "prOpenDiff": { "source": "direct", "confidence": "high", "additions": 260, "deletions": 90, "changedFiles": 6 },
+      "commits": [
+        { "oid": "sample104a", "authoredDate": "2026-05-14T07:45:00Z", "committedDate": "2026-05-14T07:46:00Z", "messageHeadline": "feat: consolidate dispatch settings" },
+        { "oid": "sample104b", "authoredDate": "2026-05-15T10:20:00Z", "committedDate": "2026-05-15T10:22:00Z", "messageHeadline": "fix: split overloaded settings model" },
+        { "oid": "sample104c", "authoredDate": "2026-05-16T16:30:00Z", "committedDate": "2026-05-16T16:31:00Z", "messageHeadline": "test: cover settings migration" },
+        { "oid": "sample104d", "authoredDate": "2026-05-17T13:00:00Z", "committedDate": "2026-05-17T13:02:00Z", "messageHeadline": "ci: repair migration fixture" }
+      ],
+      "files": [
+        { "path": "apps/web/src/settings/DispatchSettingsPage.tsx", "additions": 210, "deletions": 90, "changeType": "MODIFIED" },
+        { "path": "apps/web/src/settings/DispatchSettingsForm.tsx", "additions": 180, "deletions": 70, "changeType": "ADDED" },
+        { "path": "services/api/src/settings/dispatch-settings.ts", "additions": 190, "deletions": 88, "changeType": "MODIFIED" },
+        { "path": "workers/dispatch/settings-sync.ts", "additions": 150, "deletions": 64, "changeType": "ADDED" },
+        { "path": "tests/integration/dispatch-settings.test.ts", "additions": 120, "deletions": 30, "changeType": "ADDED" },
+        { "path": ".github/workflows/dispatch-settings.yml", "additions": 62, "deletions": 20, "changeType": "ADDED" },
+        { "path": "docs/initiatives/dispatch-settings/prd.md", "additions": 48, "deletions": 22, "changeType": "MODIFIED" },
+        { "path": "packages/generated-client/settings.ts", "additions": 20, "deletions": 36, "changeType": "MODIFIED" }
+      ],
+      "reviews": [
+        { "id": "sample-review-104-a", "author": { "login": "sample-reviewer-a", "type": "User" }, "submittedAt": "2026-05-14T16:00:00Z", "state": "CHANGES_REQUESTED", "commitOid": "sample104a", "generatedCommentCount": 0, "failedAttempt": true },
+        { "id": "sample-review-104-b", "author": { "login": "sample-reviewer-b", "type": "User" }, "submittedAt": "2026-05-15T14:00:00Z", "state": "CHANGES_REQUESTED", "commitOid": "sample104b", "generatedCommentCount": 0, "failedAttempt": true },
+        { "id": "sample-review-104-c", "author": { "login": "sample-reviewer-a", "type": "User" }, "submittedAt": "2026-05-16T18:30:00Z", "state": "COMMENTED", "commitOid": "sample104c", "generatedCommentCount": 0, "failedAttempt": false },
+        { "id": "sample-review-104-d", "author": { "login": "sample-reviewer-b", "type": "User" }, "submittedAt": "2026-05-17T17:45:00Z", "state": "APPROVED", "commitOid": "sample104d", "generatedCommentCount": 0, "failedAttempt": false }
+      ],
+      "reviewThreads": {
+        "source": "bundled tutorial sample:review_threads",
+        "totalCount": 3,
+        "nodes": [
+          { "id": "sample-thread-104-a", "isResolved": true, "isOutdated": true, "path": "services/api/src/settings/dispatch-settings.ts", "line": 65, "comments": [
+            { "databaseId": "sample-comment-104-a", "author": { "login": "sample-reviewer-a", "type": "User" }, "path": "services/api/src/settings/dispatch-settings.ts", "line": 65, "originalLine": 65, "createdAt": "2026-05-14T16:02:00Z", "updatedAt": "2026-05-14T16:02:00Z", "url": "https://example.com/pull/104#discussion-sample-104-a" },
+            { "databaseId": "sample-comment-104-b", "author": { "login": "sample-author-platform", "type": "User" }, "path": "services/api/src/settings/dispatch-settings.ts", "line": 65, "originalLine": 65, "createdAt": "2026-05-15T10:24:00Z", "updatedAt": "2026-05-15T10:24:00Z", "url": "https://example.com/pull/104#discussion-sample-104-b" }
+          ] },
+          { "id": "sample-thread-104-b", "isResolved": true, "isOutdated": false, "path": "apps/web/src/settings/DispatchSettingsForm.tsx", "line": 112, "comments": [
+            { "databaseId": "sample-comment-104-c", "author": { "login": "sample-reviewer-b", "type": "User" }, "path": "apps/web/src/settings/DispatchSettingsForm.tsx", "line": 112, "originalLine": 112, "createdAt": "2026-05-15T14:05:00Z", "updatedAt": "2026-05-15T14:05:00Z", "url": "https://example.com/pull/104#discussion-sample-104-c" },
+            { "databaseId": "sample-comment-104-d", "author": { "login": "sample-author-platform", "type": "User" }, "path": "apps/web/src/settings/DispatchSettingsForm.tsx", "line": 112, "originalLine": 112, "createdAt": "2026-05-16T16:40:00Z", "updatedAt": "2026-05-16T16:40:00Z", "url": "https://example.com/pull/104#discussion-sample-104-d" }
+          ] },
+          { "id": "sample-thread-104-c", "isResolved": false, "isOutdated": false, "path": ".github/workflows/dispatch-settings.yml", "line": 18, "comments": [
+            { "databaseId": "sample-comment-104-e", "author": { "login": "sample-ci-bot", "type": "Bot" }, "path": ".github/workflows/dispatch-settings.yml", "line": 18, "originalLine": 18, "createdAt": "2026-05-17T13:10:00Z", "updatedAt": "2026-05-17T13:10:00Z", "url": "https://example.com/pull/104#discussion-sample-104-e" }
+          ] }
+        ]
+      },
+      "statusCheckRollup": [
+        { "__typename": "CheckRun", "name": "unit", "context": null, "workflowName": "CI", "status": "COMPLETED", "conclusion": "FAILURE", "startedAt": "2026-05-14T08:10:00Z", "completedAt": "2026-05-14T08:16:00Z" },
+        { "__typename": "CheckRun", "name": "integration", "context": null, "workflowName": "CI", "status": "COMPLETED", "conclusion": "FAILURE", "startedAt": "2026-05-14T08:12:00Z", "completedAt": "2026-05-14T08:28:00Z" },
+        { "__typename": "CheckRun", "name": "migration", "context": null, "workflowName": "Migration checks", "status": "COMPLETED", "conclusion": "SUCCESS", "startedAt": "2026-05-17T13:10:00Z", "completedAt": "2026-05-17T13:24:00Z" }
+      ],
+      "workflowRuns": {
+        "source": "bundled tutorial sample:workflow_runs",
+        "totalCount": 4,
+        "conclusions": { "success": 1, "failure": 2, "cancelled": 1 },
+        "runs": [
+          { "id": "sample-run-104-a", "name": "CI", "workflowName": "CI", "headSha": "sample104a", "headBranch": "sample/consolidate-dispatch-settings", "event": "pull_request", "status": "completed", "conclusion": "failure", "createdAt": "2026-05-14T08:10:00Z", "updatedAt": "2026-05-14T08:28:00Z", "runStartedAt": "2026-05-14T08:12:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-104-a" },
+          { "id": "sample-run-104-b", "name": "CI", "workflowName": "CI", "headSha": "sample104b", "headBranch": "sample/consolidate-dispatch-settings", "event": "pull_request", "status": "completed", "conclusion": "failure", "createdAt": "2026-05-15T10:30:00Z", "updatedAt": "2026-05-15T10:48:00Z", "runStartedAt": "2026-05-15T10:31:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-104-b" },
+          { "id": "sample-run-104-c", "name": "CI", "workflowName": "CI", "headSha": "sample104c", "headBranch": "sample/consolidate-dispatch-settings", "event": "pull_request", "status": "completed", "conclusion": "cancelled", "createdAt": "2026-05-16T16:36:00Z", "updatedAt": "2026-05-16T16:39:00Z", "runStartedAt": "2026-05-16T16:37:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-104-c" },
+          { "id": "sample-run-104-d", "name": "Migration checks", "workflowName": "Migration checks", "headSha": "sample104d", "headBranch": "sample/consolidate-dispatch-settings", "event": "pull_request", "status": "completed", "conclusion": "success", "createdAt": "2026-05-17T13:10:00Z", "updatedAt": "2026-05-17T13:24:00Z", "runStartedAt": "2026-05-17T13:11:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-104-d" }
+        ]
+      },
+      "coverage": {
+        "prOpenDiff": { "family": "pr_open_diff", "source": "bundled tutorial sample", "status": "available", "attempts": 1, "diagnostics": [], "downstreamImpact": "Diff-growth metrics can compare open and merge sizes." },
+        "reviewThreads": { "family": "review_threads", "source": "bundled tutorial sample", "status": "available", "attempts": 1, "diagnostics": [], "downstreamImpact": "Review-thread evidence is available." },
+        "workflowRuns": { "family": "workflow_runs", "source": "bundled tutorial sample", "status": "partial", "attempts": 1, "diagnostics": ["One cancelled run is included to demonstrate validation caveats."], "downstreamImpact": "Validation-gap metrics include observed failed and cancelled workflow runs." }
+      }
+    }
+  ],
+  "raw": {
+    "sample": {
+      "description": "Fictional tutorial data for Delivery Friction Analyzer.",
+      "containsPrivateData": false
+    }
+  }
+}

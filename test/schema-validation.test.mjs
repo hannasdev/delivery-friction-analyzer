@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 import { computePullRequestMetrics } from "../src/metrics/friction.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
@@ -15,6 +15,34 @@ function sourceBundleSchemas(sourceBundleSchema, targetSchema) {
     schema: sourceBundleSchema,
     refs: { "target-repository.schema.json": targetSchema },
   };
+}
+
+function countWorkflowConclusions(runs) {
+  return runs.reduce((counts, run) => {
+    if (run.conclusion) {
+      counts[run.conclusion] = (counts[run.conclusion] ?? 0) + 1;
+    }
+    return counts;
+  }, {});
+}
+
+async function readTextFilesUnder(directoryUrl) {
+  const entries = await readdir(directoryUrl, { withFileTypes: true });
+  const fileTexts = [];
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      fileTexts.push(...await readTextFilesUnder(new URL(`${entry.name}/`, directoryUrl)));
+    } else if (entry.isFile()) {
+      fileTexts.push(await readFile(new URL(entry.name, directoryUrl), "utf8"));
+    }
+  }
+
+  return fileTexts;
+}
+
+function urlsFromText(text) {
+  return [...text.matchAll(/https:\/\/[^\s"),]+/g)].map(match => new URL(match[0]));
 }
 
 const GRAPHQL_REVIEW_THREADS_SOURCE = "graphql:repository.pullRequest.reviewThreads";
@@ -387,6 +415,17 @@ describe("repository profile schema", () => {
 
     assert.deepEqual(validateSchema(selfProfile, schema, {}), []);
   });
+
+  it("keeps the tutorial sample profile schema-valid with educational notes", async () => {
+    const [schema, sampleProfile] = await Promise.all([
+      readJson("../schemas/repository-profile.schema.json"),
+      readJson("../examples/tutorial/profile.json"),
+    ]);
+
+    assert.deepEqual(validateSchema(sampleProfile, schema, {}), []);
+    assert(sampleProfile.rules.some(rule => typeof rule.notes === "string" && rule.notes.includes("surface")));
+    assert(sampleProfile.prClasses.some(rule => typeof rule.notes === "string" && rule.notes.includes("Conventional Commit")));
+  });
 });
 
 describe("source bundle schema", () => {
@@ -430,6 +469,81 @@ describe("source bundle schema", () => {
     bundle.languageDistribution.coverage.source = "bundled tutorial sample";
 
     assert.deepEqual(validateSchema(bundle, schema, refs), []);
+  });
+
+  it("validates the tutorial sample source bundle contract", async () => {
+    const [sourceBundleSchema, targetSchema, bundle] = await Promise.all([
+      readJson("../schemas/source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+      readJson("../examples/tutorial/source-bundle.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+
+    assertSchemaValid({
+      artifact: "examples/tutorial/source-bundle.json",
+      schemaPath: "schemas/source-bundle.schema.json",
+      value: bundle,
+      schema,
+      refs,
+    });
+    assert.equal(bundle.source.kind, "sample");
+    assert.equal(bundle.source.label, "Bundled synthetic sample, not live GitHub data");
+    assert.equal(bundle.coverage.status, "partial");
+    assert(bundle.coverage.sourceFamilies.some(family => family.status === "partial"));
+
+    for (const pullRequest of bundle.pullRequests) {
+      assert.equal(
+        pullRequest.changedFiles,
+        pullRequest.files.length,
+        `PR #${pullRequest.number} changedFiles should match listed file rows`,
+      );
+
+      if (Array.isArray(pullRequest.reviewThreads?.nodes)) {
+        assert.equal(
+          pullRequest.reviewThreads.totalCount,
+          pullRequest.reviewThreads.nodes.length,
+          `PR #${pullRequest.number} reviewThreads.totalCount should match listed rows`,
+        );
+      }
+
+      if (
+        Array.isArray(pullRequest.workflowRuns?.runs)
+        && pullRequest.workflowRuns.totalCount !== null
+      ) {
+        assert.equal(
+          pullRequest.workflowRuns.totalCount,
+          pullRequest.workflowRuns.runs.length,
+          `PR #${pullRequest.number} workflowRuns.totalCount should match listed rows`,
+        );
+        assert.deepEqual(
+          pullRequest.workflowRuns.conclusions,
+          countWorkflowConclusions(pullRequest.workflowRuns.runs),
+          `PR #${pullRequest.number} workflowRuns.conclusions should match listed rows`,
+        );
+      }
+    }
+  });
+
+  it("keeps tutorial sample data public-safe and package-eligible", async () => {
+    const tutorialDir = new URL("../examples/tutorial/", import.meta.url);
+    const [fileTexts, packageJson] = await Promise.all([
+      readTextFilesUnder(tutorialDir),
+      readJson("../package.json"),
+    ]);
+    const combined = fileTexts.join("\n");
+
+    assert(packageJson.files.includes("examples/tutorial"));
+    assert(!combined.includes("hannasdev"));
+    assert(!combined.includes("mcp-writing"));
+    assert(!urlsFromText(combined).some(url =>
+      url.hostname === "github.com" || url.hostname.endsWith(".github.com")
+    ));
+    assert(!combined.includes("github-actions"));
+    assert(!combined.includes("ghp_"));
+    assert(!combined.includes("sk-"));
+    assert(!combined.includes("/Users/"));
+    assert(!combined.includes("raw comment"));
+    assert.match(combined, /https:\/\/example\.com\/pull\/10[1-4]/);
   });
 
   it("rejects legacy github-source-bundle.v1 artifacts instead of silently accepting them", async () => {
