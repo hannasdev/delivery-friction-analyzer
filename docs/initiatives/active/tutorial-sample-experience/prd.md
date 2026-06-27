@@ -7,7 +7,7 @@
 - Owner: Hanna
 - Created: 2026-06-22
 - Activated: 2026-06-23
-- Current milestone: M2, Generic Source Bundle Contract
+- Current milestone: M3, Deterministic Synthetic Sample Bundle
 - Related issue:
   - None yet.
 - Related docs:

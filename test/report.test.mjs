@@ -1790,7 +1790,9 @@ describe("friction report generation", () => {
     assert(markdown.startsWith("# Repository Friction Report: example-org/delivery-dashboard"));
     assert(markdown.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
     assert(markdown.includes("## Executive Summary"));
+    assert(markdown.includes("| Top findings | Review churn, Repo guidance gap, Change scope |"));
     assert(markdown.includes("## Focus Snapshot"));
+    assert(markdown.includes("| Focus first | Review churn, Repo guidance gap, Change scope |"));
     assert(markdown.includes("Change scope"));
     assert(markdown.includes("Validation gap"));
     assert(markdown.includes("Review churn"));
@@ -1811,6 +1813,8 @@ describe("friction report generation", () => {
     assert(csvArtifacts.prMetricsCsv.includes("104,feat: consolidate dispatch settings,https://example.com/pull/104,feature,repository_profile,feature-title,1400"));
     assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,partial,1,bundled tutorial sample"));
     assert(excerpt.includes("Bundled synthetic sample, not live GitHub data"));
+    assert(excerpt.includes("Review churn, Repo guidance gap, and Change scope"));
+    assert(!excerpt.includes("change scope, validation gap, and review churn"));
     assert(excerpt.includes("PR #104 is intentionally broad and outlier-sensitive"));
   });
 

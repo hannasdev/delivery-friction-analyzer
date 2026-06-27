@@ -131,11 +131,11 @@ The analyzer has a generic `source-bundle.v1` contract that honestly represents 
 ### Status
 
 - [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
+- [x] Merged
 
 ## M3: Deterministic Synthetic Sample Bundle
 
@@ -207,8 +207,8 @@ The repository contains a public-safe, fully synthetic sample repository profile
 ### Status
 
 - [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
+- [x] Implemented
+- [x] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
 - [ ] Merged
