@@ -289,7 +289,7 @@ describe("mcp-writing compact fixture normalization", () => {
     assert.equal(broadPr.files.byFunctionalSurface.delivery_api, 278);
     assert.equal(broadPr.files.byFunctionalSurface.background_jobs, 214);
     assert.equal(broadPr.files.functionalSurfaces, 6);
-    assert.equal(broadPr.review.threads.totalCount, 12);
+    assert.equal(broadPr.review.threads.totalCount, 3);
     assert.equal(broadPr.ci.workflowRuns.failedCount, 2);
     assert.equal(broadPr.ci.workflowRuns.cancelledCount, 1);
     assert.equal(broadPr.components.diffGrowthRatio.value, 4);

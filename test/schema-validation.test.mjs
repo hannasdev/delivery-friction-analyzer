@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 import { computePullRequestMetrics } from "../src/metrics/friction.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
@@ -15,6 +15,30 @@ function sourceBundleSchemas(sourceBundleSchema, targetSchema) {
     schema: sourceBundleSchema,
     refs: { "target-repository.schema.json": targetSchema },
   };
+}
+
+function countWorkflowConclusions(runs) {
+  return runs.reduce((counts, run) => {
+    if (run.conclusion) {
+      counts[run.conclusion] = (counts[run.conclusion] ?? 0) + 1;
+    }
+    return counts;
+  }, {});
+}
+
+async function readTextFilesUnder(directoryUrl) {
+  const entries = await readdir(directoryUrl, { withFileTypes: true });
+  const fileTexts = [];
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      fileTexts.push(...await readTextFilesUnder(new URL(`${entry.name}/`, directoryUrl)));
+    } else if (entry.isFile()) {
+      fileTexts.push(await readFile(new URL(entry.name, directoryUrl), "utf8"));
+    }
+  }
+
+  return fileTexts;
 }
 
 const GRAPHQL_REVIEW_THREADS_SOURCE = "graphql:repository.pullRequest.reviewThreads";
@@ -462,15 +486,41 @@ describe("source bundle schema", () => {
     assert.equal(bundle.source.label, "Bundled synthetic sample, not live GitHub data");
     assert.equal(bundle.coverage.status, "partial");
     assert(bundle.coverage.sourceFamilies.some(family => family.status === "partial"));
+
+    for (const pullRequest of bundle.pullRequests) {
+      if (Array.isArray(pullRequest.reviewThreads?.nodes)) {
+        assert.equal(
+          pullRequest.reviewThreads.totalCount,
+          pullRequest.reviewThreads.nodes.length,
+          `PR #${pullRequest.number} reviewThreads.totalCount should match listed rows`,
+        );
+      }
+
+      if (
+        Array.isArray(pullRequest.workflowRuns?.runs)
+        && pullRequest.workflowRuns.totalCount !== null
+      ) {
+        assert.equal(
+          pullRequest.workflowRuns.totalCount,
+          pullRequest.workflowRuns.runs.length,
+          `PR #${pullRequest.number} workflowRuns.totalCount should match listed rows`,
+        );
+        assert.deepEqual(
+          pullRequest.workflowRuns.conclusions,
+          countWorkflowConclusions(pullRequest.workflowRuns.runs),
+          `PR #${pullRequest.number} workflowRuns.conclusions should match listed rows`,
+        );
+      }
+    }
   });
 
   it("keeps tutorial sample data public-safe and package-eligible", async () => {
-    const [bundleText, profileText, packageJson] = await Promise.all([
-      readFile(new URL("../examples/tutorial/source-bundle.json", import.meta.url), "utf8"),
-      readFile(new URL("../examples/tutorial/profile.json", import.meta.url), "utf8"),
+    const tutorialDir = new URL("../examples/tutorial/", import.meta.url);
+    const [fileTexts, packageJson] = await Promise.all([
+      readTextFilesUnder(tutorialDir),
       readJson("../package.json"),
     ]);
-    const combined = `${bundleText}\n${profileText}`;
+    const combined = fileTexts.join("\n");
 
     assert(packageJson.files.includes("examples/tutorial"));
     assert(!combined.includes("hannasdev"));

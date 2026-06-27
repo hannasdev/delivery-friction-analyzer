@@ -170,7 +170,7 @@
       ],
       "reviewThreads": {
         "source": "bundled tutorial sample:review_threads",
-        "totalCount": 4,
+        "totalCount": 2,
         "nodes": [
           { "id": "sample-thread-101-a", "isResolved": true, "isOutdated": false, "path": "apps/web/src/routes/RouteHealthPanel.tsx", "line": 88, "comments": [
             { "databaseId": "sample-comment-101-a", "author": { "login": "sample-reviewer-a", "type": "User" }, "path": "apps/web/src/routes/RouteHealthPanel.tsx", "line": 88, "originalLine": 88, "createdAt": "2026-05-04T14:21:00Z", "updatedAt": "2026-05-04T14:21:00Z", "url": "https://example.com/pull/101#discussion-sample-101-a" },
@@ -188,8 +188,8 @@
       ],
       "workflowRuns": {
         "source": "bundled tutorial sample:workflow_runs",
-        "totalCount": 3,
-        "conclusions": { "success": 2, "failure": 1 },
+        "totalCount": 2,
+        "conclusions": { "success": 1, "failure": 1 },
         "runs": [
           { "id": "sample-run-101-a", "name": "CI", "workflowName": "CI", "headSha": "sample101a", "headBranch": "sample/route-health-dashboard", "event": "pull_request", "status": "completed", "conclusion": "failure", "createdAt": "2026-05-04T09:10:00Z", "updatedAt": "2026-05-04T09:24:00Z", "runStartedAt": "2026-05-04T09:12:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-101-a" },
           { "id": "sample-run-101-b", "name": "CI", "workflowName": "CI", "headSha": "sample101b", "headBranch": "sample/route-health-dashboard", "event": "pull_request", "status": "completed", "conclusion": "success", "createdAt": "2026-05-05T12:20:00Z", "updatedAt": "2026-05-05T12:31:00Z", "runStartedAt": "2026-05-05T12:21:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-101-b" }
@@ -233,7 +233,7 @@
       ],
       "reviewThreads": {
         "source": "bundled tutorial sample:review_threads",
-        "totalCount": 2,
+        "totalCount": 1,
         "nodes": [
           { "id": "sample-thread-102-a", "isResolved": true, "isOutdated": false, "path": "workers/dispatch/retry.ts", "line": 30, "comments": [
             { "databaseId": "sample-comment-102-a", "author": { "login": "sample-reviewer-b", "type": "User" }, "path": "workers/dispatch/retry.ts", "line": 30, "originalLine": 30, "createdAt": "2026-05-07T13:01:00Z", "updatedAt": "2026-05-07T13:01:00Z", "url": "https://example.com/pull/102#discussion-sample-102-a" },
@@ -341,7 +341,7 @@
       ],
       "reviewThreads": {
         "source": "bundled tutorial sample:review_threads",
-        "totalCount": 12,
+        "totalCount": 3,
         "nodes": [
           { "id": "sample-thread-104-a", "isResolved": true, "isOutdated": true, "path": "services/api/src/settings/dispatch-settings.ts", "line": 65, "comments": [
             { "databaseId": "sample-comment-104-a", "author": { "login": "sample-reviewer-a", "type": "User" }, "path": "services/api/src/settings/dispatch-settings.ts", "line": 65, "originalLine": 65, "createdAt": "2026-05-14T16:02:00Z", "updatedAt": "2026-05-14T16:02:00Z", "url": "https://example.com/pull/104#discussion-sample-104-a" },
@@ -363,8 +363,8 @@
       ],
       "workflowRuns": {
         "source": "bundled tutorial sample:workflow_runs",
-        "totalCount": 5,
-        "conclusions": { "success": 2, "failure": 2, "cancelled": 1 },
+        "totalCount": 4,
+        "conclusions": { "success": 1, "failure": 2, "cancelled": 1 },
         "runs": [
           { "id": "sample-run-104-a", "name": "CI", "workflowName": "CI", "headSha": "sample104a", "headBranch": "sample/consolidate-dispatch-settings", "event": "pull_request", "status": "completed", "conclusion": "failure", "createdAt": "2026-05-14T08:10:00Z", "updatedAt": "2026-05-14T08:28:00Z", "runStartedAt": "2026-05-14T08:12:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-104-a" },
           { "id": "sample-run-104-b", "name": "CI", "workflowName": "CI", "headSha": "sample104b", "headBranch": "sample/consolidate-dispatch-settings", "event": "pull_request", "status": "completed", "conclusion": "failure", "createdAt": "2026-05-15T10:30:00Z", "updatedAt": "2026-05-15T10:48:00Z", "runStartedAt": "2026-05-15T10:31:00Z", "htmlUrl": "https://example.com/actions/runs/sample-run-104-b" },
