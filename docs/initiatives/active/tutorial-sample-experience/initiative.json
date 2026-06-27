@@ -42,8 +42,9 @@
       "mergedAt": "2026-06-27"
     },
     "M6": {
-      "state": "active",
-      "startedAt": "2026-06-27"
+      "state": "implemented",
+      "startedAt": "2026-06-27",
+      "implemented": true
     }
   }
 }

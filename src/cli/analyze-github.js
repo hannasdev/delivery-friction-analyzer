@@ -36,6 +36,9 @@ const RUN_PRESET_SCHEMA_VERSION = "analyze-github-run-preset.v1";
 const SAMPLE_SOURCE_LABEL = "Bundled synthetic sample, not live GitHub data";
 const SAMPLE_SOURCE_BUNDLE_URL = new URL("../../examples/tutorial/source-bundle.json", import.meta.url);
 const SAMPLE_PROFILE_URL = new URL("../../examples/tutorial/profile.json", import.meta.url);
+const STARTER_PROFILE_PROMPT_COPY = "Starter profiles are valid, but until you add rules the report may classify PR classes, file roles, and functional surfaces as unknown.";
+const CONVENTIONAL_COMMIT_PRESET_PROMPT_COPY = "Add Conventional Commit PR class rules? Use this if PR titles usually start with feat:, fix:, docs:, test:, chore(deps):, or similar prefixes. It writes title-based dependency, feature, fix, docs, test, and maintenance classes so PR class distribution is less likely to be unknown. Skip it for release titles, ticket prefixes, free-form titles, or another custom PR taxonomy. Accepting it does not change default scoring, rankings, GitHub collection, or CSV export shape.";
+const STARTER_PROFILE_COMPLETION_COPY = "Created a starter profile. Review or refine it before a full run if you want PR classes, file roles, or functional surfaces to be labeled instead of unknown.";
 
 const ALLOWED_OPTIONS = new Set([
   "source",
@@ -941,8 +944,8 @@ function withAvailablePrClassRuleIds(profile, rules) {
 async function promptConventionalCommitPrClassPreset(promptAdapter, output, profile) {
   const hasExistingPrClasses = Array.isArray(profile.prClasses) && profile.prClasses.length > 0;
   const message = hasExistingPrClasses
-    ? "Add Conventional Commit PR class preset to existing PR class rules"
-    : "Add Conventional Commit PR class preset";
+    ? `${CONVENTIONAL_COMMIT_PRESET_PROMPT_COPY} Existing PR class rules will be kept.`
+    : CONVENTIONAL_COMMIT_PRESET_PROMPT_COPY;
   const shouldAddPreset = await askUntilValid(promptAdapter, {
     id: "addConventionalCommitPrClasses",
     type: "confirm",
@@ -1093,7 +1096,7 @@ async function maybeConfigureInteractiveProfile(promptAdapter, output, profileSt
     const shouldCreateProfile = await askUntilValid(promptAdapter, {
       id: "createProfile",
       type: "confirm",
-      message: "Create repository profile at this path",
+      message: `Create repository profile at this path. ${STARTER_PROFILE_PROMPT_COPY}`,
       defaultValue: true,
     }, {
       output,
@@ -1153,6 +1156,7 @@ async function maybeConfigureInteractiveProfile(promptAdapter, output, profileSt
     profilePath: savedProfilePath,
     savedProfilePath,
     prClassRulesWritten: profileUpdate.prClassRulesWritten,
+    starterProfileCreated: isNewProfile,
   };
 }
 
@@ -1266,6 +1270,9 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
     if (profileUpdate.savedProfilePath) {
       resolved.savedProfilePath = profileUpdate.savedProfilePath;
       resolved.prClassRulesWritten = profileUpdate.prClassRulesWritten;
+      if (profileUpdate.starterProfileCreated) {
+        resolved.starterProfileCreated = true;
+      }
       if (typeof onSavedProfilePath === "function") {
         onSavedProfilePath(profileUpdate.savedProfilePath);
       }
@@ -1551,7 +1558,7 @@ function attachCollectionCoverage(report, sourceBundle) {
   };
 }
 
-function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv, analysisFilter, savedProfilePath, savedRunPresetPath, prClassRulesWritten }) {
+function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report, requestedLimit, sampledLimit, csv, analysisFilter, savedProfilePath, savedRunPresetPath, prClassRulesWritten, starterProfileCreated }) {
   const summary = {
     ok: true,
     dryRun,
@@ -1576,6 +1583,9 @@ function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report,
   }
   if (prClassRulesWritten) {
     summary.prClassRulesWritten = true;
+  }
+  if (starterProfileCreated) {
+    summary.starterProfileCreated = true;
   }
   return summary;
 }
@@ -1713,6 +1723,7 @@ export async function runAnalyzeGithub(options, {
       savedProfilePath: options.savedProfilePath,
       savedRunPresetPath: options.savedRunPresetPath,
       prClassRulesWritten: options.prClassRulesWritten,
+      starterProfileCreated: options.starterProfileCreated,
     });
   }
 
@@ -1750,6 +1761,7 @@ export async function runAnalyzeGithub(options, {
     savedProfilePath: options.savedProfilePath,
     savedRunPresetPath: options.savedRunPresetPath,
     prClassRulesWritten: options.prClassRulesWritten,
+    starterProfileCreated: options.starterProfileCreated,
   });
 }
 
@@ -1879,6 +1891,9 @@ export function formatAnalyzeGithubCompletion(result) {
 
   if (result.savedProfilePath) {
     lines.push(`Repository profile saved: ${result.savedProfilePath}.`);
+  }
+  if (result.starterProfileCreated) {
+    lines.push(STARTER_PROFILE_COMPLETION_COPY);
   }
   if (result.savedRunPresetPath) {
     lines.push(`Run preset saved: ${result.savedRunPresetPath}.`);
