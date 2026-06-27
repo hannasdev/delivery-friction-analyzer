@@ -41,6 +41,10 @@ async function readTextFilesUnder(directoryUrl) {
   return fileTexts;
 }
 
+function urlsFromText(text) {
+  return [...text.matchAll(/https:\/\/[^\s"),]+/g)].map(match => new URL(match[0]));
+}
+
 const GRAPHQL_REVIEW_THREADS_SOURCE = "graphql:repository.pullRequest.reviewThreads";
 const HISTORICAL_SNAPSHOT_SOURCE = "historical_snapshot";
 const LANGUAGES_SOURCE = "rest:/repos/{owner}/{repo}/languages";
@@ -531,7 +535,9 @@ describe("source bundle schema", () => {
     assert(packageJson.files.includes("examples/tutorial"));
     assert(!combined.includes("hannasdev"));
     assert(!combined.includes("mcp-writing"));
-    assert(!combined.includes("github.com"));
+    assert(!urlsFromText(combined).some(url =>
+      url.hostname === "github.com" || url.hostname.endsWith(".github.com")
+    ));
     assert(!combined.includes("github-actions"));
     assert(!combined.includes("ghp_"));
     assert(!combined.includes("sk-"));

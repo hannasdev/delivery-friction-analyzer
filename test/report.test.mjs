@@ -38,6 +38,22 @@ function assertOrderedSections(markdown, sectionNames) {
   }
 }
 
+function urlsFromText(text) {
+  return [...text.matchAll(/https:\/\/[^\s),|]+/g)].map(match => new URL(match[0]));
+}
+
+function assertHasUrl(text, expectedUrl) {
+  const expected = new URL(expectedUrl);
+  assert(
+    urlsFromText(text).some(url =>
+      url.protocol === expected.protocol
+      && url.hostname === expected.hostname
+      && url.pathname === expected.pathname
+    ),
+    `expected rendered text to include URL ${expected.href}`,
+  );
+}
+
 describe("friction report generation", () => {
   it("generates deterministic JSON and Markdown reports from fixture metrics", async () => {
     const [metricsSummary, goldenJson, goldenMarkdown] = await Promise.all([
@@ -1805,12 +1821,22 @@ describe("friction report generation", () => {
     assert(markdown.includes("| feature | 2 |"));
     assert(markdown.includes("| Primary merge method | Squash merge |"));
     assert(markdown.includes("| delivery\\_api |"));
-    assert(markdown.includes("https://example.com/pull/104"));
+    assertHasUrl(markdown, "https://example.com/pull/104");
     assert(methodology.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
     assert(methodology.includes("Collection coverage: partial"));
     assert(methodology.includes("- workflow_runs: partial; attempts=1; source=bundled tutorial sample."));
     assert(methodology.includes("Profile path: examples/tutorial/profile.json"));
-    assert(csvArtifacts.prMetricsCsv.includes("104,feat: consolidate dispatch settings,https://example.com/pull/104,feature,repository_profile,feature-title,1400"));
+    const broadPrCsvRow = csvArtifacts.prMetricsCsv
+      .split("\n")
+      .find(row => row.startsWith("104,feat: consolidate dispatch settings,"));
+    assert(broadPrCsvRow);
+    const broadPrCsvFields = broadPrCsvRow.split(",");
+    assert.equal(new URL(broadPrCsvFields[2]).hostname, "example.com");
+    assert.equal(new URL(broadPrCsvFields[2]).pathname, "/pull/104");
+    assert.equal(broadPrCsvFields[3], "feature");
+    assert.equal(broadPrCsvFields[4], "repository_profile");
+    assert.equal(broadPrCsvFields[5], "feature-title");
+    assert.equal(broadPrCsvFields[6], "1400");
     assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,partial,1,bundled tutorial sample"));
     assert(excerpt.includes("Bundled synthetic sample, not live GitHub data"));
     assert(excerpt.includes("Change scope, Review churn, and Repo guidance gap"));
