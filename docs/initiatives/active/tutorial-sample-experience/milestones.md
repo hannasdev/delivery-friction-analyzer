@@ -364,8 +364,8 @@ The product repository remains rejected for ordinary live analysis, but users ca
 - [x] Active
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
 
 ## M6: First-Run Profile Prompt Refinements
