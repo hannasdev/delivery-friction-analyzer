@@ -30,13 +30,15 @@
       "mergedAt": "2026-06-27"
     },
     "M5": {
-      "state": "adversarially_reviewed",
+      "state": "pr_opened",
       "startedAt": "2026-06-27",
       "implemented": true,
       "conformanceReviewed": true,
       "conformanceReviewedAt": "2026-06-27",
       "adversariallyReviewed": true,
-      "adversariallyReviewedAt": "2026-06-27"
+      "adversariallyReviewedAt": "2026-06-27",
+      "pr": 63,
+      "openedAt": "2026-06-27"
     },
     "M6": {
       "state": "not_started"

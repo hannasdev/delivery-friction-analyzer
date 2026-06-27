@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can deliberately validate the analyzer against its public product repository without weakening the normal guardrail that steers first-time users toward the bundled sample or another target repository.
 - Who is affected: Maintainers intentionally running self-analysis, and users who hit the product-repository guard during live GitHub setup.
 - Action needed: Use the bundled sample or another repository for normal first-run analysis; add `--allow-product-repository` only for intentional self-analysis after confirming GitHub access.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/63
 
 ### 2026-06-27 — Explicit Sample CLI Source
 
