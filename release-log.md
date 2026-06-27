@@ -7,7 +7,7 @@
 - What changed: Report Markdown, methodology-adjacent contract docs, and CSV coverage expectations now use generic source-bundle and source-family wording for `source-bundle.v1`, including `collectionCoverage.status` and `collectionCoverage.sourceFamilies`.
 - Why it matters: Maintainers can review live GitHub output and future bundled sample output without stale GitHub-only labels implying that every report source is live API evidence.
 - Who is affected: Maintainers reviewing generated reports, `friction-report.v1` JSON, contract docs, or source coverage CSV exports during the tutorial sample migration.
-- Action needed: None.
+- Action needed: Update any scripts or downstream tooling that parse source coverage fields from `apiFamilies`/`api_family` to `sourceFamilies`/`source_family`.
 - PR: #60
 
 ### 2026-06-23 — Tutorial Target Guidance
