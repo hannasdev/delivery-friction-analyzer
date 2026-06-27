@@ -8,7 +8,7 @@
 - Why it matters: New users can generate a deterministic local report without GitHub credentials, while existing live GitHub runs keep their source boundary and required target-option validation.
 - Who is affected: First-time users trying the tutorial sample, maintainers reviewing CLI source routing, and users passing live-only flags such as repository targets, dry-run checks, or PR class exclusions.
 - Action needed: Use `delivery-friction-analyzer --source sample --out reports/tutorial` for the bundled sample, or `delivery-friction-analyzer --source github --repo owner/name --limit 30 --profile path/to/profile.json --out reports/owner-name` for live analysis.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/62
 
 ### 2026-06-27 — Tutorial Sample Bundle
 

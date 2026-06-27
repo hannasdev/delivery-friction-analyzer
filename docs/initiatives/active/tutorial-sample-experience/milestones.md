@@ -286,8 +286,8 @@ Users can run `delivery-friction-analyzer --source sample --out reports/tutorial
 - [ ] Not started
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
 
 ## M5: Product-Repository Override
