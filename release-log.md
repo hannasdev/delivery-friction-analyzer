@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can review and ship a public-safe sample report experience without relying on private repository access or live GitHub data.
 - Who is affected: Maintainers preparing the tutorial sample experience and future users who inspect the bundled sample artifacts after sample CLI wiring lands.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/61
 
 ### 2026-06-26 — Generic Source Bundle Report Wording
 
