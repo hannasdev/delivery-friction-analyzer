@@ -151,7 +151,7 @@
       "headRefOid": "sample101merge",
       "additions": 410,
       "deletions": 96,
-      "changedFiles": 9,
+      "changedFiles": 5,
       "prOpenDiff": { "source": "direct", "confidence": "high", "additions": 190, "deletions": 44, "changedFiles": 5 },
       "commits": [
         { "oid": "sample101a", "authoredDate": "2026-05-04T08:40:00Z", "committedDate": "2026-05-04T08:42:00Z", "messageHeadline": "feat: add route health dashboard" },
@@ -315,7 +315,7 @@
       "headRefOid": "sample104merge",
       "additions": 980,
       "deletions": 420,
-      "changedFiles": 18,
+      "changedFiles": 8,
       "prOpenDiff": { "source": "direct", "confidence": "high", "additions": 260, "deletions": 90, "changedFiles": 6 },
       "commits": [
         { "oid": "sample104a", "authoredDate": "2026-05-14T07:45:00Z", "committedDate": "2026-05-14T07:46:00Z", "messageHeadline": "feat: consolidate dispatch settings" },

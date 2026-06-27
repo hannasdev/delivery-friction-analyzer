@@ -488,6 +488,12 @@ describe("source bundle schema", () => {
     assert(bundle.coverage.sourceFamilies.some(family => family.status === "partial"));
 
     for (const pullRequest of bundle.pullRequests) {
+      assert.equal(
+        pullRequest.changedFiles,
+        pullRequest.files.length,
+        `PR #${pullRequest.number} changedFiles should match listed file rows`,
+      );
+
       if (Array.isArray(pullRequest.reviewThreads?.nodes)) {
         assert.equal(
           pullRequest.reviewThreads.totalCount,
