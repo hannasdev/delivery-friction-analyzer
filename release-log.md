@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can review live GitHub output and future bundled sample output without stale GitHub-only labels implying that every report source is live API evidence.
 - Who is affected: Maintainers reviewing generated reports, `friction-report.v1` JSON, contract docs, or source coverage CSV exports during the tutorial sample migration.
 - Action needed: None.
-- PR: TBD
+- PR: #60
 
 ### 2026-06-23 — Tutorial Target Guidance
 
