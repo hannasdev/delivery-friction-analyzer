@@ -2082,7 +2082,8 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(result.artifactPaths.methodology, join(outDir, "methodology.md"));
       assert.equal(result.artifactPaths.prMetricsCsv, join(outDir, "pr-metrics.csv"));
       assert.deepEqual(progressMessages, [
-        "Validating profile and output directory.",
+        "Validating profile.",
+        "Validating output directory.",
         "Collecting latest 1 merged pull request(s) from example/example-repo.",
         "Normalizing source bundle and computing metrics.",
         "Writing local artifacts.",
@@ -2607,7 +2608,8 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(parsed.targetRepository.owner, "example");
       assert(!stdout.includes("Target GitHub repository"));
       assert(!stdout.includes("Validating profile"));
-      assert(stderr.includes("Validating profile and output directory."));
+      assert(stderr.includes("Validating profile."));
+      assert(stderr.includes("Validating output directory."));
       assert.deepEqual(prompts.map(prompt => prompt.id), [
         "repository",
         "limit",
@@ -3041,6 +3043,31 @@ describe("GitHub live analyze CLI", () => {
 
       assert.deepEqual(provider.calls.map(call => call[0]), ["getRepository"]);
       await assert.rejects(lstat(outDir), error => error?.code === "ENOENT");
+    });
+  });
+
+  it("validates product-repository override profiles before provider calls", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = join(directory, "invalid-profile.json");
+      await writeFile(profilePath, JSON.stringify({
+        schemaVersion: "repository-profile.v1",
+        repository: { owner: "bad owner", name: "delivery-friction-analyzer" },
+        rules: [],
+      }), "utf8");
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "hannasdev/delivery-friction-analyzer",
+          limit: 1,
+          profilePath,
+          outDir: join(directory, "out"),
+          allowProductRepository: true,
+        }, { provider }),
+        /Invalid repository profile at .*invalid-profile\.json: invalid repository profile: repository\.owner must be a GitHub owner\/name segment/s,
+      );
+
+      assert.deepEqual(provider.calls, []);
     });
   });
 

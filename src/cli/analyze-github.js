@@ -1662,6 +1662,8 @@ export async function runAnalyzeGithub(options, {
   if (targetsProductRepository && !options.allowProductRepository) {
     throw new Error(productRepositoryTargetError(targetInput));
   }
+  onProgress?.("Validating profile.");
+  const repositoryProfile = await readProfile(options.profilePath);
   if (targetsProductRepository) {
     onProgress?.("Checking required GitHub read access for product-repository analysis.");
     await assertProductRepositoryReadableData({
@@ -1672,11 +1674,8 @@ export async function runAnalyzeGithub(options, {
     });
   }
 
-  onProgress?.("Validating profile and output directory.");
-  const [repositoryProfile, outDir] = await Promise.all([
-    readProfile(options.profilePath),
-    validateOutputDirectory(options.outDir),
-  ]);
+  onProgress?.("Validating output directory.");
+  const outDir = await validateOutputDirectory(options.outDir);
   validateExcludedPrClassesAreConfigured(options.excludedPrClasses ?? [], repositoryProfile);
   const generatedPaths = artifactPaths(outDir, { includeCsv: csvEnabled });
   const disabledPaths = csvEnabled ? {} : Object.fromEntries(
