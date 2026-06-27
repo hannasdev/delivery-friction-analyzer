@@ -25,8 +25,12 @@ import {
 } from "../profile/workflow.js";
 
 const RUN_PRESET_SCHEMA_VERSION = "analyze-github-run-preset.v1";
+const SAMPLE_SOURCE_LABEL = "Bundled synthetic sample, not live GitHub data";
+const SAMPLE_SOURCE_BUNDLE_URL = new URL("../../examples/tutorial/source-bundle.json", import.meta.url);
+const SAMPLE_PROFILE_URL = new URL("../../examples/tutorial/profile.json", import.meta.url);
 
 const ALLOWED_OPTIONS = new Set([
+  "source",
   "repo",
   "limit",
   "profile",
@@ -60,6 +64,7 @@ const BOOLEAN_OPTIONS = new Set([
 ]);
 
 const CLI_OPTION_KEYS = Object.freeze({
+  source: "source",
   repo: "repository",
   limit: "limit",
   profile: "profilePath",
@@ -114,10 +119,13 @@ const CSV_ARTIFACT_KEYS = new Set([
 ]);
 
 export const USAGE = `Usage:
+  delivery-friction-analyzer --source sample --out <directory>
+  delivery-friction-analyzer --source github --repo <owner/name> --limit <1-100> --profile <path> --out <directory>
   delivery-friction-analyzer --repo <owner/name> --limit <1-100> --profile <path> --out <directory>
   delivery-friction-analyzer --repo <owner/name> --limit <1-100> --profile <path> --out <directory> --dry-run
 
 Options:
+  --source <sample|github> Choose the bundled synthetic sample or live GitHub analysis.
   --repo <owner/name>       Target GitHub repository to analyze.
   --limit <1-100>           Latest merged pull request count.
   --profile <path>          Repository profile JSON used for file role classification.
@@ -136,6 +144,14 @@ Options:
   --preset <path>           Load local run settings from a saved preset. Explicit CLI flags override preset values.
   --save-preset <path>      Save local run settings for non-interactive reruns.
 `;
+
+export const SOURCE_SELECTION_GUIDANCE = `Choose what to analyze.
+
+Try the bundled sample:
+  delivery-friction-analyzer --source sample --out reports/tutorial
+
+Analyze a GitHub repository:
+  delivery-friction-analyzer --source github --repo owner/name --limit 30 --profile path/to/profile.json --out reports/owner-name`;
 
 function attachOptionSource(options, property, value) {
   Object.defineProperty(options, property, {
@@ -215,6 +231,7 @@ export function parseAnalyzeGithubArgs(argv) {
   }
 
   const parsed = {
+    source: options.source,
     repository: options.repo,
     limit: options.limit === undefined ? undefined : Number(options.limit),
     profilePath: options.profile,
@@ -228,6 +245,7 @@ export function parseAnalyzeGithubArgs(argv) {
   };
   if (options.preset !== undefined) parsed.presetPath = options.preset;
   if (options["save-preset"] !== undefined) parsed.savePresetPath = options["save-preset"];
+  if (parsed.source === undefined) delete parsed.source;
 
   return attachOptionSource(parsed, "explicitCliOptions", explicitOptions);
 }
@@ -408,6 +426,12 @@ function requireOptions(options) {
   }
 }
 
+function requireSampleOptions(options) {
+  if (!options.outDir) {
+    throw new Error("Missing required option(s): --out");
+  }
+}
+
 function validateRepositorySlug(repository) {
   if (typeof repository !== "string" || !REPOSITORY_SLUG.test(repository)) {
     throw new Error("repo must use owner/name with GitHub-safe owner and name segments.");
@@ -426,6 +450,71 @@ function validateExcludedPrClasses(excludedPrClasses = []) {
       throw new Error(`exclude-pr-class must be a lowercase PR class identifier using letters, digits, "-" or "_" separators: ${prClass}`);
     }
   }
+}
+
+function validateSource(source) {
+  if (source !== "sample" && source !== "github") {
+    throw new Error("source must be one of: sample, github");
+  }
+}
+
+function hasLiveSourceIndicator(options) {
+  const providedOptions = new Set([
+    ...optionSourceSet(options, "explicitCliOptions"),
+    ...optionSourceSet(options, "presetOptionKeys"),
+  ]);
+  return Boolean(
+    options.repository
+      || options.limit !== undefined
+      || options.profilePath
+      || options.dryRun
+      || options.isValidationTarget
+      || options.interactive
+      || options.presetPath
+      || options.savePresetPath
+      || options.excludedPrClasses?.length
+      || providedOptions.has("dryRun")
+      || providedOptions.has("isValidationTarget")
+      || providedOptions.has("interactive")
+      || providedOptions.has("presetPath")
+      || providedOptions.has("savePresetPath")
+      || providedOptions.has("excludedPrClasses"),
+  );
+}
+
+function resolveAnalysisSource(options) {
+  if (options.source !== undefined) {
+    validateSource(options.source);
+    return options.source;
+  }
+  if (hasLiveSourceIndicator(options)) {
+    return "github";
+  }
+  throw new Error(SOURCE_SELECTION_GUIDANCE);
+}
+
+function rejectSampleLiveOptions(options) {
+  const incompatible = [];
+  const providedOptions = new Set([
+    ...optionSourceSet(options, "explicitCliOptions"),
+    ...optionSourceSet(options, "presetOptionKeys"),
+  ]);
+  const dryRunOptionLabel = providedOptions.has("dryRun") && options.dryRun
+    ? "--dry-run/--metadata-only"
+    : "--dry-run";
+  if (options.repository) incompatible.push("--repo");
+  if (options.limit !== undefined) incompatible.push("--limit");
+  if (options.profilePath) incompatible.push("--profile");
+  if (options.dryRun || providedOptions.has("dryRun")) incompatible.push(dryRunOptionLabel);
+  if (options.isValidationTarget || providedOptions.has("isValidationTarget")) incompatible.push("--validation-target");
+  if (options.interactive) incompatible.push("--interactive");
+  if (options.presetPath) incompatible.push("--preset");
+  if (options.savePresetPath) incompatible.push("--save-preset");
+  if (options.excludedPrClasses?.length || providedOptions.has("excludedPrClasses")) {
+    incompatible.push("--exclude-pr-class");
+  }
+  if (!incompatible.length) return;
+  throw new Error(`--source sample cannot be combined with live GitHub option(s): ${incompatible.join(", ")}. Use only output options such as --out, --json, --csv, or --no-csv.`);
 }
 
 function configuredPrClasses(repositoryProfile) {
@@ -1444,6 +1533,7 @@ function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report,
     sampledLimit,
     outputDirectory: outDir,
     artifactPaths: dryRun ? null : paths,
+    source: sourceBundle.source,
     targetRepository: sourceBundle.targetRepository,
     selection: sourceBundle.selection,
     collectionCoverage: sourceBundle.coverage,
@@ -1482,6 +1572,49 @@ function applyPrClassFilter(normalized, excludedPrClasses = []) {
     },
     pullRequests: filteredPullRequests,
   };
+}
+
+async function readBundledJson(url, label) {
+  try {
+    return JSON.parse(await readFile(url, "utf8"));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`${label} must be valid JSON: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+async function buildAnalysisArtifacts({ sourceBundle, repositoryProfile, profilePath, csvEnabled, excludedPrClasses = [] }) {
+  validateExcludedPrClassesAreConfigured(excludedPrClasses, repositoryProfile);
+  const normalized = applyPrClassFilter(
+    normalizeFixtureBundle(sourceBundle, { repositoryProfile }),
+    excludedPrClasses,
+  );
+  const metrics = computeRepositoryMetrics(normalized);
+  const report = attachCollectionCoverage(
+    generateRepositoryFrictionReport(metrics, {
+      workflowContext: repositoryProfile.workflow,
+      contributorSource: normalized.contributorSource,
+    }),
+    sourceBundle,
+  );
+  const markdown = `${renderRepositoryFrictionMarkdown(report)}${collectionCoverageMarkdown(sourceBundle)}`;
+  const methodology = renderRepositoryFrictionMethodology({
+    report,
+    sourceBundle,
+    profilePath,
+    artifactFileNames: ANALYZE_GITHUB_ARTIFACTS,
+    csvEnabled,
+  });
+  const csv = csvEnabled
+    ? generateEvidenceCsvArtifacts({
+      metricsSummary: metrics,
+      report,
+      collectionCoverage: sourceBundle.coverage,
+    })
+    : {};
+  return { normalized, metrics, report, markdown, methodology, csv };
 }
 
 export async function runAnalyzeGithub(options, {
@@ -1541,43 +1674,23 @@ export async function runAnalyzeGithub(options, {
   }
 
   onProgress?.("Normalizing source bundle and computing metrics.");
-  const normalized = applyPrClassFilter(
-    normalizeFixtureBundle(sourceBundle, { repositoryProfile }),
-    options.excludedPrClasses ?? [],
-  );
-  const metrics = computeRepositoryMetrics(normalized);
-  const report = attachCollectionCoverage(
-    generateRepositoryFrictionReport(metrics, {
-      workflowContext: repositoryProfile.workflow,
-      contributorSource: normalized.contributorSource,
-    }),
-    sourceBundle,
-  );
-  const markdown = `${renderRepositoryFrictionMarkdown(report)}${collectionCoverageMarkdown(sourceBundle)}`;
-  const methodology = renderRepositoryFrictionMethodology({
-    report,
+  const artifacts = await buildAnalysisArtifacts({
     sourceBundle,
     profilePath: options.profilePath,
-    artifactFileNames: ANALYZE_GITHUB_ARTIFACTS,
     csvEnabled,
+    repositoryProfile,
+    excludedPrClasses: options.excludedPrClasses ?? [],
   });
-  const csv = csvEnabled
-    ? generateEvidenceCsvArtifacts({
-      metricsSummary: metrics,
-      report,
-      collectionCoverage: sourceBundle.coverage,
-    })
-    : {};
 
   onProgress?.("Writing local artifacts.");
   await writeAnalysisArtifacts(outDir, generatedPaths, {
     sourceBundle,
-    normalized,
-    metricsSummary: metrics,
-    reportJson: report,
-    reportMarkdown: markdown,
-    methodology,
-    csv,
+    normalized: artifacts.normalized,
+    metricsSummary: artifacts.metrics,
+    reportJson: artifacts.report,
+    reportMarkdown: artifacts.markdown,
+    methodology: artifacts.methodology,
+    csv: artifacts.csv,
   }, { disabledPaths });
 
   return summarizeResult({
@@ -1585,15 +1698,72 @@ export async function runAnalyzeGithub(options, {
     outDir,
     paths: generatedPaths,
     sourceBundle,
-    metrics,
-    report,
+    metrics: artifacts.metrics,
+    report: artifacts.report,
     requestedLimit: options.limit,
     sampledLimit: collectionLimit,
     csv: csvEnabled,
-    analysisFilter: normalized.analysisFilter ?? null,
+    analysisFilter: artifacts.normalized.analysisFilter ?? null,
     savedProfilePath: options.savedProfilePath,
     savedRunPresetPath: options.savedRunPresetPath,
     prClassRulesWritten: options.prClassRulesWritten,
+  });
+}
+
+export async function runAnalyzeSample(options, {
+  onProgress = null,
+} = {}) {
+  rejectSampleLiveOptions(options);
+  requireSampleOptions(options);
+  const csvEnabled = options.csv !== false;
+
+  onProgress?.("Loading bundled synthetic sample.");
+  const [sourceBundle, repositoryProfile, outDir] = await Promise.all([
+    readBundledJson(SAMPLE_SOURCE_BUNDLE_URL, "sample source bundle"),
+    readBundledJson(SAMPLE_PROFILE_URL, "sample repository profile"),
+    validateOutputDirectory(options.outDir),
+  ]);
+  if (sourceBundle.source?.kind !== "sample" || sourceBundle.source?.label !== SAMPLE_SOURCE_LABEL) {
+    throw new Error(`sample source bundle source.kind must be sample and source.label must be ${SAMPLE_SOURCE_LABEL}.`);
+  }
+  validateProfile(repositoryProfile);
+
+  const generatedPaths = artifactPaths(outDir, { includeCsv: csvEnabled });
+  const disabledPaths = csvEnabled ? {} : Object.fromEntries(
+    Object.entries(artifactPaths(outDir, { includeCsv: true })).filter(([key]) => CSV_ARTIFACT_KEYS.has(key)),
+  );
+  await assertWritableArtifactTargets({ ...generatedPaths, ...disabledPaths });
+
+  onProgress?.("Normalizing source bundle and computing metrics.");
+  const artifacts = await buildAnalysisArtifacts({
+    sourceBundle,
+    profilePath: "examples/tutorial/profile.json",
+    csvEnabled,
+    repositoryProfile,
+  });
+
+  onProgress?.("Writing local artifacts.");
+  await writeAnalysisArtifacts(outDir, generatedPaths, {
+    sourceBundle,
+    normalized: artifacts.normalized,
+    metricsSummary: artifacts.metrics,
+    reportJson: artifacts.report,
+    reportMarkdown: artifacts.markdown,
+    methodology: artifacts.methodology,
+    csv: artifacts.csv,
+  }, { disabledPaths });
+
+  return summarizeResult({
+    dryRun: false,
+    outDir,
+    paths: generatedPaths,
+    sourceBundle,
+    metrics: artifacts.metrics,
+    report: artifacts.report,
+    requestedLimit: sourceBundle.selection?.requestedLimit,
+    sampledLimit: sourceBundle.selection?.collectedCount,
+    csv: csvEnabled,
+    analysisFilter: null,
   });
 }
 
@@ -1637,6 +1807,7 @@ export function formatAnalyzeGithubCompletion(result) {
     lines.push(
       `Markdown report: ${paths.reportMarkdown}`,
       `Analysis complete for ${target}.`,
+      `Source: ${result.source?.label ?? "not recorded"}.`,
       `Methodology: ${paths.methodology}`,
       `JSON report: ${paths.reportJson}`,
       `Metrics summary: ${paths.metricsSummary}`,
@@ -1712,7 +1883,28 @@ export async function runAnalyzeGithubCli(argv, {
       stdout.write(USAGE);
       return null;
     }
+    if (parsedOptions.source !== undefined) {
+      validateSource(parsedOptions.source);
+      if (parsedOptions.source === "sample") {
+        const runOptions = {
+          onProgress: message => writeProgress(message, stderr),
+        };
+        const result = await runAnalyzeSample(parsedOptions, runOptions);
+        writeAnalyzeGithubCompletion(result, { json: parsedOptions.json, stdout });
+        return result;
+      }
+    }
     const options = await mergeRunPresetOptions(parsedOptions);
+    const source = resolveAnalysisSource(options);
+
+    if (source === "sample") {
+      const runOptions = {
+        onProgress: message => writeProgress(message, stderr),
+      };
+      const result = await runAnalyzeSample(options, runOptions);
+      writeAnalyzeGithubCompletion(result, { json: options.json, stdout });
+      return result;
+    }
 
     const providedOptionKeys = new Set([
       ...optionSourceSet(options, "explicitCliOptions"),

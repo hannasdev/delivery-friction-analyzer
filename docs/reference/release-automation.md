@@ -7,6 +7,7 @@ Delivery Friction Analyzer publishes the unbundled source package to npm. This r
 The npm package allowlist includes:
 
 - runtime source in `src`;
+- bundled tutorial sample runtime data in `examples/tutorial`;
 - JSON schemas in `schemas`;
 - public contract and reference docs in `docs/contracts` and `docs/reference`;
 - the internal validation repository profile at `fixtures/github/mcp-writing/profile.json`;

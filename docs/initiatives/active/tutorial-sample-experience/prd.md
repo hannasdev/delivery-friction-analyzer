@@ -7,7 +7,7 @@
 - Owner: Hanna
 - Created: 2026-06-22
 - Activated: 2026-06-23
-- Current milestone: M3, Deterministic Synthetic Sample Bundle
+- Current milestone: M4, Explicit Sample CLI Path
 - Related issue:
   - None yet.
 - Related docs:
@@ -194,7 +194,7 @@ Try the bundled sample:
   delivery-friction-analyzer --source sample --out reports/tutorial
 
 Analyze a GitHub repository:
-  delivery-friction-analyzer --source github --repo owner/name --profile path/to/profile.json --out reports/owner-name
+  delivery-friction-analyzer --source github --repo owner/name --limit 30 --profile path/to/profile.json --out reports/owner-name
 ```
 
 Product-repository guard copy should recommend the sample or another repository first, and mention the explicit override only for intentional self-analysis:

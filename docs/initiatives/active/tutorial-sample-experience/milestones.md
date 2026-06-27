@@ -210,8 +210,8 @@ The repository contains a public-safe, fully synthetic sample repository profile
 - [x] Implemented
 - [x] Conformance reviewed
 - [ ] Adversarially reviewed
-- [ ] PR opened
-- [ ] Merged
+- [x] PR opened
+- [x] Merged
 
 ## M4: Explicit Sample CLI Path
 
@@ -284,10 +284,10 @@ Users can run `delivery-friction-analyzer --source sample --out reports/tutorial
 ### Status
 
 - [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
 
 ## M5: Product-Repository Override
