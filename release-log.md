@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-27 — Product Repository Override
+
+- What changed: Added the explicit `--allow-product-repository` live-analysis override for intentional analysis of this tool's own repository, with required read-access checks before collection or artifact writes.
+- Why it matters: Maintainers can deliberately validate the analyzer against its public product repository without weakening the normal guardrail that steers first-time users toward the bundled sample or another target repository.
+- Who is affected: Maintainers intentionally running self-analysis, and users who hit the product-repository guard during live GitHub setup.
+- Action needed: Use the bundled sample or another repository for normal first-run analysis; add `--allow-product-repository` only for intentional self-analysis after confirming GitHub access.
+- PR: TBD
+
 ### 2026-06-27 — Explicit Sample CLI Source
 
 - What changed: Added explicit `--source sample` CLI routing for the bundled tutorial sample, with sample-first README guidance and live-only option rejection before GitHub collection.
