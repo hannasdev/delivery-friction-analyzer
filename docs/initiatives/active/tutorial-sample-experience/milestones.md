@@ -428,7 +428,7 @@ Interactive setup explains profile choices in a way that helps users avoid the w
 ### Status
 
 - [x] Active
-- [ ] Implemented
+- [x] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
 - [ ] PR opened
