@@ -1669,10 +1669,15 @@ describe("GitHub live analyze CLI", () => {
         readFile(join(outDir, "collection-coverage.csv"), "utf8"),
       ]);
 
-      assert.equal(sourceBundle.schemaVersion, "github-source-bundle.v1");
+      assert.equal(sourceBundle.schemaVersion, "source-bundle.v1");
       assert.equal(normalized.schemaVersion, "normalized-fixture.v1");
       assert.equal(metricsSummary.metricVersion, "friction-metrics.v1");
       assert.equal(reportJson.reportVersion, "friction-report.v1");
+      assert.deepEqual(sourceBundle.source, {
+        kind: "github",
+        label: "GitHub live collection",
+      });
+      assert.deepEqual(reportJson.source, sourceBundle.source);
       assert.equal(reportJson.configuredWorkflow, undefined);
       assert.equal(reportJson.collectionCoverage.status, "partial");
       assert.equal(result.csvArtifactsEnabled, true);
@@ -1685,11 +1690,14 @@ describe("GitHub live analyze CLI", () => {
         "Writing local artifacts.",
       ]);
       assert(reportMarkdown.includes("# Repository Friction Report: example/example-repo"));
+      assert(reportMarkdown.includes("Source: GitHub live collection (github)"));
       assert(reportMarkdown.includes("`methodology.md`"));
       assert(reportMarkdown.includes("## Collection Coverage"));
+      assert(reportMarkdown.includes("Source: GitHub live collection (github)"));
       assert(reportMarkdown.includes("pr_open_diff: unavailable"));
       assert(!reportMarkdown.includes("## Configured Workflow Context"));
       assert(methodology.includes("# Methodology: example/example-repo"));
+      assert(methodology.includes("Source: GitHub live collection (github)"));
       assert(methodology.includes("- PR metrics CSV: `pr-metrics.csv`"));
       assert(!methodology.includes("## Configured Workflow Context"));
       assert(prMetricsCsv.includes("pr_number,title,url,pr_class,pr_classification_source,pr_class_rule_id,changed_lines"));
@@ -2567,7 +2575,7 @@ describe("GitHub live analyze CLI", () => {
         readFile(join(outDir, "friction-report.md"), "utf8"),
       ]);
 
-      const workflowCoverage = reportJson.collectionCoverage.apiFamilies.find(entry => entry.family === "workflow_runs");
+      const workflowCoverage = reportJson.collectionCoverage.sourceFamilies.find(entry => entry.family === "workflow_runs");
       assert.equal(workflowCoverage.status, "unavailable");
       assert(workflowCoverage.diagnostics.some(diagnostic => diagnostic.includes("403")));
       assert(reportMarkdown.includes("workflow_runs: unavailable"));

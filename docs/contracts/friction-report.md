@@ -1,6 +1,6 @@
 # Friction Report Contract
 
-Milestone 3 introduced `friction-report.v1`, a deterministic report generated from a `friction-metrics.v1` repository metrics summary. Milestone 4 added configured workflow context. Milestone 5 adds sanitized contributor-source metadata for configured `.all-contributorsrc` coverage without raw contributor file contents or individual rankings. The report layer does not fetch GitHub data, mutate repositories, rank individuals, or depend on services beyond the data collection path that produced the metrics summary.
+Milestone 3 introduced `friction-report.v1`, a deterministic report generated from a `friction-metrics.v1` repository metrics summary. Milestone 4 added configured workflow context. Milestone 5 adds sanitized contributor-source metadata for configured `.all-contributorsrc` coverage without raw contributor file contents or individual rankings. The report layer does not fetch source data, mutate repositories, rank individuals, or depend on services beyond the source collection path that produced the metrics summary.
 
 ## Outputs
 
@@ -19,16 +19,19 @@ Local artifact generation is available from an existing metrics summary:
 node src/report/generate-report.js --metrics-summary fixtures/github/mcp-writing/metrics-summary.golden.json --json-out fixtures/github/mcp-writing/reports/friction-report.golden.json --markdown-out fixtures/github/mcp-writing/reports/friction-report.golden.md
 ```
 
-The command reads local `friction-metrics.v1` JSON and writes deterministic `friction-report.v1` JSON and Markdown files. It does not fetch GitHub data, mutate the analyzed repository, or write CSV/methodology companion artifacts.
+The command reads local `friction-metrics.v1` JSON and writes deterministic `friction-report.v1` JSON and Markdown files. It does not fetch source data, mutate the analyzed repository, or write CSV/methodology companion artifacts.
 
 ## Report Shape
 
 - `reportVersion`: report contract version.
 - `metricVersion`: source metrics contract version.
+- `source`: optional source-bundle provenance copied into live-generated report
+  artifacts, including `kind` and a human-readable label.
 - `targetRepository`: analyzed repository identity; live analysis sample size is encoded as `targetRepository.analysisPullRequestLimit` from collection metadata.
 - `analysisFilter`: optional metadata for explicit filters applied before metrics computation, including excluded PR classes and before/after PR counts.
 - `configuredWorkflow`: optional user-configured workflow context from the repository profile. It is not observed GitHub evidence and does not change scoring, ranking, CSV exports, or PR class matching.
 - `contributorSource`: optional sanitized contributor-source metadata from the repository profile and collection path. It records source type, path, coverage status, parsed hint count, and guardrail note. It does not include raw contributor file contents or contributor rankings.
+- `collectionCoverage`: optional source collection coverage metadata copied into live-generated report JSON artifacts. `collectionCoverage.status` records aggregate coverage, and `collectionCoverage.sourceFamilies` lists source-family entries with `family`, `status`, `attempts`, `source`, `diagnostics`, and `downstreamImpact`. This uses the generic `source-bundle.v1` `coverage.sourceFamilies` name; legacy GitHub `apiFamilies` is not a live `friction-report.v1` field.
 - `summary`: repository totals and top bottleneck identifiers.
 - `coverage`: PR-open diff, workflow-run, and review-thread coverage counts plus caveats.
 - `commentSources`: total and source-grouped review comments for Copilot, human, bot, scanner, author replies, and unknown sources.
@@ -99,7 +102,7 @@ The M3 report contract supports these recommendation categories:
 
 ## Coverage And Confidence
 
-Reports must label unavailable or partial GitHub data instead of inferring unavailable values from merge-time data. Final/current PR metadata can come from GitHub PR data, but PR-open diff growth remains unavailable unless an open-time snapshot or equivalent captured state exists. Workflow coverage and review-thread sources are summarized separately.
+Reports must label unavailable or partial source evidence instead of inferring unavailable values from merge-time data. Final/current PR metadata can come from source-bundle PR evidence, but PR-open diff growth remains unavailable unless an open-time snapshot or equivalent captured state exists. Workflow coverage and review-thread sources are summarized separately.
 
 Representative examples should carry enough source evidence to trace a report claim back to generated artifacts. Validation examples should name the workflow-run source and conclusions. Review churn examples should name the review-thread source, review decision evidence, and comment sources. PR class evidence should be visible in representative bottleneck examples so readers can distinguish workflow populations such as release, dependency, development, or repository-specific classes. When `reviewThreads` is zero, review decision evidence should make clean human approval distinguishable from unavailable review evidence and from observed absence of human review. When displayed examples are dominated by one PR or one PR class, the report should say so instead of implying a repository-wide pattern from an outlier or workflow population.
 
@@ -119,7 +122,7 @@ Full live analysis writes `methodology.md` as a hybrid artifact: stable explanat
 - contributor-source context when configured, including source type, path, coverage status, and parsed hint count, without raw contributor contents or rankings;
 - profile suggestions when PR class, file/path, or workflow-context profile evidence crosses deterministic fallback thresholds, or an explicit no-threshold note when none were triggered;
 - requested and collected PR counts;
-- collection coverage status and API-family diagnostics;
+- collection coverage status and source-family diagnostics from `collectionCoverage.sourceFamilies`;
 - scoring, ranking, dominance, sensitivity, and limitation explanations;
 - generated artifact names and artifact-sensitivity guidance.
 
@@ -138,11 +141,11 @@ Minimum CSV column groups:
 - `pr-metrics.csv`: PR number, title, URL, PR class, PR class source/rule evidence, changed lines, non-generated changed lines, review comments, review threads, review decision, human reviewer count, human approval / changes-requested booleans, failed checks, failed workflow runs, cancelled workflow runs, post-review commits, review-thread source, workflow-run source/coverage, and main ranking scores.
 - `bottleneck-examples.csv`: bottleneck identity, recommendation category, PR identity, score/value, changed lines, validation counts, review counts, comment-source counts, workflow/review source and coverage labels, dominance, and source labels.
 - `comment-sources.csv`: source name, total comments, bot/scanner classification, human/author classification, and share of all comments.
-- `collection-coverage.csv`: API family, status, attempts, source label, diagnostics, and downstream impact.
+- `collection-coverage.csv`: source family, status, attempts, source label, diagnostics, and downstream impact.
 
 Empty CSV cells mean unavailable or not applicable. Numeric zero should be used only for observed or computed zero counts. Count columns that depend on optional GitHub coverage should keep source or coverage labels nearby so spreadsheet readers can tell unavailable evidence apart from observed zeroes. CSVs must not include raw comment bodies, raw workflow logs, tokens, secret-bearing environment details, or individual contributor/reviewer rankings.
 
-Contributor-source coverage appears in `collection-coverage.csv` as the `contributor_source` API family when configured. CSVs may include aggregate comment-source counts influenced by contributor hints, but they must not include raw `.all-contributorsrc` contents, contributor names, contributor login lists, or person rankings.
+Contributor-source coverage appears in `collection-coverage.csv` as the `contributor_source` source family when configured. CSVs may include aggregate comment-source counts influenced by contributor hints, but they must not include raw `.all-contributorsrc` contents, contributor names, contributor login lists, or person rankings.
 
 ## Optional Downstream Narrative Drafting
 
@@ -153,7 +156,7 @@ Use `friction-report.json` as the structured source of truth for report identity
 - `pr-metrics.csv` for analyzed PR rows, class labels, review/validation counts, and ranking scores.
 - `bottleneck-examples.csv` for representative examples tied to bottleneck identity, recommendation category, evidence sources, dominance, and score/value.
 - `comment-sources.csv` for source-grouped comment totals and classification flags.
-- `collection-coverage.csv` for API-family coverage, attempts, source labels, diagnostics, and downstream impact.
+- `collection-coverage.csv` for source-family coverage, attempts, source labels, diagnostics, and downstream impact.
 
 A guarded narrative-drafting workflow should:
 

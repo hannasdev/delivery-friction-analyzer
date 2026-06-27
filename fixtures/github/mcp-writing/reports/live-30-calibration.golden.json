@@ -22,7 +22,7 @@
   },
   "collectionCoverage": {
     "status": "partial",
-    "apiFamilies": [
+    "sourceFamilies": [
       {
         "family": "pull_request_details",
         "source": "gh pr view --json",

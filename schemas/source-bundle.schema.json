@@ -1,12 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://delivery-friction-analyzer.local/schemas/github-source-bundle.schema.json",
-  "title": "GitHubSourceBundle",
+  "$id": "https://delivery-friction-analyzer.local/schemas/source-bundle.schema.json",
+  "title": "SourceBundle",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "schemaVersion",
     "collectedAt",
+    "source",
     "collector",
     "targetRepository",
     "repositoryMetadata",
@@ -16,14 +17,27 @@
     "pullRequests"
   ],
   "properties": {
-    "schemaVersion": { "const": "github-source-bundle.v1" },
+    "schemaVersion": { "const": "source-bundle.v1" },
     "collectedAt": { "type": "string" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "label"],
+      "properties": {
+        "kind": { "enum": ["github", "sample"] },
+        "label": { "type": "string", "minLength": 1 },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
     "collector": {
       "type": "object",
       "additionalProperties": false,
       "required": ["name", "provider"],
       "properties": {
-        "name": { "const": "github-live-collector" },
+        "name": { "type": "string", "minLength": 1 },
         "provider": { "type": "string", "minLength": 1 }
       }
     },
@@ -48,7 +62,7 @@
       "additionalProperties": false,
       "required": ["strategy", "requestedLimit", "collectedCount", "source"],
       "properties": {
-        "strategy": { "const": "latest_merged_pull_requests" },
+        "strategy": { "type": "string", "minLength": 1 },
         "requestedLimit": { "type": "integer", "minimum": 1, "maximum": 100 },
         "collectedCount": { "type": "integer", "minimum": 0, "maximum": 100 },
         "source": { "type": "string", "minLength": 1 }
@@ -57,12 +71,12 @@
     "coverage": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "apiFamilies"],
+      "required": ["status", "sourceFamilies"],
       "properties": {
         "status": { "$ref": "#/$defs/coverageStatus" },
-        "apiFamilies": {
+        "sourceFamilies": {
           "type": "array",
-          "items": { "$ref": "#/$defs/apiCoverageEntry" }
+          "items": { "$ref": "#/$defs/sourceCoverageEntry" }
         }
       }
     },
@@ -71,7 +85,7 @@
       "additionalProperties": false,
       "required": ["source", "bytesByLanguage", "coverage"],
       "properties": {
-        "source": { "const": "rest:/repos/{owner}/{repo}/languages" },
+        "source": { "type": "string", "minLength": 1 },
         "bytesByLanguage": {
           "type": "object",
           "additionalProperties": { "type": "integer", "minimum": 0 }
@@ -83,7 +97,7 @@
               "type": "object",
               "properties": {
                 "family": { "const": "languages" },
-                "source": { "const": "rest:/repos/{owner}/{repo}/languages" }
+                "source": { "type": "string", "minLength": 1 }
               }
             }
           ]
@@ -104,7 +118,7 @@
               "type": "object",
               "properties": {
                 "family": { "const": "contributor_source" },
-                "source": { "const": "rest:/repos/{owner}/{repo}/contents/{path}" }
+                "source": { "type": "string", "minLength": 1 }
               }
             }
           ]
@@ -150,7 +164,7 @@
         "downstreamImpact": { "type": ["string", "null"] }
       }
     },
-    "apiCoverageEntry": {
+    "sourceCoverageEntry": {
       "allOf": [
         { "$ref": "#/$defs/coverageEntry" },
         {
@@ -319,7 +333,7 @@
       "additionalProperties": false,
       "required": ["source", "totalCount", "nodes"],
       "properties": {
-        "source": { "enum": ["graphql:repository.pullRequest.reviewThreads", "unavailable"] },
+        "source": { "type": "string", "minLength": 1 },
         "totalCount": { "type": "integer", "minimum": 0 },
         "nodes": {
           "type": "array",
@@ -378,7 +392,7 @@
       "additionalProperties": false,
       "required": ["source", "totalCount", "conclusions", "runs"],
       "properties": {
-        "source": { "enum": ["rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request", "unavailable"] },
+        "source": { "type": "string", "minLength": 1 },
         "totalCount": { "type": ["integer", "null"], "minimum": 0 },
         "conclusions": {
           "type": "object",
@@ -434,7 +448,7 @@
               "type": "object",
               "properties": {
                 "family": { "const": "pr_open_diff" },
-                "source": { "const": "historical_snapshot" },
+                "source": { "type": "string", "minLength": 1 },
                 "status": { "enum": ["available", "partial", "unavailable", "rate_limited"] }
               }
             }
@@ -447,7 +461,7 @@
               "type": "object",
               "properties": {
                 "family": { "const": "review_threads" },
-                "source": { "const": "graphql:repository.pullRequest.reviewThreads" }
+                "source": { "type": "string", "minLength": 1 }
               }
             }
           ]
@@ -459,7 +473,7 @@
               "type": "object",
               "properties": {
                 "family": { "const": "workflow_runs" },
-                "source": { "const": "rest:/repos/{owner}/{repo}/actions/runs?branch={branch}&event=pull_request" }
+                "source": { "type": "string", "minLength": 1 }
               }
             }
           ]

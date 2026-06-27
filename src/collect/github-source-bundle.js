@@ -18,7 +18,7 @@ import {
   redactDiagnostic,
 } from "./coverage.js";
 
-export const GITHUB_SOURCE_BUNDLE_VERSION = "github-source-bundle.v1";
+export const SOURCE_BUNDLE_VERSION = "source-bundle.v1";
 
 const REPOSITORY_SLUG = /^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/;
 function parseRepositoryInput(input) {
@@ -507,7 +507,7 @@ export async function collectGitHubSourceBundle({
     pullRequests.push(pr);
   }
 
-  const apiFamilies = [
+  const sourceFamilies = [
     repositoryCoverage,
     languagesAttempt.coverage,
     inventoryCoverage,
@@ -542,8 +542,12 @@ export async function collectGitHubSourceBundle({
   ];
 
   return {
-    schemaVersion: GITHUB_SOURCE_BUNDLE_VERSION,
+    schemaVersion: SOURCE_BUNDLE_VERSION,
     collectedAt,
+    source: {
+      kind: "github",
+      label: "GitHub live collection",
+    },
     collector: {
       name: "github-live-collector",
       provider: provider.kind ?? "custom",
@@ -557,8 +561,8 @@ export async function collectGitHubSourceBundle({
       source: "gh pr list --state merged --search \"is:merged sort:merged-desc\"",
     },
     coverage: {
-      status: buildCoverageSummary(apiFamilies),
-      apiFamilies,
+      status: buildCoverageSummary(sourceFamilies),
+      sourceFamilies,
     },
     languageDistribution: {
       source: "rest:/repos/{owner}/{repo}/languages",

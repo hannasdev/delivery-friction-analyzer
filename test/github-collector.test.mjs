@@ -184,7 +184,7 @@ function createProvider(overrides = {}) {
 }
 
 function coverageFor(bundle, family) {
-  return bundle.coverage.apiFamilies.find(entry => entry.family === family);
+  return bundle.coverage.sourceFamilies.find(entry => entry.family === family);
 }
 
 describe("GitHub source collector", () => {
@@ -221,7 +221,11 @@ describe("GitHub source collector", () => {
       collectedAt: "2026-06-09T00:00:00Z",
     });
 
-    assert.equal(bundle.schemaVersion, "github-source-bundle.v1");
+    assert.equal(bundle.schemaVersion, "source-bundle.v1");
+    assert.deepEqual(bundle.source, {
+      kind: "github",
+      label: "GitHub live collection",
+    });
     assert.equal(bundle.collector.provider, "mock-gh");
     assert.equal(bundle.targetRepository.owner, "example");
     assert.equal(bundle.targetRepository.name, "example-repo");
@@ -257,7 +261,7 @@ describe("GitHub source collector", () => {
   it("collects configured all-contributors hints without raw file contents", async () => {
     const provider = createProvider();
     const [sourceBundleSchema, targetSchema] = await Promise.all([
-      readJson("../schemas/github-source-bundle.schema.json"),
+      readJson("../schemas/source-bundle.schema.json"),
       readJson("../schemas/target-repository.schema.json"),
     ]);
 
@@ -270,7 +274,7 @@ describe("GitHub source collector", () => {
     });
     assertSchemaValid({
       artifact: "source-bundle.json",
-      schemaPath: "schemas/github-source-bundle.schema.json",
+      schemaPath: "schemas/source-bundle.schema.json",
       value: bundle,
       schema: sourceBundleSchema,
       refs: {
