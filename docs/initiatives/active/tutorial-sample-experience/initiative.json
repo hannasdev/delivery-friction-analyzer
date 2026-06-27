@@ -42,9 +42,11 @@
       "mergedAt": "2026-06-27"
     },
     "M6": {
-      "state": "implemented",
+      "state": "conformance_reviewed",
       "startedAt": "2026-06-27",
-      "implemented": true
+      "implemented": true,
+      "conformanceReviewed": true,
+      "conformanceReviewedAt": "2026-06-27"
     }
   }
 }
