@@ -7,7 +7,7 @@
 - Owner: Hanna
 - Created: 2026-06-22
 - Activated: 2026-06-23
-- Current milestone: M5, Product-Repository Override
+- Current milestone: M6, First-Run Profile Prompt Refinements
 - Related issue:
   - None yet.
 - Related docs:

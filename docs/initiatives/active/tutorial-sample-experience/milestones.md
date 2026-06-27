@@ -366,7 +366,7 @@ The product repository remains rejected for ordinary live analysis, but users ca
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged
 
 ## M6: First-Run Profile Prompt Refinements
 
@@ -427,7 +427,7 @@ Interactive setup explains profile choices in a way that helps users avoid the w
 
 ### Status
 
-- [ ] Not started
+- [x] Active
 - [ ] Implemented
 - [ ] Conformance reviewed
 - [ ] Adversarially reviewed
