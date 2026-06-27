@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-27 — First-Run Profile Prompt Clarity
+
+- What changed: Interactive GitHub setup now explains starter-profile limitations, gives clearer guidance before adding Conventional Commit PR class rules, and only prints the starter-profile completion reminder when a new profile was created.
+- Why it matters: First-time maintainers can understand when a generated profile may leave PR classes, file roles, or functional surfaces as `unknown`, while existing-profile updates avoid misleading setup output.
+- Who is affected: Maintainers and contributors running `--interactive` to create or update repository profiles.
+- Action needed: None.
+- PR: pending; replace with the pull request link after the PR is opened.
+
 ### 2026-06-27 — Product Repository Override
 
 - What changed: Added the explicit `--allow-product-repository` live-analysis override for intentional analysis of this tool's own repository, with required read-access checks before collection or artifact writes.

@@ -2803,8 +2803,20 @@ describe("GitHub live analyze CLI", () => {
       });
 
       const profile = await readJson(profilePath);
+      const completion = formatAnalyzeGithubCompletion({
+        ok: true,
+        dryRun: true,
+        targetRepository: { owner: "example", name: "example-repo" },
+        requestedLimit: 1,
+        sampledLimit: 1,
+        savedProfilePath: options.savedProfilePath,
+        prClassRulesWritten: options.prClassRulesWritten,
+        collectionCoverage: { status: "available" },
+      });
       assert.equal(options.savedProfilePath, profilePath);
       assert.equal(options.prClassRulesWritten, true);
+      assert.equal(options.starterProfileCreated, undefined);
+      assert(!completion.includes("Created a starter profile."));
       assert.deepEqual(profile.workflow, {
         primaryMergeMethod: "unknown",
         releaseStrategy: "unknown",
