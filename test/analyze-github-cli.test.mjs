@@ -1248,7 +1248,7 @@ describe("GitHub live analyze CLI", () => {
       error => {
         assert.equal(error.message, SOURCE_SELECTION_GUIDANCE);
         assert.match(error.message, /delivery-friction-analyzer --source sample --out reports\/tutorial/);
-        assert.match(error.message, /delivery-friction-analyzer --source github --repo owner\/name --profile path\/to\/profile\.json --out reports\/owner-name/);
+        assert.match(error.message, /delivery-friction-analyzer --source github --repo owner\/name --limit 30 --profile path\/to\/profile\.json --out reports\/owner-name/);
         return true;
       },
     );

@@ -151,7 +151,7 @@ Try the bundled sample:
   delivery-friction-analyzer --source sample --out reports/tutorial
 
 Analyze a GitHub repository:
-  delivery-friction-analyzer --source github --repo owner/name --profile path/to/profile.json --out reports/owner-name`;
+  delivery-friction-analyzer --source github --repo owner/name --limit 30 --profile path/to/profile.json --out reports/owner-name`;
 
 function attachOptionSource(options, property, value) {
   Object.defineProperty(options, property, {
