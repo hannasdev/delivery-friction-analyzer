@@ -295,8 +295,8 @@ describe("mcp-writing compact fixture normalization", () => {
     assert.equal(broadPr.components.diffGrowthRatio.value, 4);
     assert.equal(partialCoveragePr.coverage.prOpenDiff.status, "unavailable");
     assert.equal(partialCoveragePr.coverage.workflowRuns.status, "unavailable");
-    assert(metrics.rankings.reviewChurn[0].number, 104);
-    assert(metrics.rankings.changedFileSpread[0].number, 104);
-    assert(metrics.rankings.validationGap[0].number, 104);
+    assert.equal(metrics.rankings.reviewChurn[0].number, 104);
+    assert.equal(metrics.rankings.changedFileSpread[0].number, 104);
+    assert.equal(metrics.rankings.validationGap[0].number, 104);
   });
 });
