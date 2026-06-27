@@ -30,8 +30,9 @@
       "mergedAt": "2026-06-27"
     },
     "M5": {
-      "state": "active",
-      "startedAt": "2026-06-27"
+      "state": "implemented",
+      "startedAt": "2026-06-27",
+      "implemented": true
     },
     "M6": {
       "state": "not_started"

@@ -46,6 +46,29 @@ describe("target repository contract", () => {
     assert(errors.some(error => error.includes("distinct from the product repository")));
   });
 
+  it("allows the product repository only when an explicit override is supplied", () => {
+    const result = normalizeTargetRepository(
+      {
+        owner: "hannasdev",
+        name: "delivery-friction-analyzer",
+        defaultBranch: "main",
+        visibility: "public",
+        analysisPullRequestLimit: 30,
+      },
+      {
+        productRepository: {
+          owner: "hannasdev",
+          name: "delivery-friction-analyzer",
+        },
+        allowProductRepository: true,
+      },
+    );
+
+    assert.equal(result.ok, true);
+    assert.equal(result.targetRepository.fullName, "hannasdev/delivery-friction-analyzer");
+    assert.equal(result.targetRepository.isValidationTarget, false);
+  });
+
   it("rejects product repository matches case-insensitively", () => {
     const errors = validateTargetRepository(
       {

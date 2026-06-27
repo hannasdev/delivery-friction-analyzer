@@ -372,6 +372,7 @@ describe("GitHub live analyze CLI", () => {
       assert.match(stdout, /--source <sample\|github>\s+Choose the bundled synthetic sample or live GitHub analysis\./);
       assert.match(stdout, /--dry-run/);
       assert.match(stdout, /--validation-target\s+Mark output metadata as an internal validation run; does not bypass target validation\./);
+      assert.match(stdout, /--allow-product-repository\s+Explicit live-analysis override for intentional self-analysis of this product repository\./);
     });
   });
 
@@ -407,6 +408,22 @@ describe("GitHub live analyze CLI", () => {
       "--out",
       "reports/tutorial",
     ]).source, "sample");
+  });
+
+  it("parses --allow-product-repository as an explicit live override", () => {
+    assert.equal(parseAnalyzeGithubArgs([
+      "--source",
+      "github",
+      "--repo",
+      "hannasdev/delivery-friction-analyzer",
+      "--limit",
+      "1",
+      "--profile",
+      "profile.json",
+      "--out",
+      "reports/self",
+      "--allow-product-repository",
+    ]).allowProductRepository, true);
   });
 
   it("collects interactive answers and maps them to analyze options", async () => {
@@ -1945,6 +1962,31 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("rejects --allow-product-repository with --source sample before provider calls", async () => {
+    await withTempDirectory(async directory => {
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithubCli([
+          "--source",
+          "sample",
+          "--out",
+          join(directory, "out"),
+          "--allow-product-repository",
+        ], {
+          provider,
+        }),
+        /--source sample cannot be combined with live GitHub option\(s\): --allow-product-repository/,
+      );
+
+      assert.deepEqual(provider.calls, []);
+      await assert.rejects(
+        lstat(join(directory, "out")),
+        error => error?.code === "ENOENT",
+      );
+    });
+  });
+
   it("infers GitHub live analysis from existing live command flags when source is omitted", async () => {
     await withTempDirectory(async directory => {
       const profilePath = await writeProfile(directory);
@@ -2969,9 +3011,156 @@ describe("GitHub live analyze CLI", () => {
           profilePath,
           outDir: join(directory, "out"),
         }, { provider }),
-        /Cannot analyze hannasdev\/delivery-friction-analyzer because it is this tool's product repository.*guard prevents accidental self-analysis during normal live runs.*not a data-security boundary.*Choose a different repository with --repo owner\/name.*No GitHub data was collected/s,
+        /Cannot analyze hannasdev\/delivery-friction-analyzer because it is this tool's product repository.*guard prevents accidental self-analysis during normal live runs.*not a data-security boundary.*delivery-friction-analyzer --source sample --out reports\/tutorial.*pass --repo owner\/name.*--allow-product-repository.*No GitHub data was collected/s,
       );
       assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("fails product-repository override before output creation when repository metadata is unreadable", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "product-metadata-failure-out");
+      const provider = createProvider({
+        async getRepository(input) {
+          this.calls.push(["getRepository", input]);
+          throw new Error("HTTP 401: Requires authentication");
+        },
+      });
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "hannasdev/delivery-friction-analyzer",
+          limit: 1,
+          profilePath,
+          outDir,
+          allowProductRepository: true,
+        }, { provider }),
+        /--allow-product-repository.*repository metadata.*Authenticate with GitHub CLI.*HTTP 401/s,
+      );
+
+      assert.deepEqual(provider.calls.map(call => call[0]), ["getRepository"]);
+      await assert.rejects(lstat(outDir), error => error?.code === "ENOENT");
+    });
+  });
+
+  it("fails product-repository override before output creation when PR inventory is unreadable", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "product-inventory-failure-out");
+      const provider = createProvider({
+        async listMergedPullRequests(input) {
+          this.calls.push(["listMergedPullRequests", input]);
+          throw new Error("HTTP 404: repository not found or no access");
+        },
+      });
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "hannasdev/delivery-friction-analyzer",
+          limit: 1,
+          profilePath,
+          outDir,
+          allowProductRepository: true,
+        }, { provider }),
+        /--allow-product-repository.*pull request inventory.*gh pr list.*HTTP 404/s,
+      );
+
+      assert.deepEqual(provider.calls.map(call => call[0]), [
+        "getRepository",
+        "listMergedPullRequests",
+      ]);
+      await assert.rejects(lstat(outDir), error => error?.code === "ENOENT");
+    });
+  });
+
+  it("fails product-repository override before output creation when PR details are unreadable", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "product-details-failure-out");
+      const provider = createProvider({
+        async getPullRequest(input) {
+          this.calls.push(["getPullRequest", input]);
+          throw new Error("HTTP 403: pull request details unavailable");
+        },
+      });
+
+      await assert.rejects(
+        runAnalyzeGithub({
+          repository: "hannasdev/delivery-friction-analyzer",
+          limit: 1,
+          profilePath,
+          outDir,
+          allowProductRepository: true,
+        }, { provider }),
+        /--allow-product-repository.*pull request details.*gh pr view.*HTTP 403/s,
+      );
+
+      assert.deepEqual(provider.calls.map(call => call[0]), [
+        "getRepository",
+        "listMergedPullRequests",
+        "getPullRequest",
+      ]);
+      await assert.rejects(lstat(outDir), error => error?.code === "ENOENT");
+    });
+  });
+
+  it("runs product-repository analysis only after required readable-data assertion succeeds", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "product-override-out");
+      const provider = createProvider({
+        async getRepository(input) {
+          this.calls.push(["getRepository", input]);
+          return {
+            id: 99,
+            name: "delivery-friction-analyzer",
+            full_name: "hannasdev/delivery-friction-analyzer",
+            owner: { login: "hannasdev" },
+            default_branch: "main",
+            private: false,
+            html_url: "https://github.com/hannasdev/delivery-friction-analyzer",
+          };
+        },
+        async getReviewThreads(input) {
+          this.calls.push(["getReviewThreads", input]);
+          throw new Error("HTTP 403: review threads unavailable");
+        },
+        async getWorkflowRuns(input) {
+          this.calls.push(["getWorkflowRuns", input]);
+          throw new Error("HTTP 403: workflow runs unavailable");
+        },
+      });
+
+      const result = await runAnalyzeGithub({
+        repository: "hannasdev/delivery-friction-analyzer",
+        limit: 1,
+        profilePath,
+        outDir,
+        allowProductRepository: true,
+      }, {
+        provider,
+        now: () => "2026-06-09T00:00:00Z",
+      });
+
+      assert.equal(result.targetRepository.owner, "hannasdev");
+      assert.equal(result.targetRepository.name, "delivery-friction-analyzer");
+      assert.deepEqual(provider.calls.map(call => call[0]).slice(0, 3), [
+        "getRepository",
+        "listMergedPullRequests",
+        "getPullRequest",
+      ]);
+      assert.deepEqual(provider.calls.map(call => call[0]).slice(3, 6), [
+        "getRepository",
+        "getLanguages",
+        "listMergedPullRequests",
+      ]);
+      const sourceBundle = await readJson(join(outDir, "source-bundle.json"));
+      assert.equal(sourceBundle.targetRepository.owner, "hannasdev");
+      assert.equal(sourceBundle.targetRepository.name, "delivery-friction-analyzer");
+      assert.equal(sourceBundle.coverage.sourceFamilies.find(entry => entry.family === "pull_request_details").status, "available");
+      assert.equal(sourceBundle.coverage.sourceFamilies.find(entry => entry.family === "review_threads").status, "unavailable");
+      assert.equal(sourceBundle.coverage.sourceFamilies.find(entry => entry.family === "workflow_runs").status, "unavailable");
     });
   });
 

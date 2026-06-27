@@ -4,8 +4,16 @@ import { access, lstat, mkdir, open, readFile, rename, rm, stat, writeFile } fro
 import { dirname, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { collectGitHubSourceBundle } from "../collect/github-source-bundle.js";
+import {
+  assertProductRepositoryReadableData,
+  collectGitHubSourceBundle,
+} from "../collect/github-source-bundle.js";
 import { createGhCliProvider } from "../collect/gh-provider.js";
+import {
+  DEFAULT_PRODUCT_REPOSITORY,
+  isProductRepositoryTarget,
+  productRepositoryTargetError,
+} from "../contracts/target-repository.js";
 import { computeRepositoryMetrics } from "../metrics/friction.js";
 import { normalizeFixtureBundle } from "../normalize/github-fixture.js";
 import {
@@ -48,6 +56,7 @@ const ALLOWED_OPTIONS = new Set([
   "interactive",
   "preset",
   "save-preset",
+  "allow-product-repository",
 ]);
 
 const BOOLEAN_OPTIONS = new Set([
@@ -61,6 +70,7 @@ const BOOLEAN_OPTIONS = new Set([
   "json",
   "no-json",
   "interactive",
+  "allow-product-repository",
 ]);
 
 const CLI_OPTION_KEYS = Object.freeze({
@@ -82,6 +92,7 @@ const CLI_OPTION_KEYS = Object.freeze({
   interactive: "interactive",
   preset: "presetPath",
   "save-preset": "savePresetPath",
+  "allow-product-repository": "allowProductRepository",
 });
 
 const RUN_PRESET_OPTION_KEYS = Object.freeze([
@@ -135,6 +146,8 @@ Options:
   --metadata-only           Alias for --dry-run.
   --validation-target       Mark output metadata as an internal validation run; does not bypass target validation.
   --no-validation-target    Disable validation-target mode when a preset enabled it.
+  --allow-product-repository
+                            Explicit live-analysis override for intentional self-analysis of this product repository.
   --exclude-pr-class <cls>  Exclude a PR class from normalized, metrics, report, methodology, and CSV artifacts. Repeat or comma-separate values.
   --csv                     Enable curated CSV evidence exports when a preset disabled them.
   --no-csv                  Suppress curated CSV evidence exports.
@@ -215,6 +228,7 @@ export function parseAnalyzeGithubArgs(argv) {
       if (key === "json") options.json = true;
       if (key === "no-json") options.json = false;
       if (key === "interactive") options.interactive = true;
+      if (key === "allow-product-repository") options.allowProductRepository = true;
       continue;
     }
 
@@ -243,6 +257,7 @@ export function parseAnalyzeGithubArgs(argv) {
     json: options.json,
     interactive: options.interactive,
   };
+  if (options.allowProductRepository) parsed.allowProductRepository = true;
   if (options.preset !== undefined) parsed.presetPath = options.preset;
   if (options["save-preset"] !== undefined) parsed.savePresetPath = options["save-preset"];
   if (parsed.source === undefined) delete parsed.source;
@@ -472,12 +487,14 @@ function hasLiveSourceIndicator(options) {
       || options.interactive
       || options.presetPath
       || options.savePresetPath
+      || options.allowProductRepository
       || options.excludedPrClasses?.length
       || providedOptions.has("dryRun")
       || providedOptions.has("isValidationTarget")
       || providedOptions.has("interactive")
       || providedOptions.has("presetPath")
       || providedOptions.has("savePresetPath")
+      || providedOptions.has("allowProductRepository")
       || providedOptions.has("excludedPrClasses"),
   );
 }
@@ -510,11 +527,22 @@ function rejectSampleLiveOptions(options) {
   if (options.interactive) incompatible.push("--interactive");
   if (options.presetPath) incompatible.push("--preset");
   if (options.savePresetPath) incompatible.push("--save-preset");
+  if (options.allowProductRepository || providedOptions.has("allowProductRepository")) {
+    incompatible.push("--allow-product-repository");
+  }
   if (options.excludedPrClasses?.length || providedOptions.has("excludedPrClasses")) {
     incompatible.push("--exclude-pr-class");
   }
   if (!incompatible.length) return;
   throw new Error(`--source sample cannot be combined with live GitHub option(s): ${incompatible.join(", ")}. Use only output options such as --out, --json, --csv, or --no-csv.`);
+}
+
+function targetInputFromRepositorySlug(repository) {
+  const match = REPOSITORY_SLUG.exec(repository);
+  if (!match) {
+    throw new Error("repo must use owner/name with GitHub-safe owner and name segments.");
+  }
+  return { owner: match[1], name: match[2] };
 }
 
 function configuredPrClasses(repositoryProfile) {
@@ -1628,6 +1656,21 @@ export async function runAnalyzeGithub(options, {
   validateLimit(options.limit);
   validateExcludedPrClasses(options.excludedPrClasses);
   const csvEnabled = options.csv !== false;
+  const effectiveProductRepository = productRepository ?? DEFAULT_PRODUCT_REPOSITORY;
+  const targetInput = targetInputFromRepositorySlug(options.repository);
+  const targetsProductRepository = isProductRepositoryTarget(targetInput, effectiveProductRepository);
+  if (targetsProductRepository && !options.allowProductRepository) {
+    throw new Error(productRepositoryTargetError(targetInput));
+  }
+  if (targetsProductRepository) {
+    onProgress?.("Checking required GitHub read access for product-repository analysis.");
+    await assertProductRepositoryReadableData({
+      repository: options.repository,
+      limit: options.dryRun ? Math.min(options.limit, 1) : options.limit,
+      provider,
+      productRepository: effectiveProductRepository,
+    });
+  }
 
   onProgress?.("Validating profile and output directory.");
   const [repositoryProfile, outDir] = await Promise.all([
@@ -1654,7 +1697,8 @@ export async function runAnalyzeGithub(options, {
     collectedAt: now(),
     isValidationTarget: options.isValidationTarget,
     contributors: repositoryProfile.contributors,
-    productRepository,
+    productRepository: effectiveProductRepository,
+    allowProductRepository: Boolean(options.allowProductRepository),
   });
 
   if (options.dryRun) {

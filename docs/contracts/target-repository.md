@@ -19,7 +19,13 @@ Schema: `schemas/target-repository.schema.json`. Live analysis selection is late
 
 The validator rejects a target repository that exactly matches the configured product repository. For this repository, the product repository is `hannasdev/delivery-friction-analyzer`; `hannasdev/mcp-writing` is an internal validation target and fixture source.
 
-Live GitHub analysis enforces this separation before GitHub collection starts. If `--repo` names this tool's product repository, the command fails before provider calls, explains that the guard prevents accidental self-analysis during normal live runs rather than protecting already readable GitHub data, tells you to choose the repository you want to measure with `--repo owner/name`, and confirms that no GitHub data was collected. `--validation-target` only marks output metadata and does not bypass this guard. The product repository identity is repo-local implementation configuration, not a public CLI option.
+Live GitHub analysis enforces this separation before GitHub collection starts. If `--repo` names this tool's product repository, the command fails before provider calls, explains that the guard prevents accidental self-analysis during normal live runs rather than protecting already readable GitHub data, recommends the bundled sample or another repository first, and confirms that no GitHub data was collected.
+
+`--validation-target` only marks output metadata for internal validation or fixture-source runs. It does not bypass product-repository validation and does not change which repository may be analyzed.
+
+`--allow-product-repository` is an explicit live-analysis override for intentional self-analysis of this product repository. It is not the tutorial path and is rejected in sample mode. When the override is present for the product repository, the CLI must prove required GitHub data is readable before collection or artifact writes. Required preflight reads are repository metadata, pull request inventory, and pull request details for at least one selected merged pull request. Review threads, workflow runs, languages, contributor source, and PR-open diff remain normal coverage families; partial or unavailable optional coverage should be reported as caveats after the required assertion succeeds rather than failing the preflight.
+
+The product repository identity is repo-local implementation configuration, not a general public CLI setting.
 
 ## Degraded Behavior
 

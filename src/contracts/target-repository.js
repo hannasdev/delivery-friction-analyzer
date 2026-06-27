@@ -13,7 +13,7 @@ function validateRepoPart(value, label) {
   return null;
 }
 
-export function validateTargetRepository(input, { productRepository } = {}) {
+export function validateTargetRepository(input, { productRepository, allowProductRepository = false } = {}) {
   const errors = [];
   if (!input || typeof input !== "object") {
     return ["target repository input must be an object."];
@@ -46,6 +46,8 @@ export function validateTargetRepository(input, { productRepository } = {}) {
   const normalizedProductName = typeof productRepository?.name === "string" ? productRepository.name.toLowerCase() : null;
 
   if (
+    !allowProductRepository
+    &&
     normalizedInputOwner
     && normalizedInputName
     && normalizedProductOwner
@@ -99,5 +101,12 @@ export function productRepositoryTargetError(input) {
   const repository = typeof input?.owner === "string" && typeof input?.name === "string"
     ? `${input.owner}/${input.name}`
     : "the requested repository";
-  return `Cannot analyze ${repository} because it is this tool's product repository. The guard prevents accidental self-analysis during normal live runs; it is not a data-security boundary. Choose a different repository with --repo owner/name. No GitHub data was collected.`;
+  return `Cannot analyze ${repository} because it is this tool's product repository. The guard prevents accidental self-analysis during normal live runs; it is not a data-security boundary.
+
+To learn the tool, run the bundled sample:
+  delivery-friction-analyzer --source sample --out reports/tutorial
+
+To analyze a different repository, pass --repo owner/name.
+
+If you intentionally want to analyze this product repository, rerun with --allow-product-repository. The CLI will check that required data is readable before writing artifacts. No GitHub data was collected.`;
 }
