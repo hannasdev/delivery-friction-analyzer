@@ -7,7 +7,7 @@
 - Owner: Hanna
 - Created: 2026-06-22
 - Activated: 2026-06-23
-- Current milestone: M4, Explicit Sample CLI Path
+- Current milestone: M5, Product-Repository Override
 - Related issue:
   - None yet.
 - Related docs:

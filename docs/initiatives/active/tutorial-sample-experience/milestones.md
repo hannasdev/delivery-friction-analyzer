@@ -288,7 +288,7 @@ Users can run `delivery-friction-analyzer --source sample --out reports/tutorial
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged
 
 ## M5: Product-Repository Override
 
@@ -361,11 +361,11 @@ The product repository remains rejected for ordinary live analysis, but users ca
 
 ### Status
 
-- [ ] Not started
-- [ ] Implemented
-- [ ] Conformance reviewed
-- [ ] Adversarially reviewed
-- [ ] PR opened
+- [x] Active
+- [x] Implemented
+- [x] Conformance reviewed
+- [x] Adversarially reviewed
+- [x] PR opened
 - [ ] Merged
 
 ## M6: First-Run Profile Prompt Refinements

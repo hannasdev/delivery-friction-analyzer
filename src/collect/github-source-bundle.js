@@ -49,7 +49,7 @@ function visibilityOf(repository) {
   return "unknown";
 }
 
-function mapTargetRepository({ owner, name, repositoryMetadata, analysisPullRequestLimit, isValidationTarget, productRepository }) {
+function mapTargetRepository({ owner, name, repositoryMetadata, analysisPullRequestLimit, isValidationTarget, productRepository, allowProductRepository }) {
   const targetRepository = {
     owner,
     name,
@@ -58,11 +58,88 @@ function mapTargetRepository({ owner, name, repositoryMetadata, analysisPullRequ
     analysisPullRequestLimit,
     isValidationTarget,
   };
-  const errors = validateTargetRepository(targetRepository, { productRepository });
+  const errors = validateTargetRepository(targetRepository, { productRepository, allowProductRepository });
   if (errors.length > 0) {
     throw new Error(`collected target repository metadata is invalid: ${errors.join(" ")}`);
   }
   return targetRepository;
+}
+
+function formatReadableDataFailure({ repository, family, action, error }) {
+  const diagnostic = redactDiagnostic(error?.message ?? error);
+  return `Cannot analyze ${repository} with --allow-product-repository because required GitHub read access could not be proven for ${family}. ${action}. Required preflight must read repository metadata, pull request inventory, and pull request details before collection or artifact writes.${diagnostic ? ` GitHub response: ${diagnostic}` : ""}`;
+}
+
+async function requireReadableProbe({ repository, family, action, run }) {
+  try {
+    return await run();
+  } catch (error) {
+    throw new Error(formatReadableDataFailure({
+      repository,
+      family,
+      action,
+      error,
+    }));
+  }
+}
+
+export async function assertProductRepositoryReadableData({
+  repository,
+  owner,
+  name,
+  limit,
+  provider,
+  productRepository = DEFAULT_PRODUCT_REPOSITORY,
+} = {}) {
+  if (!provider) {
+    throw new Error("provider is required.");
+  }
+  requirePullRequestLimit(limit);
+  const targetInput = repository ? parseRepositoryInput(repository) : { owner, name };
+  if (!isProductRepositoryTarget(targetInput, productRepository)) {
+    return { requiredFamilies: [] };
+  }
+
+  const repositoryLabel = `${targetInput.owner}/${targetInput.name}`;
+  await requireReadableProbe({
+    repository: repositoryLabel,
+    family: "repository metadata",
+    action: "Authenticate with GitHub CLI or choose a repository your token can read",
+    run: () => provider.getRepository(targetInput),
+  });
+
+  const inventory = await requireReadableProbe({
+    repository: repositoryLabel,
+    family: "pull request inventory",
+    action: "Ensure `gh pr list --repo owner/name` can list merged pull requests",
+    run: () => provider.listMergedPullRequests({ ...targetInput, limit }),
+  });
+  if (!Array.isArray(inventory)) {
+    throw new Error(`Cannot analyze ${repositoryLabel} with --allow-product-repository because required GitHub read access could not be proven for pull request inventory. GitHub returned an unreadable pull request inventory shape. Required preflight must read repository metadata, pull request inventory, and pull request details before collection or artifact writes.`);
+  }
+  const selectedInventory = [...inventory]
+    .sort((left, right) => String(right.mergedAt ?? "").localeCompare(String(left.mergedAt ?? "")))
+    .slice(0, limit);
+  const firstPullRequest = selectedInventory[0];
+  if (!firstPullRequest?.number) {
+    throw new Error(`Cannot analyze ${repositoryLabel} with --allow-product-repository because required GitHub read access could not be proven for pull request details. The pull request inventory returned no merged pull requests to inspect. Choose another repository or rerun after merged pull requests are readable.`);
+  }
+
+  await requireReadableProbe({
+    repository: repositoryLabel,
+    family: "pull request details",
+    action: "Ensure `gh pr view --repo owner/name <number> --json ...` can read merged pull request details",
+    run: () => provider.getPullRequest({ ...targetInput, number: firstPullRequest.number }),
+  });
+
+  return {
+    requiredFamilies: [
+      "repository_metadata",
+      "pull_request_inventory",
+      "pull_request_details",
+    ],
+    probedPullRequestNumber: firstPullRequest.number,
+  };
 }
 
 function mapRepositoryMetadata(repository) {
@@ -378,6 +455,7 @@ export async function collectGitHubSourceBundle({
   isValidationTarget = false,
   contributors = null,
   productRepository = DEFAULT_PRODUCT_REPOSITORY,
+  allowProductRepository = false,
 } = {}) {
   if (!provider) {
     throw new Error("provider is required.");
@@ -385,7 +463,7 @@ export async function collectGitHubSourceBundle({
   const targetPullRequestLimit = analysisPullRequestLimit ?? limit;
   requirePullRequestLimit(targetPullRequestLimit);
   const targetInput = repository ? parseRepositoryInput(repository) : { owner, name };
-  if (isProductRepositoryTarget(targetInput, productRepository)) {
+  if (isProductRepositoryTarget(targetInput, productRepository) && !allowProductRepository) {
     throw new Error(productRepositoryTargetError(targetInput));
   }
   const targetNameErrors = validateTargetRepository({
@@ -394,7 +472,7 @@ export async function collectGitHubSourceBundle({
     visibility: "unknown",
     analysisPullRequestLimit: targetPullRequestLimit,
     isValidationTarget,
-  }, { productRepository }).filter(error => !error.includes("defaultBranch") && !error.includes("visibility"));
+  }, { productRepository, allowProductRepository }).filter(error => !error.includes("defaultBranch") && !error.includes("visibility"));
   if (targetNameErrors.length > 0) {
     throw new Error(targetNameErrors.join(" "));
   }
@@ -406,6 +484,7 @@ export async function collectGitHubSourceBundle({
     analysisPullRequestLimit: targetPullRequestLimit,
     isValidationTarget,
     productRepository,
+    allowProductRepository,
   });
   const repositoryCoverage = coverageEntry({
     family: "repository_metadata",

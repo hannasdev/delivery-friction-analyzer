@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "slug": "tutorial-sample-experience",
+  "state": "active",
+  "currentMilestone": "M5",
+  "milestones": {
+    "M1": {
+      "state": "merged",
+      "startedAt": "2026-06-23",
+      "implemented": true,
+      "pr": 59,
+      "mergedAt": "2026-06-23"
+    },
+    "M2": {
+      "state": "merged",
+      "implemented": true,
+      "pr": 60,
+      "mergedAt": "2026-06-27"
+    },
+    "M3": {
+      "state": "merged",
+      "implemented": true,
+      "pr": 61,
+      "mergedAt": "2026-06-27"
+    },
+    "M4": {
+      "state": "merged",
+      "implemented": true,
+      "pr": 62,
+      "mergedAt": "2026-06-27"
+    },
+    "M5": {
+      "state": "pr_opened",
+      "startedAt": "2026-06-27",
+      "implemented": true,
+      "conformanceReviewed": true,
+      "conformanceReviewedAt": "2026-06-27",
+      "adversariallyReviewed": true,
+      "adversariallyReviewedAt": "2026-06-27",
+      "pr": 63,
+      "openedAt": "2026-06-27"
+    },
+    "M6": {
+      "state": "not_started"
+    }
+  }
+}
