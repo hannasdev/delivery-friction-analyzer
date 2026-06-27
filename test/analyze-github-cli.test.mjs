@@ -1710,6 +1710,7 @@ describe("GitHub live analyze CLI", () => {
       ]);
 
       assert.equal(sourceBundle.source.label, "Bundled synthetic sample, not live GitHub data");
+      assert.equal(sourceBundle.source.kind, "sample");
       assert.deepEqual(reportJson.source, sourceBundle.source);
       assert(reportMarkdown.startsWith("# Repository Friction Report: example-org/delivery-dashboard"));
       assert(reportMarkdown.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
@@ -1785,6 +1786,46 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("rejects a bundled sample source marked with a non-sample kind", async () => {
+    await withTempDirectory(async directory => {
+      const outDir = join(directory, "bad-sample-kind");
+      const provider = createProvider();
+      const originalReadFile = fsPromises.readFile.bind(fsPromises);
+      const readFileMock = mock.method(fsPromises, "readFile", async (path, ...args) => {
+        if (path instanceof URL && path.pathname.endsWith("/examples/tutorial/source-bundle.json")) {
+          const sourceBundle = JSON.parse(await originalReadFile(path, "utf8"));
+          sourceBundle.source.kind = "github";
+          return JSON.stringify(sourceBundle);
+        }
+        return originalReadFile(path, ...args);
+      });
+      syncBuiltinESMExports();
+
+      try {
+        await assert.rejects(
+          runAnalyzeGithubCli([
+            "--source",
+            "sample",
+            "--out",
+            outDir,
+          ], {
+            provider,
+          }),
+          /sample source bundle source\.kind must be sample and source\.label must be Bundled synthetic sample, not live GitHub data/,
+        );
+
+        assert.deepEqual(provider.calls, []);
+        await assert.rejects(
+          lstat(join(outDir, "source-bundle.json")),
+          error => error?.code === "ENOENT",
+        );
+      } finally {
+        readFileMock.mock.restore();
+        syncBuiltinESMExports();
+      }
+    });
+  });
+
   it("rejects live-only options with --source sample before provider calls", async () => {
     await withTempDirectory(async directory => {
       const provider = createProvider();
@@ -1810,7 +1851,28 @@ describe("GitHub live analyze CLI", () => {
           provider,
           isInteractiveTerminal: true,
         }),
-        /--source sample cannot be combined with live GitHub option\(s\): --repo, --limit, --profile, --dry-run, --validation-target, --interactive, --exclude-pr-class/,
+        /--source sample cannot be combined with live GitHub option\(s\): --repo, --limit, --profile, --dry-run\/--metadata-only, --validation-target, --interactive, --exclude-pr-class/,
+      );
+
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("reports the metadata-only alias when sample mode rejects it", async () => {
+    await withTempDirectory(async directory => {
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithubCli([
+          "--source",
+          "sample",
+          "--out",
+          join(directory, "out"),
+          "--metadata-only",
+        ], {
+          provider,
+        }),
+        /--source sample cannot be combined with live GitHub option\(s\): --dry-run\/--metadata-only/,
       );
 
       assert.deepEqual(provider.calls, []);

@@ -499,10 +499,13 @@ function rejectSampleLiveOptions(options) {
     ...optionSourceSet(options, "explicitCliOptions"),
     ...optionSourceSet(options, "presetOptionKeys"),
   ]);
+  const dryRunOptionLabel = providedOptions.has("dryRun") && options.dryRun
+    ? "--dry-run/--metadata-only"
+    : "--dry-run";
   if (options.repository) incompatible.push("--repo");
   if (options.limit !== undefined) incompatible.push("--limit");
   if (options.profilePath) incompatible.push("--profile");
-  if (options.dryRun || providedOptions.has("dryRun")) incompatible.push("--dry-run");
+  if (options.dryRun || providedOptions.has("dryRun")) incompatible.push(dryRunOptionLabel);
   if (options.isValidationTarget || providedOptions.has("isValidationTarget")) incompatible.push("--validation-target");
   if (options.interactive) incompatible.push("--interactive");
   if (options.presetPath) incompatible.push("--preset");
@@ -1720,8 +1723,8 @@ export async function runAnalyzeSample(options, {
     readBundledJson(SAMPLE_PROFILE_URL, "sample repository profile"),
     validateOutputDirectory(options.outDir),
   ]);
-  if (sourceBundle.source?.label !== SAMPLE_SOURCE_LABEL) {
-    throw new Error(`sample source bundle source.label must be ${SAMPLE_SOURCE_LABEL}.`);
+  if (sourceBundle.source?.kind !== "sample" || sourceBundle.source?.label !== SAMPLE_SOURCE_LABEL) {
+    throw new Error(`sample source bundle source.kind must be sample and source.label must be ${SAMPLE_SOURCE_LABEL}.`);
   }
   validateProfile(repositoryProfile);
 
