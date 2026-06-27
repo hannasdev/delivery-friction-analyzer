@@ -1786,6 +1786,50 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("rejects sample run presets before reading preset files", async () => {
+    await withTempDirectory(async directory => {
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithubCli([
+          "--source",
+          "sample",
+          "--preset",
+          join(directory, "missing-preset.json"),
+          "--out",
+          join(directory, "out"),
+        ], {
+          provider,
+        }),
+        /--source sample cannot be combined with live GitHub option\(s\): --preset/,
+      );
+
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("rejects inverse live-only flags with --source sample", async () => {
+    await withTempDirectory(async directory => {
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithubCli([
+          "--source",
+          "sample",
+          "--out",
+          join(directory, "out"),
+          "--no-dry-run",
+          "--no-validation-target",
+        ], {
+          provider,
+        }),
+        /--source sample cannot be combined with live GitHub option\(s\): --dry-run, --validation-target/,
+      );
+
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
   it("infers GitHub live analysis from existing live command flags when source is omitted", async () => {
     await withTempDirectory(async directory => {
       const profilePath = await writeProfile(directory);

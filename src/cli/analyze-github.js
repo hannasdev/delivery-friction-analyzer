@@ -485,11 +485,15 @@ function resolveAnalysisSource(options) {
 
 function rejectSampleLiveOptions(options) {
   const incompatible = [];
+  const providedOptions = new Set([
+    ...optionSourceSet(options, "explicitCliOptions"),
+    ...optionSourceSet(options, "presetOptionKeys"),
+  ]);
   if (options.repository) incompatible.push("--repo");
   if (options.limit !== undefined) incompatible.push("--limit");
   if (options.profilePath) incompatible.push("--profile");
-  if (options.dryRun) incompatible.push("--dry-run");
-  if (options.isValidationTarget) incompatible.push("--validation-target");
+  if (options.dryRun || providedOptions.has("dryRun")) incompatible.push("--dry-run");
+  if (options.isValidationTarget || providedOptions.has("isValidationTarget")) incompatible.push("--validation-target");
   if (options.interactive) incompatible.push("--interactive");
   if (options.presetPath) incompatible.push("--preset");
   if (options.savePresetPath) incompatible.push("--save-preset");
@@ -1863,6 +1867,17 @@ export async function runAnalyzeGithubCli(argv, {
     if (parsedOptions.help) {
       stdout.write(USAGE);
       return null;
+    }
+    if (parsedOptions.source !== undefined) {
+      validateSource(parsedOptions.source);
+      if (parsedOptions.source === "sample") {
+        const runOptions = {
+          onProgress: message => writeProgress(message, stderr),
+        };
+        const result = await runAnalyzeSample(parsedOptions, runOptions);
+        writeAnalyzeGithubCompletion(result, { json: parsedOptions.json, stdout });
+        return result;
+      }
     }
     const options = await mergeRunPresetOptions(parsedOptions);
     const source = resolveAnalysisSource(options);
