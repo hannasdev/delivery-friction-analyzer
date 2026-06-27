@@ -41,6 +41,12 @@ This keeps validation-target details in profile data rather than hardcoded produ
 
 Each file rule must include a unique lowercase `id`, a non-empty `match` object, a supported `category`, and a supported `role`. Optional `functionalSurface` values use the same lowercase identifier shape as rule IDs. Optional `generated` values must be booleans. Unsupported rule or matcher keys fail validation, and invalid JavaScript regexes fail before collection with the rule ID and matcher field in the error.
 
+File rules may include an optional `notes` string. Notes are human-readable
+profile context for maintainers and reviewers. They can explain why a path rule
+exists, what product surface it represents, or why a generated or low-signal
+path is intentionally classified. Notes do not affect matching order,
+classification output, scoring, collection, reports, or CSV exports.
+
 ## Pull Request Classes
 
 `prClasses` is optional. Rules are evaluated in order and the first matching rule wins. The current profile contract supports title-only matchers:
@@ -63,6 +69,12 @@ In reports, `unknown` means no configured `prClasses` rule matched that PR title
 Class identifiers are validated as lower-kebab-case or lower_snake_case strings. Profile validation rejects duplicate PR class rule IDs, empty match objects, invalid class identifiers, and invalid title regexes.
 
 PR class evidence is interpretive and profile-driven. It helps reports show class distributions, dominance notes, and explicit `--exclude-pr-class` filtering when you request filtering, but configured PR class rules do not change default scoring, ranking formulas, collection, or CSV export shape by themselves.
+
+PR class rules may include an optional `notes` string. Use notes to document the
+repository convention behind a class rule, such as Conventional Commit-style
+title prefixes or release-train naming. Notes are valid JSON profile data for
+humans only; they do not change title matching, PR class assignment, filtering,
+scoring, collection, reports, or CSV exports.
 
 Interactive setup can add a release PR class rule from a confirmed title convention using the current title-only matcher shape. Branch strategy answers stay in `workflow` context only; they do not create branch-based PR class matching. Branch-based class matching is deferred until a future matcher contract supports branch fields explicitly.
 

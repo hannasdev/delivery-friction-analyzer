@@ -6,6 +6,8 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
+import { computeRepositoryMetrics } from "../src/metrics/friction.js";
+import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
 import {
   generateEvidenceCsvArtifacts,
   renderRepositoryFrictionMethodology,
@@ -1742,6 +1744,74 @@ describe("friction report generation", () => {
     assert(csvArtifacts.collectionCoverageCsv.startsWith("source_family,status,attempts,source,diagnostics,downstream_impact"));
     assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,available,3,rest:actions,sampled,validation evidence populated"));
     assert(!csvArtifacts.bottleneckExamplesCsv.includes("raw comment"));
+  });
+
+  it("renders the tutorial sample report with synthetic labels, caveats, and CSV evidence", async () => {
+    const [sourceBundle, profile, excerpt] = await Promise.all([
+      readJson("../examples/tutorial/source-bundle.json"),
+      readJson("../examples/tutorial/profile.json"),
+      readText("../examples/tutorial/report-excerpt.md"),
+    ]);
+    const normalized = normalizeFixtureBundle(sourceBundle, { repositoryProfile: profile });
+    const metricsSummary = computeRepositoryMetrics(normalized);
+    const report = {
+      ...generateRepositoryFrictionReport(metricsSummary, {
+        workflowContext: profile.workflow,
+        contributorSource: normalized.contributorSource,
+      }),
+      source: sourceBundle.source,
+      collectionCoverage: sourceBundle.coverage,
+    };
+    const markdown = renderRepositoryFrictionMarkdown(report);
+    const methodology = renderRepositoryFrictionMethodology({
+      report,
+      sourceBundle,
+      profilePath: "examples/tutorial/profile.json",
+      artifactFileNames: {
+        reportMarkdown: "friction-report.md",
+        reportJson: "friction-report.json",
+        methodology: "methodology.md",
+        sourceBundle: "source-bundle.json",
+        normalized: "normalized.json",
+        metricsSummary: "metrics-summary.json",
+        prMetricsCsv: "pr-metrics.csv",
+        bottleneckExamplesCsv: "bottleneck-examples.csv",
+        commentSourcesCsv: "comment-sources.csv",
+        collectionCoverageCsv: "collection-coverage.csv",
+      },
+      csvEnabled: true,
+    });
+    const csvArtifacts = generateEvidenceCsvArtifacts({
+      metricsSummary,
+      report,
+      collectionCoverage: sourceBundle.coverage,
+    });
+
+    assert(markdown.startsWith("# Repository Friction Report: example-org/delivery-dashboard"));
+    assert(markdown.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
+    assert(markdown.includes("## Executive Summary"));
+    assert(markdown.includes("## Focus Snapshot"));
+    assert(markdown.includes("Change scope"));
+    assert(markdown.includes("Validation gap"));
+    assert(markdown.includes("Review churn"));
+    assert(markdown.includes("Outlier caveat:"));
+    assert(markdown.includes("PR #104 contributes"));
+    assert(markdown.includes("## Outlier And Sensitivity Analysis"));
+    assert(markdown.includes("## Workflow Data Caveats"));
+    assert(markdown.includes("Workflow-run coverage is unavailable for some PRs"));
+    assert(markdown.includes("| PR-open diff | computed: 3, unavailable: 1 |"));
+    assert(markdown.includes("| feature | 2 |"));
+    assert(markdown.includes("| Primary merge method | Squash merge |"));
+    assert(markdown.includes("| delivery\\_api |"));
+    assert(markdown.includes("https://example.com/pull/104"));
+    assert(methodology.includes("Source: Bundled synthetic sample, not live GitHub data (sample)"));
+    assert(methodology.includes("Collection coverage: partial"));
+    assert(methodology.includes("- workflow_runs: partial; attempts=1; source=bundled tutorial sample."));
+    assert(methodology.includes("Profile path: examples/tutorial/profile.json"));
+    assert(csvArtifacts.prMetricsCsv.includes("104,feat: consolidate dispatch settings,https://example.com/pull/104,feature,repository_profile,feature-title,1400"));
+    assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,partial,1,bundled tutorial sample"));
+    assert(excerpt.includes("Bundled synthetic sample, not live GitHub data"));
+    assert(excerpt.includes("PR #104 is intentionally broad and outlier-sensitive"));
   });
 
   it("renders review decision evidence for zero-thread human approvals", () => {

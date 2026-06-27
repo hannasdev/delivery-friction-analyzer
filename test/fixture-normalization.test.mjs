@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
+import { computeRepositoryMetrics } from "../src/metrics/friction.js";
 import { normalizeFixtureBundle } from "../src/normalize/github-fixture.js";
 
 async function readJson(path) {
@@ -263,5 +264,39 @@ describe("mcp-writing compact fixture normalization", () => {
     const normalized = normalizeFixtureBundle(bundleWithUnnamedCheck, { repositoryProfile: profile });
 
     assert.equal(normalized.pullRequests[0].checkRuns[0].name, null);
+  });
+
+  it("normalizes the tutorial sample bundle into representative metrics", async () => {
+    const [bundle, profile] = await Promise.all([
+      readJson("../examples/tutorial/source-bundle.json"),
+      readJson("../examples/tutorial/profile.json"),
+    ]);
+
+    const normalized = normalizeFixtureBundle(bundle, { repositoryProfile: profile });
+    const metrics = computeRepositoryMetrics(normalized);
+    const broadPr = metrics.pullRequests.find(pr => pr.number === 104);
+    const partialCoveragePr = metrics.pullRequests.find(pr => pr.number === 103);
+
+    assert.equal(normalized.targetRepository.owner, "example-org");
+    assert.equal(normalized.pullRequests.length, 4);
+    assert.deepEqual(normalized.pullRequests.map(pr => pr.prClass.class), [
+      "feature",
+      "fix",
+      "test",
+      "feature",
+    ]);
+    assert.equal(broadPr.files.byFunctionalSurface.dashboard_ui, 550);
+    assert.equal(broadPr.files.byFunctionalSurface.delivery_api, 278);
+    assert.equal(broadPr.files.byFunctionalSurface.background_jobs, 214);
+    assert.equal(broadPr.files.functionalSurfaces, 6);
+    assert.equal(broadPr.review.threads.totalCount, 12);
+    assert.equal(broadPr.ci.workflowRuns.failedCount, 2);
+    assert.equal(broadPr.ci.workflowRuns.cancelledCount, 1);
+    assert.equal(broadPr.components.diffGrowthRatio.value, 4);
+    assert.equal(partialCoveragePr.coverage.prOpenDiff.status, "unavailable");
+    assert.equal(partialCoveragePr.coverage.workflowRuns.status, "unavailable");
+    assert(metrics.rankings.reviewChurn[0].number, 104);
+    assert(metrics.rankings.changedFileSpread[0].number, 104);
+    assert(metrics.rankings.validationGap[0].number, 104);
   });
 });

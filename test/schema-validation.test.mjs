@@ -387,6 +387,17 @@ describe("repository profile schema", () => {
 
     assert.deepEqual(validateSchema(selfProfile, schema, {}), []);
   });
+
+  it("keeps the tutorial sample profile schema-valid with educational notes", async () => {
+    const [schema, sampleProfile] = await Promise.all([
+      readJson("../schemas/repository-profile.schema.json"),
+      readJson("../examples/tutorial/profile.json"),
+    ]);
+
+    assert.deepEqual(validateSchema(sampleProfile, schema, {}), []);
+    assert(sampleProfile.rules.some(rule => typeof rule.notes === "string" && rule.notes.includes("surface")));
+    assert(sampleProfile.prClasses.some(rule => typeof rule.notes === "string" && rule.notes.includes("Conventional Commit")));
+  });
 });
 
 describe("source bundle schema", () => {
@@ -430,6 +441,46 @@ describe("source bundle schema", () => {
     bundle.languageDistribution.coverage.source = "bundled tutorial sample";
 
     assert.deepEqual(validateSchema(bundle, schema, refs), []);
+  });
+
+  it("validates the tutorial sample source bundle contract", async () => {
+    const [sourceBundleSchema, targetSchema, bundle] = await Promise.all([
+      readJson("../schemas/source-bundle.schema.json"),
+      readJson("../schemas/target-repository.schema.json"),
+      readJson("../examples/tutorial/source-bundle.json"),
+    ]);
+    const { schema, refs } = sourceBundleSchemas(sourceBundleSchema, targetSchema);
+
+    assertSchemaValid({
+      artifact: "examples/tutorial/source-bundle.json",
+      schemaPath: "schemas/source-bundle.schema.json",
+      value: bundle,
+      schema,
+      refs,
+    });
+    assert.equal(bundle.source.kind, "sample");
+    assert.equal(bundle.source.label, "Bundled synthetic sample, not live GitHub data");
+    assert.equal(bundle.coverage.status, "partial");
+    assert(bundle.coverage.sourceFamilies.some(family => family.status === "partial"));
+  });
+
+  it("keeps tutorial sample data public-safe and package-eligible", async () => {
+    const [bundleText, profileText, packageJson] = await Promise.all([
+      readFile(new URL("../examples/tutorial/source-bundle.json", import.meta.url), "utf8"),
+      readFile(new URL("../examples/tutorial/profile.json", import.meta.url), "utf8"),
+      readJson("../package.json"),
+    ]);
+    const combined = `${bundleText}\n${profileText}`;
+
+    assert(packageJson.files.includes("examples/tutorial"));
+    assert(!combined.includes("hannasdev"));
+    assert(!combined.includes("mcp-writing"));
+    assert(!combined.includes("github.com"));
+    assert(!combined.includes("ghp_"));
+    assert(!combined.includes("sk-"));
+    assert(!combined.includes("/Users/"));
+    assert(!combined.includes("raw comment"));
+    assert.match(combined, /https:\/\/example\.com\/pull\/10[1-4]/);
   });
 
   it("rejects legacy github-source-bundle.v1 artifacts instead of silently accepting them", async () => {

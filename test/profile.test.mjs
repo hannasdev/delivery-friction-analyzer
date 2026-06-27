@@ -328,6 +328,29 @@ describe("pull request class classification", () => {
     assert.equal(classifyPullRequest({ title: "chore: refresh generated fixtures" }, profile).class, "maintenance");
     assert.equal(classifyPullRequest({ title: "Investigate self-profile output" }, profile).class, "unknown");
   });
+
+  it("validates and applies the tutorial sample profile", async () => {
+    const profile = await readJson("../examples/tutorial/profile.json");
+
+    assert.deepEqual(validateRepositoryProfile(profile), []);
+    assert.doesNotThrow(() => assertValidRepositoryProfile(profile));
+    assert.equal(classifyPullRequest({ title: "feat: add route health dashboard" }, profile).class, "feature");
+    assert.equal(classifyPullRequest({ title: "fix: retry stalled dispatch jobs" }, profile).class, "fix");
+    assert.equal(classifyPullRequest({ title: "test: add billing webhook contract coverage" }, profile).class, "test");
+    assert.deepEqual(classifyFilePath("apps/web/src/settings/DispatchSettingsPage.tsx", profile), {
+      path: "apps/web/src/settings/DispatchSettingsPage.tsx",
+      category: "code",
+      role: "product_ui",
+      functionalSurface: "dashboard_ui",
+      generated: false,
+      classificationSource: "repository_profile",
+      ruleId: "frontend-ui-paths",
+    });
+    assert.equal(classifyFilePath("services/api/src/settings/dispatch-settings.ts", profile).functionalSurface, "delivery_api");
+    assert.equal(classifyFilePath("workers/dispatch/settings-sync.ts", profile).functionalSurface, "background_jobs");
+    assert.equal(classifyFilePath("packages/generated-client/settings.ts", profile).generated, true);
+    assert.equal(profile.workflow.primaryMergeMethod, "squash_merge");
+  });
 });
 
 describe("workflow context validation", () => {
