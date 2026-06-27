@@ -7,7 +7,7 @@
 - Owner: Hanna
 - Created: 2026-06-22
 - Activated: 2026-06-23
-- Current milestone: M3, Deterministic Synthetic Sample Bundle
+- Current milestone: M4, Explicit Sample CLI Path
 - Related issue:
   - None yet.
 - Related docs:

@@ -497,7 +497,9 @@ function rejectSampleLiveOptions(options) {
   if (options.interactive) incompatible.push("--interactive");
   if (options.presetPath) incompatible.push("--preset");
   if (options.savePresetPath) incompatible.push("--save-preset");
-  if (options.excludedPrClasses?.length) incompatible.push("--exclude-pr-class");
+  if (options.excludedPrClasses?.length || providedOptions.has("excludedPrClasses")) {
+    incompatible.push("--exclude-pr-class");
+  }
   if (!incompatible.length) return;
   throw new Error(`--source sample cannot be combined with live GitHub option(s): ${incompatible.join(", ")}. Use only output options such as --out, --json, --csv, or --no-csv.`);
 }

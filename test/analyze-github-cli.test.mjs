@@ -1257,6 +1257,19 @@ describe("GitHub live analyze CLI", () => {
     assert.deepEqual(provider.calls, []);
   });
 
+  it("keeps explicit GitHub source on missing required option guidance", async () => {
+    const provider = createProvider();
+
+    await assert.rejects(
+      runAnalyzeGithubCli(["--source", "github"], {
+        provider,
+      }),
+      /Missing required option\(s\): --repo, --limit, --profile, --out/,
+    );
+
+    assert.deepEqual(provider.calls, []);
+  });
+
   it("rejects --interactive in non-TTY contexts before provider calls", async () => {
     const provider = createProvider();
 
@@ -1780,6 +1793,28 @@ describe("GitHub live analyze CLI", () => {
           isInteractiveTerminal: true,
         }),
         /--source sample cannot be combined with live GitHub option\(s\): --repo, --limit, --profile, --dry-run, --validation-target, --interactive, --exclude-pr-class/,
+      );
+
+      assert.deepEqual(provider.calls, []);
+    });
+  });
+
+  it("rejects explicit empty PR class exclusions with --source sample", async () => {
+    await withTempDirectory(async directory => {
+      const provider = createProvider();
+
+      await assert.rejects(
+        runAnalyzeGithubCli([
+          "--source",
+          "sample",
+          "--out",
+          join(directory, "out"),
+          "--exclude-pr-class",
+          ",",
+        ], {
+          provider,
+        }),
+        /--source sample cannot be combined with live GitHub option\(s\): --exclude-pr-class/,
       );
 
       assert.deepEqual(provider.calls, []);

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-27 — Explicit Sample CLI Source
+
+- What changed: Added explicit `--source sample` CLI routing for the bundled tutorial sample, with sample-first README guidance and live-only option rejection before GitHub collection.
+- Why it matters: New users can generate a deterministic local report without GitHub credentials, while existing live GitHub runs keep their source boundary and required target-option validation.
+- Who is affected: First-time users trying the tutorial sample, maintainers reviewing CLI source routing, and users passing live-only flags such as repository targets, dry-run checks, or PR class exclusions.
+- Action needed: Use `delivery-friction-analyzer --source sample --out reports/tutorial` for the bundled sample, or `--source github` with `--repo`, `--profile`, and `--out` for live analysis.
+- PR: TBD
+
 ### 2026-06-27 — Tutorial Sample Bundle
 
 - What changed: Added the packaged tutorial sample source bundle, educational sample profile, and generated-aligned report excerpt for a fully synthetic repository.

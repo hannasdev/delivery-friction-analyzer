@@ -9,7 +9,7 @@ Use it when you want to answer questions like:
 - Which files, surfaces, or PR classes create the most back-and-forth?
 - Which issues look preventable with better local checks, repo-specific AI instructions, skills, hooks, or smaller delivery slices?
 
-The analyzer runs locally with your GitHub credentials. Generated artifacts preserve source evidence, coverage caveats, and interpretation limits so reports can be inspected before they are shared.
+For live GitHub analysis, the analyzer runs locally with your GitHub credentials. Generated artifacts preserve source evidence, coverage caveats, and interpretation limits so reports can be inspected before they are shared.
 
 ## Requirements
 
