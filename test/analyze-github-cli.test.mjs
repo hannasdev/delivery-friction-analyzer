@@ -1270,6 +1270,24 @@ describe("GitHub live analyze CLI", () => {
     assert.deepEqual(provider.calls, []);
   });
 
+  it("infers GitHub source from explicit falsy live-only flags", async () => {
+    const provider = createProvider();
+
+    await assert.rejects(
+      runAnalyzeGithubCli([
+        "--no-dry-run",
+        "--no-validation-target",
+        "--exclude-pr-class",
+        ",",
+      ], {
+        provider,
+      }),
+      /Missing required option\(s\): --repo, --limit, --profile, --out/,
+    );
+
+    assert.deepEqual(provider.calls, []);
+  });
+
   it("rejects --interactive in non-TTY contexts before provider calls", async () => {
     const provider = createProvider();
 

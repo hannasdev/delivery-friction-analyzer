@@ -459,6 +459,10 @@ function validateSource(source) {
 }
 
 function hasLiveSourceIndicator(options) {
+  const providedOptions = new Set([
+    ...optionSourceSet(options, "explicitCliOptions"),
+    ...optionSourceSet(options, "presetOptionKeys"),
+  ]);
   return Boolean(
     options.repository
       || options.limit !== undefined
@@ -468,7 +472,13 @@ function hasLiveSourceIndicator(options) {
       || options.interactive
       || options.presetPath
       || options.savePresetPath
-      || options.excludedPrClasses?.length,
+      || options.excludedPrClasses?.length
+      || providedOptions.has("dryRun")
+      || providedOptions.has("isValidationTarget")
+      || providedOptions.has("interactive")
+      || providedOptions.has("presetPath")
+      || providedOptions.has("savePresetPath")
+      || providedOptions.has("excludedPrClasses"),
   );
 }
 
