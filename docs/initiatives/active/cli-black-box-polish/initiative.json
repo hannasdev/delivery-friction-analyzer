@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "slug": "cli-black-box-polish",
   "state": "active",
-  "currentMilestone": "M1",
+  "currentMilestone": "M2",
   "milestones": {
     "M1": {
       "state": "pr_opened",
@@ -16,7 +16,8 @@
       "openedAt": "2026-06-28"
     },
     "M2": {
-      "state": "not_started"
+      "state": "active",
+      "startedAt": "2026-06-28"
     },
     "M3": {
       "state": "not_started"
