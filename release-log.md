@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-28 — Low-Signal Report Quieting
+
+- What changed: Friction report JSON and Markdown now separate zero-score or no-positive-evidence bottlenecks into no-signal context, and completion receipts expose matching `noSignalBottleneckIds` for report-generating runs while leaving coverage-only runs unranked.
+- Why it matters: Users and maintainers can distinguish observed friction from inactive checks without losing machine-readable evidence or report context.
+- Who is affected: Maintainers and users reading generated Markdown reports, `friction-report.json`, or JSON completion receipts from sample or live GitHub analysis.
+- Action needed: None.
+- PR: TBD
+
 ### 2026-06-28 — CLI Artifact Truthfulness
 
 - What changed: Live dry-run JSON receipts now show requested PR-class exclusions without implying filtered metrics were computed, and `pr-metrics.csv` fills `review_threads` when sample or live review-thread evidence is available.

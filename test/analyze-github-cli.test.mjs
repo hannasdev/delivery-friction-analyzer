@@ -2188,6 +2188,7 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(metricsSummary.metricVersion, "friction-metrics.v1");
       assert.equal(reportJson.reportVersion, "friction-report.v1");
       assert.deepEqual(result.topBottleneckIds, reportJson.summary.topBottleneckIds);
+      assert.notEqual(result.noSignalBottleneckIds.length, 0);
       assert.deepEqual(result.noSignalBottleneckIds, reportJson.summary.noSignalBottleneckIds);
       assert.deepEqual(
         result.topBottleneckIds.filter(id => result.noSignalBottleneckIds.includes(id)),
