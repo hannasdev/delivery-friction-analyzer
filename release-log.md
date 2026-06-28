@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-28 — CLI Command Help Clarity
+
+- What changed: CLI help now separates the bundled sample, live GitHub analysis, live coverage probes, output controls, interactive setup, and reusable live-run presets, with mode-specific help for `--source sample --help` and `--source github --help`.
+- Why it matters: First-time users and maintainers can choose the right workflow before running into rejected flag combinations, and interactive setup can explain supported prompts without restarting the flow.
+- Who is affected: Users trying the bundled sample, maintainers running live GitHub analysis or dry-run coverage probes, and contributors reviewing CLI setup behavior.
+- Action needed: None.
+- PR: TBD
+
 ### 2026-06-27 — First-Run Profile Prompt Clarity
 
 - What changed: Interactive GitHub setup now explains starter-profile limitations, gives clearer guidance before adding Conventional Commit PR class rules, and only prints the starter-profile completion reminder when a new profile was created.
