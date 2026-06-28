@@ -8,7 +8,7 @@
 - Why it matters: Maintainers and scripts can trust completion receipts and CSV evidence to reflect accepted filters and available review-thread counts.
 - Who is affected: Maintainers and users reading JSON completion receipts, CSV exports, and contract docs from sample or live GitHub analysis.
 - Action needed: None.
-- PR: TBD (pre-PR)
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/68
 
 ### 2026-06-28 — CLI Command Help Clarity
 

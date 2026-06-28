@@ -16,13 +16,15 @@
       "openedAt": "2026-06-28"
     },
     "M2": {
-      "state": "adversarially_reviewed",
+      "state": "pr_opened",
       "startedAt": "2026-06-28",
       "implemented": true,
       "conformanceReviewed": true,
       "conformanceReviewedAt": "2026-06-28",
       "adversariallyReviewed": true,
-      "adversariallyReviewedAt": "2026-06-28"
+      "adversariallyReviewedAt": "2026-06-28",
+      "pr": 68,
+      "openedAt": "2026-06-28"
     },
     "M3": {
       "state": "not_started"
