@@ -16,9 +16,11 @@
       "openedAt": "2026-06-28"
     },
     "M2": {
-      "state": "implemented",
+      "state": "conformance_reviewed",
       "startedAt": "2026-06-28",
-      "implemented": true
+      "implemented": true,
+      "conformanceReviewed": true,
+      "conformanceReviewedAt": "2026-06-28"
     },
     "M3": {
       "state": "not_started"
