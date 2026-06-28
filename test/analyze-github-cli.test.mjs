@@ -389,6 +389,25 @@ describe("GitHub live analyze CLI", () => {
     assert(stdout.includes("--preset <path>"));
   });
 
+  it("prints help without validating later malformed options", async () => {
+    let stdout = "";
+
+    await runAnalyzeGithubCli(["--help", "--repo"], {
+      stdout: { write: chunk => { stdout += chunk; } },
+      stderr: { write() {} },
+    });
+
+    assert.match(stdout, /Usage:\n  delivery-friction-analyzer --source sample --out <directory>/);
+
+    stdout = "";
+    await runAnalyzeGithubCli(["--source", "sample", "--help", "--definitely-unknown"], {
+      stdout: { write: chunk => { stdout += chunk; } },
+      stderr: { write() {} },
+    });
+
+    assert.match(stdout, /Sample output controls:\n  --out <directory>/);
+  });
+
   it("prints source-specific help for sample mode", async () => {
     let stdout = "";
 

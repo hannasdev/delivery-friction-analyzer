@@ -251,21 +251,23 @@ function explicitCliOptionKeys(argv) {
 }
 
 export function parseAnalyzeGithubArgs(argv) {
+  if (hasHelpOption(argv)) {
+    const parsed = { help: true };
+    const source = sourceForHelp(argv);
+    if (source !== undefined) parsed.source = source;
+    return attachOptionSource(parsed, "explicitCliOptions", new Set(source === undefined ? [] : ["source"]));
+  }
+
   const options = {
     dryRun: false,
     isValidationTarget: false,
     csv: true,
     json: false,
     interactive: false,
-    help: false,
   };
   const explicitOptions = explicitCliOptionKeys(argv);
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
-    if (arg === "--help" || arg === "-h") {
-      options.help = true;
-      continue;
-    }
     if (!arg.startsWith("--")) {
       throw new Error(`Unexpected argument: ${arg}`);
     }
@@ -302,7 +304,6 @@ export function parseAnalyzeGithubArgs(argv) {
   }
 
   const parsed = {
-    help: options.help,
     source: options.source,
     repository: options.repo,
     limit: options.limit === undefined ? undefined : Number(options.limit),
@@ -319,9 +320,21 @@ export function parseAnalyzeGithubArgs(argv) {
   if (options.preset !== undefined) parsed.presetPath = options.preset;
   if (options["save-preset"] !== undefined) parsed.savePresetPath = options["save-preset"];
   if (parsed.source === undefined) delete parsed.source;
-  if (!parsed.help) delete parsed.help;
 
   return attachOptionSource(parsed, "explicitCliOptions", explicitOptions);
+}
+
+function hasHelpOption(argv) {
+  return argv.includes("--help") || argv.includes("-h");
+}
+
+function sourceForHelp(argv) {
+  for (let index = 0; index < argv.length; index += 1) {
+    if (argv[index] !== "--source") continue;
+    const source = argv[index + 1];
+    if (source === "sample" || source === "github") return source;
+  }
+  return undefined;
 }
 
 function usageForOptions(options) {
