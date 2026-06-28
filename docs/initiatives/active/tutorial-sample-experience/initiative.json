@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "slug": "tutorial-sample-experience",
-  "state": "active",
-  "currentMilestone": "M5",
+  "state": "complete_on_merge",
+  "currentMilestone": "M6",
   "milestones": {
     "M1": {
       "state": "merged",
@@ -30,7 +30,7 @@
       "mergedAt": "2026-06-27"
     },
     "M5": {
-      "state": "pr_opened",
+      "state": "merged",
       "startedAt": "2026-06-27",
       "implemented": true,
       "conformanceReviewed": true,
@@ -38,10 +38,20 @@
       "adversariallyReviewed": true,
       "adversariallyReviewedAt": "2026-06-27",
       "pr": 63,
-      "openedAt": "2026-06-27"
+      "openedAt": "2026-06-27",
+      "mergedAt": "2026-06-27"
     },
     "M6": {
-      "state": "not_started"
+      "state": "complete_on_merge",
+      "startedAt": "2026-06-27",
+      "implemented": true,
+      "conformanceReviewed": true,
+      "conformanceReviewedAt": "2026-06-27",
+      "adversariallyReviewed": true,
+      "adversariallyReviewedAt": "2026-06-27",
+      "pr": 64,
+      "openedAt": "2026-06-27"
     }
-  }
+  },
+  "completedByPr": 64
 }

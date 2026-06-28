@@ -526,6 +526,15 @@ describe("GitHub live analyze CLI", () => {
       for (const prompt of workflowPrompts) {
         assert(!prompt.choices.some(choice => choice.label === "Other" || choice.value === "other"));
       }
+      const createProfilePrompt = prompts.find(prompt => prompt.id === "createProfile");
+      assert.match(createProfilePrompt.message, /Starter profiles are valid/);
+      assert.match(createProfilePrompt.message, /PR classes, file roles, and functional surfaces as unknown/);
+      const presetPrompt = prompts.find(prompt => prompt.id === "addConventionalCommitPrClasses");
+      assert.equal(presetPrompt.defaultValue, false);
+      assert.match(presetPrompt.message, /feat:, fix:, docs:, test:, chore\(deps\):/);
+      assert.match(presetPrompt.message, /dependency, feature, fix, docs, test, and maintenance/);
+      assert.match(presetPrompt.message, /release titles, ticket prefixes, free-form titles, or another custom PR taxonomy/);
+      assert.match(presetPrompt.message, /does not change default scoring, rankings, GitHub collection, or CSV export shape/);
       assert.equal(options.profilePath, profilePath);
       assert.deepEqual((await readJson(profilePath)).workflow, {
         primaryMergeMethod: "squash_merge",
@@ -2653,6 +2662,7 @@ describe("GitHub live analyze CLI", () => {
       });
 
       assert(stdout.includes(`Repository profile saved: ${profilePath}.`));
+      assert(stdout.includes("Created a starter profile. Review or refine it before a full run if you want PR classes, file roles, or functional surfaces to be labeled instead of unknown."));
       assert.deepEqual((await readJson(profilePath)).workflow, {
         primaryMergeMethod: "squash_merge",
         releaseStrategy: "release_prs",
@@ -2666,6 +2676,7 @@ describe("GitHub live analyze CLI", () => {
       const profilePath = join(directory, "interactive-conventional-profile.json");
       const outDir = join(directory, "interactive-conventional-profile-out");
       let stdout = "";
+      const prompts = [];
 
       await runAnalyzeGithubCli(["--interactive"], {
         provider: createProvider(),
@@ -2684,7 +2695,7 @@ describe("GitHub live analyze CLI", () => {
           dryRun: "yes",
           json: "no",
           excludedPrClasses: "",
-        }),
+        }, prompts),
         stdout: { write: chunk => { stdout += chunk; } },
         stderr: { write() {} },
       });
@@ -2699,7 +2710,15 @@ describe("GitHub live analyze CLI", () => {
         "maintenance",
       ]);
       assert(profile.prClasses.every(rule => typeof rule.match.titleRegex === "string"));
+      const presetPrompt = prompts.find(prompt => prompt.id === "addConventionalCommitPrClasses");
+      assert.equal(presetPrompt.defaultValue, false);
+      assert.match(presetPrompt.message, /Add Conventional Commit PR class rules\?/);
+      assert.match(presetPrompt.message, /feat:, fix:, docs:, test:, chore\(deps\):/);
+      assert.match(presetPrompt.message, /dependency, feature, fix, docs, test, and maintenance/);
+      assert.match(presetPrompt.message, /release titles, ticket prefixes, free-form titles, or another custom PR taxonomy/);
+      assert.match(presetPrompt.message, /does not change default scoring, rankings, GitHub collection, or CSV export shape/);
       assert(stdout.includes(`Repository profile saved: ${profilePath}.`));
+      assert(stdout.includes("Created a starter profile. Review or refine it before a full run if you want PR classes, file roles, or functional surfaces to be labeled instead of unknown."));
       assert(stdout.includes("PR class rules written: Conventional Commit preset or release title rule."));
     });
   });
@@ -2784,8 +2803,20 @@ describe("GitHub live analyze CLI", () => {
       });
 
       const profile = await readJson(profilePath);
+      const completion = formatAnalyzeGithubCompletion({
+        ok: true,
+        dryRun: true,
+        targetRepository: { owner: "example", name: "example-repo" },
+        requestedLimit: 1,
+        sampledLimit: 1,
+        savedProfilePath: options.savedProfilePath,
+        prClassRulesWritten: options.prClassRulesWritten,
+        collectionCoverage: { status: "available" },
+      });
       assert.equal(options.savedProfilePath, profilePath);
       assert.equal(options.prClassRulesWritten, true);
+      assert.equal(options.starterProfileCreated, undefined);
+      assert(!completion.includes("Created a starter profile."));
       assert.deepEqual(profile.workflow, {
         primaryMergeMethod: "unknown",
         releaseStrategy: "unknown",
