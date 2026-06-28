@@ -535,7 +535,7 @@ describe("GitHub live analyze CLI", () => {
       assert.match(presetPrompt.message, /dependency, feature, fix, docs, test, and maintenance/);
       assert.match(presetPrompt.message, /release titles, ticket prefixes, free-form titles, or another custom PR taxonomy/);
       assert.match(presetPrompt.message, /fewer PRs are classified as unknown/);
-      assert.match(presetPrompt.message, /does not change scoring, rankings, GitHub collection, or CSV exports/);
+      assert.match(presetPrompt.message, /does not change scoring, rankings, GitHub collection, or CSV export shape/);
       assert.equal(options.profilePath, profilePath);
       assert.deepEqual((await readJson(profilePath)).workflow, {
         primaryMergeMethod: "squash_merge",
@@ -2718,14 +2718,14 @@ describe("GitHub live analyze CLI", () => {
         "Use this when PR titles usually start with feat:, fix:, docs:, test:, chore(deps):, or similar prefixes.",
         "It writes title-based dependency, feature, fix, docs, test, and maintenance classes so fewer PRs are classified as unknown.",
         "Skip it for release titles, ticket prefixes, free-form titles, or another custom PR taxonomy.",
-        "It does not change scoring, rankings, GitHub collection, or CSV exports.",
+        "It does not change scoring, rankings, GitHub collection, or CSV export shape.",
       ]);
       assert.match(presetPrompt.message, /Add Conventional Commit PR class rules\?/);
       assert.match(presetPrompt.message, /feat:, fix:, docs:, test:, chore\(deps\):/);
       assert.match(presetPrompt.message, /dependency, feature, fix, docs, test, and maintenance/);
       assert.match(presetPrompt.message, /release titles, ticket prefixes, free-form titles, or another custom PR taxonomy/);
       assert.match(presetPrompt.message, /fewer PRs are classified as unknown/);
-      assert.match(presetPrompt.message, /does not change scoring, rankings, GitHub collection, or CSV exports/);
+      assert.match(presetPrompt.message, /does not change scoring, rankings, GitHub collection, or CSV export shape/);
       assert(stdout.includes(`Repository profile saved: ${profilePath}.`));
       assert(stdout.includes("Created a starter profile. Review or refine it before relying on report labels for PR classes, file roles, or functional surfaces."));
       assert(stdout.includes("PR class rules written: Conventional Commit preset or release title rule."));
@@ -2776,7 +2776,7 @@ describe("GitHub live analyze CLI", () => {
         "Use this when PR titles usually start with feat:, fix:, docs:, test:, chore(deps):, or similar prefixes.",
         "It writes title-based dependency, feature, fix, docs, test, and maintenance classes so fewer PRs are classified as unknown.",
         "Skip it for release titles, ticket prefixes, free-form titles, or another custom PR taxonomy.",
-        "It does not change scoring, rankings, GitHub collection, or CSV exports. Existing PR class rules will be kept.",
+        "It does not change scoring, rankings, GitHub collection, or CSV export shape. Existing PR class rules will be kept.",
       ]);
       assert.deepEqual((await readJson(profilePath)).prClasses, [
         {
@@ -2838,7 +2838,7 @@ describe("GitHub live analyze CLI", () => {
         "Use this when PR titles usually start with feat:, fix:, docs:, test:, chore(deps):, or similar prefixes.",
         "It writes title-based dependency, feature, fix, docs, test, and maintenance classes so fewer PRs are classified as unknown.",
         "Skip it for release titles, ticket prefixes, free-form titles, or another custom PR taxonomy.",
-        "It does not change scoring, rankings, GitHub collection, or CSV exports.",
+        "It does not change scoring, rankings, GitHub collection, or CSV export shape.",
       ]);
       assert.equal(options.starterProfileCreated, undefined);
       assert(!completion.includes("Created a starter profile."));
