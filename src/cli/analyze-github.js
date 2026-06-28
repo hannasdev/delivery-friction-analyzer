@@ -37,8 +37,8 @@ const SAMPLE_SOURCE_LABEL = "Bundled synthetic sample, not live GitHub data";
 const SAMPLE_SOURCE_BUNDLE_URL = new URL("../../examples/tutorial/source-bundle.json", import.meta.url);
 const SAMPLE_PROFILE_URL = new URL("../../examples/tutorial/profile.json", import.meta.url);
 const STARTER_PROFILE_PROMPT_COPY = "Starter profiles are valid, but until you add rules the report may classify PR classes, file roles, and functional surfaces as unknown.";
-const CONVENTIONAL_COMMIT_PRESET_PROMPT_COPY = "Add Conventional Commit PR class rules? Use this if PR titles usually start with feat:, fix:, docs:, test:, chore(deps):, or similar prefixes. It writes title-based dependency, feature, fix, docs, test, and maintenance classes so PR class distribution is less likely to be unknown. Skip it for release titles, ticket prefixes, free-form titles, or another custom PR taxonomy. Accepting it does not change default scoring, rankings, GitHub collection, or CSV export shape.";
-const STARTER_PROFILE_COMPLETION_COPY = "Created a starter profile. Review or refine it before a full run if you want PR classes, file roles, or functional surfaces to be labeled instead of unknown.";
+const CONVENTIONAL_COMMIT_PRESET_PROMPT_COPY = "Add Conventional Commit PR class rules?\nUse this when PR titles usually start with feat:, fix:, docs:, test:, chore(deps):, or similar prefixes.\nIt writes title-based dependency, feature, fix, docs, test, and maintenance classes so fewer PRs are classified as unknown.\nSkip it for release titles, ticket prefixes, free-form titles, or another custom PR taxonomy.\nIt does not change scoring, rankings, GitHub collection, or CSV exports.";
+const STARTER_PROFILE_COMPLETION_COPY = "Created a starter profile. Review or refine it before relying on report labels for PR classes, file roles, or functional surfaces.";
 
 const ALLOWED_OPTIONS = new Set([
   "source",
