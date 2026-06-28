@@ -131,7 +131,7 @@ Each ranked bottleneck example includes source references, workflow-run conclusi
 
 Use `--source sample` for the bundled synthetic tutorial data. Use `--source github` for live repository analysis. Existing live commands that pass `--repo`, `--profile`, or `--limit` without `--source` still run as GitHub analysis, but new users should prefer the explicit source flag.
 
-Use `--dry-run` or `--metadata-only` to validate repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. The output directory may be created during this check, and a temporary probe file may be written and removed.
+Use `--dry-run` or `--metadata-only` with `--source github` to run a live GitHub coverage probe that validates repository access, profile JSON, output directory writability, and sampled API coverage without writing full report artifacts. The output directory may be created during this check, and a temporary probe file may be written and removed.
 
 Use `--no-csv` when you want the Markdown, JSON, source, normalized, metrics, and methodology artifacts without spreadsheet-friendly CSV exports.
 
@@ -139,7 +139,7 @@ Use `--exclude-pr-class <class>` to remove a configured PR class from downstream
 
 Use `--json` when automation needs the full machine-readable completion receipt on stdout.
 
-Use `--interactive` only in a terminal when you want prompts. When combined with `--json`, prompts and progress stay off stdout so the final completion receipt remains parseable JSON.
+Use `--interactive` only in a terminal when you want prompts for live GitHub setup. Enter `?` at supported prompts for contextual help without restarting the flow. When combined with `--json`, prompts and progress stay off stdout so the final completion receipt remains parseable JSON.
 
 ## How To Read A Report
 

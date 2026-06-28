@@ -5,8 +5,9 @@
   "currentMilestone": "M1",
   "milestones": {
     "M1": {
-      "state": "active",
-      "startedAt": "2026-06-28"
+      "state": "implemented",
+      "startedAt": "2026-06-28",
+      "implemented": true
     },
     "M2": {
       "state": "not_started"

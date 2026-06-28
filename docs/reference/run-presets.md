@@ -1,14 +1,14 @@
 # Run Presets
 
-Run presets are optional local JSON files for reusing CLI run settings. They are intended for rerunning the same analysis without re-answering interactive prompts.
+Run presets are optional local JSON files for reusing live GitHub CLI run settings. They are intended for rerunning the same live analysis without re-answering interactive prompts. The bundled `--source sample` tutorial path does not save or load presets.
 
-Repository meaning stays in repository profiles. Put file rules, PR class rules, workflow context, branch or release strategy, and contributor-source declarations in a repository profile. A run preset may only point at a profile and store run inputs or preferences such as the target repository, sample size, output directory, dry-run mode, CSV preference, JSON completion preference, validation-target mode, and requested PR class exclusions.
+Repository meaning stays in repository profiles. Put file rules, PR class rules, workflow context, branch or release strategy, and contributor-source declarations in a repository profile. A run preset may only point at a profile and store live run inputs or preferences such as the target repository, pull request limit, output directory, dry-run coverage-probe mode, CSV preference, JSON completion preference, validation-target mode, and requested PR class exclusions.
 
 When a preset supplies `profilePath`, the CLI validates that referenced profile exactly as if it had been passed with `--profile`. Presets do not copy, freeze, or override profile rules; fixing profile validation failures means editing the referenced profile or choosing a different profile path.
 
 ## Save A Preset
 
-Interactive setup asks whether to save a local run preset near the end of the prompt flow. If you answer yes, you choose the preset path explicitly. The CLI does not invent a global or cloud-synced preset location.
+Interactive live GitHub setup asks whether to save a local run preset near the end of the prompt flow. If you answer yes, you choose the preset path explicitly. The CLI does not invent a global or cloud-synced preset location.
 
 Saving a preset may overwrite an existing regular file at that path, but the path must not be a directory, symbolic link, or other special file.
 
