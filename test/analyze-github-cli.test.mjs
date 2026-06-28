@@ -4,6 +4,7 @@ import fsPromises, { chmod, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlin
 import { syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { PassThrough } from "node:stream";
 import { describe, it, mock } from "node:test";
 import { promisify } from "node:util";
 import {
@@ -369,22 +370,79 @@ describe("GitHub live analyze CLI", () => {
 
       assert.match(stdout, /Usage:\n  delivery-friction-analyzer --source sample --out <directory>/);
       assert.match(stdout, /delivery-friction-analyzer --source github --repo <owner\/name>/);
-      assert.match(stdout, /--source <sample\|github>\s+Choose the bundled synthetic sample or live GitHub analysis\./);
-      assert.match(stdout, /--dry-run/);
-      assert.match(stdout, /--validation-target\s+Mark output metadata as an internal validation run; does not bypass target validation\./);
-      assert.match(stdout, /--allow-product-repository\s+Explicit live-analysis override for intentional self-analysis of this product repository\./);
+      assert.match(stdout, /Sample tutorial:\n    Uses bundled synthetic data\. Accepts output controls only\./);
+      assert.match(stdout, /Live GitHub analysis:\n    Collects repository data from GitHub using a repository profile\./);
+      assert.match(stdout, /Output controls:\n  --out <directory>/);
+      assert.match(stdout, /--no-json\s+Disable JSON completion output\./);
+      assert.match(stdout, /--dry-run and --metadata-only validate live GitHub access/);
+      assert.match(stdout, /--source sample --help\s+Show sample-mode options\./);
+      assert.match(stdout, /--source github --help\s+Show live GitHub, dry-run, interactive, and preset options\./);
     });
   });
 
   it("prints help without loading preset files", async () => {
     let stdout = "";
 
-    await runAnalyzeGithubCli(["--help", "--preset", "missing-preset.json"], {
+    await runAnalyzeGithubCli(["--source", "github", "--help", "--preset", "missing-preset.json"], {
       stdout: { write: chunk => { stdout += chunk; } },
       stderr: { write() {} },
     });
 
     assert(stdout.includes("--preset <path>"));
+  });
+
+  it("prints help without validating later malformed options", async () => {
+    let stdout = "";
+
+    await runAnalyzeGithubCli(["--help", "--repo"], {
+      stdout: { write: chunk => { stdout += chunk; } },
+      stderr: { write() {} },
+    });
+
+    assert.match(stdout, /Usage:\n  delivery-friction-analyzer --source sample --out <directory>/);
+    assert.match(stdout, /--no-json\s+Disable JSON completion output\./);
+
+    stdout = "";
+    await runAnalyzeGithubCli(["--source", "sample", "--help", "--definitely-unknown"], {
+      stdout: { write: chunk => { stdout += chunk; } },
+      stderr: { write() {} },
+    });
+
+    assert.match(stdout, /Sample output controls:\n  --out <directory>/);
+    assert.match(stdout, /--no-json\s+Disable JSON completion output\./);
+  });
+
+  it("prints source-specific help for sample mode", async () => {
+    let stdout = "";
+
+    await runAnalyzeGithubCli(["--source", "sample", "--help"], {
+      stdout: { write: chunk => { stdout += chunk; } },
+      stderr: { write() {} },
+    });
+
+    assert.match(stdout, /Usage:\n  delivery-friction-analyzer --source sample --out <directory>/);
+    assert.match(stdout, /Sample output controls:\n  --out <directory>/);
+    assert.match(stdout, /--no-json\s+Disable JSON completion output\./);
+    assert.match(stdout, /Live-only flags are not supported with --source sample:/);
+    assert.match(stdout, /--dry-run, --metadata-only/);
+    assert.doesNotMatch(stdout, /--save-preset <path>\s+Save reusable live GitHub run settings/);
+  });
+
+  it("prints source-specific help for live GitHub mode", async () => {
+    let stdout = "";
+
+    await runAnalyzeGithubCli(["--source", "github", "--help"], {
+      stdout: { write: chunk => { stdout += chunk; } },
+      stderr: { write() {} },
+    });
+
+    assert.match(stdout, /Usage:\n  delivery-friction-analyzer --source github --repo <owner\/name>/);
+    assert.match(stdout, /Live GitHub coverage probes:\n  --dry-run\s+Validate live GitHub access/);
+    assert.match(stdout, /--metadata-only\s+Alias for --dry-run\./);
+    assert.match(stdout, /--interactive\s+Prompt for missing live GitHub run options/);
+    assert.match(stdout, /--preset <path>\s+Load reusable live GitHub run settings/);
+    assert.match(stdout, /--save-preset <path>\s+Save reusable live GitHub run settings/);
+    assert.doesNotMatch(stdout, /Sample output controls:/);
   });
 
   it("parses --json as a machine-readable completion output opt-in", () => {
@@ -474,6 +532,52 @@ describe("GitHub live analyze CLI", () => {
         "json",
         "excludedPrClasses",
       ]);
+    });
+  });
+
+  it("shows interactive prompt help without discarding prior answers", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "interactive-help-out");
+      const prompts = [];
+      let output = "";
+
+      const options = await collectInteractiveAnalyzeGithubOptions({
+        interactive: true,
+        excludedPrClasses: [],
+      }, {
+        isInteractiveTerminal: true,
+        output: { write: chunk => { output += chunk; } },
+        promptAdapter: createScriptedPromptAdapter({
+          repository: "example/example-repo",
+          limit: "2",
+          profilePath: ["?", profilePath],
+          configureWorkflow: "no",
+          addConventionalCommitPrClasses: "no",
+          outDir,
+          dryRun: "yes",
+          json: "no",
+          excludedPrClasses: "",
+        }, prompts),
+      });
+
+      assert.equal(options.repository, "example/example-repo");
+      assert.equal(options.limit, 2);
+      assert.equal(options.profilePath, profilePath);
+      assert.equal(options.dryRun, true);
+      assert.deepEqual(prompts.map(prompt => prompt.id), [
+        "repository",
+        "limit",
+        "profilePath",
+        "profilePath",
+        "configureWorkflow",
+        "addConventionalCommitPrClasses",
+        "outDir",
+        "dryRun",
+        "json",
+        "excludedPrClasses",
+      ]);
+      assert.match(output, /Enter a local repository-profile\.v1 JSON path/);
     });
   });
 
@@ -1878,7 +1982,7 @@ describe("GitHub live analyze CLI", () => {
           provider,
           isInteractiveTerminal: true,
         }),
-        /--source sample cannot be combined with live GitHub option\(s\): --repo, --limit, --profile, --dry-run\/--metadata-only, --validation-target, --interactive, --exclude-pr-class/,
+        /--source sample cannot be combined with live GitHub option\(s\): --repo, --limit, --profile, --dry-run\/--metadata-only, --validation-target, --interactive, --exclude-pr-class\. Allowed sample output controls are --out, --json, --no-json, --csv, and --no-csv\. Use --source github for live repository, dry-run, interactive, preset, validation, and PR-class filtering options\./,
       );
 
       assert.deepEqual(provider.calls, []);
@@ -1899,7 +2003,7 @@ describe("GitHub live analyze CLI", () => {
         ], {
           provider,
         }),
-        /--source sample cannot be combined with live GitHub option\(s\): --dry-run\/--metadata-only/,
+        /--source sample cannot be combined with live GitHub option\(s\): --dry-run\/--metadata-only\. Allowed sample output controls are --out, --json, --no-json, --csv, and --no-csv\./,
       );
 
       assert.deepEqual(provider.calls, []);
@@ -2631,6 +2735,53 @@ describe("GitHub live analyze CLI", () => {
         "saveRunPreset",
       ]);
       assert.deepEqual(await readdir(outDir), []);
+    });
+  });
+
+  it("formats terminal prompt help without an extra period before the prompt suffix", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "interactive-terminal-prompt-out");
+      const stdin = new PassThrough();
+      const stderr = new PassThrough();
+      const answers = [
+        "example/example-repo",
+        "1",
+        profilePath,
+        "no",
+        "no",
+        outDir,
+        "yes",
+        "no",
+      ];
+      let stderrOutput = "";
+      let stdout = "";
+
+      stderr.setEncoding("utf8");
+      stderr.on("data", chunk => {
+        stderrOutput += chunk;
+        if ((/: $/.test(stderrOutput) || / \[[Yy]\/[Nn]\] $/.test(stderrOutput)) && answers.length) {
+          stdin.write(`${answers.shift()}\n`);
+          if (!answers.length) {
+            stdin.end();
+          }
+        }
+      });
+
+      const runPromise = runAnalyzeGithubCli(["--interactive", "--json"], {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+        isInteractiveTerminal: true,
+        stdin,
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr,
+      });
+
+      await runPromise;
+
+      assert.equal(JSON.parse(stdout).ok, true);
+      assert.match(stderrOutput, /Repository profile path Enter \? for help: /);
+      assert.doesNotMatch(stderrOutput, /Enter \? for help\.:/);
     });
   });
 

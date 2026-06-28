@@ -135,30 +135,84 @@ const CSV_ARTIFACT_KEYS = new Set([
 export const USAGE = `Usage:
   delivery-friction-analyzer --source sample --out <directory>
   delivery-friction-analyzer --source github --repo <owner/name> --limit <1-100> --profile <path> --out <directory>
-  delivery-friction-analyzer --repo <owner/name> --limit <1-100> --profile <path> --out <directory>
-  delivery-friction-analyzer --repo <owner/name> --limit <1-100> --profile <path> --out <directory> --dry-run
 
-Options:
-  --source <sample|github> Choose the bundled synthetic sample or live GitHub analysis.
+Workflows:
+  Sample tutorial:
+    Uses bundled synthetic data. Accepts output controls only.
+    delivery-friction-analyzer --source sample --out reports/tutorial
+
+  Live GitHub analysis:
+    Collects repository data from GitHub using a repository profile.
+    delivery-friction-analyzer --source github --repo owner/name --limit 30 --profile path/to/profile.json --out reports/owner-name
+
+  Live GitHub coverage probe:
+    --dry-run and --metadata-only validate live GitHub access, profile JSON, output writability, and sampled API coverage without report artifacts.
+    delivery-friction-analyzer --source github --repo owner/name --limit 30 --profile path/to/profile.json --out reports/owner-name --dry-run
+
+Output controls:
+  --out <directory>         Output directory for generated artifacts.
+  --json                    Print the machine-readable completion receipt to stdout.
+  --no-json                 Disable JSON completion output.
+  --csv                     Enable curated CSV evidence exports when a preset disabled them.
+  --no-csv                  Suppress curated CSV evidence exports.
+
+Help:
+  --source sample --help    Show sample-mode options.
+  --source github --help    Show live GitHub, dry-run, interactive, and preset options.
+`;
+
+export const SAMPLE_USAGE = `Usage:
+  delivery-friction-analyzer --source sample --out <directory>
+
+Sample tutorial:
+  Uses bundled synthetic data and never calls GitHub.
+  Sample mode writes the same report bundle shape as a live analysis for tutorial use.
+
+Sample output controls:
+  --out <directory>         Required output directory for generated sample artifacts.
+  --json                    Print the machine-readable completion receipt to stdout.
+  --no-json                 Disable JSON completion output.
+  --csv                     Enable curated CSV evidence exports.
+  --no-csv                  Suppress curated CSV evidence exports.
+
+Live-only flags are not supported with --source sample:
+  --repo, --limit, --profile, --dry-run, --metadata-only, --validation-target,
+  --interactive, --preset, --save-preset, --exclude-pr-class, --allow-product-repository
+`;
+
+export const GITHUB_USAGE = `Usage:
+  delivery-friction-analyzer --source github --repo <owner/name> --limit <1-100> --profile <path> --out <directory>
+  delivery-friction-analyzer --source github --repo <owner/name> --limit <1-100> --profile <path> --out <directory> --dry-run
+  delivery-friction-analyzer --interactive --source github
+
+Live GitHub analysis:
   --repo <owner/name>       Target GitHub repository to analyze.
   --limit <1-100>           Latest merged pull request count.
   --profile <path>          Repository profile JSON used for file role classification.
   --out <directory>         Output directory for generated artifacts.
-  --dry-run                 Validate inputs and sample GitHub coverage without writing artifacts.
-  --no-dry-run              Disable dry-run mode when a preset enabled it.
+
+Live GitHub coverage probes:
+  --dry-run                 Validate live GitHub access, profile JSON, output writability, and sampled API coverage without writing report artifacts.
   --metadata-only           Alias for --dry-run.
+  --no-dry-run              Disable dry-run mode when a preset enabled it.
+
+Live filters and metadata:
   --validation-target       Mark output metadata as an internal validation run; does not bypass target validation.
   --no-validation-target    Disable validation-target mode when a preset enabled it.
   --allow-product-repository
                             Explicit live-analysis override for intentional self-analysis of this product repository.
-  --exclude-pr-class <cls>  Exclude a PR class from normalized, metrics, report, methodology, and CSV artifacts. Repeat or comma-separate values.
-  --csv                     Enable curated CSV evidence exports when a preset disabled them.
-  --no-csv                  Suppress curated CSV evidence exports.
+  --exclude-pr-class <cls>  Exclude a configured PR class from downstream normalized, metrics, report, methodology, and CSV artifacts. Repeat or comma-separate values.
+
+Output controls:
   --json                    Print the machine-readable completion receipt to stdout.
   --no-json                 Disable JSON completion output when a preset enabled it.
-  --interactive             Prompt for missing run options in a terminal.
-  --preset <path>           Load local run settings from a saved preset. Explicit CLI flags override preset values.
-  --save-preset <path>      Save local run settings for non-interactive reruns.
+  --csv                     Enable curated CSV evidence exports when a preset disabled them.
+  --no-csv                  Suppress curated CSV evidence exports.
+
+Interactive setup and presets:
+  --interactive             Prompt for missing live GitHub run options in a terminal; enter ? at supported prompts for contextual help.
+  --preset <path>           Load reusable live GitHub run settings from a saved preset. Explicit CLI flags override preset values.
+  --save-preset <path>      Save reusable live GitHub run settings for non-interactive reruns.
 `;
 
 export const SOURCE_SELECTION_GUIDANCE = `Choose what to analyze.
@@ -199,6 +253,13 @@ function explicitCliOptionKeys(argv) {
 }
 
 export function parseAnalyzeGithubArgs(argv) {
+  if (hasHelpOption(argv)) {
+    const parsed = { help: true };
+    const source = sourceForHelp(argv);
+    if (source !== undefined) parsed.source = source;
+    return attachOptionSource(parsed, "explicitCliOptions", new Set(source === undefined ? [] : ["source"]));
+  }
+
   const options = {
     dryRun: false,
     isValidationTarget: false,
@@ -209,9 +270,6 @@ export function parseAnalyzeGithubArgs(argv) {
   const explicitOptions = explicitCliOptionKeys(argv);
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
-    if (arg === "--help" || arg === "-h") {
-      return { help: true };
-    }
     if (!arg.startsWith("--")) {
       throw new Error(`Unexpected argument: ${arg}`);
     }
@@ -266,6 +324,25 @@ export function parseAnalyzeGithubArgs(argv) {
   if (parsed.source === undefined) delete parsed.source;
 
   return attachOptionSource(parsed, "explicitCliOptions", explicitOptions);
+}
+
+function hasHelpOption(argv) {
+  return argv.includes("--help") || argv.includes("-h");
+}
+
+function sourceForHelp(argv) {
+  for (let index = 0; index < argv.length; index += 1) {
+    if (argv[index] !== "--source") continue;
+    const source = argv[index + 1];
+    if (source === "sample" || source === "github") return source;
+  }
+  return undefined;
+}
+
+function usageForOptions(options) {
+  if (options?.source === "sample") return SAMPLE_USAGE;
+  if (options?.source === "github") return GITHUB_USAGE;
+  return USAGE;
 }
 
 function normalizeExcludedPrClasses(values) {
@@ -537,7 +614,7 @@ function rejectSampleLiveOptions(options) {
     incompatible.push("--exclude-pr-class");
   }
   if (!incompatible.length) return;
-  throw new Error(`--source sample cannot be combined with live GitHub option(s): ${incompatible.join(", ")}. Use only output options such as --out, --json, --csv, or --no-csv.`);
+  throw new Error(`--source sample cannot be combined with live GitHub option(s): ${incompatible.join(", ")}. Allowed sample output controls are --out, --json, --no-json, --csv, and --no-csv. Use --source github for live repository, dry-run, interactive, preset, validation, and PR-class filtering options.`);
 }
 
 function targetInputFromRepositorySlug(repository) {
@@ -590,21 +667,22 @@ function formatChoiceList(choices) {
 }
 
 function formatInteractivePrompt(prompt) {
+  const helpSuffix = prompt.help ? " Enter ? for help" : "";
   const suffix = prompt.defaultValue === undefined
     ? ""
     : Array.isArray(prompt.defaultValue)
       ? (prompt.defaultValue.length ? ` [${prompt.defaultValue.join(",")}]` : "")
       : ` [${prompt.defaultValue}]`;
   if (prompt.type === "confirm") {
-    return `${prompt.message}${prompt.defaultValue ? " [Y/n]" : " [y/N]"} `;
+    return `${prompt.message}${helpSuffix}${prompt.defaultValue ? " [Y/n]" : " [y/N]"} `;
   }
   if (prompt.type === "multi-select" && prompt.choices?.length) {
-    return `${prompt.message} (${prompt.choices.map(choiceValue).join(",")})${suffix}: `;
+    return `${prompt.message}${helpSuffix} (${prompt.choices.map(choiceValue).join(",")})${suffix}: `;
   }
   if (prompt.type === "select" && prompt.choices?.length) {
-    return `${prompt.message}\n${formatChoiceList(prompt.choices)}\nChoose a number or identifier${suffix}: `;
+    return `${prompt.message}${helpSuffix}\n${formatChoiceList(prompt.choices)}\nChoose a number or identifier${suffix}: `;
   }
-  return `${prompt.message}${suffix}: `;
+  return `${prompt.message}${helpSuffix}${suffix}: `;
 }
 
 function createTerminalPromptAdapter({ input, output }) {
@@ -632,6 +710,16 @@ async function callPromptAdapter(promptAdapter, prompt) {
 async function askUntilValid(promptAdapter, prompt, { normalize, validate, output }) {
   for (;;) {
     const raw = await callPromptAdapter(promptAdapter, prompt);
+    if (String(raw ?? "").trim() === "?" && prompt.help) {
+      if (typeof promptAdapter.writeHelp === "function") {
+        promptAdapter.writeHelp(prompt.help);
+      } else if (typeof promptAdapter.writeError === "function") {
+        promptAdapter.writeError(prompt.help);
+      } else if (output?.write) {
+        output.write(`${prompt.help}\n`);
+      }
+      continue;
+    }
     try {
       const value = normalize(raw, prompt);
       await validate(value);
@@ -950,6 +1038,7 @@ async function promptConventionalCommitPrClassPreset(promptAdapter, output, prof
     id: "addConventionalCommitPrClasses",
     type: "confirm",
     message,
+    help: "Optional profile setup: add reusable title rules when Conventional Commit prefixes match this repository. This changes profile classification only, not scoring or GitHub collection.",
     defaultValue: false,
   }, {
     output,
@@ -991,6 +1080,7 @@ async function promptWorkflowField(promptAdapter, output, { id, message, choices
     id,
     type: "select",
     message,
+    help: "Workflow context is configured profile metadata. Choose the closest stable repository practice; it helps report interpretation but is not observed GitHub evidence.",
     choices: workflowChoices(choices),
     defaultValue,
   }, {
@@ -1030,6 +1120,7 @@ async function promptWorkflowProfileUpdate(promptAdapter, output, profile, { isN
       id: "releasePrTitleIncludes",
       type: "text",
       message: `Release PR title includes (blank to skip PR class rule; suggested: ${suggestedReleaseTitle})`,
+      help: "Use this only when release PR titles follow a stable phrase. Blank skips the generated release PR class rule.",
     }, {
       output,
       normalize: normalizeTextAnswer,
@@ -1044,6 +1135,7 @@ async function promptWorkflowProfileUpdate(promptAdapter, output, profile, { isN
           id: "updateReleasePrClass",
           type: "confirm",
           message: "Update existing title-based release PR class rule",
+          help: "Updates the existing title-based release PR class rule in the repository profile. Existing unrelated profile rules are kept.",
           defaultValue: false,
         }, {
           output,
@@ -1065,6 +1157,7 @@ async function promptWorkflowProfileUpdate(promptAdapter, output, profile, { isN
             id: "addReleasePrClass",
             type: "confirm",
             message: "Add release PR class rule from title convention",
+            help: "Adds a title-based release PR class rule to the repository profile when that convention matches this repository.",
             defaultValue: true,
           }, {
             output,
@@ -1097,6 +1190,7 @@ async function maybeConfigureInteractiveProfile(promptAdapter, output, profileSt
       id: "createProfile",
       type: "confirm",
       message: `Create repository profile at this path. ${STARTER_PROFILE_PROMPT_COPY}`,
+      help: "A repository profile is required for live GitHub analysis. Interactive setup can create a starter profile at the path you entered, then you can review or refine it before a full run.",
       defaultValue: true,
     }, {
       output,
@@ -1111,6 +1205,7 @@ async function maybeConfigureInteractiveProfile(promptAdapter, output, profileSt
       id: "configureWorkflow",
       type: "confirm",
       message: "Configure repository workflow profile fields",
+      help: "Workflow profile fields are configured context for report interpretation. Choose yes to review merge, release, and branch strategy prompts; choose no to keep the existing profile values.",
       defaultValue: false,
     }, {
       output,
@@ -1220,6 +1315,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         id: "repository",
         type: "text",
         message: "Target GitHub repository",
+        help: "Enter the live GitHub repository as owner/name. Sample mode is not part of interactive setup; use --source sample --out <directory> for the bundled tutorial.",
       }, {
         output,
         normalize: normalizeTextAnswer,
@@ -1232,6 +1328,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         id: "limit",
         type: "integer",
         message: "Latest merged pull request count",
+        help: "Choose how many recent merged pull requests to collect from live GitHub. Smaller limits are faster; larger limits give reports more evidence.",
         defaultValue: 30,
       }, {
         output,
@@ -1245,6 +1342,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         id: "profilePath",
         type: "path",
         message: "Repository profile path",
+        help: "Enter a local repository-profile.v1 JSON path. If the path does not exist, interactive setup can create a starter profile there.",
       });
       profileState = prompted;
     } else {
@@ -1284,6 +1382,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         id: "outDir",
         type: "path",
         message: "Output directory",
+        help: "Choose where generated artifacts or dry-run probe files should be written. Interactive setup may create the directory and check that it is writable.",
         defaultValue: defaultOutDirForRepository(resolved.repository),
       }, {
         output,
@@ -1299,7 +1398,8 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
       resolved.dryRun = await askUntilValid(adapter, {
         id: "dryRun",
         type: "confirm",
-        message: "Run metadata-only dry run",
+        message: "Run live GitHub metadata-only coverage probe",
+        help: "A dry run is a live GitHub coverage probe. It validates access, profile JSON, output writability, and sampled API coverage without writing report artifacts.",
         defaultValue: false,
       }, {
         output,
@@ -1314,6 +1414,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         id: "csv",
         type: "confirm",
         message: "Write CSV evidence files",
+        help: "CSV evidence files are optional spreadsheet-friendly artifacts for full report runs. They are not written during dry-run coverage probes.",
         defaultValue: true,
       }, {
         output,
@@ -1328,6 +1429,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         id: "json",
         type: "confirm",
         message: "Print completion as JSON",
+        help: "JSON completion writes the final machine-readable receipt to stdout. Prompts and progress stay on stderr so automation can parse stdout.",
         defaultValue: false,
       }, {
         output,
@@ -1344,6 +1446,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
           id: "excludedPrClasses",
           type: "multi-select",
           message: "Exclude PR classes (comma-separated, blank for none)",
+          help: "Optionally exclude configured PR classes from downstream normalized data, metrics, reports, methodology, and CSV artifacts. The source bundle still preserves the full collected sample.",
           choices: availablePrClasses,
           defaultValue: [],
         }, {
@@ -1362,6 +1465,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
         id: "saveRunPreset",
         type: "confirm",
         message: "Save local run preset for non-interactive reruns",
+        help: "Run presets store reusable live GitHub run settings such as repo, profile, limit, output, dry-run preference, JSON/CSV preference, and requested PR class exclusions. Sample mode does not save or load presets.",
         defaultValue: false,
       }, {
         output,
@@ -1373,6 +1477,7 @@ export async function collectInteractiveAnalyzeGithubOptions(options, {
           id: "runPresetPath",
           type: "path",
           message: "Run preset path",
+          help: "Choose a local JSON file path for reusable live GitHub run settings. The path must be a regular file path, not a directory or symlink.",
         }, {
           output,
           normalize: normalizeTextAnswer,
@@ -1938,7 +2043,7 @@ export async function runAnalyzeGithubCli(argv, {
   try {
     const parsedOptions = parseAnalyzeGithubArgs(argv);
     if (parsedOptions.help) {
-      stdout.write(USAGE);
+      stdout.write(usageForOptions(parsedOptions));
       return null;
     }
     if (parsedOptions.source !== undefined) {
