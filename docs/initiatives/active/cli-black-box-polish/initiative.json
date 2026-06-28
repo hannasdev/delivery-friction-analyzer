@@ -29,11 +29,13 @@
       "mergedAt": "2026-06-28"
     },
     "M3": {
-      "state": "conformance_reviewed",
+      "state": "adversarially_reviewed",
       "startedAt": "2026-06-28",
       "implemented": true,
       "conformanceReviewed": true,
-      "conformanceReviewedAt": "2026-06-28"
+      "conformanceReviewedAt": "2026-06-28",
+      "adversariallyReviewed": true,
+      "adversariallyReviewedAt": "2026-06-28"
     }
   }
 }
