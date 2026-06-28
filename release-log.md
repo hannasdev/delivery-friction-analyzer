@@ -8,7 +8,7 @@
 - Why it matters: First-time users and maintainers can choose the right workflow before running into rejected flag combinations, and interactive setup can explain supported prompts without restarting the flow.
 - Who is affected: Users trying the bundled sample, maintainers running live GitHub analysis or dry-run coverage probes, and contributors reviewing CLI setup behavior.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/67
 
 ### 2026-06-27 — First-Run Profile Prompt Clarity
 
