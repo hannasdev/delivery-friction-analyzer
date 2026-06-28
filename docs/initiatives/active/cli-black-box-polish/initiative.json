@@ -16,8 +16,9 @@
       "openedAt": "2026-06-28"
     },
     "M2": {
-      "state": "active",
-      "startedAt": "2026-06-28"
+      "state": "implemented",
+      "startedAt": "2026-06-28",
+      "implemented": true
     },
     "M3": {
       "state": "not_started"
