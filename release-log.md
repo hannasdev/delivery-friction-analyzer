@@ -8,7 +8,7 @@
 - Why it matters: Users and maintainers can distinguish observed friction from inactive checks without losing machine-readable evidence or report context.
 - Who is affected: Maintainers and users reading generated Markdown reports, `friction-report.json`, or JSON completion receipts from sample or live GitHub analysis.
 - Action needed: None.
-- PR: TBD
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/69
 
 ### 2026-06-28 — CLI Artifact Truthfulness
 

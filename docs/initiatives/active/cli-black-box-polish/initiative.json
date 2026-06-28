@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "slug": "cli-black-box-polish",
-  "state": "active",
+  "state": "complete_on_merge",
   "currentMilestone": "M3",
   "milestones": {
     "M1": {
@@ -29,13 +29,16 @@
       "mergedAt": "2026-06-28"
     },
     "M3": {
-      "state": "adversarially_reviewed",
+      "state": "complete_on_merge",
       "startedAt": "2026-06-28",
       "implemented": true,
       "conformanceReviewed": true,
       "conformanceReviewedAt": "2026-06-28",
       "adversariallyReviewed": true,
-      "adversariallyReviewedAt": "2026-06-28"
+      "adversariallyReviewedAt": "2026-06-28",
+      "pr": 69,
+      "openedAt": "2026-06-28"
     }
-  }
+  },
+  "completedByPr": 69
 }
