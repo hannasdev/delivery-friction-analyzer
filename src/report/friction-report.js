@@ -469,6 +469,32 @@ function summarizeBottlenecks(metricsSummary, prClasses = summarizePrClasses(met
     .map(({ definitionIndex, rankValue, ...bottleneck }) => bottleneck);
 }
 
+function hasPositiveRepresentativeScore(bottleneck) {
+  return (bottleneck.observedData ?? [])
+    .some(evidence => Number(evidence.value ?? 0) > 0);
+}
+
+function splitBottleneckSignals(bottlenecks) {
+  const positiveSignalBottlenecks = [];
+  const noSignalBottlenecks = [];
+
+  for (const bottleneck of bottlenecks ?? []) {
+    if (hasPositiveRepresentativeScore(bottleneck)) {
+      positiveSignalBottlenecks.push(bottleneck);
+    } else {
+      noSignalBottlenecks.push(bottleneck);
+    }
+  }
+
+  noSignalBottlenecks.sort((left, right) => {
+    const leftRank = Number(left.observedData?.[0]?.value ?? 0);
+    const rightRank = Number(right.observedData?.[0]?.value ?? 0);
+    return (rightRank - leftRank) || left.id.localeCompare(right.id);
+  });
+
+  return { positiveSignalBottlenecks, noSignalBottlenecks };
+}
+
 function summarizeEvidenceDominance(evidence) {
   const values = evidence
     .map(entry => Number(entry.value ?? 0))
@@ -866,7 +892,9 @@ function summarizeSensitivity(metricsSummary, baselineBottlenecks) {
   return {
     summaries: dominantPrNumbers.map(excludedPrNumber => {
       const excludedPr = findPullRequest(metricsSummary, excludedPrNumber);
-      const filteredBottlenecks = summarizeBottlenecks(metricsWithoutPullRequest(metricsSummary, excludedPrNumber));
+      const { positiveSignalBottlenecks: filteredBottlenecks } = splitBottleneckSignals(
+        summarizeBottlenecks(metricsWithoutPullRequest(metricsSummary, excludedPrNumber)),
+      );
       const filteredTopBottleneckIds = filteredBottlenecks.slice(0, 3).map(bottleneck => bottleneck.id);
       const affectedBottlenecks = baselineBottlenecks
         .filter(bottleneck => bottleneck.dominance?.status === "single_pr_dominates"
@@ -904,9 +932,15 @@ function summarizeSensitivity(metricsSummary, baselineBottlenecks) {
 export function generateRepositoryFrictionReport(metricsSummary, options = {}) {
   const { workflowContext, contributorSource } = options ?? {};
   const prClasses = summarizePrClasses(metricsSummary);
-  const bottlenecksWithSharedSignalKeys = summarizeBottlenecks(metricsSummary, prClasses);
+  const rankedBottlenecksWithSharedSignalKeys = summarizeBottlenecks(metricsSummary, prClasses);
+  const {
+    positiveSignalBottlenecks: bottlenecksWithSharedSignalKeys,
+    noSignalBottlenecks: noSignalBottlenecksWithSharedSignalKeys,
+  } = splitBottleneckSignals(rankedBottlenecksWithSharedSignalKeys);
   const sharedSignals = summarizeSharedSignals(bottlenecksWithSharedSignalKeys);
   const bottlenecks = bottlenecksWithSharedSignalKeys.map(({ rankingKey, ...bottleneck }) => bottleneck);
+  const noSignalBottlenecks = noSignalBottlenecksWithSharedSignalKeys
+    .map(({ rankingKey, ...bottleneck }) => bottleneck);
   const configuredWorkflow = normalizeConfiguredWorkflowContext(workflowContext);
   const contributorSourceMetadata = normalizeContributorSourceMetadata(contributorSource);
   return {
@@ -925,12 +959,14 @@ export function generateRepositoryFrictionReport(metricsSummary, options = {}) {
       failedChecks: metricsSummary.totals?.failedChecks ?? 0,
       cancelledWorkflowRuns: metricsSummary.totals?.cancelledWorkflowRuns ?? 0,
       topBottleneckIds: bottlenecks.slice(0, 3).map(bottleneck => bottleneck.id),
+      noSignalBottleneckIds: noSignalBottlenecks.map(bottleneck => bottleneck.id),
     },
     coverage: summarizeCoverage(metricsSummary),
     commentSources: summarizeCommentSources(metricsSummary),
     surfaces: summarizeSurfaces(metricsSummary),
     prClasses,
     bottlenecks,
+    noSignalBottlenecks,
     sharedSignals,
     sensitivity: summarizeSensitivity(metricsSummary, bottlenecks),
     recommendationCategories: summarizeRecommendationCategories(bottlenecks),
@@ -1263,11 +1299,33 @@ function renderPriorityExplanation() {
   return renderList([
     "Bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score.",
     "Each score comes from one metric family, such as review-loop drag, validation failures, change scope, planning signals, review surprise, or post-review commits.",
+    "Bottlenecks with no positive raw representative score are shown as no-signal context instead of top findings or recommendation drivers.",
     "Change scope is the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched. It is not a line-count metric.",
     "PR size columns show final/current additions, deletions, changed files, and changed lines so readers can compare size against the detected friction signals.",
     "PR size columns are context for interpreting displayed examples; bottleneck ordering uses each metric family's representative score and stable tie-breaks, not the PR size columns.",
     "Coverage caveats and outlier dominance should be considered before treating the first bottleneck as the most important repository problem.",
   ]);
+}
+
+function renderNoSignalBottlenecks(bottlenecks) {
+  const noSignalBottlenecks = bottlenecks ?? [];
+  if (!noSignalBottlenecks.length) return "";
+
+  return [
+    "## No Signal Observed",
+    "",
+    "These bottlenecks had representative report-owned scores of zero or no positive representative score in the displayed evidence. They remain useful context for future runs when matching evidence appears, but they are not treated as top findings or recommendation drivers in this report.",
+    "",
+    renderMarkdownTable(
+      ["Bottleneck", "Metric", "Potential use when evidence exists"],
+      noSignalBottlenecks.map(bottleneck => [
+        bottleneck.title,
+        bottleneck.metricLabel,
+        recommendationActionText(bottleneck),
+      ]),
+    ),
+    "",
+  ].join("\n");
 }
 
 function topBottleneckLabels(report) {
@@ -1712,6 +1770,11 @@ export function renderRepositoryFrictionMarkdown(report) {
     );
   }
 
+  const noSignalSection = renderNoSignalBottlenecks(report.noSignalBottlenecks);
+  if (noSignalSection) {
+    lines.push(noSignalSection);
+  }
+
   lines.push(
     "## Recommendation Categories",
     "",
@@ -1733,6 +1796,7 @@ export function renderRepositoryFrictionMarkdown(report) {
       ? "- Profile suggestions are optional interpretation improvements derived from existing report evidence; they do not change scores, rankings, CSV exports, or JSON report fields."
       : "- No profile suggestion thresholds were triggered by this report's PR class, role, functional-surface, or workflow-coverage evidence.",
     "- Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.",
+    "- Zero-score or no-positive-score bottlenecks are retained in no-signal context and excluded from top findings and recommendation category counts.",
     "- Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.",
     "- Missing or partial source evidence remains visible in coverage tables rather than being inferred from unrelated fields.",
     ...(hasConfiguredWorkflowContext(report.configuredWorkflow)

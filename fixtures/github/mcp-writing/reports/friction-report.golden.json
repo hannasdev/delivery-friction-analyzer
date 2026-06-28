@@ -21,7 +21,8 @@
       "review-churn",
       "repo-guidance-gap",
       "changed-file-spread"
-    ]
+    ],
+    "noSignalBottleneckIds": []
   },
   "coverage": {
     "prOpenDiff": {
@@ -1270,6 +1271,7 @@
       }
     }
   ],
+  "noSignalBottlenecks": [],
   "sharedSignals": {
     "groups": [
       {

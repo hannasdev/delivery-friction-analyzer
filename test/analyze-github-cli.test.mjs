@@ -1825,6 +1825,7 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(result.targetRepository.name, "delivery-dashboard");
       assert.equal(result.source.label, "Bundled synthetic sample, not live GitHub data");
       assert.equal(result.source.kind, "sample");
+      assert.deepEqual(result.noSignalBottleneckIds, []);
       assert.deepEqual(provider.calls, []);
       assert.deepEqual((await readdir(outDir)).sort(), Object.values(ANALYZE_GITHUB_ARTIFACTS).sort());
 
@@ -1885,6 +1886,7 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(parsed.ok, true);
       assert.equal(parsed.source.label, "Bundled synthetic sample, not live GitHub data");
       assert.equal(parsed.artifactPaths.reportMarkdown, join(outDir, "friction-report.md"));
+      assert.deepEqual(parsed.noSignalBottleneckIds, []);
       assert(!stdout.includes("Loading bundled synthetic sample"));
       assert(!stdout.includes("Markdown report:"));
       assert(stderr.includes("Loading bundled synthetic sample."));
@@ -2185,6 +2187,12 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(normalized.schemaVersion, "normalized-fixture.v1");
       assert.equal(metricsSummary.metricVersion, "friction-metrics.v1");
       assert.equal(reportJson.reportVersion, "friction-report.v1");
+      assert.deepEqual(result.topBottleneckIds, reportJson.summary.topBottleneckIds);
+      assert.deepEqual(result.noSignalBottleneckIds, reportJson.summary.noSignalBottleneckIds);
+      assert.deepEqual(
+        result.topBottleneckIds.filter(id => result.noSignalBottleneckIds.includes(id)),
+        [],
+      );
       assert.deepEqual(sourceBundle.source, {
         kind: "github",
         label: "GitHub live collection",
@@ -3151,8 +3159,41 @@ describe("GitHub live analyze CLI", () => {
       assert.equal(result.selection.requestedLimit, 1);
       assert.equal(result.selection.collectedCount, 1);
       assert.equal(result.artifactPaths, null);
+      assert.equal(result.noSignalBottleneckIds, null);
       assert.deepEqual(await readdir(outDir), []);
       assert(provider.calls.some(([method]) => method === "getWorkflowRuns"));
+    });
+  });
+
+  it("sets report-derived receipt IDs to null for metadata-only JSON output", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writeProfile(directory);
+      const outDir = join(directory, "metadata-only-out");
+      let stdout = "";
+
+      await runAnalyzeGithubCli([
+        "--repo",
+        "example/example-repo",
+        "--limit",
+        "30",
+        "--profile",
+        profilePath,
+        "--out",
+        outDir,
+        "--metadata-only",
+        "--json",
+      ], {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write() {} },
+      });
+
+      const receipt = JSON.parse(stdout);
+      assert.equal(receipt.dryRun, true);
+      assert.equal(receipt.topBottleneckIds, null);
+      assert.equal(receipt.noSignalBottleneckIds, null);
+      assert.deepEqual(await readdir(outDir), []);
     });
   });
 
@@ -3180,6 +3221,7 @@ describe("GitHub live analyze CLI", () => {
       });
       assert.equal(result.totals, null);
       assert.equal(result.topBottleneckIds, null);
+      assert.equal(result.noSignalBottleneckIds, null);
       assert.deepEqual(await readdir(outDir), []);
 
       let output = "";
