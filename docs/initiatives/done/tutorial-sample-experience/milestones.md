@@ -64,7 +64,6 @@ Public docs and CLI copy stop presenting `hannasdev/mcp-writing` as the tutorial
 
 ### Status
 
-- [ ] Not started
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
@@ -105,14 +104,14 @@ The analyzer has a generic `source-bundle.v1` contract that honestly represents 
 
 ### Acceptance Criteria
 
-- [ ] `source-bundle.v1` schema and docs define `source.kind: "github" | "sample"` and generic source/collector/selection/coverage semantics.
-- [ ] Contract docs include a field mapping for `schemaVersion`, `collectedAt`, `collector`, `targetRepository`, `repositoryMetadata`, `selection`, retained `coverage.status`, `coverage.apiFamilies` renamed to `coverage.sourceFamilies`, `languageDistribution`, `contributorSource`, `pullRequests`, retained per-PR coverage object, and `raw`.
-- [ ] Live GitHub collection emits `source-bundle.v1` with `source.kind: "github"`.
-- [ ] Existing live source-bundle tests validate against the new generic contract.
-- [ ] Any retained `github-source-bundle.v1` compatibility path is explicit, tested, and documented as legacy.
-- [ ] Generated methodology and report source labels no longer rely on a GitHub-only source-bundle identity.
-- [ ] Contract docs explain why sample and GitHub sources share the same analyzer contract.
-- [ ] No analyzer-owned evidence field from `github-source-bundle.v1` is dropped without an explicit documented removal and test coverage.
+- [x] `source-bundle.v1` schema and docs define `source.kind: "github" | "sample"` and generic source/collector/selection/coverage semantics.
+- [x] Contract docs include a field mapping for `schemaVersion`, `collectedAt`, `collector`, `targetRepository`, `repositoryMetadata`, `selection`, retained `coverage.status`, `coverage.apiFamilies` renamed to `coverage.sourceFamilies`, `languageDistribution`, `contributorSource`, `pullRequests`, retained per-PR coverage object, and `raw`.
+- [x] Live GitHub collection emits `source-bundle.v1` with `source.kind: "github"`.
+- [x] Existing live source-bundle tests validate against the new generic contract.
+- [x] Any retained `github-source-bundle.v1` compatibility path is explicit, tested, and documented as legacy.
+- [x] Generated methodology and report source labels no longer rely on a GitHub-only source-bundle identity.
+- [x] Contract docs explain why sample and GitHub sources share the same analyzer contract.
+- [x] No analyzer-owned evidence field from `github-source-bundle.v1` is dropped without an explicit documented removal and test coverage.
 
 ### Required Validation
 
@@ -130,7 +129,6 @@ The analyzer has a generic `source-bundle.v1` contract that honestly represents 
 
 ### Status
 
-- [ ] Not started
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
@@ -176,17 +174,17 @@ The repository contains a public-safe, fully synthetic sample repository profile
 
 ### Acceptance Criteria
 
-- [ ] Sample source data validates against `source-bundle.v1` with `source.kind: "sample"`.
-- [ ] Sample profile demonstrates PR classes, file/path rules, functional surfaces, and workflow context.
-- [ ] Sample profile is valid JSON with fake but explanatory placeholder content that users can inspect or copy to infer what belongs in a real profile.
-- [ ] Repository-profile reference docs explain valid `notes` usage for file rules and PR class rules.
-- [ ] Sample data uses fictional names, URLs, users, and source labels that cannot be mistaken for observed GitHub evidence, including the stable label `Bundled synthetic sample, not live GitHub data` for the sample source bundle source label.
-- [ ] Sample data passes a public-safety review: no private repository names, private PR URLs, real user names, tokens, copied private comments, or sensitive file paths.
-- [ ] Generated sample report opens with useful findings and clearly labels synthetic sample data.
-- [ ] Sample output includes caveats, partial coverage, broad-change scope, and at least one outlier/sensitivity example without overwhelming the first page.
-- [ ] Tests cover the sample bundle through schema validation, profile validation, normalization, metrics, and report rendering.
-- [ ] Package-content review confirms the sample runtime files are eligible to ship in the published npm package.
-- [ ] A short text excerpt suitable for public docs is generated or selected from the sample report.
+- [x] Sample source data validates against `source-bundle.v1` with `source.kind: "sample"`.
+- [x] Sample profile demonstrates PR classes, file/path rules, functional surfaces, and workflow context.
+- [x] Sample profile is valid JSON with fake but explanatory placeholder content that users can inspect or copy to infer what belongs in a real profile.
+- [x] Repository-profile reference docs explain valid `notes` usage for file rules and PR class rules.
+- [x] Sample data uses fictional names, URLs, users, and source labels that cannot be mistaken for observed GitHub evidence, including the stable label `Bundled synthetic sample, not live GitHub data` for the sample source bundle source label.
+- [x] Sample data passes a public-safety review: no private repository names, private PR URLs, real user names, tokens, copied private comments, or sensitive file paths.
+- [x] Generated sample report opens with useful findings and clearly labels synthetic sample data.
+- [x] Sample output includes caveats, partial coverage, broad-change scope, and at least one outlier/sensitivity example without overwhelming the first page.
+- [x] Tests cover the sample bundle through schema validation, profile validation, normalization, metrics, and report rendering.
+- [x] Package-content review confirms the sample runtime files are eligible to ship in the published npm package.
+- [x] A short text excerpt suitable for public docs is generated or selected from the sample report.
 
 ### Required Validation
 
@@ -206,10 +204,9 @@ The repository contains a public-safe, fully synthetic sample repository profile
 
 ### Status
 
-- [ ] Not started
 - [x] Implemented
 - [x] Conformance reviewed
-- [ ] Adversarially reviewed
+- [x] Adversarially reviewed
 - [x] PR opened
 - [x] Merged
 
@@ -253,18 +250,18 @@ Users can run `delivery-friction-analyzer --source sample --out reports/tutorial
 
 ### Acceptance Criteria
 
-- [ ] `delivery-friction-analyzer --source sample --out reports/tutorial` writes the expected artifact bundle.
-- [ ] Running without `--source` and without live target flags gives source-selection guidance with exact sample and GitHub command examples instead of producing sample output.
-- [ ] Existing live invocations with `--repo`, `--profile`, or `--limit` still resolve to GitHub live analysis when `--source` is omitted.
-- [ ] Sample command completion points to `friction-report.md` first and uses the stable label `Bundled synthetic sample, not live GitHub data`.
-- [ ] Sample report title/opening, methodology source summary, and `source-bundle.json` source label use the same stable sample label.
-- [ ] `--json` sample completion is machine-readable and does not mix prompt/progress text into stdout.
-- [ ] `--no-csv` works consistently with live analysis artifact behavior.
-- [ ] Sample mode does not call `gh` or require network access.
-- [ ] Published package contents include the sample runtime data needed by `npx` users.
-- [ ] README lets a new user run the explicit sample command first and then transition to analyzing their own repository.
-- [ ] README or reference docs include a short text excerpt from the generated sample report, with screenshots deferred.
-- [ ] CLI help introduces `--source` without burying the sample path under advanced GitHub flags.
+- [x] `delivery-friction-analyzer --source sample --out reports/tutorial` writes the expected artifact bundle.
+- [x] Running without `--source` and without live target flags gives source-selection guidance with exact sample and GitHub command examples instead of producing sample output.
+- [x] Existing live invocations with `--repo`, `--profile`, or `--limit` still resolve to GitHub live analysis when `--source` is omitted.
+- [x] Sample command completion points to `friction-report.md` first and uses the stable label `Bundled synthetic sample, not live GitHub data`.
+- [x] Sample report title/opening, methodology source summary, and `source-bundle.json` source label use the same stable sample label.
+- [x] `--json` sample completion is machine-readable and does not mix prompt/progress text into stdout.
+- [x] `--no-csv` works consistently with live analysis artifact behavior.
+- [x] Sample mode does not call `gh` or require network access.
+- [x] Published package contents include the sample runtime data needed by `npx` users.
+- [x] README lets a new user run the explicit sample command first and then transition to analyzing their own repository.
+- [x] README or reference docs include a short text excerpt from the generated sample report, with screenshots deferred.
+- [x] CLI help introduces `--source` without burying the sample path under advanced GitHub flags.
 
 ### Required Validation
 
@@ -283,7 +280,6 @@ Users can run `delivery-friction-analyzer --source sample --out reports/tutorial
 
 ### Status
 
-- [ ] Not started
 - [x] Implemented
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
@@ -334,16 +330,16 @@ The product repository remains rejected for ordinary live analysis, but users ca
 
 ### Acceptance Criteria
 
-- [ ] Product-repository live analysis remains rejected by default.
-- [ ] `--allow-product-repository` is documented as an explicit live-analysis override, not a tutorial path.
-- [ ] The override is rejected in sample mode and does not affect sample output.
-- [ ] The CLI performs readable-data assertion before collection and before creating report artifacts.
-- [ ] Readable-data assertion requires repository metadata, pull request inventory, and pull request details; optional coverage families remain coverage caveats instead of preflight failures.
-- [ ] When required readable-data assertion succeeds, collection proceeds only after that success and optional source families such as review threads, workflow runs, languages, contributor source, and PR-open diff remain ordinary coverage caveats when partial or unavailable.
-- [ ] Missing authentication when required, missing repository access, or missing required read access fail closed with actionable messages.
-- [ ] Tests cover default rejection, override option parsing, sample-mode rejection, independent failures for repository metadata, pull request inventory, and pull request details, access assertion success, and no-artifacts-on-failure behavior.
-- [ ] Target-repository contract docs distinguish ordinary product-repository rejection, validation-target metadata, and the explicit product-repository override.
-- [ ] Product-repository guard copy recommends sample or another repository first and mentions `--allow-product-repository` only for intentional self-analysis.
+- [x] Product-repository live analysis remains rejected by default.
+- [x] `--allow-product-repository` is documented as an explicit live-analysis override, not a tutorial path.
+- [x] The override is rejected in sample mode and does not affect sample output.
+- [x] The CLI performs readable-data assertion before collection and before creating report artifacts.
+- [x] Readable-data assertion requires repository metadata, pull request inventory, and pull request details; optional coverage families remain coverage caveats instead of preflight failures.
+- [x] When required readable-data assertion succeeds, collection proceeds only after that success and optional source families such as review threads, workflow runs, languages, contributor source, and PR-open diff remain ordinary coverage caveats when partial or unavailable.
+- [x] Missing authentication when required, missing repository access, or missing required read access fail closed with actionable messages.
+- [x] Tests cover default rejection, override option parsing, sample-mode rejection, independent failures for repository metadata, pull request inventory, and pull request details, access assertion success, and no-artifacts-on-failure behavior.
+- [x] Target-repository contract docs distinguish ordinary product-repository rejection, validation-target metadata, and the explicit product-repository override.
+- [x] Product-repository guard copy recommends sample or another repository first and mentions `--allow-product-repository` only for intentional self-analysis.
 
 ### Required Validation
 
@@ -404,13 +400,13 @@ Interactive setup explains profile choices in a way that helps users avoid the w
 
 ### Acceptance Criteria
 
-- [ ] New-profile prompts explain that starter profiles are valid but may classify PR classes, roles, or surfaces as unknown until rules are added.
-- [ ] Conventional Commit preset prompt names the generated classes: `dependency`, `feature`, `fix`, `docs`, `test`, and `maintenance`.
-- [ ] Conventional Commit preset prompt explains when to accept it, using examples such as `feat:`, `fix:`, `docs:`, `test:`, `chore(deps):`, or similar title prefixes.
-- [ ] Conventional Commit preset prompt explains when to skip it, including repositories that use release titles, ticket prefixes, free-form titles, or another custom PR taxonomy.
-- [ ] Conventional Commit preset prompt preserves the default no answer and makes clear that accepting the preset does not change default scoring, rankings, collection, or CSV export shape.
-- [ ] Completion output after profile creation points users to inspect or refine the profile before a full run.
-- [ ] Tests cover prompt flow changes and generated profile behavior.
+- [x] New-profile prompts explain that starter profiles are valid but may classify PR classes, roles, or surfaces as unknown until rules are added.
+- [x] Conventional Commit preset prompt names the generated classes: `dependency`, `feature`, `fix`, `docs`, `test`, and `maintenance`.
+- [x] Conventional Commit preset prompt explains when to accept it, using examples such as `feat:`, `fix:`, `docs:`, `test:`, `chore(deps):`, or similar title prefixes.
+- [x] Conventional Commit preset prompt explains when to skip it, including repositories that use release titles, ticket prefixes, free-form titles, or another custom PR taxonomy.
+- [x] Conventional Commit preset prompt preserves the default no answer and makes clear that accepting the preset does not change default scoring, rankings, collection, or CSV export shape.
+- [x] Completion output after profile creation points users to inspect or refine the profile before a full run.
+- [x] Tests cover prompt flow changes and generated profile behavior.
 
 ### Required Validation
 
@@ -432,4 +428,4 @@ Interactive setup explains profile choices in a way that helps users avoid the w
 - [x] Conformance reviewed
 - [x] Adversarially reviewed
 - [x] PR opened
-- [ ] Merged
+- [x] Merged

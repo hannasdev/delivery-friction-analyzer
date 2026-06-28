@@ -2,12 +2,15 @@
 
 ## Status
 
-- State: Active
+Status: Completed in PR #64 on 2026-06-28.
+
+- State: Done
 - Human approval: Approved
 - Owner: Hanna
 - Created: 2026-06-22
 - Activated: 2026-06-23
-- Current milestone: M6, First-Run Profile Prompt Refinements
+- Completed: 2026-06-28
+- Current milestone state: M1, M2, M3, M4, M5, and M6 merged.
 - Related issue:
   - None yet.
 - Related docs:
@@ -260,24 +263,24 @@ Use this if PR titles usually start with feat:, fix:, docs:, test:, chore(deps):
 
 ## Acceptance Criteria
 
-- [ ] Public quickstart no longer depends on `hannasdev/mcp-writing` as the tutorial target.
-- [ ] Running `delivery-friction-analyzer --source sample --out reports/tutorial` produces a deterministic local sample report bundle without GitHub network access or private repository permissions.
-- [ ] Running without `--source` and without live target flags fails with source-selection guidance that includes exact sample and GitHub command examples rather than silently producing sample output.
-- [ ] `--source sample` clearly labels synthetic data and does not claim live GitHub coverage.
-- [ ] Existing live command shapes that include `--repo`, `--profile`, or `--limit` continue to resolve to GitHub live analysis when `--source` is omitted.
-- [ ] Live-only options passed with `--source sample` are rejected with actionable copy.
-- [ ] Generated source bundles use generic `source-bundle.v1`, with `source.kind` distinguishing `sample` and `github`.
-- [ ] The `source-bundle.v1` migration preserves or explicitly maps every analyzer-owned field from `github-source-bundle.v1`.
-- [ ] The sample profile and source data demonstrate PR classes, file/path roles, functional surfaces, workflow context, caveats, broad-change scope, outlier/sensitivity examples, and CSV evidence without requiring user edits.
-- [ ] The sample profile is valid JSON with fake but explanatory placeholder values, useful rule IDs, path patterns, functional surfaces, workflow choices, and `notes` fields where supported.
-- [ ] Repository profile reference docs explain valid `notes` usage for file rules and PR class rules.
-- [ ] Sample data uses clearly fictional identities and URLs that cannot be mistaken for observed GitHub evidence.
-- [ ] Public docs include a short text excerpt from the generated sample report after the sample exists; screenshots and graphs are explicitly deferred.
-- [ ] Product-repository live analysis remains rejected by default.
-- [ ] The product-repository override asserts required readable access for repository metadata, PR inventory, and PR details before collecting data or writing artifacts; optional families remain honest coverage states.
-- [ ] Product-repository guard and `--validation-target` copy explain what happened and what to do next.
-- [ ] Interactive profile setup copy makes the tradeoff between minimal starter profiles and useful PR class presets understandable, including when to accept or skip the Conventional Commit preset.
-- [ ] Internal `mcp-writing` validation references remain available where needed for tests, fixtures, and historical initiative records.
+- [x] Public quickstart no longer depends on `hannasdev/mcp-writing` as the tutorial target.
+- [x] Running `delivery-friction-analyzer --source sample --out reports/tutorial` produces a deterministic local sample report bundle without GitHub network access or private repository permissions.
+- [x] Running without `--source` and without live target flags fails with source-selection guidance that includes exact sample and GitHub command examples rather than silently producing sample output.
+- [x] `--source sample` clearly labels synthetic data and does not claim live GitHub coverage.
+- [x] Existing live command shapes that include `--repo`, `--profile`, or `--limit` continue to resolve to GitHub live analysis when `--source` is omitted.
+- [x] Live-only options passed with `--source sample` are rejected with actionable copy.
+- [x] Generated source bundles use generic `source-bundle.v1`, with `source.kind` distinguishing `sample` and `github`.
+- [x] The `source-bundle.v1` migration preserves or explicitly maps every analyzer-owned field from `github-source-bundle.v1`.
+- [x] The sample profile and source data demonstrate PR classes, file/path roles, functional surfaces, workflow context, caveats, broad-change scope, outlier/sensitivity examples, and CSV evidence without requiring user edits.
+- [x] The sample profile is valid JSON with fake but explanatory placeholder values, useful rule IDs, path patterns, functional surfaces, workflow choices, and `notes` fields where supported.
+- [x] Repository profile reference docs explain valid `notes` usage for file rules and PR class rules.
+- [x] Sample data uses clearly fictional identities and URLs that cannot be mistaken for observed GitHub evidence.
+- [x] Public docs include a short text excerpt from the generated sample report after the sample exists; screenshots and graphs are explicitly deferred.
+- [x] Product-repository live analysis remains rejected by default.
+- [x] The product-repository override asserts required readable access for repository metadata, PR inventory, and PR details before collecting data or writing artifacts; optional families remain honest coverage states.
+- [x] Product-repository guard and `--validation-target` copy explain what happened and what to do next.
+- [x] Interactive profile setup copy makes the tradeoff between minimal starter profiles and useful PR class presets understandable, including when to accept or skip the Conventional Commit preset.
+- [x] Internal `mcp-writing` validation references remain available where needed for tests, fixtures, and historical initiative records.
 
 ## Risks And Tradeoffs
 
