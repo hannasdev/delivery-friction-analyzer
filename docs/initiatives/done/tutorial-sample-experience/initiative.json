@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "slug": "tutorial-sample-experience",
-  "state": "complete_on_merge",
+  "state": "complete",
   "currentMilestone": "M6",
   "milestones": {
     "M1": {
@@ -42,7 +42,7 @@
       "mergedAt": "2026-06-27"
     },
     "M6": {
-      "state": "complete_on_merge",
+      "state": "merged",
       "startedAt": "2026-06-27",
       "implemented": true,
       "conformanceReviewed": true,
@@ -50,8 +50,10 @@
       "adversariallyReviewed": true,
       "adversariallyReviewedAt": "2026-06-27",
       "pr": 64,
-      "openedAt": "2026-06-27"
+      "openedAt": "2026-06-27",
+      "mergedAt": "2026-06-28"
     }
   },
-  "completedByPr": 64
+  "completedByPr": 64,
+  "completedAt": "2026-06-28"
 }

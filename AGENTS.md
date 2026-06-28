@@ -23,6 +23,12 @@ still reviewable. For initiative work, keep milestone bookkeeping current when
 status changes and prefer adversarial review before activation or PR work on
 broad milestones.
 
+Post-merge lifecycle or archive bookkeeping belongs on a review branch unless
+the user explicitly asks for a direct local-only main commit. Do not commit
+directly to `main` for done-folder moves, lifecycle recording, release-log
+corrections, or other follow-up bookkeeping; create a branch from current
+`main`, make the scoped change there, and prepare a PR.
+
 Completed initiative docs under `docs/initiatives/done/**` should read as
 implementation history, not active TODO lists. Check shipped or otherwise
 resolved work. Leave unchecked items only when they are explicitly labeled
