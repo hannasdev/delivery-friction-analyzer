@@ -152,6 +152,7 @@ Workflows:
 Output controls:
   --out <directory>         Output directory for generated artifacts.
   --json                    Print the machine-readable completion receipt to stdout.
+  --no-json                 Disable JSON completion output.
   --csv                     Enable curated CSV evidence exports when a preset disabled them.
   --no-csv                  Suppress curated CSV evidence exports.
 
@@ -170,6 +171,7 @@ Sample tutorial:
 Sample output controls:
   --out <directory>         Required output directory for generated sample artifacts.
   --json                    Print the machine-readable completion receipt to stdout.
+  --no-json                 Disable JSON completion output.
   --csv                     Enable curated CSV evidence exports.
   --no-csv                  Suppress curated CSV evidence exports.
 
@@ -612,7 +614,7 @@ function rejectSampleLiveOptions(options) {
     incompatible.push("--exclude-pr-class");
   }
   if (!incompatible.length) return;
-  throw new Error(`--source sample cannot be combined with live GitHub option(s): ${incompatible.join(", ")}. Allowed sample output controls are --out, --json, --csv, and --no-csv. Use --source github for live repository, dry-run, interactive, preset, validation, and PR-class filtering options.`);
+  throw new Error(`--source sample cannot be combined with live GitHub option(s): ${incompatible.join(", ")}. Allowed sample output controls are --out, --json, --no-json, --csv, and --no-csv. Use --source github for live repository, dry-run, interactive, preset, validation, and PR-class filtering options.`);
 }
 
 function targetInputFromRepositorySlug(repository) {
@@ -665,7 +667,7 @@ function formatChoiceList(choices) {
 }
 
 function formatInteractivePrompt(prompt) {
-  const helpSuffix = prompt.help ? " Enter ? for help." : "";
+  const helpSuffix = prompt.help ? " Enter ? for help" : "";
   const suffix = prompt.defaultValue === undefined
     ? ""
     : Array.isArray(prompt.defaultValue)
