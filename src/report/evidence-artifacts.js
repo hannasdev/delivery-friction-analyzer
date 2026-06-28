@@ -94,9 +94,12 @@ function hasObservedWorkflowRuns(workflowRuns = {}) {
   return (workflowRuns.coverage ?? workflowRuns.workflowRunCoverage) === "observed";
 }
 
-function hasObservedReviewThreads(reviewThreads = {}) {
+function hasObservedReviewThreads(reviewThreads = {}, coverage = {}) {
   const source = reviewThreads.source ?? reviewThreads.reviewThreadSource ?? "unavailable";
-  return String(source).startsWith("graphql");
+  if (String(source).startsWith("graphql")) return true;
+  if (String(source).startsWith("not_sampled") || source === "unavailable") return false;
+  if (String(source).includes("review_threads")) return true;
+  return coverage.status === "available";
 }
 
 function hasObservedReviewDecision(reviewDecision = {}) {
@@ -135,7 +138,7 @@ function prMetricsCsv(metricsSummary, analysisFilter) {
     ...SCORE_COLUMNS.map(([header]) => header),
   ];
   const rows = sortedPullRequests(metricsSummary).map(pr => {
-    const observedReviewThreads = hasObservedReviewThreads(pr.review?.threads);
+    const observedReviewThreads = hasObservedReviewThreads(pr.review?.threads, pr.coverage?.reviewThreads);
     const observedReviewDecision = hasObservedReviewDecision(pr.review?.decision);
     const observedWorkflowRuns = hasObservedWorkflowRuns(pr.ci?.workflowRuns);
     const row = {

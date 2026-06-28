@@ -3156,6 +3156,84 @@ describe("GitHub live analyze CLI", () => {
     });
   });
 
+  it("includes requested PR class exclusions in live dry-run JSON receipts", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "dry-run-filter-out");
+      const result = await runAnalyzeGithub({
+        repository: "example/example-repo",
+        limit: 30,
+        profilePath,
+        outDir,
+        dryRun: true,
+        excludedPrClasses: ["release"],
+      }, {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+      });
+
+      assert.equal(result.dryRun, true);
+      assert.deepEqual(result.analysisFilter, {
+        excludedPrClasses: ["release"],
+        originalPullRequests: null,
+        filteredPullRequests: null,
+      });
+      assert.equal(result.totals, null);
+      assert.equal(result.topBottleneckIds, null);
+      assert.deepEqual(await readdir(outDir), []);
+
+      let output = "";
+      writeAnalyzeGithubCompletion(result, {
+        json: true,
+        stdout: { write: chunk => { output += chunk; } },
+      });
+      assert.deepEqual(JSON.parse(output).analysisFilter, result.analysisFilter);
+
+      const textCompletion = formatAnalyzeGithubCompletion(result);
+      assert(textCompletion.includes("Analysis filter: excluded PR class(es): release."));
+      assert(textCompletion.includes("Filter application: requested only; dry-run coverage probes do not compute filtered metrics or report artifacts."));
+      assert(!textCompletion.includes("Filtered sample:"));
+    });
+  });
+
+  it("gives preset-loaded exclusions the same live dry-run receipt semantics as CLI exclusions", async () => {
+    await withTempDirectory(async directory => {
+      const profilePath = await writePrClassProfile(directory);
+      const outDir = join(directory, "preset-dry-run-filter-out");
+      const presetPath = join(directory, "filtered-dry-run-preset.json");
+      await writeFile(presetPath, `${JSON.stringify({
+        schemaVersion: "analyze-github-run-preset.v1",
+        run: {
+          repository: "example/example-repo",
+          limit: 30,
+          profilePath,
+          outDir,
+          dryRun: true,
+          isValidationTarget: false,
+          csv: true,
+          json: true,
+          excludedPrClasses: ["release"],
+        },
+      }, null, 2)}\n`, "utf8");
+      let stdout = "";
+
+      const result = await runAnalyzeGithubCli(["--preset", presetPath], {
+        provider: createProvider(),
+        now: () => "2026-06-09T00:00:00Z",
+        stdout: { write: chunk => { stdout += chunk; } },
+        stderr: { write() {} },
+      });
+
+      assert.deepEqual(result.analysisFilter, {
+        excludedPrClasses: ["release"],
+        originalPullRequests: null,
+        filteredPullRequests: null,
+      });
+      assert.deepEqual(JSON.parse(stdout).analysisFilter, result.analysisFilter);
+      assert.deepEqual(await readdir(outDir), []);
+    });
+  });
+
   it("surfaces degraded GitHub coverage in report artifacts", async () => {
     await withTempDirectory(async directory => {
       const profilePath = await writeProfile(directory);

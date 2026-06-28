@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-28 — CLI Artifact Truthfulness
+
+- What changed: Live dry-run JSON receipts now show requested PR-class exclusions without implying filtered metrics were computed, and `pr-metrics.csv` fills `review_threads` when sample or live review-thread evidence is available.
+- Why it matters: Maintainers and scripts can trust completion receipts and CSV evidence to reflect accepted filters and available review-thread counts.
+- Who is affected: Maintainers and users reading JSON completion receipts, CSV exports, and contract docs from sample or live GitHub analysis.
+- Action needed: None.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/68
+
 ### 2026-06-28 — CLI Command Help Clarity
 
 - What changed: CLI help now separates the bundled sample, live GitHub analysis, live coverage probes, output controls, interactive setup, and reusable live-run presets, with mode-specific help for `--source sample --help` and `--source github --help`.

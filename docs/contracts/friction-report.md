@@ -28,7 +28,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `source`: optional source-bundle provenance copied into live-generated report
   artifacts, including `kind` and a human-readable label.
 - `targetRepository`: analyzed repository identity; live analysis sample size is encoded as `targetRepository.analysisPullRequestLimit` from collection metadata.
-- `analysisFilter`: optional metadata for explicit filters applied before metrics computation, including excluded PR classes and before/after PR counts.
+- `analysisFilter`: optional metadata for explicit filters applied before metrics computation, including excluded PR classes and before/after PR counts. Live dry-run completion receipts may also include requested `analysisFilter.excludedPrClasses` with null before/after counts because dry-run coverage probes do not compute filtered metrics or report artifacts.
 - `configuredWorkflow`: optional user-configured workflow context from the repository profile. It is not observed GitHub evidence and does not change scoring, ranking, CSV exports, or PR class matching.
 - `contributorSource`: optional sanitized contributor-source metadata from the repository profile and collection path. It records source type, path, coverage status, parsed hint count, and guardrail note. It does not include raw contributor file contents or contributor rankings.
 - `collectionCoverage`: optional source collection coverage metadata copied into live-generated report JSON artifacts. `collectionCoverage.status` records aggregate coverage, and `collectionCoverage.sourceFamilies` lists source-family entries with `family`, `status`, `attempts`, `source`, `diagnostics`, and `downstreamImpact`. This uses the generic `source-bundle.v1` `coverage.sourceFamilies` name; legacy GitHub `apiFamilies` is not a live `friction-report.v1` field.
@@ -128,7 +128,7 @@ Full live analysis writes `methodology.md` as a hybrid artifact: stable explanat
 
 The methodology artifact should stay aligned with this contract and the Markdown methodology summary, but it may be more detailed than the main report.
 
-When PR class filtering is applied, `source-bundle.json` remains the full collected sample, while `normalized.json`, `metrics-summary.json`, `friction-report.json`, `friction-report.md`, `methodology.md`, and CSV exports describe the filtered sample. The methodology and CLI completion output must name the excluded PR classes and show the filtered PR count. If filtering excludes every collected PR, the analysis must fail without writing complete-looking empty reports.
+When PR class filtering is applied to a full analysis, `source-bundle.json` remains the full collected sample, while `normalized.json`, `metrics-summary.json`, `friction-report.json`, `friction-report.md`, `methodology.md`, and CSV exports describe the filtered sample. The methodology and CLI completion output must name the excluded PR classes and show the filtered PR count. If filtering excludes every collected PR, the analysis must fail without writing complete-looking empty reports. Live dry-run receipts record requested PR class exclusions without a filtered count because dry-run does not build normalized metrics.
 
 ## CSV Evidence Exports
 
@@ -143,7 +143,7 @@ Minimum CSV column groups:
 - `comment-sources.csv`: source name, total comments, bot/scanner classification, human/author classification, and share of all comments.
 - `collection-coverage.csv`: source family, status, attempts, source label, diagnostics, and downstream impact.
 
-Empty CSV cells mean unavailable or not applicable. Numeric zero should be used only for observed or computed zero counts. Count columns that depend on optional GitHub coverage should keep source or coverage labels nearby so spreadsheet readers can tell unavailable evidence apart from observed zeroes. CSVs must not include raw comment bodies, raw workflow logs, tokens, secret-bearing environment details, or individual contributor/reviewer rankings.
+Empty CSV cells mean unavailable or not applicable. Numeric zero should be used only for observed or computed zero counts. Count columns that depend on optional GitHub or sample-bundle coverage should keep source or coverage labels nearby so spreadsheet readers can tell unavailable evidence apart from observed zeroes. `pr-metrics.csv` `review_threads` is populated when normalized review-thread source evidence is available, including synthetic sample evidence and live GraphQL review-thread evidence. CSVs must not include raw comment bodies, raw workflow logs, tokens, secret-bearing environment details, or individual contributor/reviewer rankings.
 
 Contributor-source coverage appears in `collection-coverage.csv` as the `contributor_source` source family when configured. CSVs may include aggregate comment-source counts influenced by contributor hints, but they must not include raw `.all-contributorsrc` contents, contributor names, contributor login lists, or person rankings.
 

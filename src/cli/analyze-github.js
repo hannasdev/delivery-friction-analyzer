@@ -1695,6 +1695,15 @@ function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report,
   return summary;
 }
 
+function requestedAnalysisFilter(excludedPrClasses = []) {
+  if (!excludedPrClasses.length) return null;
+  return {
+    excludedPrClasses,
+    originalPullRequests: null,
+    filteredPullRequests: null,
+  };
+}
+
 function applyPrClassFilter(normalized, excludedPrClasses = []) {
   if (!excludedPrClasses.length) return normalized;
   const excluded = new Set(excludedPrClasses);
@@ -1824,7 +1833,7 @@ export async function runAnalyzeGithub(options, {
       requestedLimit: options.limit,
       sampledLimit: collectionLimit,
       csv: false,
-      analysisFilter: null,
+      analysisFilter: requestedAnalysisFilter(options.excludedPrClasses ?? []),
       savedProfilePath: options.savedProfilePath,
       savedRunPresetPath: options.savedRunPresetPath,
       prClassRulesWritten: options.prClassRulesWritten,
@@ -1988,10 +1997,13 @@ export function formatAnalyzeGithubCompletion(result) {
   }
 
   if (result.analysisFilter?.excludedPrClasses?.length) {
-    lines.push(
-      `Analysis filter: excluded PR class(es): ${result.analysisFilter.excludedPrClasses.join(", ")}.`,
-      `Filtered sample: ${result.analysisFilter.filteredPullRequests} of ${result.analysisFilter.originalPullRequests} collected pull request(s).`,
-    );
+    lines.push(`Analysis filter: excluded PR class(es): ${result.analysisFilter.excludedPrClasses.join(", ")}.`);
+    if (Number.isInteger(result.analysisFilter.filteredPullRequests)
+      && Number.isInteger(result.analysisFilter.originalPullRequests)) {
+      lines.push(`Filtered sample: ${result.analysisFilter.filteredPullRequests} of ${result.analysisFilter.originalPullRequests} collected pull request(s).`);
+    } else if (result.dryRun) {
+      lines.push("Filter application: requested only; dry-run coverage probes do not compute filtered metrics or report artifacts.");
+    }
   }
 
   if (result.savedProfilePath) {

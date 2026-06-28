@@ -1837,6 +1837,27 @@ describe("friction report generation", () => {
     assert.equal(broadPrCsvFields[4], "repository_profile");
     assert.equal(broadPrCsvFields[5], "feature-title");
     assert.equal(broadPrCsvFields[6], "1400");
+    assert.equal(metricsSummary.totals.reviewThreads, 6);
+    assert.equal(report.summary.reviewThreads, 6);
+    const reviewThreadCountsByPr = new Map(
+      csvArtifacts.prMetricsCsv
+        .trim()
+        .split("\n")
+        .slice(1)
+        .map(row => {
+          const fields = row.split(",");
+          return [fields[0], fields[9]];
+        }),
+    );
+    assert.deepEqual(Object.fromEntries(reviewThreadCountsByPr), {
+      "101": "2",
+      "102": "1",
+      "103": "0",
+      "104": "3",
+    });
+    assert(csvArtifacts.bottleneckExamplesCsv.includes(
+      "review-churn,Review churn,pr_readiness_gate,104,feat: consolidate dispatch settings,https://example.com/pull/104,8,1400,2,2,1,3,2,1",
+    ));
     assert(csvArtifacts.collectionCoverageCsv.includes("workflow_runs,partial,1,bundled tutorial sample"));
     assert(excerpt.includes("Bundled synthetic sample, not live GitHub data"));
     assert(excerpt.includes("Change scope, Review churn, and Repo guidance gap"));
