@@ -2713,6 +2713,13 @@ describe("GitHub live analyze CLI", () => {
       assert(profile.prClasses.every(rule => typeof rule.match.titleRegex === "string"));
       const presetPrompt = prompts.find(prompt => prompt.id === "addConventionalCommitPrClasses");
       assert.equal(presetPrompt.defaultValue, false);
+      assert.deepEqual(presetPrompt.message.split("\n"), [
+        "Add Conventional Commit PR class rules?",
+        "Use this when PR titles usually start with feat:, fix:, docs:, test:, chore(deps):, or similar prefixes.",
+        "It writes title-based dependency, feature, fix, docs, test, and maintenance classes so fewer PRs are classified as unknown.",
+        "Skip it for release titles, ticket prefixes, free-form titles, or another custom PR taxonomy.",
+        "It does not change scoring, rankings, GitHub collection, or CSV exports.",
+      ]);
       assert.match(presetPrompt.message, /Add Conventional Commit PR class rules\?/);
       assert.match(presetPrompt.message, /feat:, fix:, docs:, test:, chore\(deps\):/);
       assert.match(presetPrompt.message, /dependency, feature, fix, docs, test, and maintenance/);
@@ -2740,6 +2747,7 @@ describe("GitHub live analyze CLI", () => {
         rules: [],
       });
       const outDir = join(directory, "custom-pr-classes-out");
+      const prompts = [];
 
       await runAnalyzeGithubCli(["--interactive"], {
         provider: createProvider(),
@@ -2758,11 +2766,18 @@ describe("GitHub live analyze CLI", () => {
           dryRun: "yes",
           json: "no",
           excludedPrClasses: "",
-        }),
+        }, prompts),
         stdout: { write() {} },
         stderr: { write() {} },
       });
 
+      assert.deepEqual(prompts.find(prompt => prompt.id === "addConventionalCommitPrClasses").message.split("\n"), [
+        "Add Conventional Commit PR class rules?",
+        "Use this when PR titles usually start with feat:, fix:, docs:, test:, chore(deps):, or similar prefixes.",
+        "It writes title-based dependency, feature, fix, docs, test, and maintenance classes so fewer PRs are classified as unknown.",
+        "Skip it for release titles, ticket prefixes, free-form titles, or another custom PR taxonomy.",
+        "It does not change scoring, rankings, GitHub collection, or CSV exports. Existing PR class rules will be kept.",
+      ]);
       assert.deepEqual((await readJson(profilePath)).prClasses, [
         {
           id: "custom-feature",
@@ -2786,6 +2801,7 @@ describe("GitHub live analyze CLI", () => {
         rules: [],
       });
       const outDir = join(directory, "existing-profile-pr-preset-out");
+      const prompts = [];
 
       const options = await collectInteractiveAnalyzeGithubOptions({
         interactive: true,
@@ -2801,7 +2817,7 @@ describe("GitHub live analyze CLI", () => {
           configureWorkflow: "no",
           addConventionalCommitPrClasses: "yes",
           json: "no",
-        }),
+        }, prompts),
       });
 
       const profile = await readJson(profilePath);
@@ -2817,6 +2833,13 @@ describe("GitHub live analyze CLI", () => {
       });
       assert.equal(options.savedProfilePath, profilePath);
       assert.equal(options.prClassRulesWritten, true);
+      assert.deepEqual(prompts.find(prompt => prompt.id === "addConventionalCommitPrClasses").message.split("\n"), [
+        "Add Conventional Commit PR class rules?",
+        "Use this when PR titles usually start with feat:, fix:, docs:, test:, chore(deps):, or similar prefixes.",
+        "It writes title-based dependency, feature, fix, docs, test, and maintenance classes so fewer PRs are classified as unknown.",
+        "Skip it for release titles, ticket prefixes, free-form titles, or another custom PR taxonomy.",
+        "It does not change scoring, rankings, GitHub collection, or CSV exports.",
+      ]);
       assert.equal(options.starterProfileCreated, undefined);
       assert(!completion.includes("Created a starter profile."));
       assert.deepEqual(profile.workflow, {
