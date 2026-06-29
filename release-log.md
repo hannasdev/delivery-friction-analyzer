@@ -8,7 +8,7 @@
 - Why it matters: Maintainers can see which caveats should affect report interpretation before acting on top findings, without losing the detailed audit sections.
 - Who is affected: Maintainers and users reading generated Markdown friction reports.
 - Action needed: None.
-- PR: pending PR creation.
+- PR: https://github.com/hannasdev/delivery-friction-analyzer/pull/71
 
 ### 2026-06-28 — Low-Signal Report Quieting
 
