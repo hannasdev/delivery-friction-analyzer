@@ -22,7 +22,7 @@ Make the top of `friction-report.md` explain confidence caveats by decision driv
 
 - Primary behavior change: generated Markdown reports become clearer about which caveats should affect user action.
 - Major subsystem boundaries touched: report renderer and report contract docs.
-- Acceptance criteria count: 7.
+- Acceptance criteria count: 8.
 - Estimated non-generated diff size: under 750 changed lines.
 - Validation shape: focused renderer/golden tests plus manual sample report inspection.
 - Split rationale: this is the smallest coherent report slice because digest rendering, duplicate top-level caveat removal, fixture updates, and contract wording must land together for the report to remain internally consistent.
