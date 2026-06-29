@@ -521,6 +521,7 @@ describe("friction report generation", () => {
     assertOrderedSections(markdown, [
       "## Executive Summary",
       "## Focus Snapshot",
+      "## Confidence Digest",
       "## Recommendation Category Snapshot",
       "## How To Read This Report",
       "## Evidence Quality And Coverage",
@@ -532,7 +533,9 @@ describe("friction report generation", () => {
     assert(markdown.includes("| Focus first | Review churn, Repo guidance gap, Change scope |"));
     assert(markdown.includes("| Action categories | Hooks (1), Preflight scripts (1), Repo-specific AI skills (1), PR readiness gates (2), Smaller milestones (2), Planning artifacts (1), Test infrastructure (1) |"));
     assert(markdown.includes("| Evidence reviewed | 3 PRs, 2454 changed lines, 2433 non-generated changed lines, 30 review comments, 25 review threads, 0 failed checks, 1 cancelled workflow run |"));
-    assert(markdown.includes("| Confidence caveats | 2 coverage caveats, 4 outlier caveats. Read the evidence and caveat sections before generalizing. |"));
+    assert(markdown.includes("| Confidence caveats | Confidence Digest groups 4 caveat drivers by decision driver. Read it before acting on top findings. |"));
+    assert(markdown.includes("## Confidence Digest"));
+    assert(markdown.includes("| Caveat driver | Affects | Why it matters | Next check |"));
     assert(markdown.includes("Change scope is the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched. It is not a line-count metric."));
   });
 
@@ -679,7 +682,8 @@ describe("friction report generation", () => {
     assert(markdown.includes("## PR Class Context"));
     assert(markdown.includes("| release | 2 | 600 | 67% | repository\\_profile=2 |"));
     assert(markdown.includes("| development | 1 | 100 | 33% | fallback\\_rule=1 |"));
-    assert(markdown.includes("PR class caveat: Review churn: PR class release contributes 90%"));
+    assert(markdown.includes("| Dominant PR class | Focus areas: Review churn, Repo guidance gap | release class drives 90% of displayed score value; class sample size is 2 PRs. |"));
+    assert(!markdown.includes("PR class caveat: Review churn: PR class release contributes 90%"));
     assert(markdown.includes("| [#1](https://example.test/pull/1) | Release 2026.06.14 | 10 | release | unknown | unknown | unknown | 500 |"));
     assert(markdown.includes("\\[configured\\] release (source=repository\\_profile, rule=release-title)"));
   });
@@ -762,10 +766,12 @@ describe("friction report generation", () => {
     assert(markdown.includes("| Analysis filter | excluded PR class(es): release; filtered sample 2 of 5 collected PRs |"));
     assert(markdown.includes("| Focus first | No detailed bottleneck evidence was available. |"));
     assert(markdown.includes("| Action categories | none |"));
-    assert(markdown.includes("| Confidence caveats | 1 coverage caveat. Read the evidence and caveat sections before generalizing. |"));
+    assert(markdown.includes("| Confidence caveats | Confidence Digest groups 1 caveat driver by decision driver. Read it before acting on top findings. |"));
+    assert(markdown.includes("| Partial coverage | PR-open diff 0/2 available (2 unavailable); workflow runs 0/2 available (2 unavailable); review threads 0/2 available (2 unavailable) | diff-growth, validation, and review-thread signals use available evidence only. |"));
     assert(markdown.includes("No recommendation categories were triggered by the displayed bottleneck evidence."));
-    assert(markdown.includes("- PR class caveat: PR class context was not available for the analyzed sample."));
-    assert(markdown.includes("- Coverage caveat: Workflow-run coverage is unavailable for this filtered sample."));
+    assert(markdown.includes("- Confidence digest: review the grouped caveat drivers below before generalizing from the top findings."));
+    assert(!markdown.includes("- PR class caveat: PR class context was not available for the analyzed sample."));
+    assert(!markdown.includes("- Coverage caveat: Workflow-run coverage is unavailable for this filtered sample."));
   });
 
   it("renders no-caveat focus states without placeholder count syntax", () => {
@@ -1070,7 +1076,7 @@ describe("friction report generation", () => {
     assert.equal(reviewChurn.classDominance.status, "single_class_dominates");
     assert.equal(reviewChurn.classDominance.topShare, 0.501);
     assert(reviewChurn.classDominance.note.includes("PR class release contributes 50.1%"));
-    assert(markdown.includes("PR class release contributes 50.1%"));
+    assert(markdown.includes("release class drives 50.1% of displayed score value"));
     assert(!markdown.includes("PR class release contributes 50%"));
   });
 
@@ -1124,7 +1130,9 @@ describe("friction report generation", () => {
       reviewChurn.classDominance.note,
       "Only one PR class appears in the analyzed sample; class dominance is not meaningful.",
     );
-    assert(markdown.includes("PR class caveat: only one PR class appears in the analyzed sample, so class dominance comparison is not meaningful."));
+    assert(markdown.includes("## Confidence Digest"));
+    assert(markdown.includes("| Partial coverage | PR-open diff 0/2 available (2 unavailable); workflow runs 0/2 available (2 unavailable); review threads 0/2 available (2 unavailable) |"));
+    assert(!markdown.includes("Dominant PR class"));
     assert(!markdown.includes("PR class caveat: displayed bottleneck examples are not dominated by one PR class."));
   });
 
@@ -1140,7 +1148,7 @@ describe("friction report generation", () => {
 
     assert.deepEqual(report, goldenJson);
     assert.equal(markdown, goldenMarkdown);
-    assert(markdown.includes("PR class caveat: Review churn: PR class release contributes 90%"));
+    assert(markdown.includes("| Dominant PR class | Focus areas: Review churn, Repo guidance gap | release class drives 90% of displayed score value; class sample size is 2 PRs. |"));
   });
 
   it("counts bot comments even when a bot source is outside displayed source samples", () => {
@@ -1236,14 +1244,14 @@ describe("friction report generation", () => {
       ),
     );
     assert(markdown.includes("#### Review churn Confidence And Caveats"));
-    assert(markdown.includes("- PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing."));
+    assert(markdown.includes("- See [Confidence Digest](#confidence-digest) for dominant PR context; inspect this bottleneck's evidence rows before generalizing."));
     assert(
       markdown.includes(
         "- PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data.",
       ),
     );
     assert(markdown.includes("- Workflow-run coverage is unavailable for some PRs"));
-    assert(markdown.includes("- Shares the same representative PR evidence as Repo guidance gap, Review surprise, Fix amplification."));
+    assert(markdown.includes("- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context."));
   });
 
   it("pins the redacted live-30 calibration sample for source-label regressions", async () => {
@@ -1609,8 +1617,8 @@ describe("friction report generation", () => {
       followUp: [],
     });
 
-    assert(markdown.includes("- Shares the same representative PR evidence as Repo guidance gap."));
-    assert(markdown.includes("- Shares the same representative PR evidence as Review churn."));
+    assert(markdown.includes("| Shared evidence | Focus areas: Review churn, Repo guidance gap | 1 shared-signal group means some recommendations interpret the same metric or representative PR evidence. |"));
+    assert(markdown.includes("- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context."));
     assert(markdown.includes("## Shared Signal Interpretation"));
     assert(
       markdown.includes(
@@ -1936,8 +1944,10 @@ describe("friction report generation", () => {
     assert(markdown.includes("Change scope"));
     assert(markdown.includes("Validation gap"));
     assert(markdown.includes("Review churn"));
-    assert(markdown.includes("Outlier caveat:"));
-    assert(markdown.includes("PR #104 contributes"));
+    assert(markdown.includes("## Confidence Digest"));
+    assert(markdown.includes("| Dominant PR | Focus areas: Review churn, Repo guidance gap; Other affected signals: Validation gap, Local hook gap, Test infrastructure gap, Fix amplification |"));
+    assert(markdown.includes("| Dominant PR class | Focus areas: Change scope, Review churn, Repo guidance gap; Other affected signals: Validation gap, Local hook gap, Test infrastructure gap, Review surprise, Fix amplification |"));
+    assert(markdown.includes("[PR #104](https://example.com/pull/104) contributes"));
     assert(markdown.includes("## Outlier And Sensitivity Analysis"));
     assert(markdown.includes("## Workflow Data Caveats"));
     assert(markdown.includes("Workflow-run coverage is unavailable for some PRs"));
