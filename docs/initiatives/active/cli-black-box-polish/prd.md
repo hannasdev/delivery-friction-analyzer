@@ -2,7 +2,7 @@
 
 ## Status
 
-- State: Active
+- State: Complete
 - Human approval: Approved
 - Owner: Hanna
 - Created: 2026-06-28
