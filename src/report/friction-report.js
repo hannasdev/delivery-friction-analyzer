@@ -1420,7 +1420,7 @@ function renderKeyFindings(report) {
 function summarizeFocusCaveats(report) {
   const rows = confidenceDigestRows(report, report.sharedSignals);
   if (!rows.length) return "No early confidence caveats were recorded for the displayed evidence.";
-  return `Confidence Digest groups ${formatCount(rows.length, "caveat driver")} by decision driver. Read it before acting on top findings.`;
+  return `Confidence Digest groups ${formatCount(rows.length, "digest row")} by caveat group. Read it before acting on top findings.`;
 }
 
 function renderFocusSnapshot(report) {
@@ -1488,7 +1488,6 @@ function coverageDigestPart(label, entries = {}) {
 }
 
 function coverageDigestRow(report) {
-  if (!(report.coverage?.notes ?? []).length) return null;
   const parts = [
     coverageDigestPart("PR-open diff", report.coverage?.prOpenDiff),
     coverageDigestPart("workflow runs", report.coverage?.workflowRuns),
@@ -1515,7 +1514,12 @@ function formatInlineList(items) {
 }
 
 function formatShareRange(shares) {
-  const labels = [...new Set(shares.map(classDominancePercentageLabel))];
+  const labels = [...new Set(
+    shares
+      .map(share => Number(share ?? 0))
+      .sort((left, right) => left - right)
+      .map(classDominancePercentageLabel),
+  )];
   return labels.length === 1 ? labels[0] : `${labels[0]}-${labels[labels.length - 1]}`;
 }
 
@@ -1579,6 +1583,22 @@ function dominantClassDigestRows(report) {
     });
 }
 
+function classComparisonLimitedDigestRows(report) {
+  const distribution = report.prClasses?.distribution ?? [];
+  if (distribution.length !== 1) return [];
+  const onlyClass = distribution[0];
+  const bottlenecks = (report.bottlenecks ?? [])
+    .filter(bottleneck => bottleneck.classDominance?.status === "not_applicable");
+  if (!bottlenecks.length) return [];
+
+  return [[
+    "PR class comparison limited",
+    affectedBottleneckLabel(report, bottlenecks),
+    `${onlyClass.class} is the only PR class in the analyzed sample; class comparison is not meaningful across ${formatCount(Number(onlyClass.pullRequests ?? 0), "PR")}.`,
+    "Compare against PR Class Context or rerun with a broader class mix before generalizing by PR class.",
+  ]];
+}
+
 function sharedSignalDigestRow(report, sharedSignals) {
   const groups = sharedSignals?.groups ?? [];
   if (!groups.length) return null;
@@ -1603,6 +1623,7 @@ function confidenceDigestRows(report, sharedSignals = report.sharedSignals) {
     coverageDigestRow(report),
     ...dominantPrDigestRows(report),
     ...dominantClassDigestRows(report),
+    ...classComparisonLimitedDigestRows(report),
     sharedSignalDigestRow(report, sharedSignals),
   ].filter(Boolean);
 }

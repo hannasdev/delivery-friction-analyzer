@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-06-29 — Report Confidence Digest Usability
+
+- What changed: Generated Markdown reports now keep edge-case confidence caveats visible in the top digest, including review-thread-only coverage gaps, one-class PR-class comparison limits, and correctly ordered contribution ranges.
+- Why it matters: Maintainers can see which caveats should affect report interpretation before acting on top findings, without losing the detailed audit sections.
+- Who is affected: Maintainers and users reading generated Markdown friction reports.
+- Action needed: None.
+- PR: pending PR creation.
+
 ### 2026-06-28 — Low-Signal Report Quieting
 
 - What changed: Friction report JSON and Markdown now separate zero-score or no-positive-evidence bottlenecks into no-signal context, and completion receipts expose matching `noSignalBottleneckIds` for report-generating runs while leaving coverage-only runs unranked.

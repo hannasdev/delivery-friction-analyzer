@@ -26,7 +26,7 @@ Pull requests analyzed: 3
 | Focus first | Review churn, Repo guidance gap, Change scope |
 | Action categories | Hooks (1), Preflight scripts (1), Repo-specific AI skills (1), PR readiness gates (2), Smaller milestones (2), Planning artifacts (1), Test infrastructure (1) |
 | Evidence reviewed | 3 PRs, 2454 changed lines, 2433 non-generated changed lines, 30 review comments, 25 review threads, 0 failed checks, 1 cancelled workflow run |
-| Confidence caveats | Confidence Digest groups 4 caveat drivers by decision driver. Read it before acting on top findings. |
+| Confidence caveats | Confidence Digest groups 5 digest rows by caveat group. Read it before acting on top findings. |
 
 ## Confidence Digest
 
@@ -37,6 +37,7 @@ Top-level routing for caveats that can change how you act on the findings; detai
 | Partial coverage | PR-open diff 0/3 available (3 unavailable); workflow runs 1/3 available (2 unavailable) | diff-growth and validation signals use available evidence only. | Check Evidence Quality And Coverage and \`methodology.md\`/\`collection-coverage.csv\` before comparing trends. |
 | Dominant PR | Other affected signals: Review surprise | [PR #221](https://github.com/hannasdev/mcp-writing/pull/221) contributes 56% of displayed signal; top focus ordering is unchanged without it. | Inspect PR #221 and Outlier And Sensitivity Analysis before changing process. |
 | Dominant PR | Focus areas: Review churn, Repo guidance gap; Other affected signals: Fix amplification | [PR #239](https://github.com/hannasdev/mcp-writing/pull/239) contributes 63%-83% of displayed signal; top focus ordering changes without it. | Inspect PR #239 and Outlier And Sensitivity Analysis before changing process. |
+| PR class comparison limited | Focus areas: Review churn, Repo guidance gap, Change scope; Other affected signals: Review surprise, Fix amplification, Validation gap, Local hook gap, Test infrastructure gap, Planning gap | unknown is the only PR class in the analyzed sample; class comparison is not meaningful across 3 PRs. | Compare against PR Class Context or rerun with a broader class mix before generalizing by PR class. |
 | Shared evidence | Focus areas: Review churn, Repo guidance gap, Change scope; Other affected signals: Validation gap, Local hook gap, Test infrastructure gap, Review surprise, Fix amplification, Planning gap | 5 shared-signal groups means some recommendations interpret the same metric or representative PR evidence. | Read Shared Signal Interpretation before treating affected recommendations as independent findings. |
 
 ## Recommendation Category Snapshot

@@ -5,11 +5,9 @@
   "currentMilestone": "M1",
   "milestones": {
     "M1": {
-      "state": "conformance_reviewed",
+      "state": "implemented",
       "startedAt": "2026-06-29",
-      "implemented": true,
-      "conformanceReviewed": true,
-      "conformanceReviewedAt": "2026-06-29"
+      "implemented": true
     },
     "M2": {
       "state": "not_started"

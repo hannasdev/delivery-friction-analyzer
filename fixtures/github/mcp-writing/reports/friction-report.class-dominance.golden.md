@@ -26,7 +26,7 @@ Pull requests analyzed: 3
 | Focus first | Review churn, Repo guidance gap |
 | Action categories | Repo-specific AI skills (1), PR readiness gates (1) |
 | Evidence reviewed | 3 PRs, 700 changed lines, 700 non-generated changed lines, 0 review comments, 0 review threads, 0 failed checks, 0 cancelled workflow runs |
-| Confidence caveats | Confidence Digest groups 3 caveat drivers by decision driver. Read it before acting on top findings. |
+| Confidence caveats | Confidence Digest groups 3 digest rows by caveat group. Read it before acting on top findings. |
 
 ## Confidence Digest
 
