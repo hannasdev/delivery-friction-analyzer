@@ -2,16 +2,21 @@
 
 ## Status
 
-- State: Active
+Status: Completed in PR #69 on 2026-06-29.
+
+- State: Done
 - Human approval: Approved
 - Owner: Hanna
 - Created: 2026-06-28
+- Activated: 2026-06-28
+- Completed: 2026-06-29
+- Current milestone state: M1, M2, and M3 merged.
 - Related docs:
   - [Milestones](milestones.md)
   - [Architecture Notes](architecture.md)
-  - [Interactive CLI Setup](../../done/interactive-cli-setup/prd.md)
-  - [Tutorial Sample Experience](../../done/tutorial-sample-experience/prd.md)
-  - [PR Class Segmentation](../../done/pr-class-segmentation/prd.md)
+  - [Interactive CLI Setup](../interactive-cli-setup/prd.md)
+  - [Tutorial Sample Experience](../tutorial-sample-experience/prd.md)
+  - [PR Class Segmentation](../pr-class-segmentation/prd.md)
   - [Run Presets](../../../reference/run-presets.md)
 
 ## Problem
@@ -117,12 +122,12 @@ Completion receipts should exclude no-signal items from `topBottleneckIds`. For 
 
 ## Acceptance Criteria
 
-- [ ] CLI help and validation copy clearly distinguish sample-compatible, live-only, and output-only flags, with command- or context-specific help available without disrupting interactive setup.
-- [ ] Dry-run receipts truthfully represent accepted PR-class filter input or explicitly document why the filter is not applied during coverage-only sampling.
-- [ ] CSV review-thread counts align with the available normalized/report/receipt evidence for sample and live runs.
-- [ ] Tiny or zero-signal reports move zero-score bottlenecks into a no-signal category instead of promoting them as top findings or recommendation drivers.
-- [ ] Report JSON exposes no-signal bottlenecks in a sibling `noSignalBottlenecks` list whose entries use the same property names and deterministic ordering as ranked bottleneck entries; completion receipts exclude no-signal IDs from `topBottleneckIds` and follow the `noSignalBottleneckIds` array/null contract.
-- [ ] README/reference documentation stays precise about conditional artifacts, `npx` or package usage, interactive prompts, and configured versus observed claims touched by this initiative.
+- [x] CLI help and validation copy clearly distinguish sample-compatible, live-only, and output-only flags, with command- or context-specific help available without disrupting interactive setup.
+- [x] Dry-run receipts truthfully represent accepted PR-class filter input or explicitly document why the filter is not applied during coverage-only sampling.
+- [x] CSV review-thread counts align with the available normalized/report/receipt evidence for sample and live runs.
+- [x] Tiny or zero-signal reports move zero-score bottlenecks into a no-signal category instead of promoting them as top findings or recommendation drivers.
+- [x] Report JSON exposes no-signal bottlenecks in a sibling `noSignalBottlenecks` list whose entries use the same property names and deterministic ordering as ranked bottleneck entries; completion receipts exclude no-signal IDs from `topBottleneckIds` and follow the `noSignalBottleneckIds` array/null contract.
+- [x] README/reference documentation stays precise about conditional artifacts, `npx` or package usage, interactive prompts, and configured versus observed claims touched by this initiative.
 
 ## Risks And Tradeoffs
 

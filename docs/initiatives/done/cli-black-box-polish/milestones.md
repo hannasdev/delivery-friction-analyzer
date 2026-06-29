@@ -37,13 +37,13 @@ Users can get help for the command or context they are using and can tell which 
 
 ### Acceptance Criteria
 
-- [ ] `--help` or equivalent usage output separates sample, live GitHub, and output-control concepts clearly enough that sample/live-only boundaries are visible.
-- [ ] `--source sample --help` and `--source github --help` are available for the main user workflows without requiring users to read one flat option list.
-- [ ] Interactive setup offers `?` help for the representative prompt groups named in scope without losing answers already supplied.
-- [ ] `--source sample` with live-only flags fails with actionable copy that names allowed sample output controls.
-- [ ] `--dry-run` and `--metadata-only` are described as live GitHub coverage probes.
-- [ ] Preset save/load docs and help do not imply unsupported sample-mode behavior.
-- [ ] Tests cover representative valid and invalid sample/live combinations.
+- [x] `--help` or equivalent usage output separates sample, live GitHub, and output-control concepts clearly enough that sample/live-only boundaries are visible.
+- [x] `--source sample --help` and `--source github --help` are available for the main user workflows without requiring users to read one flat option list.
+- [x] Interactive setup offers `?` help for the representative prompt groups named in scope without losing answers already supplied.
+- [x] `--source sample` with live-only flags fails with actionable copy that names allowed sample output controls.
+- [x] `--dry-run` and `--metadata-only` are described as live GitHub coverage probes.
+- [x] Preset save/load docs and help do not imply unsupported sample-mode behavior.
+- [x] Tests cover representative valid and invalid sample/live combinations.
 
 ### Required Validation
 
@@ -97,11 +97,11 @@ Completion receipts, CSV artifacts, reports, and methodology agree on accepted f
 
 ### Acceptance Criteria
 
-- [ ] Live dry-run JSON receipts expose requested PR-class exclusions through `analysisFilter.excludedPrClasses`.
-- [ ] Preset-loaded exclusions and direct CLI exclusions produce the same `analysisFilter.excludedPrClasses` receipt semantics.
-- [ ] `pr-metrics.csv` review-thread counts are populated when review-thread counts are available in normalized/report evidence.
-- [ ] Sample and live-like fixture artifacts agree on review-thread totals across receipt/report/CSV where the data is available.
-- [ ] Contract or reference docs are updated if receipt or CSV field semantics change.
+- [x] Live dry-run JSON receipts expose requested PR-class exclusions through `analysisFilter.excludedPrClasses`.
+- [x] Preset-loaded exclusions and direct CLI exclusions produce the same `analysisFilter.excludedPrClasses` receipt semantics.
+- [x] `pr-metrics.csv` review-thread counts are populated when review-thread counts are available in normalized/report evidence.
+- [x] Sample and live-like fixture artifacts agree on review-thread totals across receipt/report/CSV where the data is available.
+- [x] Contract or reference docs are updated if receipt or CSV field semantics change.
 
 ### Required Validation
 
@@ -158,16 +158,16 @@ Tiny or clean analyses move zero-score bottlenecks into no-signal context instea
 
 ### Acceptance Criteria
 
-- [ ] Reports move zero-score bottlenecks into a no-signal category instead of listing them as top findings.
-- [ ] No-signal classification is driven by zero raw unrounded score or absence of positive representative report-owned scores, not by rounded display values, hidden non-report fields, or sample size alone.
-- [ ] The no-signal category explains the potential use of those bottlenecks when evidence exists.
-- [ ] Report JSON includes a sibling `noSignalBottlenecks` list using the same item property names and deterministic ordering as ranked bottleneck entries.
-- [ ] Completion receipts exclude no-signal IDs from `topBottleneckIds`; report-generating receipts include `noSignalBottleneckIds` as an array, and dry-run or metadata-only receipts set it to `null`.
-- [ ] `noSignalBottlenecks` ordering follows ranked-bottleneck ordering after positive-signal entries are removed, with stable bottleneck ID tie-breaks.
-- [ ] Recommendation category counts are not inflated by bottlenecks with no positive displayed evidence.
-- [ ] One-PR clean reports still show evidence reviewed, coverage caveats, and methodology.
-- [ ] JSON report fields affected by low-signal handling are documented and covered by tests.
-- [ ] Manual black-box run against a tiny live sample produces a report whose top findings match the observed evidence.
+- [x] Reports move zero-score bottlenecks into a no-signal category instead of listing them as top findings.
+- [x] No-signal classification is driven by zero raw unrounded score or absence of positive representative report-owned scores, not by rounded display values, hidden non-report fields, or sample size alone.
+- [x] The no-signal category explains the potential use of those bottlenecks when evidence exists.
+- [x] Report JSON includes a sibling `noSignalBottlenecks` list using the same item property names and deterministic ordering as ranked bottleneck entries.
+- [x] Completion receipts exclude no-signal IDs from `topBottleneckIds`; report-generating receipts include `noSignalBottleneckIds` as an array, and dry-run or metadata-only receipts set it to `null`.
+- [x] `noSignalBottlenecks` ordering follows ranked-bottleneck ordering after positive-signal entries are removed, with stable bottleneck ID tie-breaks.
+- [x] Recommendation category counts are not inflated by bottlenecks with no positive displayed evidence.
+- [x] One-PR clean reports still show evidence reviewed, coverage caveats, and methodology.
+- [x] JSON report fields affected by low-signal handling are documented and covered by tests.
+- [x] Manual black-box run against a tiny live sample produces a report whose top findings match the observed evidence.
 
 ### Required Validation
 
