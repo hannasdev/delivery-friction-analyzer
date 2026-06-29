@@ -837,7 +837,7 @@ describe("friction report generation", () => {
     assert(!markdown.includes("caveat(s)"));
   });
 
-  it("falls back to displayed example count when displayed ranking scores are unavailable", () => {
+  it("keeps unavailable-score class dominance in no-signal context", () => {
     const report = generateRepositoryFrictionReport({
       metricVersion: "friction-metrics.v1",
       targetRepository: {
@@ -889,18 +889,22 @@ describe("friction report generation", () => {
       },
     });
     const markdown = renderRepositoryFrictionMarkdown(report);
-    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+    const reviewChurn = report.noSignalBottlenecks.find(bottleneck => bottleneck.id === "review-churn");
 
+    assert.deepEqual(report.bottlenecks, []);
+    assert.deepEqual(report.summary.topBottleneckIds, []);
+    assert(report.summary.noSignalBottleneckIds.includes("review-churn"));
     assert.equal(reviewChurn.classDominance.status, "single_class_dominates");
     assert.equal(reviewChurn.classDominance.class, "release");
     assert.equal(reviewChurn.classDominance.topShare, 0.667);
     assert.equal(reviewChurn.classDominance.basis, "displayed_example_count");
     assert.equal(reviewChurn.classDominance.displayedExamples, 2);
-    assert(markdown.includes("PR class release contributes 67% of the displayed example count"));
-    assert(markdown.includes("| [#1](https://example.test/pull/1) | Release unavailable one | unknown | release | unknown | unknown | unknown | 10 |"));
+    assert(markdown.includes("## No Signal Observed"));
+    assert(markdown.includes("| Review churn | iteration drag | Add or tighten a PR readiness gate"));
+    assert(!markdown.includes("PR class release contributes 67% of the displayed example count"));
   });
 
-  it("falls back to displayed example count when displayed ranking scores are zero", () => {
+  it("keeps zero-score class dominance in no-signal context", () => {
     const report = generateRepositoryFrictionReport({
       metricVersion: "friction-metrics.v1",
       targetRepository: {
@@ -952,15 +956,19 @@ describe("friction report generation", () => {
       },
     });
     const markdown = renderRepositoryFrictionMarkdown(report);
-    const reviewChurn = report.bottlenecks.find(bottleneck => bottleneck.id === "review-churn");
+    const reviewChurn = report.noSignalBottlenecks.find(bottleneck => bottleneck.id === "review-churn");
 
+    assert.deepEqual(report.bottlenecks, []);
+    assert.deepEqual(report.summary.topBottleneckIds, []);
+    assert(report.summary.noSignalBottleneckIds.includes("review-churn"));
     assert.equal(reviewChurn.classDominance.status, "single_class_dominates");
     assert.equal(reviewChurn.classDominance.class, "release");
     assert.equal(reviewChurn.classDominance.topShare, 0.667);
     assert.equal(reviewChurn.classDominance.basis, "displayed_example_count");
     assert.equal(reviewChurn.classDominance.displayedExamples, 2);
-    assert(markdown.includes("PR class release contributes 67% of the displayed example count"));
-    assert(markdown.includes("| [#1](https://example.test/pull/1) | Release zero one | 0 | release | unknown | unknown | unknown | 10 |"));
+    assert(markdown.includes("## No Signal Observed"));
+    assert(markdown.includes("| Review churn | iteration drag | Add or tighten a PR readiness gate"));
+    assert(!markdown.includes("PR class release contributes 67% of the displayed example count"));
   });
 
   it("keeps class dominance distributed when the rendered share rounds to half", () => {
@@ -1332,6 +1340,122 @@ describe("friction report generation", () => {
       "local-hook-gap",
       "test-infrastructure-gap",
     ]);
+    assert.deepEqual(report.summary.noSignalBottleneckIds, []);
+    assert.deepEqual(report.noSignalBottlenecks, []);
+  });
+
+  it("moves zero-score bottlenecks into no-signal report context", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 1,
+      },
+      totals: {
+        pullRequests: 1,
+        changedLines: 8,
+        nonGeneratedChangedLines: 8,
+        reviewComments: 0,
+        reviewThreads: 0,
+        failedChecks: 0,
+        cancelledWorkflowRuns: 0,
+      },
+      pullRequests: [
+        {
+          number: 1,
+          title: "clean small change",
+          url: "https://example.test/pull/1",
+          diffAtMerge: {
+            additions: 5,
+            deletions: 3,
+            changedFiles: 1,
+            changedLines: 8,
+          },
+          review: {
+            threads: { source: "graphql:repository.pullRequest.reviewThreads", totalCount: 0 },
+            decision: { source: "reviews", state: "APPROVED", humanReviewerCount: 1, humanApproved: true },
+          },
+          ci: {
+            workflowRuns: { source: "rest", coverage: "observed", conclusions: { success: 1 }, failedCount: 0, cancelledCount: 0 },
+            checkRuns: { failedCount: 0 },
+          },
+        },
+      ],
+      rankings: {
+        reviewChurn: [{ number: 1, title: "clean small change", value: 0 }],
+        changedFileSpread: [{ number: 1, title: "clean small change", value: 0 }],
+        validationGap: [{ number: 1, title: "clean small change", value: 0 }],
+        planningGap: [{ number: 1, title: "clean small change", value: 0 }],
+        reviewSurprise: [{ number: 1, title: "clean small change", value: 0 }],
+        fixAmplification: [{ number: 1, title: "clean small change", value: 0 }],
+      },
+    });
+    const markdown = renderRepositoryFrictionMarkdown(report);
+
+    assert.deepEqual(report.bottlenecks, []);
+    assert.deepEqual(report.summary.topBottleneckIds, []);
+    assert.deepEqual(report.summary.noSignalBottleneckIds, [
+      "changed-file-spread",
+      "fix-amplification",
+      "local-hook-gap",
+      "planning-gap",
+      "repo-guidance-gap",
+      "review-churn",
+      "review-surprise",
+      "test-infrastructure-gap",
+      "validation-gap",
+    ]);
+    assert.deepEqual(report.noSignalBottlenecks.map(bottleneck => bottleneck.id), report.summary.noSignalBottleneckIds);
+    assert.equal(report.noSignalBottlenecks[0].observedData[0].value, 0);
+    assert(report.recommendationCategories.every(category => category.triggeredBottlenecks === 0));
+    assert(markdown.includes("| Top findings | none |"));
+    assert(markdown.includes("| Focus first | No detailed bottleneck evidence was available. |"));
+    assert(markdown.includes("No recommendation categories were triggered by the displayed bottleneck evidence."));
+    assert(markdown.includes("## No Signal Observed"));
+    assert(markdown.includes("They remain useful context for future runs when matching evidence appears"));
+    assert(markdown.includes("| Review churn | iteration drag | Add or tighten a PR readiness gate"));
+    assert(markdown.includes("| Evidence reviewed | 1 PR, 8 changed lines, 8 non-generated changed lines, 0 review comments, 0 review threads, 0 failed checks, 0 cancelled workflow runs |"));
+    assert(markdown.includes("## Evidence Quality And Coverage"));
+    assert(markdown.includes("## Methodology Summary"));
+  });
+
+  it("keeps small samples with positive raw representative scores in top findings", () => {
+    const report = generateRepositoryFrictionReport({
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 1,
+      },
+      totals: { pullRequests: 1 },
+      pullRequests: [
+        {
+          number: 1,
+          title: "small but real review loop",
+          url: "https://example.test/pull/1",
+          diffAtMerge: { changedLines: 4 },
+        },
+      ],
+      rankings: {
+        reviewChurn: [{ number: 1, title: "small but real review loop", value: 0.01 }],
+        validationGap: [{ number: 1, title: "small but real review loop", value: 0 }],
+      },
+    });
+
+    assert.deepEqual(report.summary.topBottleneckIds, [
+      "review-churn",
+      "repo-guidance-gap",
+    ]);
+    assert.deepEqual(report.summary.noSignalBottleneckIds, [
+      "local-hook-gap",
+      "test-infrastructure-gap",
+      "validation-gap",
+    ]);
+    assert.deepEqual(Object.keys(report.noSignalBottlenecks[0]).sort(), Object.keys(report.bottlenecks[0]).sort());
+    assert.equal(report.recommendationCategories.find(category => category.id === "pr_readiness_gate").triggeredBottlenecks, 1);
+    assert.equal(report.recommendationCategories.find(category => category.id === "repo_specific_ai_skills").triggeredBottlenecks, 1);
+    assert.equal(report.recommendationCategories.find(category => category.id === "preflight_scripts").triggeredBottlenecks, 0);
   });
 
   it("does not flag exact evidence ties as single-PR dominance", () => {

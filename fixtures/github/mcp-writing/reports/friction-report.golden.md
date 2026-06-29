@@ -108,6 +108,7 @@ Sensitivity summaries are robustness context only. They do not remove PRs from t
 
 - Bottlenecks are ordered by their strongest displayed representative score, not by an opaque composite priority score.
 - Each score comes from one metric family, such as review-loop drag, validation failures, change scope, planning signals, review surprise, or post-review commits.
+- Bottlenecks with no positive raw representative score are shown as no-signal context instead of top findings or recommendation drivers.
 - Change scope is the internal changed-file-spread signal: core files touched plus directories touched plus functional surfaces touched. It is not a line-count metric.
 - PR size columns show final/current additions, deletions, changed files, and changed lines so readers can compare size against the detected friction signals.
 - PR size columns are context for interpreting displayed examples; bottleneck ordering uses each metric family's representative score and stable tie-breaks, not the PR size columns.
@@ -439,6 +440,7 @@ File roles:
 - File roles and functional surfaces come from repository-profile classification, not from language names alone.
 - Profile suggestions are optional interpretation improvements derived from existing report evidence; they do not change scores, rankings, CSV exports, or JSON report fields.
 - Bottlenecks are ranked by their strongest representative observed signal, with stable category order only used to break ties.
+- Zero-score or no-positive-score bottlenecks are retained in no-signal context and excluded from top findings and recommendation category counts.
 - Recommendations are inferred from transparent component evidence and representative PR examples; they are not automated changes.
 - Missing or partial source evidence remains visible in coverage tables rather than being inferred from unrelated fields.
 - Sensitivity analysis, when present, excludes one dominant representative PR at a time to show robustness context without changing the baseline ranking.

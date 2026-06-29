@@ -1679,6 +1679,7 @@ function summarizeResult({ dryRun, outDir, paths, sourceBundle, metrics, report,
     collectionCoverage: sourceBundle.coverage,
     totals: metrics?.totals ?? null,
     topBottleneckIds: report?.summary?.topBottleneckIds ?? null,
+    noSignalBottleneckIds: report?.summary?.noSignalBottleneckIds ?? null,
   };
   if (savedProfilePath) {
     summary.savedProfilePath = savedProfilePath;

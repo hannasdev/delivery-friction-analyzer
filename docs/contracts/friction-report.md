@@ -32,12 +32,13 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `configuredWorkflow`: optional user-configured workflow context from the repository profile. It is not observed GitHub evidence and does not change scoring, ranking, CSV exports, or PR class matching.
 - `contributorSource`: optional sanitized contributor-source metadata from the repository profile and collection path. It records source type, path, coverage status, parsed hint count, and guardrail note. It does not include raw contributor file contents or contributor rankings.
 - `collectionCoverage`: optional source collection coverage metadata copied into live-generated report JSON artifacts. `collectionCoverage.status` records aggregate coverage, and `collectionCoverage.sourceFamilies` lists source-family entries with `family`, `status`, `attempts`, `source`, `diagnostics`, and `downstreamImpact`. This uses the generic `source-bundle.v1` `coverage.sourceFamilies` name; legacy GitHub `apiFamilies` is not a live `friction-report.v1` field.
-- `summary`: repository totals and top bottleneck identifiers.
+- `summary`: repository totals, positive-signal top bottleneck identifiers, and no-signal bottleneck identifiers.
 - `coverage`: PR-open diff, workflow-run, and review-thread coverage counts plus caveats.
 - `commentSources`: total and source-grouped review comments for Copilot, human, bot, scanner, author replies, and unknown sources.
 - `surfaces`: core, low-signal, generated, support-surface, role, and functional-surface breakdowns.
 - `prClasses`: PR class distribution for the analyzed sample, including PR counts, changed lines, share of PRs, and classification source counts by class.
-- `bottlenecks`: ranked friction patterns with observed data, inferred diagnosis, and suggested action kept as separate fields. `bottlenecks[].title` is a reader-facing display label and may change for clarity while stable IDs such as `changed-file-spread` remain unchanged.
+- `bottlenecks`: ranked positive-signal friction patterns with observed data, inferred diagnosis, and suggested action kept as separate fields. `bottlenecks[].title` is a reader-facing display label and may change for clarity while stable IDs such as `changed-file-spread` remain unchanged.
+- `noSignalBottlenecks`: ranked no-signal context entries using the same item property names as `bottlenecks`. Entries move here when their raw, unrounded report-owned representative scores are zero or when no displayed representative score is positive. They are excluded from `summary.topBottleneckIds` and recommendation category counts; `summary.noSignalBottleneckIds` records their IDs in deterministic order.
 - `bottlenecks[].observedData[]`: representative PR examples with PR identity, score/value, PR class evidence, final/current additions, deletions, changed-file count, and changed-line count.
 - `bottlenecks[].observedData[].validationEvidence`: workflow-run source label, workflow-run coverage, workflow-run conclusions, failed check-run count, failed workflow-run count, and cancelled workflow-run count for representative PR examples.
 - `bottlenecks[].observedData[].reviewEvidence`: review-thread source label, thread counts, resolution/outdated counts, review decision label/source, human reviewer count, human approval / changes-requested booleans, comment-source breakdown, bot comment count, human reviewer comment count, and author reply count for representative PR examples.
@@ -49,7 +50,7 @@ The command reads local `friction-metrics.v1` JSON and writes deterministic `fri
 - `guardrails`: machine-readable checks that the report avoids individual ranking, separates evidence from inference, and does not use an opaque composite score.
 - `followUp`: non-automated future work suggested by the report.
 
-Bottlenecks are ordered by their strongest observed representative metric value, with stable category order used only to break ties. Final/current PR size fields are context for comparing displayed examples against friction signals; they are not separate ordering inputs. The internal `changedFileSpread` / `changed-file-spread` signal remains the stable contract name for the metric that sums core files touched, directories touched, and functional surfaces touched. It is not a changed-line-count metric.
+Bottlenecks are ordered by their strongest observed representative metric value, with stable category order used only to break ties. `noSignalBottlenecks` preserves the same ranked-candidate ordering after positive-signal entries are removed, with stable bottleneck IDs used for no-signal ties. Final/current PR size fields are context for comparing displayed examples against friction signals; they are not separate ordering inputs. The internal `changedFileSpread` / `changed-file-spread` signal remains the stable contract name for the metric that sums core files touched, directories touched, and functional surfaces touched. It is not a changed-line-count metric.
 
 ## Markdown Output
 
@@ -71,6 +72,7 @@ The Markdown renderer presents the same report data for human review:
 - outlier and sensitivity analysis when displayed examples are dominated by one PR;
 - a prioritization explanation that describes strongest-signal ordering and how PR size is used as context, using reader-facing change-scope language while mapping back to the internal changed-file-spread signal when needed;
 - ranked bottlenecks with representative PR examples rendered as compact PR-size tables;
+- a no-signal section for zero-score or no-positive-score bottlenecks, explaining that they are future-run context rather than top findings or recommendation drivers;
 - validation, review, and source-label evidence for representative PR examples rendered as compact evidence tables;
 - text-backed status labels such as observed, partial, unavailable, configured, warning, and healthy in Markdown evidence tables where they improve scanability;
 - separately labeled inferred diagnosis, suggested action, and confidence/caveat blocks for each bottleneck;

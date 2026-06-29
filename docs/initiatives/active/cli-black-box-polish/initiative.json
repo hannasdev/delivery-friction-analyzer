@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "slug": "cli-black-box-polish",
-  "state": "active",
-  "currentMilestone": "M2",
+  "state": "complete_on_merge",
+  "currentMilestone": "M3",
   "milestones": {
     "M1": {
-      "state": "pr_opened",
+      "state": "merged",
       "startedAt": "2026-06-28",
       "implemented": true,
       "conformanceReviewed": true,
@@ -13,10 +13,11 @@
       "adversariallyReviewed": true,
       "adversariallyReviewedAt": "2026-06-28",
       "pr": 67,
-      "openedAt": "2026-06-28"
+      "openedAt": "2026-06-28",
+      "mergedAt": "2026-06-28"
     },
     "M2": {
-      "state": "pr_opened",
+      "state": "merged",
       "startedAt": "2026-06-28",
       "implemented": true,
       "conformanceReviewed": true,
@@ -24,10 +25,20 @@
       "adversariallyReviewed": true,
       "adversariallyReviewedAt": "2026-06-28",
       "pr": 68,
-      "openedAt": "2026-06-28"
+      "openedAt": "2026-06-28",
+      "mergedAt": "2026-06-28"
     },
     "M3": {
-      "state": "not_started"
+      "state": "complete_on_merge",
+      "startedAt": "2026-06-28",
+      "implemented": true,
+      "conformanceReviewed": true,
+      "conformanceReviewedAt": "2026-06-28",
+      "adversariallyReviewed": true,
+      "adversariallyReviewedAt": "2026-06-28",
+      "pr": 69,
+      "openedAt": "2026-06-28"
     }
-  }
+  },
+  "completedByPr": 69
 }
