@@ -1401,51 +1401,29 @@ function renderContributorSourceContext(contributorSource) {
   ].join("\n");
 }
 
-function renderKeyFindings(report) {
+function renderKeyFindings(report, sharedSignals = report.sharedSignals) {
   const topBottlenecks = topBottleneckLabels(report);
   const strongest = report.bottlenecks?.[0];
-  const dominanceCallouts = (report.bottlenecks ?? [])
-    .filter(bottleneck => bottleneck.dominance?.status === "single_pr_dominates")
-    .map(bottleneck => `${bottleneck.title}: ${bottleneck.dominance.note}`);
-  const classDominanceCallouts = (report.bottlenecks ?? [])
-    .filter(bottleneck => bottleneck.classDominance?.status === "single_class_dominates")
-    .map(bottleneck => `${bottleneck.title}: ${bottleneck.classDominance.note}`);
-  const coverageNotes = report.coverage?.notes?.length
-    ? report.coverage.notes.join(" ")
-    : "No coverage caveats were recorded for the displayed evidence.";
+  const digestRows = confidenceDigestRows(report, sharedSignals);
 
   return renderList([
     `Top bottlenecks: ${topBottlenecks}.`,
     strongest
       ? `Strongest displayed signal: ${strongest.title} (${strongest.metricLabel}).`
       : "No bottleneck evidence was available.",
-    dominanceCallouts.length
-      ? `Outlier caveat: ${dominanceCallouts.join(" ")}`
-      : "Outlier caveat: displayed bottleneck examples are not dominated by a single PR.",
-    classDominanceCallouts.length
-      ? `PR class caveat: ${classDominanceCallouts.join(" ")}`
-      : classDominanceFallback(report.prClasses),
-    `Coverage caveat: ${coverageNotes}`,
+    digestRows.length
+      ? "Confidence digest: review the grouped caveat drivers below before generalizing from the top findings."
+      : "Confidence digest: no early confidence caveats were recorded for the displayed evidence.",
   ]);
 }
 
-function summarizeFocusCaveats(report) {
-  const caveats = [];
-  const coverageNotes = report.coverage?.notes ?? [];
-  const dominantPrs = (report.bottlenecks ?? [])
-    .filter(bottleneck => bottleneck.dominance?.status === "single_pr_dominates");
-  const dominantClasses = (report.bottlenecks ?? [])
-    .filter(bottleneck => bottleneck.classDominance?.status === "single_class_dominates");
-
-  if (coverageNotes.length) caveats.push(formatCount(coverageNotes.length, "coverage caveat"));
-  if (dominantPrs.length) caveats.push(formatCount(dominantPrs.length, "outlier caveat"));
-  if (dominantClasses.length) caveats.push(formatCount(dominantClasses.length, "PR class caveat"));
-  if (!caveats.length) return "No early confidence caveats were recorded for the displayed evidence.";
-
-  return `${caveats.join(", ")}. Read the evidence and caveat sections before generalizing.`;
+function summarizeFocusCaveats(report, sharedSignals = report.sharedSignals) {
+  const rows = confidenceDigestRows(report, sharedSignals);
+  if (!rows.length) return "No early confidence caveats were recorded for the displayed evidence.";
+  return `Confidence Digest groups ${formatCount(rows.length, "digest row")} by caveat group. Read it before acting on top findings.`;
 }
 
-function renderFocusSnapshot(report) {
+function renderFocusSnapshot(report, sharedSignals = report.sharedSignals) {
   const summary = report.summary ?? {};
   const categories = triggeredCategoryLabels(report);
   const evidenceReviewed = [
@@ -1468,19 +1446,203 @@ function renderFocusSnapshot(report) {
       ["Focus first", firstInspection],
       ["Action categories", categories],
       ["Evidence reviewed", evidenceReviewed],
-      ["Confidence caveats", summarizeFocusCaveats(report)],
+      ["Confidence caveats", summarizeFocusCaveats(report, sharedSignals)],
     ],
   );
 }
 
-function classDominanceFallback(prClasses) {
-  const sampleClasses = (prClasses?.distribution ?? []).filter(entry => entry.pullRequests > 0);
-  if (!sampleClasses.length) {
-    return "PR class caveat: PR class context was not available for the analyzed sample.";
+function focusBottleneckIdSet(report) {
+  return new Set(report.summary?.topBottleneckIds ?? []);
+}
+
+function affectedBottleneckLabel(report, bottlenecks) {
+  const focusIds = focusBottleneckIdSet(report);
+  const focus = [];
+  const supporting = [];
+  for (const bottleneck of bottlenecks) {
+    if (focusIds.has(bottleneck.id)) focus.push(bottleneck.title);
+    else supporting.push(bottleneck.title);
   }
-  return sampleClasses.length < 2
-    ? "PR class caveat: only one PR class appears in the analyzed sample, so class dominance comparison is not meaningful."
-    : "PR class caveat: displayed bottleneck examples are not dominated by one PR class.";
+
+  const parts = [];
+  if (focus.length) parts.push(`Focus areas: ${focus.join(", ")}`);
+  if (supporting.length) parts.push(`Other affected signals: ${supporting.join(", ")}`);
+  return parts.join("; ") || "No displayed bottlenecks";
+}
+
+function availableCoverageCount(entries = {}) {
+  return Object.entries(entries)
+    .filter(([name]) => name !== "unavailable")
+    .reduce((sum, [, value]) => sum + Number(value ?? 0), 0);
+}
+
+function totalCoverageCount(entries = {}) {
+  return Object.values(entries).reduce((sum, value) => sum + Number(value ?? 0), 0);
+}
+
+function coverageDigestPart(label, entries = {}) {
+  const unavailable = Number(entries.unavailable ?? 0);
+  const total = totalCoverageCount(entries);
+  if (!unavailable || !total) return null;
+  return `${label} ${availableCoverageCount(entries)}/${total} available (${unavailable} unavailable)`;
+}
+
+function coverageDigestRow(report) {
+  const parts = [
+    coverageDigestPart("PR-open diff", report.coverage?.prOpenDiff),
+    coverageDigestPart("workflow runs", report.coverage?.workflowRuns),
+    coverageDigestPart("review threads", report.coverage?.reviewThreads),
+  ].filter(Boolean);
+  if (!parts.length) return null;
+
+  const families = [];
+  if (Number(report.coverage?.prOpenDiff?.unavailable ?? 0) > 0) families.push("diff-growth");
+  if (Number(report.coverage?.workflowRuns?.unavailable ?? 0) > 0) families.push("validation");
+  if (Number(report.coverage?.reviewThreads?.unavailable ?? 0) > 0) families.push("review-thread");
+
+  return [
+    "Partial coverage",
+    parts.join("; "),
+    `${families.length ? `${formatInlineList(families)} signals` : "Displayed signals"} use available evidence only.`,
+    "Check Evidence Quality And Coverage and `methodology.md`/`collection-coverage.csv` before comparing trends.",
+  ];
+}
+
+function formatInlineList(items) {
+  if (items.length < 3) return items.join(" and ");
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+function formatShareRange(shares) {
+  const labels = [...new Set(
+    shares
+      .map(share => Number(share ?? 0))
+      .sort((left, right) => left - right)
+      .map(classDominancePercentageLabel),
+  )];
+  return labels.length === 1 ? labels[0] : `${labels[0]}-${labels[labels.length - 1]}`;
+}
+
+function dominantPrDigestRows(report) {
+  const groups = new Map();
+  for (const bottleneck of report.bottlenecks ?? []) {
+    if (bottleneck.dominance?.status !== "single_pr_dominates") continue;
+    const prNumber = bottleneck.dominance.topPrNumber;
+    if (!Number.isInteger(prNumber)) continue;
+    const current = groups.get(prNumber) ?? { prNumber, bottlenecks: [], shares: [] };
+    current.bottlenecks.push(bottleneck);
+    current.shares.push(Number(bottleneck.dominance.topShare ?? 0));
+    groups.set(prNumber, current);
+  }
+
+  const sensitivityByPr = new Map(
+    (report.sensitivity?.summaries ?? []).map(summary => [summary.excludedPr.number, summary]),
+  );
+
+  return [...groups.values()]
+    .sort((left, right) => left.prNumber - right.prNumber)
+    .map(group => {
+      const sensitivity = sensitivityByPr.get(group.prNumber);
+      const prLabel = sensitivity?.excludedPr?.url
+        ? `[PR #${group.prNumber}](${sensitivity.excludedPr.url})`
+        : `PR #${group.prNumber}`;
+      return [
+        "Dominant PR",
+        affectedBottleneckLabel(report, group.bottlenecks),
+        rawMarkdownCell(`${prLabel} contributes ${formatShareRange(group.shares)} of displayed signal; ${sensitivity?.changedTopBottlenecks ? "top focus ordering changes without it" : "top focus ordering is unchanged without it"}.`),
+        `Inspect PR #${group.prNumber} and Outlier And Sensitivity Analysis before changing process.`,
+      ];
+    });
+}
+
+function dominantClassDigestRows(report) {
+  const groups = new Map();
+  for (const bottleneck of report.bottlenecks ?? []) {
+    if (bottleneck.classDominance?.status !== "single_class_dominates") continue;
+    const className = bottleneck.classDominance.class ?? "unknown";
+    const current = groups.get(className) ?? { className, bottlenecks: [], shares: [], bases: new Set() };
+    current.bottlenecks.push(bottleneck);
+    current.shares.push(Number(bottleneck.classDominance.topShare ?? 0));
+    current.bases.add(bottleneck.classDominance.basis === "score_value" ? "displayed score value" : "displayed example count");
+    groups.set(className, current);
+  }
+
+  return [...groups.values()]
+    .sort((left, right) => left.className.localeCompare(right.className))
+    .map(group => {
+      const distribution = (report.prClasses?.distribution ?? [])
+        .find(entry => entry.class === group.className);
+      const sampleSize = Number(distribution?.pullRequests ?? group.bottlenecks[0]?.classDominance?.samplePullRequests ?? 0);
+      const basisLabel = [...group.bases].join(" and ");
+      return [
+        "Dominant PR class",
+        affectedBottleneckLabel(report, group.bottlenecks),
+        `${group.className} class drives ${formatShareRange(group.shares)} of ${basisLabel}; class sample size is ${formatCount(sampleSize, "PR")}.`,
+        "Compare against PR Class Context or rerun with class filters before generalizing.",
+      ];
+    });
+}
+
+function classComparisonLimitedDigestRows(report) {
+  const distribution = report.prClasses?.distribution ?? [];
+  if (distribution.length !== 1) return [];
+  const onlyClass = distribution[0];
+  const bottlenecks = (report.bottlenecks ?? [])
+    .filter(bottleneck => bottleneck.classDominance?.status === "not_applicable");
+  if (!bottlenecks.length) return [];
+
+  return [[
+    "PR class comparison limited",
+    affectedBottleneckLabel(report, bottlenecks),
+    `${onlyClass.class} is the only PR class in the analyzed sample; class comparison is not meaningful across ${formatCount(Number(onlyClass.pullRequests ?? 0), "PR")}.`,
+    "Compare against PR Class Context or rerun with a broader class mix before generalizing by PR class.",
+  ]];
+}
+
+function sharedSignalDigestRow(report, sharedSignals) {
+  const groups = sharedSignals?.groups ?? [];
+  if (!groups.length) return null;
+  const bottlenecksById = new Map((report.bottlenecks ?? []).map(bottleneck => [bottleneck.id, bottleneck]));
+  const affected = new Map();
+  for (const group of groups) {
+    for (const bottleneck of group.bottlenecks ?? []) {
+      const source = bottlenecksById.get(bottleneck.id);
+      if (source) affected.set(source.id, source);
+    }
+  }
+  return [
+    "Shared evidence",
+    affectedBottleneckLabel(report, [...affected.values()]),
+    `${formatCount(groups.length, "shared-signal group")} means some recommendations interpret the same metric or representative PR evidence.`,
+    "Read Shared Signal Interpretation before treating affected recommendations as independent findings.",
+  ];
+}
+
+function confidenceDigestRows(report, sharedSignals = report.sharedSignals) {
+  return [
+    coverageDigestRow(report),
+    ...dominantPrDigestRows(report),
+    ...dominantClassDigestRows(report),
+    ...classComparisonLimitedDigestRows(report),
+    sharedSignalDigestRow(report, sharedSignals),
+  ].filter(Boolean);
+}
+
+function renderConfidenceDigest(report, sharedSignals) {
+  const rows = confidenceDigestRows(report, sharedSignals);
+  if (!rows.length) return "";
+
+  return [
+    "## Confidence Digest",
+    "",
+    "Top-level routing for caveats that can change how you act on the findings; detailed audit trails remain in the sections below.",
+    "",
+    renderMarkdownTable(
+      ["Caveat driver", "Affects", "Why it matters", "Next check"],
+      rows,
+    ),
+    "",
+  ].join("\n");
 }
 
 function renderPrClassContext(prClasses) {
@@ -1556,10 +1718,23 @@ function renderWorkflowDataCaveats(report) {
   ].join("\n");
 }
 
-function classDominanceCaveat(bottleneck) {
-  return bottleneck.classDominance?.status === "single_class_dominates"
-    ? bottleneck.classDominance.note
-    : null;
+function renderBottleneckCaveats(bottleneck, sharedNotes) {
+  const caveats = [];
+  if (bottleneck.dominance?.status === "single_pr_dominates") {
+    caveats.push("See [Confidence Digest](#confidence-digest) for dominant PR context; inspect this bottleneck's evidence rows before generalizing.");
+  } else {
+    caveats.push(bottleneck.dominance?.note ?? "Not enough positive examples to evaluate outlier dominance.");
+  }
+
+  if (bottleneck.classDominance?.status === "single_class_dominates") {
+    caveats.push("See [Confidence Digest](#confidence-digest) and [PR Class Context](#pr-class-context) for repeated class-dominance context.");
+  }
+
+  if (sharedNotes.get(bottleneck.id)) {
+    caveats.push("See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.");
+  }
+
+  return renderList(caveats);
 }
 
 function renderSharedSignalInterpretation(sharedSignals) {
@@ -1694,8 +1869,9 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     "## Focus Snapshot",
     "",
-    renderFocusSnapshot(report),
+    renderFocusSnapshot(report, sharedSignals),
     "",
+    renderConfidenceDigest(report, sharedSignals),
     "## Recommendation Category Snapshot",
     "",
     renderRecommendationCategorySnapshot(report.recommendationCategories ?? []),
@@ -1729,7 +1905,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     "## Key Findings",
     "",
-    renderKeyFindings(report),
+    renderKeyFindings(report, sharedSignals),
     "",
     renderPrClassContext(report.prClasses),
     renderProfileSuggestions(report),
@@ -1761,11 +1937,7 @@ export function renderRepositoryFrictionMarkdown(report) {
       "",
       `#### ${bottleneck.title} Confidence And Caveats`,
       "",
-      renderList([
-        bottleneck.dominance?.note ?? "Not enough positive examples to evaluate outlier dominance.",
-        classDominanceCaveat(bottleneck),
-        sharedNotes.get(bottleneck.id),
-      ].filter(Boolean)),
+      renderBottleneckCaveats(bottleneck, sharedNotes),
       "",
     );
   }

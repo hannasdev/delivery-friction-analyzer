@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "slug": "report-caveat-usability",
+  "state": "active",
+  "currentMilestone": "M1",
+  "milestones": {
+    "M1": {
+      "state": "pr_opened",
+      "startedAt": "2026-06-29",
+      "implemented": true,
+      "conformanceReviewed": true,
+      "conformanceReviewedAt": "2026-06-29",
+      "adversariallyReviewed": true,
+      "adversariallyReviewedAt": "2026-06-29",
+      "pr": 71,
+      "openedAt": "2026-06-29"
+    },
+    "M2": {
+      "state": "not_started"
+    }
+  }
+}

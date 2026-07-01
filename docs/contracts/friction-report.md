@@ -58,14 +58,15 @@ The Markdown renderer presents the same report data for human review:
 
 - explicit analysis filter labels when downstream artifacts were generated from a filtered PR class sample;
 - executive summary totals plus top findings, triggered recommendation categories, and filter status in a table;
-- a top-of-report focus snapshot that names focus areas, action categories, evidence reviewed, and confidence caveats before detailed bottlenecks;
+- a top-of-report focus snapshot that names focus areas, action categories, evidence reviewed, and points to grouped confidence caveats before detailed bottlenecks;
+- a top-level confidence digest table adjacent to the focus snapshot that groups decision-affecting caveats by driver, including partial coverage, dominant PRs, dominant PR classes, and shared evidence when present;
 - a compact recommendation-category snapshot before detailed bottlenecks, with the full category reference retained later in the report;
 - a short "How To Read This Report" guide that distinguishes observed evidence, interpretation, recommendations, and caveats;
 - a configured workflow context section only when repository profile workflow fields are present, labeled as user-configured profile context rather than observed GitHub evidence;
 - a contributor source context section only when a contributor source is configured, labeled as metadata that may improve comment-source classification coverage without changing scores, authorship conclusions, reviewer attribution, CSV export shape, person-level CSV output, or individual ranking guardrails;
 - workflow data caveats when configured workflow context clarifies unavailable PR-open diff or workflow-run evidence;
 - evidence-quality and coverage tables before detailed recommendations;
-- key findings that highlight top bottlenecks, strongest displayed signal, outlier caveats, PR class caveats, and coverage caveats;
+- key findings that highlight top bottlenecks, strongest displayed signal, and route readers to the confidence digest instead of repeating sample-level caveat prose;
 - a PR class context table that shows analyzed PR counts, changed lines, sample share, and classification sources by class;
 - profile suggestions when fallback `unknown` PR classes, unknown file role/surface evidence, or omitted workflow context with relevant unavailable coverage cross deterministic thresholds;
 - a top-level shared-signal interpretation callout when multiple displayed bottlenecks share a ranking key or representative PR evidence;
@@ -76,6 +77,7 @@ The Markdown renderer presents the same report data for human review:
 - validation, review, and source-label evidence for representative PR examples rendered as compact evidence tables;
 - text-backed status labels such as observed, partial, unavailable, configured, warning, and healthy in Markdown evidence tables where they improve scanability;
 - separately labeled inferred diagnosis, suggested action, and confidence/caveat blocks for each bottleneck;
+- concise confidence/caveat links from per-bottleneck blocks to the confidence digest, PR class context, shared-signal interpretation, or sensitivity table when the same sample-level caveat is already grouped at the top of the report;
 - shared-evidence notes when multiple recommendation categories use the same representative PR set;
 - recommendation-category, comment-source, and core/support-surface tables;
 - a concise methodology summary;
@@ -105,6 +107,15 @@ The M3 report contract supports these recommendation categories:
 ## Coverage And Confidence
 
 Reports must label unavailable or partial source evidence instead of inferring unavailable values from merge-time data. Final/current PR metadata can come from source-bundle PR evidence, but PR-open diff growth remains unavailable unless an open-time snapshot or equivalent captured state exists. Workflow coverage and review-thread sources are summarized separately.
+
+The confidence digest is Markdown presentation only, not a `friction-report.v1` JSON field. It must be derived from existing report data and should act as top-level routing for decisions:
+
+- partial coverage rows state affected source families with available/unavailable counts when those counts are present, plus the user impact of using available evidence only;
+- dominant PR rows group affected bottlenecks by PR and distinguish focus areas from other affected signals using `summary.topBottleneckIds`;
+- dominant PR-class rows group affected bottlenecks by class, show contribution values or ranges, state the class sample size, and point to PR class context or filtering as the next check;
+- shared-evidence rows render only when shared ranking-key or representative-evidence groups exist, and point to shared-signal interpretation before readers treat affected recommendations as independent findings.
+
+The digest is not a replacement for audit trails. Evidence-quality coverage tables, workflow data caveats, PR class context, shared-signal interpretation, outlier/sensitivity analysis, per-bottleneck evidence tables, methodology summaries, and companion CSV/methodology artifacts remain the detailed sources for verification.
 
 Representative examples should carry enough source evidence to trace a report claim back to generated artifacts. Validation examples should name the workflow-run source and conclusions. Review churn examples should name the review-thread source, review decision evidence, and comment sources. PR class evidence should be visible in representative bottleneck examples so readers can distinguish workflow populations such as release, dependency, development, or repository-specific classes. When `reviewThreads` is zero, review decision evidence should make clean human approval distinguishable from unavailable review evidence and from observed absence of human review. When displayed examples are dominated by one PR or one PR class, the report should say so instead of implying a repository-wide pattern from an outlier or workflow population.
 

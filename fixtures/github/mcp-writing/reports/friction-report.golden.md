@@ -26,7 +26,19 @@ Pull requests analyzed: 3
 | Focus first | Review churn, Repo guidance gap, Change scope |
 | Action categories | Hooks (1), Preflight scripts (1), Repo-specific AI skills (1), PR readiness gates (2), Smaller milestones (2), Planning artifacts (1), Test infrastructure (1) |
 | Evidence reviewed | 3 PRs, 2454 changed lines, 2433 non-generated changed lines, 30 review comments, 25 review threads, 0 failed checks, 1 cancelled workflow run |
-| Confidence caveats | 2 coverage caveats, 4 outlier caveats. Read the evidence and caveat sections before generalizing. |
+| Confidence caveats | Confidence Digest groups 5 digest rows by caveat group. Read it before acting on top findings. |
+
+## Confidence Digest
+
+Top-level routing for caveats that can change how you act on the findings; detailed audit trails remain in the sections below.
+
+| Caveat driver | Affects | Why it matters | Next check |
+| --- | --- | --- | --- |
+| Partial coverage | PR-open diff 0/3 available (3 unavailable); workflow runs 1/3 available (2 unavailable) | diff-growth and validation signals use available evidence only. | Check Evidence Quality And Coverage and \`methodology.md\`/\`collection-coverage.csv\` before comparing trends. |
+| Dominant PR | Other affected signals: Review surprise | [PR #221](https://github.com/hannasdev/mcp-writing/pull/221) contributes 56% of displayed signal; top focus ordering is unchanged without it. | Inspect PR #221 and Outlier And Sensitivity Analysis before changing process. |
+| Dominant PR | Focus areas: Review churn, Repo guidance gap; Other affected signals: Fix amplification | [PR #239](https://github.com/hannasdev/mcp-writing/pull/239) contributes 63%-83% of displayed signal; top focus ordering changes without it. | Inspect PR #239 and Outlier And Sensitivity Analysis before changing process. |
+| PR class comparison limited | Focus areas: Review churn, Repo guidance gap, Change scope; Other affected signals: Review surprise, Fix amplification, Validation gap, Local hook gap, Test infrastructure gap, Planning gap | unknown is the only PR class in the analyzed sample; class comparison is not meaningful across 3 PRs. | Compare against PR Class Context or rerun with a broader class mix before generalizing by PR class. |
+| Shared evidence | Focus areas: Review churn, Repo guidance gap, Change scope; Other affected signals: Validation gap, Local hook gap, Test infrastructure gap, Review surprise, Fix amplification, Planning gap | 5 shared-signal groups means some recommendations interpret the same metric or representative PR evidence. | Read Shared Signal Interpretation before treating affected recommendations as independent findings. |
 
 ## Recommendation Category Snapshot
 
@@ -64,9 +76,7 @@ Coverage notes:
 
 - Top bottlenecks: Review churn, Repo guidance gap, Change scope.
 - Strongest displayed signal: Review churn (iteration drag).
-- Outlier caveat: Review churn: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Repo guidance gap: PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing. Review surprise: PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing. Fix amplification: PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
-- PR class caveat: only one PR class appears in the analyzed sample, so class dominance comparison is not meaningful.
-- Coverage caveat: PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
+- Confidence digest: review the grouped caveat drivers below before generalizing from the top findings.
 
 ## PR Class Context
 
@@ -141,8 +151,8 @@ Recommendation category: pr_readiness_gate
 
 #### Review churn Confidence And Caveats
 
-- PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing.
-- Shares the same representative PR evidence as Repo guidance gap, Review surprise, Fix amplification.
+- See [Confidence Digest](#confidence-digest) for dominant PR context; inspect this bottleneck's evidence rows before generalizing.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ### Repo guidance gap
 
@@ -169,8 +179,8 @@ Recommendation category: repo_specific_ai_skills
 
 #### Repo guidance gap Confidence And Caveats
 
-- PR #239 contributes 63% of the displayed signal; inspect raw evidence before generalizing.
-- Shares the same representative PR evidence as Review churn, Review surprise, Fix amplification.
+- See [Confidence Digest](#confidence-digest) for dominant PR context; inspect this bottleneck's evidence rows before generalizing.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ### Change scope
 
@@ -200,7 +210,7 @@ Recommendation category: smaller_milestones
 #### Change scope Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
-- Shares the same representative PR evidence as Planning gap.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ### Review surprise
 
@@ -227,8 +237,8 @@ Recommendation category: pr_readiness_gate
 
 #### Review surprise Confidence And Caveats
 
-- PR #221 contributes 56% of the displayed signal; inspect raw evidence before generalizing.
-- Shares the same representative PR evidence as Review churn, Repo guidance gap, Fix amplification.
+- See [Confidence Digest](#confidence-digest) for dominant PR context; inspect this bottleneck's evidence rows before generalizing.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ### Fix amplification
 
@@ -255,8 +265,8 @@ Recommendation category: smaller_milestones
 
 #### Fix amplification Confidence And Caveats
 
-- PR #239 contributes 83% of the displayed signal; inspect raw evidence before generalizing.
-- Shares the same representative PR evidence as Review churn, Repo guidance gap, Review surprise.
+- See [Confidence Digest](#confidence-digest) for dominant PR context; inspect this bottleneck's evidence rows before generalizing.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ### Validation gap
 
@@ -282,7 +292,7 @@ Recommendation category: preflight_scripts
 #### Validation gap Confidence And Caveats
 
 - Not enough positive examples to evaluate outlier dominance.
-- Shares the same representative PR evidence as Local hook gap, Test infrastructure gap.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ### Local hook gap
 
@@ -308,7 +318,7 @@ Recommendation category: hooks
 #### Local hook gap Confidence And Caveats
 
 - Not enough positive examples to evaluate outlier dominance.
-- Shares the same representative PR evidence as Validation gap, Test infrastructure gap.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ### Test infrastructure gap
 
@@ -334,7 +344,7 @@ Recommendation category: test_infrastructure
 #### Test infrastructure gap Confidence And Caveats
 
 - Not enough positive examples to evaluate outlier dominance.
-- Shares the same representative PR evidence as Validation gap, Local hook gap.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ### Planning gap
 
@@ -364,7 +374,7 @@ Recommendation category: planning_artifacts
 #### Planning gap Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
-- Shares the same representative PR evidence as Change scope.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ## Recommendation Categories
 

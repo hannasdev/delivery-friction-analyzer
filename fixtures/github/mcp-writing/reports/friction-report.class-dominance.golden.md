@@ -26,7 +26,17 @@ Pull requests analyzed: 3
 | Focus first | Review churn, Repo guidance gap |
 | Action categories | Repo-specific AI skills (1), PR readiness gates (1) |
 | Evidence reviewed | 3 PRs, 700 changed lines, 700 non-generated changed lines, 0 review comments, 0 review threads, 0 failed checks, 0 cancelled workflow runs |
-| Confidence caveats | 2 coverage caveats, 2 PR class caveats. Read the evidence and caveat sections before generalizing. |
+| Confidence caveats | Confidence Digest groups 3 digest rows by caveat group. Read it before acting on top findings. |
+
+## Confidence Digest
+
+Top-level routing for caveats that can change how you act on the findings; detailed audit trails remain in the sections below.
+
+| Caveat driver | Affects | Why it matters | Next check |
+| --- | --- | --- | --- |
+| Partial coverage | PR-open diff 0/3 available (3 unavailable); workflow runs 0/3 available (3 unavailable); review threads 0/3 available (3 unavailable) | diff-growth, validation, and review-thread signals use available evidence only. | Check Evidence Quality And Coverage and \`methodology.md\`/\`collection-coverage.csv\` before comparing trends. |
+| Dominant PR class | Focus areas: Review churn, Repo guidance gap | release class drives 90% of displayed score value; class sample size is 2 PRs. | Compare against PR Class Context or rerun with class filters before generalizing. |
+| Shared evidence | Focus areas: Review churn, Repo guidance gap | 2 shared-signal groups means some recommendations interpret the same metric or representative PR evidence. | Read Shared Signal Interpretation before treating affected recommendations as independent findings. |
 
 ## Recommendation Category Snapshot
 
@@ -59,9 +69,7 @@ Coverage notes:
 
 - Top bottlenecks: Review churn, Repo guidance gap.
 - Strongest displayed signal: Review churn (iteration drag).
-- Outlier caveat: displayed bottleneck examples are not dominated by a single PR.
-- PR class caveat: Review churn: PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat. Repo guidance gap: PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat.
-- Coverage caveat: PR-open diff growth is unavailable for PRs without an open-time snapshot or equivalent captured state; final/current PR metadata can still come from GitHub PR data, but open-time size is not reconstructed from merge-time data. Workflow-run coverage is unavailable for some PRs, often because branch-based history is missing.
+- Confidence digest: review the grouped caveat drivers below before generalizing from the top findings.
 
 ## PR Class Context
 
@@ -128,8 +136,8 @@ Recommendation category: pr_readiness_gate
 #### Review churn Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
-- PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat.
-- Shares the same representative PR evidence as Repo guidance gap.
+- See [Confidence Digest](#confidence-digest) and [PR Class Context](#pr-class-context) for repeated class-dominance context.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ### Repo guidance gap
 
@@ -159,8 +167,8 @@ Recommendation category: repo_specific_ai_skills
 #### Repo guidance gap Confidence And Caveats
 
 - Displayed examples are not dominated by one PR.
-- PR class release contributes 90% of the displayed score value; compare this bottleneck against the class distribution before generalizing. The release class has 2 PRs in the analyzed sample, so treat this as a small-sample caveat.
-- Shares the same representative PR evidence as Review churn.
+- See [Confidence Digest](#confidence-digest) and [PR Class Context](#pr-class-context) for repeated class-dominance context.
+- See [Confidence Digest](#confidence-digest) and [Shared Signal Interpretation](#shared-signal-interpretation) for shared-evidence context.
 
 ## Recommendation Categories
 
