@@ -1794,6 +1794,90 @@ describe("friction report generation", () => {
     );
   });
 
+  it("uses derived shared signals consistently in first-glance caveats", () => {
+    const markdown = renderRepositoryFrictionMarkdown({
+      reportVersion: "friction-report.v1",
+      metricVersion: "friction-metrics.v1",
+      targetRepository: {
+        owner: "example",
+        name: "target",
+        analysisPullRequestLimit: 30,
+      },
+      summary: {
+        pullRequests: 2,
+        changedLines: 3,
+        nonGeneratedChangedLines: 3,
+        reviewComments: 0,
+        reviewThreads: 0,
+        topBottleneckIds: ["review-churn", "repo-guidance-gap"],
+      },
+      bottlenecks: [
+        {
+          id: "review-churn",
+          title: "Review churn",
+          metricLabel: "iteration drag",
+          observedData: [
+            { number: 7, title: "first PR", value: 2, changedLines: 1 },
+            { number: 9, title: "second PR", value: 1, changedLines: 2 },
+          ],
+          inferredDiagnosis: "Review loops are concentrated in a small set of PRs.",
+          suggestedAction: {
+            category: "pr_readiness_gate",
+            action: "Add or tighten a PR readiness gate.",
+          },
+        },
+        {
+          id: "repo-guidance-gap",
+          title: "Repo guidance gap",
+          metricLabel: "iteration drag",
+          observedData: [
+            { number: 7, title: "first PR", value: 2, changedLines: 1 },
+            { number: 9, title: "second PR", value: 1, changedLines: 2 },
+          ],
+          inferredDiagnosis: "Repeated review loops suggest missing repository guidance.",
+          suggestedAction: {
+            category: "repo_specific_ai_skills",
+            action: "Add repo-specific AI skills.",
+          },
+        },
+      ],
+      recommendationCategories: [],
+      commentSources: {
+        totalComments: 0,
+        botComments: 0,
+        humanComments: 0,
+        authorReplies: 0,
+        bySource: [],
+      },
+      surfaces: {
+        coreChangedLines: 3,
+        lowSignalChangedLines: 0,
+        lowSignalFiles: 0,
+        weightedChangedLines: 3,
+        smallDiffWideSpreadCount: 0,
+        byFunctionalSurface: [],
+        byRole: [],
+      },
+      coverage: {
+        prOpenDiff: { observed: 2 },
+        workflowRuns: { observed: 2 },
+        reviewThreads: { observed: 2 },
+        notes: [],
+      },
+      guardrails: {
+        avoidsIndividualRanking: true,
+        separatesObservedInferredAndSuggested: true,
+        usesCompositeScore: false,
+      },
+      followUp: [],
+    });
+
+    assert(markdown.includes("| Confidence caveats | Confidence Digest groups 1 digest row by caveat group. Read it before acting on top findings. |"));
+    assert(markdown.includes("- Confidence digest: review the grouped caveat drivers below before generalizing from the top findings."));
+    assert(markdown.includes("| Shared evidence | Focus areas: Review churn, Repo guidance gap | 1 shared-signal group means some recommendations interpret the same metric or representative PR evidence. |"));
+    assert(!markdown.includes("Confidence digest: no early confidence caveats were recorded for the displayed evidence."));
+  });
+
   it("renders legacy observed examples without nested evidence fields", () => {
     const markdown = renderRepositoryFrictionMarkdown({
       reportVersion: "friction-report.v1",

@@ -1401,10 +1401,10 @@ function renderContributorSourceContext(contributorSource) {
   ].join("\n");
 }
 
-function renderKeyFindings(report) {
+function renderKeyFindings(report, sharedSignals = report.sharedSignals) {
   const topBottlenecks = topBottleneckLabels(report);
   const strongest = report.bottlenecks?.[0];
-  const digestRows = confidenceDigestRows(report, report.sharedSignals);
+  const digestRows = confidenceDigestRows(report, sharedSignals);
 
   return renderList([
     `Top bottlenecks: ${topBottlenecks}.`,
@@ -1417,13 +1417,13 @@ function renderKeyFindings(report) {
   ]);
 }
 
-function summarizeFocusCaveats(report) {
-  const rows = confidenceDigestRows(report, report.sharedSignals);
+function summarizeFocusCaveats(report, sharedSignals = report.sharedSignals) {
+  const rows = confidenceDigestRows(report, sharedSignals);
   if (!rows.length) return "No early confidence caveats were recorded for the displayed evidence.";
   return `Confidence Digest groups ${formatCount(rows.length, "digest row")} by caveat group. Read it before acting on top findings.`;
 }
 
-function renderFocusSnapshot(report) {
+function renderFocusSnapshot(report, sharedSignals = report.sharedSignals) {
   const summary = report.summary ?? {};
   const categories = triggeredCategoryLabels(report);
   const evidenceReviewed = [
@@ -1446,7 +1446,7 @@ function renderFocusSnapshot(report) {
       ["Focus first", firstInspection],
       ["Action categories", categories],
       ["Evidence reviewed", evidenceReviewed],
-      ["Confidence caveats", summarizeFocusCaveats(report)],
+      ["Confidence caveats", summarizeFocusCaveats(report, sharedSignals)],
     ],
   );
 }
@@ -1718,12 +1718,6 @@ function renderWorkflowDataCaveats(report) {
   ].join("\n");
 }
 
-function classDominanceCaveat(bottleneck) {
-  return bottleneck.classDominance?.status === "single_class_dominates"
-    ? bottleneck.classDominance.note
-    : null;
-}
-
 function renderBottleneckCaveats(bottleneck, sharedNotes) {
   const caveats = [];
   if (bottleneck.dominance?.status === "single_pr_dominates") {
@@ -1734,8 +1728,6 @@ function renderBottleneckCaveats(bottleneck, sharedNotes) {
 
   if (bottleneck.classDominance?.status === "single_class_dominates") {
     caveats.push("See [Confidence Digest](#confidence-digest) and [PR Class Context](#pr-class-context) for repeated class-dominance context.");
-  } else if (classDominanceCaveat(bottleneck)) {
-    caveats.push(classDominanceCaveat(bottleneck));
   }
 
   if (sharedNotes.get(bottleneck.id)) {
@@ -1877,7 +1869,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     "## Focus Snapshot",
     "",
-    renderFocusSnapshot(report),
+    renderFocusSnapshot(report, sharedSignals),
     "",
     renderConfidenceDigest(report, sharedSignals),
     "## Recommendation Category Snapshot",
@@ -1913,7 +1905,7 @@ export function renderRepositoryFrictionMarkdown(report) {
     "",
     "## Key Findings",
     "",
-    renderKeyFindings(report),
+    renderKeyFindings(report, sharedSignals),
     "",
     renderPrClassContext(report.prClasses),
     renderProfileSuggestions(report),
